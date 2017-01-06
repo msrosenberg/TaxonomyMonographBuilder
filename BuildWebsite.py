@@ -2216,7 +2216,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
                 pn = int(photo.n)
                 if ";" in photo.species:
                     nl = photo.species.replace(";", "_")
-                    pfname = "photos/u_" + nl + format(pn, "0>2") + ".html"
+                    pfname = WEBOUT_PATH + "photos/u_" + nl + format(pn, "0>2") + ".html"
                     tname = nl
                 else:
                     pfname = WEBOUT_PATH + "photos/u_" + species.species + format(pn, "0>2") + ".html"
@@ -2271,7 +2271,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
             for art in artlist:
                 slist = art.species.split(";")
                 if species.species in slist:
-                    pfname = "art/" + art.image + ".html"
+                    pfname = WEBOUT_PATH + "art/" + art.image + ".html"
                     outfile.write("      <figure class=\"sppic\">\n")
                     outfile.write("        <a href=\"" + pfname + "\"><picture><img src=\"art/" + art.image +
                                   "_tn." + art.ext + "\" alt=\"" + art.title + "\" title=\"" +
@@ -3417,8 +3417,8 @@ def build_site():
         create_output_paths()
         print("...Reading References...")
         references, refdict, citelist, yeardict, citecount = read_reference_data("Data/references_cites.txt",
-                                                                            "Data/references.html",
-                                                                            "Data/citeinfo.txt", logfile)
+                                                                                 "Data/references.html",
+                                                                                 "Data/citeinfo.txt", logfile)
         yeardat, yeardat1900 = summarize_year(yeardict)
         languages = summarize_languages(references)
         print("...Reading Species...")
