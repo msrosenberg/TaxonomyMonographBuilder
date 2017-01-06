@@ -1030,8 +1030,6 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
     
 
 def reference_pages(reflist, refdict, citelist, logfile):
-    if not os.path.exists(WEBOUT_PATH + "references/"):
-        os.makedirs(WEBOUT_PATH + "references/")
     create_blank_index(WEBOUT_PATH + "references/index.html")
     name_table = create_name_table(citelist)
     update_cite_list(citelist)
@@ -1766,8 +1764,6 @@ def index_name_pages(refdict, citelist, specific_names, species_refs, logfile):
     unique_names.sort(key=lambda s: s.lower())
 
     # create name index
-    if not os.path.exists(WEBOUT_PATH + "names/"):
-        os.makedirs(WEBOUT_PATH + "names/")
     with codecs.open(WEBOUT_PATH + "names/index.html", "w", "utf-8") as outfile:
         common_html_header(outfile, "Name Index", "../")
         outfile.write("    <header>\n")
@@ -2306,8 +2302,6 @@ def write_species_page(species, references, specific_names, all_names, photos, v
 
 
 def create_photos_html(specieslist, photos):
-    if not os.path.exists(WEBOUT_PATH + "photos/"):
-        os.makedirs(WEBOUT_PATH + "photos/")
     create_blank_index("photos/index.html")
     """ create the photos index page """
     with codecs.open(WEBOUT_PATH + PHOTO_URL, "w", "utf-8") as outfile:
@@ -2354,8 +2348,6 @@ def create_photos_html(specieslist, photos):
 
 
 def create_videos_html(videos):
-    if not os.path.exists(WEBOUT_PATH + "video/"):
-        os.makedirs(WEBOUT_PATH + "video/")
     create_blank_index("video/index.html")
     """ create the videos page """
     sectitle = ("Feeding", "Male Waving and Other Displays", "Female Display", "Fighting", "Mating", "Miscellaneous")
@@ -2562,8 +2554,6 @@ def create_art_crafts_html(artlist):
 
 def create_art_html(artlist):
     """ create the art pages """
-    if not os.path.exists(WEBOUT_PATH + "art/"):
-        os.makedirs(WEBOUT_PATH + "art/")
     create_art_science_html(artlist)
     create_art_stamps_html(artlist)
     create_art_crafts_html(artlist)
@@ -3238,8 +3228,6 @@ def create_morphology_index(morphlist):
 
 def create_morphology_pages(morphology):
     """ create page for general morphology descriptions """
-    if not os.path.exists(WEBOUT_PATH + "morphology/"):
-        os.makedirs(WEBOUT_PATH + "morphology/")
     with codecs.open(WEBOUT_PATH + MORPH_URL, "w", "utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Morphology", "")
         outfile.write("    <header>\n")
@@ -3406,12 +3394,27 @@ def create_index(species):
         common_html_footer(outfile, "")
 
 
+def create_output_paths():
+    # create web output directory if it does not already exist
+    if not os.path.exists(WEBOUT_PATH):
+        os.makedirs(WEBOUT_PATH)
+    if not os.path.exists(WEBOUT_PATH + "photos/"):
+        os.makedirs(WEBOUT_PATH + "photos/")
+    if not os.path.exists(WEBOUT_PATH + "video/"):
+        os.makedirs(WEBOUT_PATH + "video/")
+    if not os.path.exists(WEBOUT_PATH + "references/"):
+        os.makedirs(WEBOUT_PATH + "references/")
+    if not os.path.exists(WEBOUT_PATH + "names/"):
+        os.makedirs(WEBOUT_PATH + "names/")
+    if not os.path.exists(WEBOUT_PATH + "art/"):
+        os.makedirs(WEBOUT_PATH + "art/")
+    if not os.path.exists(WEBOUT_PATH + "morphology/"):
+        os.makedirs(WEBOUT_PATH + "morphology/")
+
+
 def build_site():
     with open("errorlog.txt", "w") as logfile:
-        # create web output directory if it does not already exist
-        if not os.path.exists(WEBOUT_PATH):
-            os.makedirs(WEBOUT_PATH)
-
+        create_output_paths()
         print("...Reading References...")
         references, refdict, citelist, yeardict, citecount = get_references("Data/references_cites.txt",
                                                                             "Data/references.html",
