@@ -4,7 +4,7 @@ import datetime
 import random
 import os
 
-WEBOUT_PATH = "Webout/"
+WEBOUT_PATH = "webout/"
 SPECIES_URL = "uca_species.html"
 REF_URL = "uca_references.html"
 REF_SUM_URL = "uca_refsummary.html"
@@ -1898,9 +1898,9 @@ def create_map_html(species):
         common_html_footer(outfile, "")
 
 
-def create_common_names_html():
+def create_common_names_html(filename):
     """ output common names to HTML """
-    with codecs.open("common_names.txt", "r", "utf-8") as infile:
+    with codecs.open(filename, "r", "utf-8") as infile:
         lines = infile.readlines()
     with codecs.open(WEBOUT_PATH + COMMON_URL, "w", "utf-8") as outfile:
         common_html_header(outfile, "Common Names of Fiddler Crabs", "")
@@ -2302,7 +2302,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
 
 
 def create_photos_html(specieslist, photos):
-    create_blank_index("photos/index.html")
+    create_blank_index(WEBOUT_PATH + "photos/index.html")
     """ create the photos index page """
     with codecs.open(WEBOUT_PATH + PHOTO_URL, "w", "utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Photos", "")
@@ -2348,7 +2348,7 @@ def create_photos_html(specieslist, photos):
 
 
 def create_videos_html(videos):
-    create_blank_index("video/index.html")
+    create_blank_index(WEBOUT_PATH + "video/index.html")
     """ create the videos page """
     sectitle = ("Feeding", "Male Waving and Other Displays", "Female Display", "Fighting", "Mating", "Miscellaneous")
     secshort = ("Feeding", "Male Display", "Female Display", "Fighting", "Mating", "Miscellaneous")
@@ -2449,7 +2449,7 @@ def create_art_science_html(artlist):
         outfile.write("      <p>\n")
         outfile.write("        Total scientific drawing count is " + str(cnt) + ".\n")
         outfile.write("      </p>\n")
-        create_blank_index("art/index.html")
+        create_blank_index(WEBOUT_PATH + "art/index.html")
         for a in artsource:
             outfile.write("      <h3>"+a+"</h3>\n")
             for art in artlist:
@@ -3416,13 +3416,13 @@ def build_site():
     with open("errorlog.txt", "w") as logfile:
         create_output_paths()
         print("...Reading References...")
-        references, refdict, citelist, yeardict, citecount = read_reference_data("Data/references_cites.txt",
-                                                                                 "Data/references.html",
-                                                                                 "Data/citeinfo.txt", logfile)
+        references, refdict, citelist, yeardict, citecount = read_reference_data("data/references_cites.txt",
+                                                                                 "data/references.html",
+                                                                                 "data/citeinfo.txt", logfile)
         yeardat, yeardat1900 = summarize_year(yeardict)
         languages = summarize_languages(references)
         print("...Reading Species...")
-        species = read_species_data("Data/species_info.txt")
+        species = read_species_data("data/species_info.txt")
         print("...Connecting References...")
         species_refs = connect_refs_to_species(species, citelist)
         print("...Writing References...")
@@ -3430,27 +3430,27 @@ def build_site():
         reference_summary(len(references), yeardat, yeardat1900, citecount, languages)
         reference_pages(references, refdict, citelist, logfile)
         print("...Reading Species Names...")
-        specific_names = read_specific_names_data("Data/specific_names.txt")
+        specific_names = read_specific_names_data("data/specific_names.txt")
         all_names, binomial_name_cnts, specific_name_cnts = index_name_pages(refdict, citelist, specific_names,
                                                                              species_refs, logfile)
         specific_name_pages(citelist, specific_names, logfile)
         print("...Reading Photos and Videos...")
-        photos = read_photo_data("Data/photos.txt")
-        videos = read_video_data("Data/videos.txt")
-        art = read_art_data("Data/art.txt")
+        photos = read_photo_data("data/photos.txt")
+        videos = read_video_data("data/videos.txt")
+        art = read_art_data("data/art.txt")
         print("...Writing Species...")
         species_to_html(species, references, specific_names, all_names, photos, videos, art, species_refs, refdict,
                         binomial_name_cnts, specific_name_cnts, logfile)
-        subgenera = read_subgenera_data("Data/subgenera.txt")
+        subgenera = read_subgenera_data("data/subgenera.txt")
         create_systematics_html(subgenera, species)
-        create_common_names_html()
+        create_common_names_html("data/common_names.txt")
         create_photos_html(species, photos)
         create_art_html(art)
         create_videos_html(videos)
         create_map_html(species)
         create_life_cycle()
         create_phylogeny()
-        morphology = read_morphology_data("Data/morphology.txt")
+        morphology = read_morphology_data("data/morphology.txt")
         create_morphology_pages(morphology)
         create_index(species)
         create_citation_page(refdict)
