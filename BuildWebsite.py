@@ -2,7 +2,9 @@
 import codecs
 import datetime
 import random
+import os
 
+WEBOUT_PATH = "Webout/"
 SPECIES_URL = "uca_species.html"
 REF_URL = "uca_references.html"
 REF_SUM_URL = "uca_refsummary.html"
@@ -36,44 +38,6 @@ class ReferenceClass:
         self.cite_key = ""
         self.language = ""
 
-    # def __init__(self):
-    #     self.__formattedHTML = ""
-    #     self.__citation = ""
-    #     self.__citeKey = ""
-    #     self.__language = ""
-    #
-    #
-    # def citation(self):
-    #     return self.__citation
-    #
-    #
-    # def setCitation(self, x):
-    #     self.__citation = x
-    #
-    #
-    # def citeKey(self):
-    #     return self.__citeKey
-    #
-    #
-    # def setciteKey(self, x):
-    #     self.__citeKey = x
-    #
-    #
-    # def formattedHTML(self):
-    #     return self.__formattedHTML
-    #
-    #
-    # def setFormattedHTML(self, x):
-    #     self.__formattedHTML = x
-    #
-    #
-    # def language(self):
-    #     return self.__language
-    #
-    #
-    # def setLanguage(self, x):
-    #     self.__language = x
-
 
 class SpecificNameClass:
     """ a class to hold specific names """
@@ -86,57 +50,6 @@ class SpecificNameClass:
         self.meaning = ""
         self.notes = ""
 
-    # def __init__(self):
-    #     self.__name = ""
-    #     self.__variations = ""
-    #     self.__synonym = ""
-    #     self.__originalBinomial = ""
-    #     self.__prioritySource = ""
-    #     self.__meaning = ""
-    #     self.__notes = ""
-    #
-    # def name(self):
-    #     return self.__name
-    #
-    # def setName(self,x):
-    #     self.__name = x
-    #
-    # def variations(self):
-    #     return self.__variations
-    #
-    # def setVariations(self,x):
-    #     self.__variations = x
-    #
-    # def synonym(self):
-    #     return self.__synonym
-    #
-    # def setSynonym(self,x):
-    #     self.__synonym = x
-    #
-    # def originalBinomial(self):
-    #     return self.__originalBinomial
-    #
-    # def setOriginalBinomial(self,x):
-    #     self.__originalBinomial = x
-    #
-    # def prioritySource(self):
-    #     return self.__prioritySource
-    #
-    # def setPrioritySource(self,x):
-    #     self.__prioritySource = x
-    #
-    # def meaning(self):
-    #     return self.__meaning
-    #
-    # def setMeaning(self,x):
-    #     self.__meaning = x
-    #
-    # def notes(self):
-    #     return self.__notes
-    #
-    # def setNotes(self,x):
-    #     self.__notes = x
-
 
 class SubgenusClass:
     """ a class to hold subgenera """
@@ -147,49 +60,6 @@ class SubgenusClass:
         self.notes = ""
         self.taxonid = ""
         self.eolid = ""
-    # def __init__(self):
-    #     self.__subgenus = ""
-    #     self.__author = ""
-    #     self.__typeSpecies = ""
-    #     self.__notes = ""
-    #     self.__taxonid = ""
-    #     self.__EOLid = ""
-    #
-    # def subgenus(self):
-    #     return self.__subgenus
-    #
-    # def setSubgenus(self,x):
-    #     self.__subgenus = x
-    #
-    # def author(self):
-    #     return self.__author
-    #
-    # def setAuthor(self,x):
-    #     self.__author = x
-    #
-    # def typeSpecies(self):
-    #     return self.__typespecies
-    #
-    # def setTypeSpecies(self,x):
-    #     self.__typespecies = x
-    #
-    # def notes(self):
-    #     return self.__notes
-    #
-    # def setNotes(self,x):
-    #     self.__notes = x
-    #
-    # def taxonid(self):
-    #     return self.__taxonid
-    #
-    # def setTaxonid(self,x):
-    #     self.__taxonid = x
-    #
-    # def EOLid(self):
-    #     return self.__EOLid
-    #
-    # def setEOLid(self,x):
-    #     self.__EOLid = x
 
 
 class VideoClass:
@@ -205,77 +75,6 @@ class VideoClass:
         self.date_location = ""
         self.author = ""
         self.notes = ""
-    # def __init__(self):
-    #     self.__species = ""
-    #     self.__n = 0
-    #     self.__activity = ""
-    #     self.__caption = ""
-    #     self.__length = ""
-    #     self.__size = ""
-    #     self.__format = ""
-    #     self.__dateLocation = ""
-    #     self.__author = ""
-    #     self.__notes = ""
-    #
-    # def species(self):
-    #     return self.__species
-    #
-    # def setSpecies(self,x):
-    #     self.__species = x
-    #
-    # def n(self):
-    #     return self.__n
-    #
-    # def setn(self,x):
-    #     self.__n = x
-    #
-    # def activity(self):
-    #     return self.__activity
-    #
-    # def setActivity(self,x):
-    #     self.__activity = x
-    #
-    # def caption(self):
-    #     return self.__caption
-    #
-    # def setCaption(self,x):
-    #     self.__caption = x
-    #
-    # def length(self):
-    #     return self.__length
-    #
-    # def setLength(self,x):
-    #     self.__length = x
-    #
-    # def size(self):
-    #     return self.__size
-    #
-    # def setSize(self,x):
-    #     self.__size = x
-    #
-    # def format(self):
-    #     return self.__format
-    #
-    # def setFormat(self,x):
-    #     self.__format = x
-    #
-    # def dateLocation(self):
-    #     return self.__dateLocation
-    #
-    # def setDateLocation(self,x):
-    #     self.__dateLocation = x
-    #
-    # def author(self):
-    #     return self.__author
-    #
-    # def setAuthor(self,x):
-    #     self.__author = x
-    #
-    # def notes(self):
-    #     return self.__notes
-    #
-    # def setNotes(self,x):
-    #     self.__notes = x
 
 
 class PhotoClass:
@@ -284,28 +83,6 @@ class PhotoClass:
         self.species = ""
         self.n = 0
         self.caption = ""
-    # def __init__(self):
-    #     self.__species = ""
-    #     self.__n = 0
-    #     self.__caption = ""
-    #
-    # def species(self):
-    #     return self.__species
-    #
-    # def setSpecies(self,x):
-    #     self.__species = x
-    #
-    # def n(self):
-    #     return self.__n
-    #
-    # def setn(self,x):
-    #     self.__n = x
-    #
-    # def caption(self):
-    #     return self.__caption
-    #
-    # def setCaption(self,x):
-    #     self.__caption = x
 
 
 class ArtClass:
@@ -321,71 +98,6 @@ class ArtClass:
         self.notes = ""
         self.cite_key = ""
 
-    # def __init__(self):
-    #     self.__artType = ""
-    #     self.__author = ""
-    #     self.__year = ""
-    #     self.__title = ""
-    #     self.__image = ""
-    #     self.__ext = ""
-    #     self.__species = ""
-    #     self.__notes = ""
-    #     self.__citeKey = ""
-    #
-    # def artType(self):
-    #     return self.__artType
-    #
-    # def setArtType(self,x):
-    #     self.__artType = x
-    #
-    # def citeKey(self):
-    #     return self.__citeKey
-    #
-    # def setCiteKey(self,x):
-    #     self.__citeKey = x
-    #
-    # def author(self):
-    #     return self.__author
-    #
-    # def setAuthor(self,x):
-    #     self.__author = x
-    #
-    # def year(self):
-    #     return self.__year
-    #
-    # def setYear(self,x):
-    #     self.__year = x
-    #
-    # def title(self):
-    #     return self.__title
-    #
-    # def setTitle(self,x):
-    #     self.__title = x
-    #
-    # def image(self):
-    #     return self.__image
-    #
-    # def setImage(self,x):
-    #     self.__image = x
-    #
-    # def ext(self):
-    #     return self.__ext
-    #
-    # def setExt(self,x):
-    #     self.__ext = x
-    #
-    # def species(self):
-    #     return self.__species
-    #
-    # def setSpecies(self,x):
-    #     self.__species = x
-    #
-    # def notes(self):
-    #     return self.__notes
-    #
-    # def setNotes(self,x):
-    #     self.__notes = x
-
 
 class MorphologyClass:
     def __init__(self):
@@ -394,42 +106,6 @@ class MorphologyClass:
         self.image = ""
         self.description = ""
         self.caption = ""
-    # def __init__(self):
-    #     self.__character = ""
-    #     self.__parent = ""
-    #     self.__image = ""
-    #     self.__description = ""
-    #     self.__caption = ""
-    #
-    # def character(self):
-    #     return self.__character
-    #
-    # def setCharacter(self,x):
-    #     self.__character = x
-    #
-    # def parent(self):
-    #     return self.__parent
-    #
-    # def setParent(self,x):
-    #     self.__parent = x
-    #
-    # def image(self):
-    #     return self.__image
-    #
-    # def setImage(self,x):
-    #     self.__image = x
-    #
-    # def description(self):
-    #     return self.__description
-    #
-    # def setDescription(self,x):
-    #     self.__description = x
-    #
-    # def caption(self):
-    #     return self.__caption
-    #
-    # def setCaption(self,x):
-    #     self.__caption = x
 
 
 class SpeciesClass:
@@ -448,77 +124,6 @@ class SpeciesClass:
         self.eolid = ""
         self.inatid = ""
         self.gbifid = ""
-    # def __init__(self):
-    #     self.__species = ""
-    #     self.__subgenus = ""
-    #     self.__typeSpecies = ""
-    #     self.__typeRef = ""
-    #     self.__common = ""
-    #     self.__commonext = ""
-    #     self.__range = ""
-    #     self.__rangeRefs = ""
-    #     self.__region = ""
-    #     self.__status = ""
-    #     self.__taxonid = ""
-    #     self.__EOLid = ""
-    #     self.__iNatid = ""
-    #     self.__gbifid = ""
-    # def species(self):
-    #     return self.__species
-    # def setSpecies(self, x):
-    #     self.__species = x
-    # def subgenus(self):
-    #     return self.__subgenus
-    # def setSubgenus(self, x):
-    #     self.__subgenus = x
-    # def typeSpecies(self):
-    #     return self.__typeSpecies
-    # def setTypeSpecies(self, x):
-    #     self.__typeSpecies = x
-    # def typeRef(self):
-    #     return self.__typeRef
-    # def setTypeRef(self, x):
-    #     self.__typeRef = x
-    # def common(self):
-    #     return self.__common
-    # def setCommon(self, x):
-    #     self.__common = x
-    # def commonext(self):
-    #     return self.__commonext
-    # def setCommonext(self, x):
-    #     self.__commonext = x
-    # def range(self):
-    #     return self.__range
-    # def setRange(self, x):
-    #     self.__range = x
-    # def rangeRefs(self):
-    #     return self.__rangeRefs
-    # def setRangeRefs(self, x):
-    #     self.__rangeRefs = x
-    # def region(self):
-    #     return self.__region
-    # def setRegion(self, x):
-    #     self.__region = x
-    # def status(self):
-    #     return self.__status
-    # def setStatus(self, x):
-    #     self.__status = x
-    # def taxonid(self):
-    #     return self.__taxonid
-    # def setTaxonid(self, x):
-    #     self.__taxonid = x
-    # def EOLid(self):
-    #     return self.__EOLid
-    # def setEOLid(self, x):
-    #     self.__EOLid = x
-    # def iNatid(self):
-    #     return self.__iNatid
-    # def setiNatid(self, x):
-    #     self.__iNatid = x
-    # def gbifid(self):
-    #     return self.__gbifid
-    # def setgbifid(self, x):
-    #     self.__gbifid = x
 
 
 class CitationClass:
@@ -545,90 +150,20 @@ class CitationClass:
         else:
             return self.name < x.name
 
-    # def __init__(self):
-    #     self.__citeKey = ""
-    #     self.__nameKey = ""
-    #     self.__name = ""
-    #     self.__common = ""
-    #     self.__where = ""
-    #     self.__context = ""
-    #     self.__application = ""
-    #     self.__citeN = ""
-    #     self.__actual = ""
-    #     self.__source = ""
-    #     self.__nameNote = ""
-    #     self.__generalNote = ""
-    # def citeKey(self):
-    #     return self.__citeKey
-    # def setCiteKey(self,x):
-    #     self.__citeKey = x
-    # def nameKey(self):
-    #     return self.__nameKey
-    # def setNameKey(self,x):
-    #     self.__nameKey = x
-    # def name(self):
-    #     return self.__name
-    # def setName(self,x):
-    #     self.__name = x
-    # def common(self):
-    #     return self.__common
-    # def setCommon(self,x):
-    #     self.__common = x
-    # def where(self):
-    #     return self.__where
-    # def setWhere(self,x):
-    #     self.__where = x
-    # def context(self):
-    #     return self.__context
-    # def setContext(self,x):
-    #     self.__context = x
-    # def application(self):
-    #     return self.__application
-    # def setApplication(self,x):
-    #     self.__application = x
-    # def citeN(self):
-    #     return self.__citeN
-    # def setCiteN(self,x):
-    #     self.__citeN = x
-    # def actual(self):
-    #     return self.__actual
-    # def setActual(self,x):
-    #     self.__actual = x
-    # def source(self):
-    #     return self.__source
-    # def setSource(self,x):
-    #     self.__source = x
-    # def nameNote(self):
-    #     return self.__nameNote
-    # def setNameNote(self,x):
-    #     self.__nameNote = x
-    # def generalNote(self):
-    #     return self.__generalNote
-    # def setGeneralNote(self, x):
-    #     self.__generalNote = x
-    # def __lt__(self, x):
-    #     if self.name() == x.name():
-    #         if self.context() == x.context():
-    #             return self.application() < x.application()
-    #         else:
-    #             return self.context() < x.context()
-    #     else:
-    #         return self.name() < x.name()
 
-
-# ----functions----
+# ----import data from file functions----
 def report_error(logfile, outstr):
     print(outstr)
     logfile.write(outstr + "\n")
 
 
-def get_references(logfile):
+def get_references(ref_filename, formatref_filename, citation_filename, logfile):
     """ read reference data """
     reflist = []
     year_dat = {}
     cite_done = {}
     # citation and species data from text
-    with codecs.open("references_cites.txt", "r", "utf-8") as reffile:
+    with codecs.open(ref_filename, "r", "utf-8") as reffile:
         for line in reffile:
             line = line.replace("et al.", "<em>et al.</em>")
             ref = line.strip().split("\t")
@@ -655,7 +190,7 @@ def get_references(logfile):
             reflist.append(newref)
 
     # formatted references from html
-    with codecs.open("references.html", "r", "utf-8") as reffile:
+    with codecs.open(formatref_filename, "r", "utf-8") as reffile:
         c = -1
         for line in reffile:
             line = line.strip()
@@ -672,7 +207,7 @@ def get_references(logfile):
             report_error(logfile, "Duplicate reference key:" + ref.cite_key)
         refdict[ref.cite_key] = ref
     # citation info
-    with open("citeinfo.txt", "r") as reffile:
+    with open(citation_filename, "r") as reffile:
         citelist = []
         got_header = False
         for line in reffile:
@@ -714,9 +249,9 @@ def get_references(logfile):
     return reflist, refdict, citelist, year_dat, cite_count
 
 
-def read_simple_file(fname):
+def read_simple_file(filename):
     """ read data from generic flatfile """
-    with open(fname, "r") as infile:
+    with open(filename, "r") as infile:
         splist = []
         got_header = False
         for line in infile:
@@ -733,9 +268,9 @@ def read_simple_file(fname):
     return splist
 
 
-def get_species():
+def get_species(filename):
     """ read data from species flatfile """
-    tmplist = read_simple_file("species_info.txt")
+    tmplist = read_simple_file(filename)
     slist = []
     for s in tmplist:
         newspecies = SpeciesClass()
@@ -757,9 +292,9 @@ def get_species():
     return slist
 
 
-def get_photos():
+def get_photos(filename):
     """ read data from photo flatfile """
-    tmplist = read_simple_file("photos.txt")
+    tmplist = read_simple_file(filename)
     plist = []
     for p in tmplist:
         newphoto = PhotoClass()
@@ -770,9 +305,9 @@ def get_photos():
     return plist
 
 
-def get_videos():
+def get_videos(filename):
     """ read data from video flatfile """
-    tmplist = read_simple_file("videos.txt")
+    tmplist = read_simple_file(filename)
     vlist = []
     for v in tmplist:
         newvideo = VideoClass()
@@ -790,9 +325,9 @@ def get_videos():
     return vlist
 
 
-def get_subgenera():
+def get_subgenera(filename):
     """ read subgenera data """
-    tmplist = read_simple_file("subgenera.txt")
+    tmplist = read_simple_file(filename)
     genlist = []
     for g in tmplist:
         newsubgenus = SubgenusClass()
@@ -806,9 +341,9 @@ def get_subgenera():
     return genlist
 
 
-def get_specific_names():
+def get_specific_names(filename):
     """ read specific name data """
-    tmplist = read_simple_file("specific_names.txt")
+    tmplist = read_simple_file(filename)
     splist = []
     for s in tmplist:
         newname = SpecificNameClass()
@@ -823,9 +358,9 @@ def get_specific_names():
     return splist
 
 
-def get_art():
+def get_art(filename):
     """ read art data """
-    tmplist = read_simple_file("art.txt")
+    tmplist = read_simple_file(filename)
     artlist = []
     for a in tmplist:
         newart = ArtClass()
@@ -842,9 +377,9 @@ def get_art():
     return artlist
 
 
-def get_morphology():
+def get_morphology(filename):
     """ read morphology data """
-    tmplist = read_simple_file("morphology.txt")
+    tmplist = read_simple_file(filename)
     morphlist = []
     for m in tmplist:
         newmorph = MorphologyClass()
@@ -996,7 +531,7 @@ def format_reference(ref, logfile):
 
 
 def reference_summary(nrefs, year_data, year_data_1900, cite_count, languages):
-    with codecs.open(REF_SUM_URL, "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + REF_SUM_URL, "w", "utf-8") as outfile:
         common_header_part1(outfile, "Fiddler Crab Reference Summary", "")
         outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
         outfile.write("    <script type=\"text/javascript\">\n")
@@ -1135,7 +670,7 @@ def reference_summary(nrefs, year_data, year_data_1900, cite_count, languages):
 
     
 def references_to_html(reflist, logfile):
-    with codecs.open(REF_URL, "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + REF_URL, "w", "utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Publications", "")
         outfile.write("    <header>\n")
         outfile.write("      <h1>Publications</h1>\n")
@@ -1174,7 +709,6 @@ def references_to_html(reflist, logfile):
         outfile.write("    <section class=\"spsection\">\n")
         outfile.write("      <div id=\"citation\">\n")
         outfile.write("        <ul>\n")
-        # for i, ref in enumerate(reflist):
         for ref in reflist:
             outfile.write(format_reference(ref, logfile))
         outfile.write("        </ul>\n")
@@ -1496,12 +1030,14 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
     
 
 def reference_pages(reflist, refdict, citelist, logfile):
-    create_blank_index("references/index.html")
+    if not os.path.exists(WEBOUT_PATH + "references/"):
+        os.makedirs(WEBOUT_PATH + "references/")
+    create_blank_index(WEBOUT_PATH + "references/index.html")
     name_table = create_name_table(citelist)
     update_cite_list(citelist)
     for ref in reflist:
         if ref.cite_key != "<pending>":
-            with codecs.open("references/" + ref.cite_key + ".html", "w", "utf-8") as outfile:
+            with codecs.open(WEBOUT_PATH + "references/" + ref.cite_key + ".html", "w", "utf-8") as outfile:
                 common_html_header(outfile, ref.citation, "../")
                 outfile.write("    <header>\n")
                 outfile.write("      <h1>" + ref.citation + "</h1>\n")
@@ -1597,7 +1133,7 @@ def clean_name(x):
 
 def create_binomial_name_page(name, namefile, refdict, citelist, name_table, species_name, logfile):
     """ create a page listing all citations using a specific binomial """
-    with codecs.open("names/" + namefile + ".html", "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + "names/" + namefile + ".html", "w", "utf-8") as outfile:
         common_html_header(outfile, name, "../")
         outfile.write("    <header>\n")
         outfile.write("      <h1>" + format_name_string(name) + "</h1>\n")
@@ -1681,7 +1217,7 @@ def test_create_binomial_name_page(name, namefile, refdict, citelist, name_table
             if START_YEAR <= y <= CURRENT_YEAR:
                 name_by_year[y] += 1
 
-    with codecs.open("names/test_" + namefile + ".html", "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + "names/test_" + namefile + ".html", "w", "utf-8") as outfile:
         common_header_part1(outfile, name, "../")
         outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
         outfile.write("    <script type=\"text/javascript\">\n")
@@ -1740,7 +1276,7 @@ def test_create_binomial_name_page(name, namefile, refdict, citelist, name_table
 
 def create_specific_name_page(name, binomial_names, refdict, logfile):
     """ create a page with the history of a specific name """
-    with codecs.open("names/sn_" + name.name + ".html", "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + "names/sn_" + name.name + ".html", "w", "utf-8") as outfile:
         common_html_header(outfile, name.name, "../")
         outfile.write("    <header>\n")
         outfile.write("      <h1>" + format_name_string(name.name) + "</h1>\n")
@@ -1816,7 +1352,7 @@ def create_specific_name_page(name, binomial_names, refdict, logfile):
 
 def test_create_specific_name_page(specific_name, binomial_names, refdict, binomial_cnts, logfile):
     """ create a page with the history of a specific name """
-    with codecs.open("names/test_sn_" + specific_name.name + ".html", "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + "names/test_sn_" + specific_name.name + ".html", "w", "utf-8") as outfile:
         common_header_part1(outfile, specific_name.name, "../")
         outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
         outfile.write("    <script type=\"text/javascript\">\n")
@@ -1957,7 +1493,7 @@ def write_chronology_chart_div(n, outfile):
 
 def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, specific_synlist, specific_name_counts):
     """ create a page with the chronological history of a specific name and its synonyms """
-    with codecs.open("names/synonyms_" + species + ".html", "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + "names/synonyms_" + species + ".html", "w", "utf-8") as outfile:
         common_header_part1(outfile, species, "../")
         outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
         outfile.write("    <script type=\"text/javascript\">\n")
@@ -2059,7 +1595,7 @@ def match_specific_name(name, specific_names):
 
 
 def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs):
-    with codecs.open("names/" + NAME_SUM_URL, "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + "names/" + NAME_SUM_URL, "w", "utf-8") as outfile:
         common_header_part1(outfile, "Fiddler Crab Name Summary", "../")
         outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
         outfile.write("    <script type=\"text/javascript\">\n")
@@ -2230,7 +1766,9 @@ def index_name_pages(refdict, citelist, specific_names, species_refs, logfile):
     unique_names.sort(key=lambda s: s.lower())
 
     # create name index
-    with codecs.open("names/index.html", "w", "utf-8") as outfile:
+    if not os.path.exists(WEBOUT_PATH + "names/"):
+        os.makedirs(WEBOUT_PATH + "names/")
+    with codecs.open(WEBOUT_PATH + "names/index.html", "w", "utf-8") as outfile:
         common_html_header(outfile, "Name Index", "../")
         outfile.write("    <header>\n")
         outfile.write("      <h1>Name Index</h1>\n")
@@ -2331,7 +1869,7 @@ def create_map_html(species):
                "Western Atlantic",
                "Eastern Pacific",
                "Indo-West Pacific")
-    with codecs.open(MAP_URL, "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + MAP_URL, "w", "utf-8") as outfile:
         common_species_html_header(outfile, "Fiddler Crab Geographic Ranges", "", "")
         outfile.write("    <header>\n")
         outfile.write("      <h1>Geographic Ranges</h1>\n")
@@ -2368,7 +1906,7 @@ def create_common_names_html():
     """ output common names to HTML """
     with codecs.open("common_names.txt", "r", "utf-8") as infile:
         lines = infile.readlines()
-    with codecs.open(COMMON_URL, "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + COMMON_URL, "w", "utf-8") as outfile:
         common_html_header(outfile, "Common Names of Fiddler Crabs", "")
         outfile.write("    <header>\n")
         outfile.write("      <h1>Common Names of Fiddler Crabs</h1>\n")
@@ -2424,7 +1962,7 @@ def connect_refs_to_species(species, citelist):
 
 def write_species_list(specieslist):
     """ output species index HTML """
-    with codecs.open(SPECIES_URL, "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + SPECIES_URL, "w", "utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Species", "")
         outfile.write("    <header>\n")
         outfile.write("      <h1>Species</h1>\n")
@@ -2555,7 +2093,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
         is_fossil = True
     else:
         is_fossil = False
-    with codecs.open("u_" + species.species + ".html", "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + "u_" + species.species + ".html", "w", "utf-8") as outfile:
         if is_fossil:
             common_html_header(outfile, "Uca " + species.species + " / Fossil", "")
         else:
@@ -2685,7 +2223,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
                     pfname = "photos/u_" + nl + format(pn, "0>2") + ".html"
                     tname = nl
                 else:
-                    pfname = "photos/u_" + species.species + format(pn, "0>2") + ".html"
+                    pfname = WEBOUT_PATH + "photos/u_" + species.species + format(pn, "0>2") + ".html"
                     tname = species.species
                 outfile.write("      <figure class=\"sppic\">\n")
                 outfile.write("        <a href=\"" + pfname + "\"><picture><img src=\"photos/U_" + tname +
@@ -2711,9 +2249,9 @@ def write_species_page(species, references, specific_names, all_names, photos, v
                     vn = int(video.n)
                     if ";" in video.species:
                         nl = video.species.replace(";", "_")
-                        vfname = "video/u_" + nl + format(vn, "0>2") + ".html"
+                        vfname = WEBOUT_PATH + "video/u_" + nl + format(vn, "0>2") + ".html"
                     else:
-                        vfname = "video/u_" + species.species + format(vn, "0>2") + ".html"
+                        vfname = WEBOUT_PATH + "video/u_" + species.species + format(vn, "0>2") + ".html"
                     videon += 1
                     if videon == 1:
                         outfile.write("      <dl class=\"vidlist\">\n")
@@ -2768,9 +2306,11 @@ def write_species_page(species, references, specific_names, all_names, photos, v
 
 
 def create_photos_html(specieslist, photos):
+    if not os.path.exists(WEBOUT_PATH + "photos/"):
+        os.makedirs(WEBOUT_PATH + "photos/")
     create_blank_index("photos/index.html")
     """ create the photos index page """
-    with codecs.open(PHOTO_URL, "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + PHOTO_URL, "w", "utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Photos", "")
         outfile.write("    <header>\n")
         outfile.write("      <h1>Photos</h1>\n")
@@ -2814,13 +2354,15 @@ def create_photos_html(specieslist, photos):
 
 
 def create_videos_html(videos):
+    if not os.path.exists(WEBOUT_PATH + "video/"):
+        os.makedirs(WEBOUT_PATH + "video/")
     create_blank_index("video/index.html")
     """ create the videos page """
     sectitle = ("Feeding", "Male Waving and Other Displays", "Female Display", "Fighting", "Mating", "Miscellaneous")
     secshort = ("Feeding", "Male Display", "Female Display", "Fighting", "Mating", "Miscellaneous")
     secanchor = ("feeding", "display", "female", "fighting", "mating", "misc")
 
-    with codecs.open(VIDEO_URL, "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + VIDEO_URL, "w", "utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Videos", "")
         outfile.write("    <header>\n")
         outfile.write("      <h1>Videos</h1>\n")
@@ -2892,7 +2434,7 @@ def write_science_art_page(fname, art, backurl, backtext):
 
 def create_art_science_html(artlist):
     """ create the art science index """
-    with codecs.open(ART_SCI_URL, "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + ART_SCI_URL, "w", "utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Art - Scientific", "")
         outfile.write("    <header>\n")
         outfile.write("      <h1>Scientific Drawings</h1>\n")
@@ -2922,7 +2464,7 @@ def create_art_science_html(artlist):
                 if art.art_type == "science":
                     artist = art.author + " (" + art.year + ")"
                     if artist == a:
-                        pfname = "art/" + art.image + ".html"
+                        pfname = WEBOUT_PATH + "art/" + art.image + ".html"
                         outfile.write("      <figure class=\"sppic\">\n")
                         outfile.write("        <a href=\"" + pfname + "\"><picture><img src=\"art/" + art.image +
                                       "_tn." + art.ext + "\" alt=\"" + art.title + "\" title=\"" + art.title +
@@ -2934,7 +2476,7 @@ def create_art_science_html(artlist):
 
 def create_art_stamps_html(artlist):
     """ create the art stamps index """
-    with codecs.open(ART_STAMP_URL, "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + ART_STAMP_URL, "w", "utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Stamps", "")
         outfile.write("    <header>\n")
         outfile.write("      <h1>Postage Stamps</h1>\n")
@@ -2963,7 +2505,7 @@ def create_art_stamps_html(artlist):
             for art in artlist:
                 if art.art_type == "stamp":
                     if art.author == a:
-                        pfname = "art/" + art.image + ".html"
+                        pfname = WEBOUT_PATH + "art/" + art.image + ".html"
                         outfile.write("      <figure class=\"sppic\">\n")
                         outfile.write("        <a href=\"" + pfname+"\"><picture><img src=\"art/" + art.image +
                                       "_tn." + art.ext + "\" alt=\"" + art.title + "\" title=\"" + art.title +
@@ -2975,7 +2517,7 @@ def create_art_stamps_html(artlist):
     
 def create_art_crafts_html(artlist):
     """ create the art craft index """
-    with codecs.open(ART_CRAFT_URL, "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + ART_CRAFT_URL, "w", "utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Crafts", "")
         outfile.write("    <header>\n")
         outfile.write("      <h1>Art</h1>\n")
@@ -3008,7 +2550,7 @@ def create_art_crafts_html(artlist):
             for art in artlist:
                 if art.art_type == "origami":
                     if art.author == a:
-                        pfname = "art/" + art.image + ".html"
+                        pfname = WEBOUT_PATH + "art/" + art.image + ".html"
                         outfile.write("      <figure class=\"sppic\">\n")
                         outfile.write("        <a href=\"" + pfname + "\"><picture><img src=\"art/" + art.image +
                                       "_tn." + art.ext + "\" alt=\"" + art.title + "\" title=\"" +
@@ -3020,6 +2562,8 @@ def create_art_crafts_html(artlist):
 
 def create_art_html(artlist):
     """ create the art pages """
+    if not os.path.exists(WEBOUT_PATH + "art/"):
+        os.makedirs(WEBOUT_PATH + "art/")
     create_art_science_html(artlist)
     create_art_stamps_html(artlist)
     create_art_crafts_html(artlist)
@@ -3037,7 +2581,7 @@ def species_to_html(specieslist, references, specific_names, all_names, photos, 
 
 def create_systematics_html(subgenlist, specieslist):
     """ create the systematics page """
-    with codecs.open(SYST_URL, "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + SYST_URL, "w", "utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Systematics", "")
         outfile.write("    <header>\n")
         outfile.write("      <h1>Systematics</h1>\n")
@@ -3439,7 +2983,7 @@ def summarize_languages(refs):
 
 def create_life_cycle():
     """ create the life cycle page """
-    with codecs.open(LIFECYCLE_URL, "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + LIFECYCLE_URL, "w", "utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Life Cycle", "")
         outfile.write("    <header>\n")
         outfile.write("      <h1>Life Cycle</h1>\n")
@@ -3547,7 +3091,7 @@ def create_life_cycle():
 
 def create_phylogeny():
     """ create the phylogeny page """
-    with codecs.open(TREE_URL, "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + TREE_URL, "w", "utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Phylogeny", "")
         outfile.write("    <header>\n")
         outfile.write("      <h1>Phylogeny</h1>\n")
@@ -3599,7 +3143,7 @@ def find_morphology_parent(p, mlist):
 
 def create_morphology_page(morph, morphlist):
     """ create individual pages for morphology descriptions """
-    with codecs.open("morphology/" + morphology_link(morph.parent, morph.character) + ".html",
+    with codecs.open(WEBOUT_PATH + "morphology/" + morphology_link(morph.parent, morph.character) + ".html",
                      "w", "utf-8") as outfile:
         if morph.parent == ".":
             p = ""
@@ -3654,7 +3198,7 @@ def create_morphology_page(morph, morphlist):
 
 def create_morphology_index(morphlist):
     """ create index for morphology pages """
-    with codecs.open("morphology/index.html", "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + "morphology/index.html", "w", "utf-8") as outfile:
         common_html_header(outfile, "Morphology Index", "../")
         outfile.write("    <header>\n")
         outfile.write("      <h1>Morphology Index</h1>\n")
@@ -3694,7 +3238,9 @@ def create_morphology_index(morphlist):
 
 def create_morphology_pages(morphology):
     """ create page for general morphology descriptions """
-    with codecs.open(MORPH_URL, "w", "utf-8") as outfile:
+    if not os.path.exists(WEBOUT_PATH + "morphology/"):
+        os.makedirs(WEBOUT_PATH + "morphology/")
+    with codecs.open(WEBOUT_PATH + MORPH_URL, "w", "utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Morphology", "")
         outfile.write("    <header>\n")
         outfile.write("      <h1>Morphology</h1>\n")
@@ -3747,7 +3293,7 @@ def create_morphology_pages(morphology):
 
 def create_citation_page(refdict):
     """ create page with site citation info """
-    with codecs.open(CITE_URL, "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + CITE_URL, "w", "utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Website Citation", "")
         outfile.write("    <header>\n")
         outfile.write("      <h1>Citation Info</h1>\n")
@@ -3776,7 +3322,7 @@ def create_citation_page(refdict):
 
 def create_index(species):
     """ create the site index """
-    with codecs.open("index.html", "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + "index.html", "w", "utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crabs (Genus Uca)", "")
         outfile.write("    <p>\n")
         scnt = 0
@@ -3860,14 +3406,20 @@ def create_index(species):
         common_html_footer(outfile, "")
 
 
-def main():
+def build_site():
     with open("errorlog.txt", "w") as logfile:
+        # create web output directory if it does not already exist
+        if not os.path.exists(WEBOUT_PATH):
+            os.makedirs(WEBOUT_PATH)
+
         print("...Reading References...")
-        references, refdict, citelist, yeardict, citecount = get_references(logfile)
+        references, refdict, citelist, yeardict, citecount = get_references("Data/references_cites.txt",
+                                                                            "Data/references.html",
+                                                                            "Data/citeinfo.txt", logfile)
         yeardat, yeardat1900 = summarize_year(yeardict)
         languages = summarize_languages(references)
         print("...Reading Species...")
-        species = get_species()
+        species = get_species("Data/species_info.txt")
         print("...Connecting References...")
         species_refs = connect_refs_to_species(species, citelist)
         print("...Writing References...")
@@ -3875,18 +3427,18 @@ def main():
         reference_summary(len(references), yeardat, yeardat1900, citecount, languages)
         reference_pages(references, refdict, citelist, logfile)
         print("...Reading Species Names...")
-        specific_names = get_specific_names()
+        specific_names = get_specific_names("Data/specific_names.txt")
         all_names, binomial_name_cnts, specific_name_cnts = index_name_pages(refdict, citelist, specific_names,
                                                                              species_refs, logfile)
         specific_name_pages(citelist, specific_names, logfile)
         print("...Reading Photos and Videos...")
-        photos = get_photos()
-        videos = get_videos()
-        art = get_art()
+        photos = get_photos("Data/photos.txt")
+        videos = get_videos("Data/videos.txt")
+        art = get_art("Data/art.txt")
         print("...Writing Species...")
         species_to_html(species, references, specific_names, all_names, photos, videos, art, species_refs, refdict,
                         binomial_name_cnts, specific_name_cnts, logfile)
-        subgenera = get_subgenera()
+        subgenera = get_subgenera("Data/subgenera.txt")
         create_systematics_html(subgenera, species)
         create_common_names_html()
         create_photos_html(species, photos)
@@ -3895,11 +3447,19 @@ def main():
         create_map_html(species)
         create_life_cycle()
         create_phylogeny()
-        morphology = get_morphology()
+        morphology = get_morphology("Data/morphology.txt")
         create_morphology_pages(morphology)
         create_index(species)
         create_citation_page(refdict)
     print("done")
+
+
+def main():
+    # will eventually need to put options here for choosing different paths, etc.
+    main_path = "fiddlercrab.info"
+    os.chdir(main_path)
+    # will need to read options from file
+    build_site()
 
 
 if __name__ == "__main__":
