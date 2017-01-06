@@ -157,7 +157,7 @@ def report_error(logfile, outstr):
     logfile.write(outstr + "\n")
 
 
-def get_references(ref_filename, formatref_filename, citation_filename, logfile):
+def read_reference_data(ref_filename, formatref_filename, citation_filename, logfile):
     """ read reference data """
     reflist = []
     year_dat = {}
@@ -268,7 +268,7 @@ def read_simple_file(filename):
     return splist
 
 
-def get_species(filename):
+def read_species_data(filename):
     """ read data from species flatfile """
     tmplist = read_simple_file(filename)
     slist = []
@@ -292,7 +292,7 @@ def get_species(filename):
     return slist
 
 
-def get_photos(filename):
+def read_photo_data(filename):
     """ read data from photo flatfile """
     tmplist = read_simple_file(filename)
     plist = []
@@ -305,7 +305,7 @@ def get_photos(filename):
     return plist
 
 
-def get_videos(filename):
+def read_video_data(filename):
     """ read data from video flatfile """
     tmplist = read_simple_file(filename)
     vlist = []
@@ -325,7 +325,7 @@ def get_videos(filename):
     return vlist
 
 
-def get_subgenera(filename):
+def read_subgenera_data(filename):
     """ read subgenera data """
     tmplist = read_simple_file(filename)
     genlist = []
@@ -341,7 +341,7 @@ def get_subgenera(filename):
     return genlist
 
 
-def get_specific_names(filename):
+def read_specific_names_data(filename):
     """ read specific name data """
     tmplist = read_simple_file(filename)
     splist = []
@@ -358,7 +358,7 @@ def get_specific_names(filename):
     return splist
 
 
-def get_art(filename):
+def read_art_data(filename):
     """ read art data """
     tmplist = read_simple_file(filename)
     artlist = []
@@ -377,7 +377,7 @@ def get_art(filename):
     return artlist
 
 
-def get_morphology(filename):
+def read_morphology_data(filename):
     """ read morphology data """
     tmplist = read_simple_file(filename)
     morphlist = []
@@ -3416,13 +3416,13 @@ def build_site():
     with open("errorlog.txt", "w") as logfile:
         create_output_paths()
         print("...Reading References...")
-        references, refdict, citelist, yeardict, citecount = get_references("Data/references_cites.txt",
+        references, refdict, citelist, yeardict, citecount = read_reference_data("Data/references_cites.txt",
                                                                             "Data/references.html",
                                                                             "Data/citeinfo.txt", logfile)
         yeardat, yeardat1900 = summarize_year(yeardict)
         languages = summarize_languages(references)
         print("...Reading Species...")
-        species = get_species("Data/species_info.txt")
+        species = read_species_data("Data/species_info.txt")
         print("...Connecting References...")
         species_refs = connect_refs_to_species(species, citelist)
         print("...Writing References...")
@@ -3430,18 +3430,18 @@ def build_site():
         reference_summary(len(references), yeardat, yeardat1900, citecount, languages)
         reference_pages(references, refdict, citelist, logfile)
         print("...Reading Species Names...")
-        specific_names = get_specific_names("Data/specific_names.txt")
+        specific_names = read_specific_names_data("Data/specific_names.txt")
         all_names, binomial_name_cnts, specific_name_cnts = index_name_pages(refdict, citelist, specific_names,
                                                                              species_refs, logfile)
         specific_name_pages(citelist, specific_names, logfile)
         print("...Reading Photos and Videos...")
-        photos = get_photos("Data/photos.txt")
-        videos = get_videos("Data/videos.txt")
-        art = get_art("Data/art.txt")
+        photos = read_photo_data("Data/photos.txt")
+        videos = read_video_data("Data/videos.txt")
+        art = read_art_data("Data/art.txt")
         print("...Writing Species...")
         species_to_html(species, references, specific_names, all_names, photos, videos, art, species_refs, refdict,
                         binomial_name_cnts, specific_name_cnts, logfile)
-        subgenera = get_subgenera("Data/subgenera.txt")
+        subgenera = read_subgenera_data("Data/subgenera.txt")
         create_systematics_html(subgenera, species)
         create_common_names_html()
         create_photos_html(species, photos)
@@ -3450,7 +3450,7 @@ def build_site():
         create_map_html(species)
         create_life_cycle()
         create_phylogeny()
-        morphology = get_morphology("Data/morphology.txt")
+        morphology = read_morphology_data("Data/morphology.txt")
         create_morphology_pages(morphology)
         create_index(species)
         create_citation_page(refdict)
