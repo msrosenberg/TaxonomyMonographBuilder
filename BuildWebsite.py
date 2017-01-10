@@ -519,13 +519,48 @@ def create_blank_index(fname):
         outfile.write("</html>\n")
 
 
-def format_reference(ref, logfile):
+# def convert_link(link, path, do_print):
+#     if do_print:
+#         return "#" + link
+#     else:
+#         return path + "/" + link
+
+
+def rel_link_prefix(do_print, prefix):
+    if do_print:
+        return "#"
+    else:
+        return prefix
+
+
+def abs_link_prefix(do_absolute):
+    if do_absolute:
+        return "http://www.fiddlercrab.info/"
+    else:
+        return ""
+
+
+def format_reference(ref, do_print, logfile):
     if ref.cite_key == "<pending>":
         return "          <li>" + ref.formatted_html + "</li>\n"
     else:
         try:
-            return ("          <li><a href=\"references/" + ref.cite_key + ".html\">" + ref.formatted_html +
-                    "</a></li>\n")
+            # return ("          <li><a href=\"" + convert_link(ref.cite_key, "references", do_print) + "\">" +
+            #         ref.formatted_html + "</a></li>\n")
+            # if do_print:
+            #     xref_prefix = "#"
+            # else:
+            #     xref_prefix = "references/"
+            # return ("          <li><a href=\"" + xref_prefix + ref.cite_key + ".html\">" + ref.formatted_html +
+            #         "</a></li>\n")
+            return ("          <li><a href=\"" + rel_link_prefix(do_print, "references/") + ref.cite_key +
+                    ".html\">" + ref.formatted_html + "</a></li>\n")
+            # if do_print:
+            #     return ("          <li><a href=\"#" + ref.cite_key + "\">" + ref.formatted_html +
+            #             "</a></li>\n")
+            # else:
+            #     return ("          <li><a href=\"references/" + ref.cite_key + ".html\">" + ref.formatted_html +
+            #             "</a></li>\n")
         except LookupError:
             report_error(logfile, "missing label: " + ref.cite_key)
 
@@ -668,52 +703,53 @@ def reference_summary(nrefs, year_data, year_data_1900, cite_count, languages):
         outfile.write("    <div id=\"chart_div\"></div>\n")
         common_html_footer(outfile, "")
 
-    
-def references_to_html(reflist, logfile):
-    with codecs.open(WEBOUT_PATH + REF_URL, "w", "utf-8") as outfile:
-        common_html_header(outfile, "Fiddler Crab Publications", "")
-        outfile.write("    <header>\n")
-        outfile.write("      <h1>Publications</h1>\n")
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + REF_SUM_URL +
-                      "\"><span class=\"fa fa-line-chart\"></span> Reference/Citation Summary</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
 
-        outfile.write("    </header>\n")
-        outfile.write("\n")
-        outfile.write("    <p>\n")
-        outfile.write("      Following is a fairly comprehensive list of papers, books, and theses that deal or refer "
-                      "to fiddler crabs. The list currently contains {:0,} references (last updated {}). Many of these "
-                      "papers (particularly the older ones) are primarily "
-                      "taxonomic lists.\n".format(len(reflist), datetime.date.isoformat(datetime.date.today())))
-        outfile.write("    </p>\n")
-        outfile.write("    <p>\n")
-        outfile.write("      The references can also be downloaded as "
-                      "<a href=\"references/Uca_references.enlx\">compressed Endnote</a>, "
-                      "<a href=\"references/Uca_references_RIS.txt\">RIS (text)</a>, or "
-                      "<a href=\"references/Uca_references_RIS.xml\">RIS (XML)</a>.\n")
-        outfile.write("    </p>\n")
-        outfile.write("    <p>\n")
-        outfile.write("      Linked references contain information on every name applied to fiddler crabs within "
-                      "the publication, including context and the correct name as we currently understand it. These "
-                      "data are in the process of being compiled (chronologically for all publications I have access "
-                      "to a copy of), with most references still incomplete.\n")
-        outfile.write("    </p>\n")
-        outfile.write("    <p>\n")
-        outfile.write("      In a list of this size, there are bound to be errors, omissions, and mistaken "
-                      "inclusions. Please feel free to send me corrections.\n")
-        outfile.write("    </p>\n")
-        outfile.write("\n")
-        outfile.write("    <section class=\"spsection\">\n")
-        outfile.write("      <div id=\"citation\">\n")
-        outfile.write("        <ul>\n")
-        for ref in reflist:
-            outfile.write(format_reference(ref, logfile))
-        outfile.write("        </ul>\n")
-        outfile.write("      </div>\n")
-        outfile.write("    </section>\n")
+def write_reference_bibliography(reflist, do_print, outfile, logfile):
+    if not do_print:
+        common_html_header(outfile, "Fiddler Crab Publications", "")
+    outfile.write("    <header>\n")
+    outfile.write("      <h1>Publications</h1>\n")
+    outfile.write("      <nav>\n")
+    outfile.write("        <ul>\n")
+    outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") + REF_SUM_URL +
+                  "\"><span class=\"fa fa-line-chart\"></span> Reference/Citation Summary</a></li>\n")
+    outfile.write("        </ul>\n")
+    outfile.write("      </nav>\n")
+
+    outfile.write("    </header>\n")
+    outfile.write("\n")
+    outfile.write("    <p>\n")
+    outfile.write("      Following is a fairly comprehensive list of papers, books, and theses that deal or refer "
+                  "to fiddler crabs. The list currently contains {:0,} references (last updated {}). Many of these "
+                  "papers (particularly the older ones) are primarily "
+                  "taxonomic lists.\n".format(len(reflist), datetime.date.isoformat(datetime.date.today())))
+    outfile.write("    </p>\n")
+    outfile.write("    <p>\n")
+    outfile.write("      The references can also be downloaded as "
+                  "<a href=\"" + abs_link_prefix(do_print) + "references/Uca_references.enlx\">compressed Endnote</a>, "
+                  "<a href=\"" + abs_link_prefix(do_print) + "references/Uca_references_RIS.txt\">RIS (text)</a>, or "
+                  "<a href=\"" + abs_link_prefix(do_print) + "references/Uca_references_RIS.xml\">RIS (XML)</a>.\n")
+    outfile.write("    </p>\n")
+    outfile.write("    <p>\n")
+    outfile.write("      Linked references contain information on every name applied to fiddler crabs within "
+                  "the publication, including context and the correct name as we currently understand it. These "
+                  "data are in the process of being compiled (chronologically for all publications I have access "
+                  "to a copy of), with most references still incomplete.\n")
+    outfile.write("    </p>\n")
+    outfile.write("    <p>\n")
+    outfile.write("      In a list of this size, there are bound to be errors, omissions, and mistaken "
+                  "inclusions. Please feel free to send me corrections.\n")
+    outfile.write("    </p>\n")
+    outfile.write("\n")
+    outfile.write("    <section class=\"spsection\">\n")
+    outfile.write("      <div id=\"citation\">\n")
+    outfile.write("        <ul>\n")
+    for ref in reflist:
+        outfile.write(format_reference(ref, do_print, logfile))
+    outfile.write("        </ul>\n")
+    outfile.write("      </div>\n")
+    outfile.write("    </section>\n")
+    if not do_print:
         common_html_footer(outfile, "")
 
 
@@ -1027,98 +1063,108 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
                 outfile.write("      <td>" + n.name_note + "</td>\n")
         outfile.write("    </tr>\n")
     outfile.write("    </table>\n")
-    
 
-def reference_pages(reflist, refdict, citelist, logfile):
-    create_blank_index(WEBOUT_PATH + "references/index.html")
+
+def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, logfile):
+    if not do_print:
+        common_html_header(outfile, ref.citation, "../")
+    outfile.write("    <header id=\"" + ref.cite_key + ".html\">\n")
+    outfile.write("      <h1>" + ref.citation + "</h1>\n")
+    outfile.write("      <h2>" + ref.formatted_html + "</h2>\n")
+    if not do_print:
+        outfile.write("      <nav>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("          <li><a href=\"../" + REF_URL +
+                      "\"><span class=\"fa fa-list\"></span> Full Reference List</a></li>\n")
+        outfile.write("        </ul>\n")
+        outfile.write("      </nav>\n")
+    outfile.write("    </header>\n")
+    outfile.write("\n")
+    # find names for this citation
+    names = []
+    cites_to = []
+    for c in citelist:
+        if c.cite_key == ref.cite_key:
+            names.append(c)
+        if c.application == ref.cite_key:
+            cites_to.append(c)
+    started_note = False
+    comcnt = 0
+    notecnt = 0
+    uniquenames = set()
+    for n in names:
+        if n.general_note != ".":
+            if not started_note:
+                outfile.write("    <p>\n")
+                started_note = True
+            outfile.write("      " + n.general_note + "\n")
+        if n.common != ".":
+            comcnt += 1
+        if n.name_note != ".":
+            notecnt += 1
+        # uniquenames = uniquenames | {n.name}
+        uniquenames |= {n.name}
+    if started_note:
+        outfile.write("    </p>\n")
+
+    # write name table
+    outfile.write("    <h3>Names Appearing in this Publication</h3>\n")
+    if len(names) > 0:
+        outfile.write("    <table class=\"citetable\">\n")
+        outfile.write("      <tr>\n")
+        outfile.write("        <th>Name Used</th>\n")
+        if comcnt > 0:
+            outfile.write("        <th>Common Name(s)</th>\n")
+        outfile.write("        <th>Where</th>\n")
+        outfile.write("        <th>Applied to...</th>\n")
+        outfile.write("        <th>Accepted Name</th>\n")
+        outfile.write("        <th>Source of Accepted</th>\n")
+        if notecnt > 0:
+            outfile.write("        <th>Note(s)</th>\n")
+        outfile.write("      </tr>\n")
+        names.sort()
+        output_name_table(False, outfile, names, uniquenames, notecnt, comcnt, refdict, name_table,
+                          logfile)
+    else:
+        outfile.write("    Data not yet available.\n")
+
+    if len(cites_to) > 0:
+        outfile.write("    <h3>This Publication is Cited By</h3>\n")
+        outfile.write("    <p>\n")
+        cs = set()
+        for c in cites_to:
+            if c.cite_key in refdict:
+                crossref = refdict[c.cite_key]
+                cs |= {"<a href=\"" + rel_link_prefix(do_print, "") + crossref.cite_key +
+                       ".html\">" + crossref.citation + "</a>"}
+            else:
+                cs |= {c.cite_key}
+        cl = []
+        for x in cs:
+            cl.append(x)
+        cl.sort()
+        outfile.write("     " + ", ".join(cl) + "\n")
+        outfile.write("    </p>\n")
+    else:
+        outfile.write("    <p>\n")
+    outfile.write("    </p>\n")
+
+    if not do_print:
+        common_html_footer(outfile, "../")
+
+
+def write_reference_pages(reflist, refdict, citelist, do_print, printfile, logfile):
+    if not do_print:
+        create_blank_index(WEBOUT_PATH + "references/index.html")
     name_table = create_name_table(citelist)
     update_cite_list(citelist)
     for ref in reflist:
         if ref.cite_key != "<pending>":
-            with codecs.open(WEBOUT_PATH + "references/" + ref.cite_key + ".html", "w", "utf-8") as outfile:
-                common_html_header(outfile, ref.citation, "../")
-                outfile.write("    <header>\n")
-                outfile.write("      <h1>" + ref.citation + "</h1>\n")
-                outfile.write("      <h2>" + ref.formatted_html + "</h2>\n")
-                outfile.write("      <nav>\n")
-                outfile.write("        <ul>\n")
-                outfile.write("          <li><a href=\"../" + REF_URL +
-                              "\"><span class=\"fa fa-list\"></span> Full Reference List</a></li>\n")
-                outfile.write("        </ul>\n")
-                outfile.write("      </nav>\n")
-                outfile.write("    </header>\n")
-                outfile.write("\n")
-                # find names for this citation
-                names = []
-                cites_to = []
-                for c in citelist:
-                    if c.cite_key == ref.cite_key:
-                        names.append(c)
-                    if c.application == ref.cite_key:
-                        cites_to.append(c)
-                started_note = False
-                comcnt = 0
-                notecnt = 0
-                uniquenames = set()
-                for n in names:
-                    if n.general_note != ".":
-                        if not started_note:
-                            outfile.write("    <p>\n")
-                            started_note = True
-                        outfile.write("      " + n.general_note + "\n")
-                    if n.common != ".":
-                        comcnt += 1
-                    if n.name_note != ".":
-                        notecnt += 1
-                    # uniquenames = uniquenames | {n.name}
-                    uniquenames |= {n.name}
-                if started_note:
-                    outfile.write("    </p>\n")
-
-                # write name table
-                outfile.write("    <h3>Names Appearing in this Publication</h3>\n")
-                if len(names) > 0:
-                    outfile.write("    <table class=\"citetable\">\n")
-                    outfile.write("      <tr>\n")
-                    outfile.write("        <th>Name Used</th>\n")
-                    if comcnt > 0:
-                        outfile.write("        <th>Common Name(s)</th>\n")
-                    outfile.write("        <th>Where</th>\n")
-                    outfile.write("        <th>Applied to...</th>\n")
-                    outfile.write("        <th>Accepted Name</th>\n")
-                    outfile.write("        <th>Source of Accepted</th>\n")
-                    if notecnt > 0:
-                        outfile.write("        <th>Note(s)</th>\n")
-                    outfile.write("      </tr>\n")
-                    names.sort()
-                    output_name_table(False, outfile, names, uniquenames, notecnt, comcnt, refdict, name_table,
-                                      logfile)
-                else:
-                    outfile.write("    Data not yet available.\n")
-
-                if len(cites_to) > 0:
-                    outfile.write("    <h3>This Publication is Cited By</h3>\n")
-                    outfile.write("    <p>\n")
-                    cs = set()
-                    for c in cites_to:
-                        if c.cite_key in refdict:
-                            crossref = refdict[c.cite_key]
-                            # cs = cs | {"<a href=\"" + crossref.cite_key + ".html\">" + crossref.citation + "</a>"}
-                            cs |= {"<a href=\"" + crossref.cite_key + ".html\">" + crossref.citation + "</a>"}
-                        else:
-                            # cs = cs | {c.cite_key}
-                            cs |= {c.cite_key}
-                    cl = []
-                    for x in cs:
-                        cl.append(x)
-                    cl.sort()
-                    outfile.write("     " + ", ".join(cl) + "\n")
-                    outfile.write("    </p>\n")
-                else:
-                    outfile.write("    <p>\n")
-                outfile.write("    </p>\n")
-
-                common_html_footer(outfile, "../")
+            if do_print:
+                write_reference_page(printfile, do_print, ref, citelist, refdict, name_table, logfile)
+            else:
+                with codecs.open(WEBOUT_PATH + "references/" + ref.cite_key + ".html", "w", "utf-8") as outfile:
+                    write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, logfile)
 
 
 def clean_name(x):
@@ -2414,7 +2460,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
         # for i, ref in enumerate(references):
         for ref in references:
             if ref.cite_key in sprefs:
-                outfile.write(format_reference(ref, logfile))
+                outfile.write(format_reference(ref, False, logfile))
         outfile.write("        </ul>\n")
         outfile.write("      </div>\n")
         outfile.write("    </section>\n")
@@ -3532,6 +3578,23 @@ def create_output_paths():
         os.makedirs(WEBOUT_PATH + "morphology/")
 
 
+def start_print(outfile):
+    outfile.write("<!DOCTYPE HTML>\n")
+    outfile.write("<html lang=\"en\">\n")
+    outfile.write("  <head>\n")
+    outfile.write("    <meta charset=\"utf-8\" />\n")
+    outfile.write("    <title>Fiddler Crabs</title>\n")
+    outfile.write("    <link rel=\"stylesheet\" href=\"print.css\" />\n")
+    outfile.write("  </head>\n")
+    outfile.write("\n")
+    outfile.write("  <body>\n")
+
+
+def end_print(outfile):
+    outfile.write("  </body>\n")
+    outfile.write("</html>\n")
+
+
 def build_site():
     with open("errorlog.txt", "w") as logfile:
         create_output_paths()
@@ -3546,9 +3609,10 @@ def build_site():
         print("...Connecting References...")
         species_refs = connect_refs_to_species(species, citelist)
         print("...Writing References...")
-        # references_to_html(references, logfile)
+        with codecs.open(WEBOUT_PATH + REF_URL, "w", "utf-8") as outfile:
+            write_reference_bibliography(references, False, outfile, logfile)
         # reference_summary(len(references), yeardat, yeardat1900, citecount, languages)
-        # reference_pages(references, refdict, citelist, logfile)
+        write_reference_pages(references, refdict, citelist, False, None, logfile)
         print("...Reading Species Names...")
         specific_names = read_specific_names_data("data/specific_names.txt")
         all_names, binomial_name_cnts, specific_name_cnts = index_name_pages(refdict, citelist, specific_names,
@@ -3574,6 +3638,11 @@ def build_site():
         # create_morphology_pages(morphology)
         # create_index(species)
         # create_citation_page(refdict)
+    with codecs.open("print.html", "w", "utf-8") as printfile:
+        start_print(printfile)
+        write_reference_bibliography(references, True, printfile, logfile)
+        write_reference_pages(references, refdict, citelist, True, printfile, logfile)
+        end_print(printfile)
     print("done")
 
 
