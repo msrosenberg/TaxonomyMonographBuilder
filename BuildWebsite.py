@@ -1457,7 +1457,10 @@ def setup_chronology_chart(title, n, miny, maxy, maxcnt, yearly_data, is_species
     outfile.write("        var data" + nstr + " = google.visualization.arrayToDataTable([\n")
     outfile.write("          ['Year', 'Number of Uses', 'Number of Uses'],\n")
     for y in range(miny, maxy + 1):
-        outfile.write("          ['" + str(y) + "', " + str(yearly_data[y]) + ", " + str(yearly_data[y]) + "],\n")
+        if yearly_data[y] != 0:
+            outfile.write("          ['" + str(y) + "', " + str(yearly_data[y]) + ", " + str(yearly_data[y]) + "],\n")
+        else:
+            outfile.write("          ['" + str(y) + "', null, null],\n")
     outfile.write("        ]);\n")
     outfile.write("\n")
     outfile.write("        var options" + nstr + " = {\n")
@@ -1473,7 +1476,7 @@ def setup_chronology_chart(title, n, miny, maxy, maxcnt, yearly_data, is_species
     outfile.write("                  },\n")
     outfile.write("          vAxes: { 1: { direction: -1}},\n")
     outfile.write("          vAxis: { gridlines: {count: 0},\n")
-    outfile.write("                   baselineColor: 'black',\n")
+    outfile.write("                   baselineColor: 'none',\n")
     outfile.write("                   minValue: -" + str(maxcnt) + ",\n")
     outfile.write("                   maxValue: " + str(maxcnt) + "\n")
     outfile.write("                 }\n")
@@ -1502,19 +1505,21 @@ def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, s
         maxy = CURRENT_YEAR
         # --all totals and specific names--
         # find max count across all synonyms
-        maxcnt = 0
+        # maxcnt = 0
         name_cnts = []
         total_cnts = {y: 0 for y in range(miny, maxy+1)}
         for name in specific_synlist:
             cnts = specific_name_counts[name]
             for y in cnts:
                 total_cnts[y] += cnts[y]
-            tmpmax = max(cnts.values())
-            maxcnt = max(maxcnt, tmpmax)
+            # tmpmax = max(cnts.values())
+            # maxcnt = max(maxcnt, tmpmax)
             total = sum(cnts.values())
             name_cnts.append([total, name])
+        maxcnt = max(total_cnts.values())
 
-        setup_chronology_chart("All Names", 0, miny, maxy, max(total_cnts.values()), total_cnts, False, outfile)
+        # setup_chronology_chart("All Names", 0, miny, maxy, max(total_cnts.values()), total_cnts, False, outfile)
+        setup_chronology_chart("All Names", 0, miny, maxy, maxcnt, total_cnts, False, outfile)
         adjust = 1
 
         name_cnts.sort(reverse=True)
@@ -1737,6 +1742,92 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs):
         common_html_footer(outfile, "../")
 
 
+def extract_genus(name):
+    if " " in name:
+        return name[:name.find(" ")]
+    else:
+        return name
+
+
+def create_genus_chronology(genus_cnts):
+    """ create a page with the chronological history of the genera """
+    with codecs.open(WEBOUT_PATH + "names/synonyms_uca.html", "w", "utf-8") as outfile:
+        common_header_part1(outfile, "Uca", "../")
+        outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
+        outfile.write("    <script type=\"text/javascript\">\n")
+        outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
+        outfile.write("      google.setOnLoadCallback(drawChart);\n")
+        outfile.write("      function drawChart() {\n")
+        miny = START_YEAR
+        maxy = CURRENT_YEAR
+        # --all totals and specific names--
+        # find max count across all synonyms
+        maxcnt = 0
+        name_cnts = []
+        total_cnts = {y: 0 for y in range(miny, maxy+1)}
+        for name in genus_cnts:
+            cnts = genus_cnts[name]
+            for y in cnts:
+                total_cnts[y] += cnts[y]
+            tmpmax = max(cnts.values())
+            maxcnt = max(maxcnt, tmpmax)
+            total = sum(cnts.values())
+            name_cnts.append([total, name])
+        maxcnt = max(total_cnts.values())
+
+        # setup_chronology_chart("All Genera", 0, miny, maxy, max(total_cnts.values()), total_cnts, False, outfile)
+        setup_chronology_chart("All Genera", 0, miny, maxy, max(total_cnts.values()), total_cnts, False, outfile)
+        adjust = 1
+
+        name_cnts.sort(reverse=True)
+        # put accepted name first, followed by the rest in decreasing frequency
+        order = ["Uca"]
+        for x in name_cnts:
+            if x[1] != "Uca":
+                order.append(x[1])
+        for i, name in enumerate(order):
+            setup_chronology_chart(name, i + adjust, miny, maxy, maxcnt, genus_cnts[name], True, outfile)
+
+        outfile.write("      }\n")
+        outfile.write("    </script>\n")
+        common_header_part2(outfile, "", False)
+
+        outfile.write("    <header>\n")
+        outfile.write("      <h1>Synonym Chronology of the genus " + format_name_string("Uca") + "</h1>\n")
+        # outfile.write("      <nav>\n")
+        # outfile.write("        <ul>\n")
+        # outfile.write("          <li><a href=\"index.html\"><span class=\"fa fa-list\"></span> "
+        #               "Full Name Index</a></li>\n")
+        # outfile.write("        </ul>\n")
+        # outfile.write("      </nav>\n")
+        outfile.write("    </header>\n")
+        outfile.write("\n")
+        write_chronology_chart_div(0, outfile)
+        adjust = 1
+        outfile.write("    <p>Accepted name is listed first, followed by synonyms in decreasing order of use.</p>")
+        outfile.write("    <h2>Genus Synonyms</h2>\n")
+        for i in range(len(genus_cnts)):
+            write_chronology_chart_div(i + adjust, outfile)
+
+        common_html_footer(outfile, "../")
+
+
+def clean_genus(genus):
+    # fix alternate genus spellings when performing summaries
+    if genus in {"Galasimus", "Gelasimes", "Gelasius", "Gelasmus", "Gelsimus", "Gelassimus", "Gelasima"}:
+        return "Gelasimus"
+    elif genus in {"Uka", "Uça"}:
+        return "Uca"
+    elif genus in {"Goneplax"}:
+        return "Gonoplax"
+    elif genus in {"Ocypoda"}:
+        return "Ocypode"
+    elif genus in {"Ciecie"}:
+        return ""
+    else:
+        return genus
+
+
 def index_name_pages(refdict, citelist, specific_names, species_refs, logfile):
     """ create an index of binomials and specific names """
     name_table = create_name_table(citelist)
@@ -1762,6 +1853,35 @@ def index_name_pages(refdict, citelist, specific_names, species_refs, logfile):
                     else:
                         total_binomial_year_cnts[y] = 1
     unique_names.sort(key=lambda s: s.lower())
+
+    # identify genera used per paper
+    genera_per_paper = {}
+    for c in citelist:
+        if c.name != ".":
+            if c.cite_key not in genera_per_paper:
+                genera_per_paper[c.cite_key] = set()
+            genera_set = genera_per_paper[c.cite_key]
+            genera_set |= {extract_genus(clean_name(c.name))}
+    genus_cnts = {}
+    for c in genera_per_paper:
+        y = refdict[c].citation
+        y = y[y.find("(") + 1:y.find(")")]
+        if (y != "?") and (y.lower() != "in press"):
+            if y[0] == "~":
+                y = y[1:]
+            if len(y) > 4:
+                y = y[:4]
+            y = int(y)
+            if START_YEAR <= y <= CURRENT_YEAR:
+                genera_set = genera_per_paper[c]
+                for genus in genera_set:
+                    genus = clean_genus(genus)
+                    if genus != "":
+                        if genus not in genus_cnts:
+                            genus_cnts[genus] = {y: 0 for y in range(START_YEAR, CURRENT_YEAR + 1)}
+                        gcnts = genus_cnts[genus]
+                        gcnts[y] += 1
+    create_genus_chronology(genus_cnts)
 
     # create name index
     with codecs.open(WEBOUT_PATH + "names/index.html", "w", "utf-8") as outfile:
@@ -3426,34 +3546,34 @@ def build_site():
         print("...Connecting References...")
         species_refs = connect_refs_to_species(species, citelist)
         print("...Writing References...")
-        references_to_html(references, logfile)
-        reference_summary(len(references), yeardat, yeardat1900, citecount, languages)
-        reference_pages(references, refdict, citelist, logfile)
+        # references_to_html(references, logfile)
+        # reference_summary(len(references), yeardat, yeardat1900, citecount, languages)
+        # reference_pages(references, refdict, citelist, logfile)
         print("...Reading Species Names...")
         specific_names = read_specific_names_data("data/specific_names.txt")
         all_names, binomial_name_cnts, specific_name_cnts = index_name_pages(refdict, citelist, specific_names,
                                                                              species_refs, logfile)
         specific_name_pages(citelist, specific_names, logfile)
-        print("...Reading Photos and Videos...")
-        photos = read_photo_data("data/photos.txt")
-        videos = read_video_data("data/videos.txt")
-        art = read_art_data("data/art.txt")
-        print("...Writing Species...")
-        species_to_html(species, references, specific_names, all_names, photos, videos, art, species_refs, refdict,
-                        binomial_name_cnts, specific_name_cnts, logfile)
-        subgenera = read_subgenera_data("data/subgenera.txt")
-        create_systematics_html(subgenera, species)
-        create_common_names_html("data/common_names.txt")
-        create_photos_html(species, photos)
-        create_art_html(art)
-        create_videos_html(videos)
-        create_map_html(species)
-        create_life_cycle()
-        create_phylogeny()
-        morphology = read_morphology_data("data/morphology.txt")
-        create_morphology_pages(morphology)
-        create_index(species)
-        create_citation_page(refdict)
+        # print("...Reading Photos and Videos...")
+        # photos = read_photo_data("data/photos.txt")
+        # videos = read_video_data("data/videos.txt")
+        # art = read_art_data("data/art.txt")
+        # print("...Writing Species...")
+        # species_to_html(species, references, specific_names, all_names, photos, videos, art, species_refs, refdict,
+        #                 binomial_name_cnts, specific_name_cnts, logfile)
+        # subgenera = read_subgenera_data("data/subgenera.txt")
+        # create_systematics_html(subgenera, species)
+        # create_common_names_html("data/common_names.txt")
+        # create_photos_html(species, photos)
+        # create_art_html(art)
+        # create_videos_html(videos)
+        # create_map_html(species)
+        # create_life_cycle()
+        # create_phylogeny()
+        # morphology = read_morphology_data("data/morphology.txt")
+        # create_morphology_pages(morphology)
+        # create_index(species)
+        # create_citation_page(refdict)
     print("done")
 
 
