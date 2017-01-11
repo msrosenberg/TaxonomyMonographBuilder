@@ -244,8 +244,6 @@ def read_reference_data(ref_filename, formatref_filename, citation_filename, log
             cite_count += 1
             if c[1] in year_dat:
                 year_dat[c[1]][1] += 1
-        # if c[1] in yearDat and c[0]:
-        #    yearDat[c[1]][1] += 1    
     return reflist, refdict, citelist, year_dat, cite_count
 
 
@@ -392,6 +390,12 @@ def read_morphology_data(filename):
     return morphlist
 
 
+def read_common_name_data(filename):
+    with codecs.open(filename, "r", "utf-8") as infile:
+        lines = infile.readlines()
+    return lines
+
+
 # -----End input code---- #
 def common_header_part1(outfile, title, indexpath):
     """ part 1 of the header for all html """
@@ -467,7 +471,6 @@ def common_species_html_header(outfile, title, indexpath, species):
     outfile.write("          overviewMapControl: false,\n")
     outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
     outfile.write("        };\n")
-    # outfile.write("        var map = new google.maps.Map(document.getElementById(\"map_canvas_sp\"),mapOptions);\n")
     if species == "":
         outfile.write("        var map = new google.maps.Map(document.getElementById(\"map_canvas\"),mapOptions);\n")
         outfile.write("        var ctaLayer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/uca.kmz\","
@@ -545,169 +548,158 @@ def format_reference(ref, do_print, logfile):
         return "          <li>" + ref.formatted_html + "</li>\n"
     else:
         try:
-            # return ("          <li><a href=\"" + convert_link(ref.cite_key, "references", do_print) + "\">" +
-            #         ref.formatted_html + "</a></li>\n")
-            # if do_print:
-            #     xref_prefix = "#"
-            # else:
-            #     xref_prefix = "references/"
-            # return ("          <li><a href=\"" + xref_prefix + ref.cite_key + ".html\">" + ref.formatted_html +
-            #         "</a></li>\n")
             return ("          <li><a href=\"" + rel_link_prefix(do_print, "references/") + ref.cite_key +
                     ".html\">" + ref.formatted_html + "</a></li>\n")
-            # if do_print:
-            #     return ("          <li><a href=\"#" + ref.cite_key + "\">" + ref.formatted_html +
-            #             "</a></li>\n")
-            # else:
-            #     return ("          <li><a href=\"references/" + ref.cite_key + ".html\">" + ref.formatted_html +
-            #             "</a></li>\n")
         except LookupError:
             report_error(logfile, "missing label: " + ref.cite_key)
 
 
-def reference_summary(nrefs, year_data, year_data_1900, cite_count, languages):
-    with codecs.open(WEBOUT_PATH + REF_SUM_URL, "w", "utf-8") as outfile:
+def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, languages, do_print, outfile):
+    # reference summary page does not work in print version for now
+    if not do_print:
         common_header_part1(outfile, "Fiddler Crab Reference Summary", "")
-        outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
-        outfile.write("    <script type=\"text/javascript\">\n")
-        outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
-        outfile.write("      google.setOnLoadCallback(drawChart);\n")
-        outfile.write("      function drawChart() {\n")
-        outfile.write("        var data1 = google.visualization.arrayToDataTable([\n")
-        outfile.write("          ['Year', 'Cumulative Publications'],\n")
-        for y in year_data:
-            outfile.write("          ['" + str(y[0]) + "', " + str(y[2]) + "],\n")
-        outfile.write("        ]);\n")
-        outfile.write("\n")
-        outfile.write("        var data2 = google.visualization.arrayToDataTable([\n")
-        outfile.write("          ['Year', 'Publications'],\n")
-        for y in year_data:
-            outfile.write("          ['" + str(y[0]) + "', " + str(y[1]) + "],\n")
-        outfile.write("        ]);\n")
-        outfile.write("\n")
-        """
-        outfile.write("        var data3 = google.visualization.arrayToDataTable([\n")
-        outfile.write("          ['Year', 'Citations in DB', 'Pending'],\n")
-        for y in yearData:
-            outfile.write("          ['"+str(y[0])+"', "+str(y[3])+", "+str(y[1]-y[3])+"],\n")
-        outfile.write("        ]);\n")
-        outfile.write("\n")
-        """
-        outfile.write("        var data4 = google.visualization.arrayToDataTable([\n")
-        outfile.write("          ['Year', 'Publications'],\n")
-        for y in year_data_1900:
-            outfile.write("          ['" + str(y[0]) + "', " + str(y[1]) + "],\n")
-        outfile.write("        ]);\n")
-        outfile.write("\n")
-        outfile.write("        var data5 = google.visualization.arrayToDataTable([\n")
-        outfile.write("          ['Year', 'Citations in DB', 'Pending'],\n")
-        for y in year_data_1900:
-            outfile.write("          ['" + str(y[0]) + "', " + str(y[2]) + ", " + str(y[1]-y[2]) + "],\n")
-        outfile.write("        ]);\n")
+    outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
+    outfile.write("    <script type=\"text/javascript\">\n")
+    outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
+    outfile.write("      google.setOnLoadCallback(drawChart);\n")
+    outfile.write("      function drawChart() {\n")
+    outfile.write("        var data1 = google.visualization.arrayToDataTable([\n")
+    outfile.write("          ['Year', 'Cumulative Publications'],\n")
+    for y in year_data:
+        outfile.write("          ['" + str(y[0]) + "', " + str(y[2]) + "],\n")
+    outfile.write("        ]);\n")
+    outfile.write("\n")
+    outfile.write("        var data2 = google.visualization.arrayToDataTable([\n")
+    outfile.write("          ['Year', 'Publications'],\n")
+    for y in year_data:
+        outfile.write("          ['" + str(y[0]) + "', " + str(y[1]) + "],\n")
+    outfile.write("        ]);\n")
+    outfile.write("\n")
+    """
+    outfile.write("        var data3 = google.visualization.arrayToDataTable([\n")
+    outfile.write("          ['Year', 'Citations in DB', 'Pending'],\n")
+    for y in yearData:
+        outfile.write("          ['"+str(y[0])+"', "+str(y[3])+", "+str(y[1]-y[3])+"],\n")
+    outfile.write("        ]);\n")
+    outfile.write("\n")
+    """
+    outfile.write("        var data4 = google.visualization.arrayToDataTable([\n")
+    outfile.write("          ['Year', 'Publications'],\n")
+    for y in year_data_1900:
+        outfile.write("          ['" + str(y[0]) + "', " + str(y[1]) + "],\n")
+    outfile.write("        ]);\n")
+    outfile.write("\n")
+    outfile.write("        var data5 = google.visualization.arrayToDataTable([\n")
+    outfile.write("          ['Year', 'Citations in DB', 'Pending'],\n")
+    for y in year_data_1900:
+        outfile.write("          ['" + str(y[0]) + "', " + str(y[2]) + ", " + str(y[1]-y[2]) + "],\n")
+    outfile.write("        ]);\n")
 
-        outfile.write("        var data6 = google.visualization.arrayToDataTable([\n")
-        outfile.write("          ['Language', 'Count'],\n")
-        langlist = list(languages.keys())
-        langlist.sort()
-        for l in langlist:
-            outfile.write("          ['" + l + "', " + str(languages[l]) + "],\n")
-        outfile.write("        ]);\n")
+    outfile.write("        var data6 = google.visualization.arrayToDataTable([\n")
+    outfile.write("          ['Language', 'Count'],\n")
+    langlist = list(languages.keys())
+    langlist.sort()
+    for l in langlist:
+        outfile.write("          ['" + l + "', " + str(languages[l]) + "],\n")
+    outfile.write("        ]);\n")
 
-        outfile.write("\n")
-        outfile.write("        var options1 = {\n")
-        outfile.write("          title: \"Cumulative References by Year\", \n")
-        outfile.write("          legend: { position: 'none' }\n")
-        outfile.write("        };\n")
-        outfile.write("\n")
-        outfile.write("        var options2 = {\n")
-        outfile.write("          title: \"References by Year\", \n")
-        outfile.write("          legend: { position: 'none' }\n")
-        outfile.write("        };\n")
-        outfile.write("\n")
-        """
-        outfile.write("        var options3 = {\n")
-        outfile.write("          title: \"References with Citation Data in Database\", \n")
-        outfile.write("          legend: { position: 'bottom' },\n")
-        outfile.write("          isStacked: true\n")
-        outfile.write("        };\n")
-        outfile.write("\n")
-        """
-        outfile.write("        var options4 = {\n")
-        outfile.write("          title: \"References by Year (since 1900)\", \n")
-        outfile.write("          legend: { position: 'none' },\n")
-        outfile.write("          bar: { groupWidth: '80%' }\n")
-        outfile.write("        };\n")
-        outfile.write("\n")
-        outfile.write("        var options5 = {\n")
-        outfile.write("          title: \"References with Citation Data in Database (since 1900; all pre-1900 "
-                      "literature is complete)\", \n")
-        outfile.write("          legend: { position: 'bottom' },\n")
-        outfile.write("          isStacked: true,\n")
-        outfile.write("          bar: { groupWidth: '80%' }\n")
-        outfile.write("        };\n")
-        outfile.write("\n")
+    outfile.write("\n")
+    outfile.write("        var options1 = {\n")
+    outfile.write("          title: \"Cumulative References by Year\", \n")
+    outfile.write("          legend: { position: 'none' }\n")
+    outfile.write("        };\n")
+    outfile.write("\n")
+    outfile.write("        var options2 = {\n")
+    outfile.write("          title: \"References by Year\", \n")
+    outfile.write("          legend: { position: 'none' }\n")
+    outfile.write("        };\n")
+    outfile.write("\n")
+    """
+    outfile.write("        var options3 = {\n")
+    outfile.write("          title: \"References with Citation Data in Database\", \n")
+    outfile.write("          legend: { position: 'bottom' },\n")
+    outfile.write("          isStacked: true\n")
+    outfile.write("        };\n")
+    outfile.write("\n")
+    """
+    outfile.write("        var options4 = {\n")
+    outfile.write("          title: \"References by Year (since 1900)\", \n")
+    outfile.write("          legend: { position: 'none' },\n")
+    outfile.write("          bar: { groupWidth: '80%' }\n")
+    outfile.write("        };\n")
+    outfile.write("\n")
+    outfile.write("        var options5 = {\n")
+    outfile.write("          title: \"References with Citation Data in Database (since 1900; all pre-1900 "
+                  "literature is complete)\", \n")
+    outfile.write("          legend: { position: 'bottom' },\n")
+    outfile.write("          isStacked: true,\n")
+    outfile.write("          bar: { groupWidth: '80%' }\n")
+    outfile.write("        };\n")
+    outfile.write("\n")
 
-        outfile.write("        var options6 = {\n")
-        outfile.write("          title: \"Primary Language of References\", \n")
-        outfile.write("          titleTextStle: { fontSize: '16' },\n")
-        # outfile.write("          isStacked: true,\n")
-        # outfile.write("          bar: { groupWidth: '80%' }\n")
-        outfile.write("        };\n")
-        outfile.write("\n")
+    outfile.write("        var options6 = {\n")
+    outfile.write("          title: \"Primary Language of References\", \n")
+    outfile.write("          titleTextStle: { fontSize: '16' },\n")
+    # outfile.write("          isStacked: true,\n")
+    # outfile.write("          bar: { groupWidth: '80%' }\n")
+    outfile.write("        };\n")
+    outfile.write("\n")
 
-        outfile.write("        var chart = new google.visualization.LineChart"
-                      "(document.getElementById('chart_div'));\n")
-        outfile.write("        chart.draw(data1, options1);\n")
-        outfile.write("        var chart2 = new google.visualization.ColumnChart"
-                      "(document.getElementById('chart2_div'));\n")
-        outfile.write("        chart2.draw(data2, options2);\n")
-        # outfile.write("        var chart3 = new google.visualization.ColumnChart
-        #               "(document.getElementById('chart3_div'));\n")
-        # outfile.write("        chart3.draw(data3, options3);\n")
-        outfile.write("        var chart4 = new google.visualization.ColumnChart"
-                      "(document.getElementById('chart4_div'));\n")
-        outfile.write("        chart4.draw(data4, options4);\n")
-        outfile.write("        var chart5 = new google.visualization.ColumnChart"
-                      "(document.getElementById('chart5_div'));\n")
-        outfile.write("        chart5.draw(data5, options5);\n")
-        outfile.write("        var chart6 = new google.visualization.PieChart"
-                      "(document.getElementById('chart6_div'));\n")
-        outfile.write("        chart6.draw(data6, options6);\n")
-        outfile.write("      }\n")
-        outfile.write("    </script>\n")
+    outfile.write("        var chart = new google.visualization.LineChart"
+                  "(document.getElementById('chart_div'));\n")
+    outfile.write("        chart.draw(data1, options1);\n")
+    outfile.write("        var chart2 = new google.visualization.ColumnChart"
+                  "(document.getElementById('chart2_div'));\n")
+    outfile.write("        chart2.draw(data2, options2);\n")
+    # outfile.write("        var chart3 = new google.visualization.ColumnChart
+    #               "(document.getElementById('chart3_div'));\n")
+    # outfile.write("        chart3.draw(data3, options3);\n")
+    outfile.write("        var chart4 = new google.visualization.ColumnChart"
+                  "(document.getElementById('chart4_div'));\n")
+    outfile.write("        chart4.draw(data4, options4);\n")
+    outfile.write("        var chart5 = new google.visualization.ColumnChart"
+                  "(document.getElementById('chart5_div'));\n")
+    outfile.write("        chart5.draw(data5, options5);\n")
+    outfile.write("        var chart6 = new google.visualization.PieChart"
+                  "(document.getElementById('chart6_div'));\n")
+    outfile.write("        chart6.draw(data6, options6);\n")
+    outfile.write("      }\n")
+    outfile.write("    </script>\n")
+    if not do_print:
         common_header_part2(outfile, "", False)
 
-        outfile.write("    <header>\n")
-        outfile.write("      <h1>Summary of References</h1>\n")
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + REF_URL +
-                      "\"><span class=\"fa fa-list\"></span> Full Reference List</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-        outfile.write("    </header>\n")
-        outfile.write("\n")
-        outfile.write("    <p>\n")
-        outfile.write("      A summary of the references  in the database (last updated {}).\n".
-                      format(datetime.date.isoformat(datetime.date.today())))
-        outfile.write("      " + str(cite_count) + " of " + str(nrefs) +
-                      " references  have had citation data recorded.\n")
-        outfile.write("      See also the <a href=\"names/" + NAME_SUM_URL + "\">name summary page</a> for information "
-                      "on reference patterns to specific species.\n")
-        outfile.write("    </p>\n")
-        outfile.write("    <div id=\"chart6_div\"></div>\n")
-        outfile.write("    <div id=\"chart2_div\"></div>\n")
-        outfile.write("    <div id=\"chart4_div\"></div>\n")
-        # outfile.write("    <div id=\"chart3_div\"></div>\n")
-        outfile.write("    <div id=\"chart5_div\"></div>\n")
-        outfile.write("    <div id=\"chart_div\"></div>\n")
+    outfile.write("    <header id=\"" + REF_SUM_URL + "\">\n")
+    outfile.write("      <h1>Summary of References</h1>\n")
+    outfile.write("      <nav>\n")
+    outfile.write("        <ul>\n")
+    outfile.write("          <li><a href=\"" + REF_URL +
+                  "\"><span class=\"fa fa-list\"></span> Full Reference List</a></li>\n")
+    outfile.write("        </ul>\n")
+    outfile.write("      </nav>\n")
+    outfile.write("    </header>\n")
+    outfile.write("\n")
+    outfile.write("    <p>\n")
+    outfile.write("      A summary of the references  in the database (last updated {}).\n".
+                  format(datetime.date.isoformat(datetime.date.today())))
+    outfile.write("      " + str(cite_count) + " of " + str(nrefs) +
+                  " references  have had citation data recorded.\n")
+    outfile.write("      See also the <a href=\"names/" + NAME_SUM_URL + "\">name summary page</a> for information "
+                  "on reference patterns to specific species.\n")
+    outfile.write("    </p>\n")
+    outfile.write("    <div id=\"chart6_div\"></div>\n")
+    outfile.write("    <div id=\"chart2_div\"></div>\n")
+    outfile.write("    <div id=\"chart4_div\"></div>\n")
+    # outfile.write("    <div id=\"chart3_div\"></div>\n")
+    outfile.write("    <div id=\"chart5_div\"></div>\n")
+    outfile.write("    <div id=\"chart_div\"></div>\n")
+    if not do_print:
         common_html_footer(outfile, "")
 
 
 def write_reference_bibliography(reflist, do_print, outfile, logfile):
     if not do_print:
         common_html_header(outfile, "Fiddler Crab Publications", "")
-    outfile.write("    <header>\n")
+    outfile.write("    <header id=\"" + REF_URL + "\">\n")
     outfile.write("      <h1>Publications</h1>\n")
     outfile.write("      <nav>\n")
     outfile.write("        <ul>\n")
@@ -828,12 +820,13 @@ def update_cite_list(citelist):
                     cite.name_note = "in part; " + cite.name_note
 
 
-def create_species_link(species, status, path):
+def create_species_link(species, status, path, do_print):
     if status == "fossil":
         sc = FOSSIL_IMAGE
     else:
         sc = ""
-    return "<a href=\"" + path + "u_" + species + ".html\"><em class=\"species\">Uca " + species + "</em></a>" + sc
+    return ("<a href=\"" + rel_link_prefix(do_print, path) + "u_" + species + ".html\"><em class=\"species\">Uca " +
+            species + "</em></a>" + sc)
 
 
 def format_name_string(x):
@@ -915,7 +908,7 @@ def clean_specific_name(x):
             return x.lower()
 
 
-def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, refdict, name_table, logfile):
+def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, refdict, name_table, logfile, do_print):
     first_name = True
     ncols = 5
     if notecnt > 0:
@@ -941,11 +934,11 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
                 outfile.write("      <td>&nbsp;</td>\n")
             elif is_name:  # output citation
                 crossref = refdict[nref]
-                outfile.write("      <td><a href=\"../references/" + crossref.cite_key + ".html\">" +
-                              crossref.citation + "</a></td>\n")
+                outfile.write("      <td><a href=\"" + rel_link_prefix(do_print, "../references/") +
+                              crossref.cite_key + ".html\">" + crossref.citation + "</a></td>\n")
             else:  # output species name
-                outfile.write("      <td><a href=\"../names/" + name_to_filename(nref) + ".html\">" +
-                              format_name_string(nref) + "</a></td>\n")
+                outfile.write("      <td><a href=\"" + rel_link_prefix(do_print, "../names/") +
+                              name_to_filename(nref) + ".html\">" + format_name_string(nref) + "</a></td>\n")
 
             # common names
             if comcnt > 0:
@@ -971,7 +964,7 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
                     nstr = n.cite_n
                     if nstr == "0":
                         outfile.write("      <td><span class=\"fa fa-pencil-square-o\"></span> citation: "
-                                      "<a href=\"../references/" + crossref.cite_key +
+                                      "<a href=\"" + rel_link_prefix(do_print, "../references/") + crossref.cite_key +
                                       ".html\">" + crossref.citation + "</a></td>\n")
                     else:
                         if "." in nstr:
@@ -990,12 +983,12 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
                             # print(nstr, n.cite_key, n.application)
                             refname = name_table[n.application][int(nstr)]
                         outfile.write("      <td><span class=\"fa fa-pencil-square-o\"></span> citation: "
-                                      "<a href=\"../references/" + crossref.cite_key +
+                                      "<a href=\"" + rel_link_prefix(do_print, "../references/") + crossref.cite_key +
                                       ".html\">" + crossref.citation + "</a> → " + format_name_string(refname) +
                                       extraref + "</td>\n")
                 else:
                     outfile.write("      <td><span class=\"fa fa-pencil-square-o\"></span> citation: "
-                                  "<a href=\"../references/" + crossref.cite_key +
+                                  "<a href=\"" + rel_link_prefix(do_print, "../references/") + crossref.cite_key +
                                   ".html\">" + crossref.citation + "</a></td>\n")
             else:
                 outfile.write("      <td><span class=\"fa fa-pencil-square-o\"></span> citation: " + n.application +
@@ -1026,7 +1019,7 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
             outfile.write("      <td><em class=\"species\">" + n.actual[1:] +
                           "</em></td>\n")
         else:
-            outfile.write("      <td><a href=\"../u_" + n.actual +
+            outfile.write("      <td><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + n.actual +
                           ".html\"><em class=\"species\">Uca " + n.actual +
                           "</em></a></td>\n")
 
@@ -1043,9 +1036,8 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
             outfile.write("      <td><span class=\"fa fa-gears\"></span> Computed</td>\n")
         elif n.source in refdict:  # another reference
             crossref = refdict[n.source]
-            outfile.write("      <td><a href=\"../references/" +
-                          crossref.cite_key + ".html\">" +
-                          crossref.citation + "</a></td>\n")
+            outfile.write("      <td><a href=\"" + rel_link_prefix(do_print, "../references/") +
+                          crossref.cite_key + ".html\">" + crossref.citation + "</a></td>\n")
         else:  # should start with a >
             tmpsource = n.source[1:]
             tmpsource = tmpsource.replace("MSR:", "")
@@ -1124,7 +1116,7 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
         outfile.write("      </tr>\n")
         names.sort()
         output_name_table(False, outfile, names, uniquenames, notecnt, comcnt, refdict, name_table,
-                          logfile)
+                          logfile, do_print)
     else:
         outfile.write("    Data not yet available.\n")
 
@@ -1175,8 +1167,9 @@ def clean_name(x):
     return x
 
 
+"""
 def create_binomial_name_page(name, namefile, refdict, citelist, name_table, species_name, logfile):
-    """ create a page listing all citations using a specific binomial """
+    # create a page listing all citations using a specific binomial
     with codecs.open(WEBOUT_PATH + "names/" + namefile + ".html", "w", "utf-8") as outfile:
         common_html_header(outfile, name, "../")
         outfile.write("    <header>\n")
@@ -1229,9 +1222,47 @@ def create_binomial_name_page(name, namefile, refdict, citelist, name_table, spe
         outfile.write("    <p>\n")
         outfile.write("    </p>\n")
         common_html_footer(outfile, "../")
+"""
 
 
-def test_create_binomial_name_page(name, namefile, refdict, citelist, name_table, species_name, logfile):
+def calculate_binomial_yearly_cnts(name, refdict, citelist):
+    miny = START_YEAR
+    maxy = CURRENT_YEAR
+    # find citations for this name
+    cites = []
+    for c in citelist:
+        clean = clean_name(c.name)
+        if clean.lower() == name.lower():
+            cites.append(c)
+    # comcnt = 0
+    # notecnt = 0
+    uniquecites = set()
+    for c in cites:
+        # if c.common != ".":
+        #     comcnt += 1
+        # if c.name_note != ".":
+        #     notecnt += 1
+        uniquecites |= {c.cite_key}
+    name_by_year = {y: 0 for y in range(miny, maxy+1)}
+    for c in uniquecites:
+        y = refdict[c].citation
+        y = y[y.find("(") + 1:y.find(")")]
+        if (y != "?") and (y.lower() != "in press"):
+            if y[0] == "~":
+                y = y[1:]
+            if len(y) > 4:
+                y = y[:4]
+            y = int(y)
+            if miny <= y <= maxy:
+                name_by_year[y] += 1
+    # byears = {y: 0 for y in range(miny, maxy+1)}
+    # for y in name_by_year:
+    #     byears[y] = name_by_year[y]
+    return name_by_year
+
+
+def write_binomial_name_page(name, name_by_year, refdict, citelist, name_table, species_name, logfile, outfile,
+                             do_print):
     """ create a page listing all citations using a specific binomial """
     # find citations for this name
     cites = []
@@ -1248,20 +1279,21 @@ def test_create_binomial_name_page(name, namefile, refdict, citelist, name_table
         if c.name_note != ".":
             notecnt += 1
         uniquecites |= {c.cite_key}
-    name_by_year = {y: 0 for y in range(START_YEAR, 2018)}
-    for c in uniquecites:
-        y = refdict[c].citation
-        y = y[y.find("(") + 1:y.find(")")]
-        if (y != "?") and (y.lower() != "in press"):
-            if y[0] == "~":
-                y = y[1:]
-            if len(y) > 4:
-                y = y[:4]
-            y = int(y)
-            if START_YEAR <= y <= CURRENT_YEAR:
-                name_by_year[y] += 1
+    # name_by_year = {y: 0 for y in range(START_YEAR, 2018)}
+    # for c in uniquecites:
+    #     y = refdict[c].citation
+    #     y = y[y.find("(") + 1:y.find(")")]
+    #     if (y != "?") and (y.lower() != "in press"):
+    #         if y[0] == "~":
+    #             y = y[1:]
+    #         if len(y) > 4:
+    #             y = y[:4]
+    #         y = int(y)
+    #         if START_YEAR <= y <= CURRENT_YEAR:
+    #             name_by_year[y] += 1
 
-    with codecs.open(WEBOUT_PATH + "names/test_" + namefile + ".html", "w", "utf-8") as outfile:
+    # with codecs.open(WEBOUT_PATH + "names/test_" + namefile + ".html", "w", "utf-8") as outfile:
+    if not do_print:
         common_header_part1(outfile, name, "../")
         outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
         outfile.write("    <script type=\"text/javascript\">\n")
@@ -1270,56 +1302,58 @@ def test_create_binomial_name_page(name, namefile, refdict, citelist, name_table
         outfile.write("      function drawChart() {\n")
         miny = START_YEAR
         maxy = CURRENT_YEAR
-        byears = {y: 0 for y in range(miny, maxy+1)}
-        for y in name_by_year:
-            byears[y] = name_by_year[y]
-        maxcnt = max(byears.values())
-        setup_chronology_chart("Number of Uses of Name per Year", 0, miny, maxy, maxcnt, byears, False, outfile)
+        # byears = {y: 0 for y in range(miny, maxy+1)}
+        # for y in name_by_year:
+        #     byears[y] = name_by_year[y]
+        maxcnt = max(name_by_year.values())
+        setup_chronology_chart("Number of Uses of Name per Year", 0, miny, maxy, maxcnt, name_by_year, False, outfile)
         outfile.write("      }\n")
         outfile.write("    </script>\n")
         common_header_part2(outfile, "", False)
 
-        outfile.write("    <header>\n")
-        outfile.write("      <h1>" + format_name_string(name) + "</h1>\n")
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        if species_name != "":
-            outfile.write("          <li><a href=\"sn_" + species_name +
-                          ".html\"><span class=\"fa fa-window-minimize\"></span> " + format_name_string(species_name) +
-                          "</a></li>\n")
-        outfile.write("          <li><a href=\"index.html\"><span class=\"fa fa-list\"></span> "
-                      "Full Name Index</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-        outfile.write("    </header>\n")
-        outfile.write("\n")
+    outfile.write("    <header id=\"" + name + ".html\">\n")
+    outfile.write("      <h1>" + format_name_string(name) + "</h1>\n")
+    outfile.write("      <nav>\n")
+    outfile.write("        <ul>\n")
+    if species_name != "":
+        outfile.write("          <li><a href=\"sn_" + species_name +
+                      ".html\"><span class=\"fa fa-window-minimize\"></span> " + format_name_string(species_name) +
+                      "</a></li>\n")
+    outfile.write("          <li><a href=\"index.html\"><span class=\"fa fa-list\"></span> "
+                  "Full Name Index</a></li>\n")
+    outfile.write("        </ul>\n")
+    outfile.write("      </nav>\n")
+    outfile.write("    </header>\n")
+    outfile.write("\n")
 
+    if not do_print:
         write_chronology_chart_div(0, outfile)
         outfile.write("\n")
 
-        # write name table
-        outfile.write("    <h3>Publications Using this Name</h3>\n")
-        outfile.write("    <table class=\"citetable\">\n")
-        outfile.write("      <tr>\n")
-        outfile.write("        <th>Citation</th>\n")
-        if comcnt > 0:
-            outfile.write("        <th>Common Name(s)</th>\n")
-        outfile.write("        <th>Where</th>\n")
-        outfile.write("        <th>Applied to...</th>\n")
-        outfile.write("        <th>Accepted Name</th>\n")
-        outfile.write("        <th>Source of Accepted</th>\n")
-        if notecnt > 0:
-            outfile.write("        <th>Note(s)</th>\n")
-        outfile.write("      </tr>\n")
-        output_name_table(True, outfile, cites, uniquecites, notecnt, comcnt, refdict, name_table, logfile)
-        outfile.write("    <p>\n")
-        outfile.write("    </p>\n")
+    # write name table
+    outfile.write("    <h3>Publications Using this Name</h3>\n")
+    outfile.write("    <table class=\"citetable\">\n")
+    outfile.write("      <tr>\n")
+    outfile.write("        <th>Citation</th>\n")
+    if comcnt > 0:
+        outfile.write("        <th>Common Name(s)</th>\n")
+    outfile.write("        <th>Where</th>\n")
+    outfile.write("        <th>Applied to...</th>\n")
+    outfile.write("        <th>Accepted Name</th>\n")
+    outfile.write("        <th>Source of Accepted</th>\n")
+    if notecnt > 0:
+        outfile.write("        <th>Note(s)</th>\n")
+    outfile.write("      </tr>\n")
+    output_name_table(True, outfile, cites, uniquecites, notecnt, comcnt, refdict, name_table, logfile, do_print)
+    outfile.write("    <p>\n")
+    outfile.write("    </p>\n")
+    if not do_print:
         common_html_footer(outfile, "../")
-        return byears
 
 
+"""
 def create_specific_name_page(name, binomial_names, refdict, logfile):
-    """ create a page with the history of a specific name """
+    # create a page with the history of a specific name
     with codecs.open(WEBOUT_PATH + "names/sn_" + name.name + ".html", "w", "utf-8") as outfile:
         common_html_header(outfile, name.name, "../")
         outfile.write("    <header>\n")
@@ -1392,11 +1426,27 @@ def create_specific_name_page(name, binomial_names, refdict, logfile):
         outfile.write("    </section>\n")
 
         common_html_footer(outfile, "../")
+"""
 
 
-def test_create_specific_name_page(specific_name, binomial_names, refdict, binomial_cnts, logfile):
+def calculate_specific_name_yearly_cnts(specific_name, binomial_names, binomial_cnts):
+    miny = START_YEAR
+    maxy = CURRENT_YEAR
+    year_cnts = {y: 0 for y in range(miny, maxy+1)}
+    for n in binomial_names:
+        sp_name = clean_specific_name(n)
+        tmpnamelist = specific_name.variations.split(";")
+        if (sp_name != "") and (sp_name in tmpnamelist):
+            cnts = binomial_cnts[clean_name(n)]
+            for y in cnts:
+                if miny <= y <= maxy:
+                    year_cnts[y] += cnts[y]
+    return year_cnts
+
+
+def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cnts, logfile, outfile, do_print):
     """ create a page with the history of a specific name """
-    with codecs.open(WEBOUT_PATH + "names/test_sn_" + specific_name.name + ".html", "w", "utf-8") as outfile:
+    if not do_print:
         common_header_part1(outfile, specific_name.name, "../")
         outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
         outfile.write("    <script type=\"text/javascript\">\n")
@@ -1420,82 +1470,80 @@ def test_create_specific_name_page(specific_name, binomial_names, refdict, binom
         outfile.write("    </script>\n")
         common_header_part2(outfile, "", False)
 
-        outfile.write("    <header>\n")
-        outfile.write("      <h1>" + format_name_string(specific_name.name) + "</h1>\n")
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"index.html\"><span class=\"fa fa-list\"></span> "
-                      "Full Name Index</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-        outfile.write("    </header>\n")
-        outfile.write("\n")
-        outfile.write("    <section class=\"topspsection\">\n")
-        outfile.write("      <h3>History</h3>\n")
-        outfile.write("      <dl>\n")
-        if specific_name.synonym != ".":
-            if specific_name.synonym in specific_name.variations:
-                outfile.write("        <dt>Species</dt>\n")
-            else:
-                outfile.write("        <dt>Primary Senior Synonym</dt>\n")
-            if specific_name.synonym == "?":
-                outfile.write("          <dd>Unknown</dd>\n")
-            elif specific_name.synonym.startswith(">"):
-                outfile.write("          <dd><em class=\"species\">" +
-                              specific_name.synonym[1:] + "</em></dd>\n")
-            else:
-                outfile.write("          <dd>" +
-                              create_species_link(specific_name.synonym, "", "../") +
-                              "</dd>\n")
-        outfile.write("        <dt>Original Usage</dt>\n")
-        outfile.write("          <dd>" + format_name_string(specific_name.original_binomial) + "</dd>\n")
-        outfile.write("        <dt>Original Source with Priority</dt>\n")
-        refname = ""
-        if specific_name.priority_source != ".":
-            try:
-                ref = refdict[specific_name.priority_source]
-                refname = ref.formatted_html
-            except LookupError:
-                # print(name.priority_source)
-                report_error(logfile, specific_name.priority_source)
+    outfile.write("    <header id=\"sn_" + specific_name.name + ".html\">\n")
+    outfile.write("      <h1>" + format_name_string(specific_name.name) + "</h1>\n")
+    outfile.write("      <nav>\n")
+    outfile.write("        <ul>\n")
+    outfile.write("          <li><a href=\"index.html\"><span class=\"fa fa-list\"></span> "
+                  "Full Name Index</a></li>\n")
+    outfile.write("        </ul>\n")
+    outfile.write("      </nav>\n")
+    outfile.write("    </header>\n")
+    outfile.write("\n")
+    outfile.write("    <section class=\"topspsection\">\n")
+    outfile.write("      <h3>History</h3>\n")
+    outfile.write("      <dl>\n")
+    if specific_name.synonym != ".":
+        if specific_name.synonym in specific_name.variations:
+            outfile.write("        <dt>Species</dt>\n")
         else:
-            refname = "unknown"
-        outfile.write("          <dd>" + refname + "</dd>\n")
-        outfile.write("        <dt>Derivation</dt>\n")
-        if specific_name.meaning == ".":
-            outfile.write("          <dd>unknown</dd>\n")
+            outfile.write("        <dt>Primary Senior Synonym</dt>\n")
+        if specific_name.synonym == "?":
+            outfile.write("          <dd>Unknown</dd>\n")
+        elif specific_name.synonym.startswith(">"):
+            outfile.write("          <dd><em class=\"species\">" +
+                          specific_name.synonym[1:] + "</em></dd>\n")
         else:
-            outfile.write("          <dd>" + specific_name.meaning + "</dd>\n")
-        outfile.write("      </dl>\n")
-        outfile.write("    </section>\n")
-        outfile.write("\n")
+            outfile.write("          <dd>" + create_species_link(specific_name.synonym, "", "../", do_print) +
+                          "</dd>\n")
+    outfile.write("        <dt>Original Usage</dt>\n")
+    outfile.write("          <dd>" + format_name_string(specific_name.original_binomial) + "</dd>\n")
+    outfile.write("        <dt>Original Source with Priority</dt>\n")
+    refname = ""
+    if specific_name.priority_source != ".":
+        try:
+            ref = refdict[specific_name.priority_source]
+            refname = ref.formatted_html
+        except LookupError:
+            # print(name.priority_source)
+            report_error(logfile, specific_name.priority_source)
+    else:
+        refname = "unknown"
+    outfile.write("          <dd>" + refname + "</dd>\n")
+    outfile.write("        <dt>Derivation</dt>\n")
+    if specific_name.meaning == ".":
+        outfile.write("          <dd>unknown</dd>\n")
+    else:
+        outfile.write("          <dd>" + specific_name.meaning + "</dd>\n")
+    outfile.write("      </dl>\n")
+    outfile.write("    </section>\n")
+    outfile.write("\n")
 
+    if not do_print:
         write_chronology_chart_div(0, outfile)
         outfile.write("\n")
 
-        if specific_name.notes != ".":
-            outfile.write("    <section class=\"spsection\">\n")
-            outfile.write("      <h3>Notes/Comments</h3>\n")
-            outfile.write("      <p>\n")
-            outfile.write("        " + specific_name.notes + "\n")
-            outfile.write("      </p>\n")
-            outfile.write("    </section>\n")
+    if specific_name.notes != ".":
         outfile.write("    <section class=\"spsection\">\n")
-        outfile.write("      <h3>Binomials Using this Specific Name</h3>\n")
-        outfile.write("      <ul>\n")
-        for n in binomial_names:
-            x = clean_specific_name(n)
-            tmpnamelist = specific_name.variations.split(";")
-            if (x != "") and (x in tmpnamelist):
-                namefile = name_to_filename(n)
-                outfile.write("      <li><a href=\"" + namefile + ".html\">" +
-                              format_name_string(n) + "</a></li>\n")
-        outfile.write("      </ul>\n")
+        outfile.write("      <h3>Notes/Comments</h3>\n")
+        outfile.write("      <p>\n")
+        outfile.write("        " + specific_name.notes + "\n")
+        outfile.write("      </p>\n")
         outfile.write("    </section>\n")
+    outfile.write("    <section class=\"spsection\">\n")
+    outfile.write("      <h3>Binomials Using this Specific Name</h3>\n")
+    outfile.write("      <ul>\n")
+    for n in binomial_names:
+        x = clean_specific_name(n)
+        tmpnamelist = specific_name.variations.split(";")
+        if (x != "") and (x in tmpnamelist):
+            namefile = name_to_filename(n)
+            outfile.write("      <li><a href=\"" + namefile + ".html\">" + format_name_string(n) + "</a></li>\n")
+    outfile.write("      </ul>\n")
+    outfile.write("    </section>\n")
 
+    if not do_print:
         common_html_footer(outfile, "../")
-
-        return byears
 
 
 def setup_chronology_chart(title, n, miny, maxy, maxcnt, yearly_data, is_species, outfile):
@@ -1874,8 +1922,8 @@ def clean_genus(genus):
         return genus
 
 
-def index_name_pages(refdict, citelist, specific_names, species_refs, logfile):
-    """ create an index of binomials and specific names """
+def calculate_name_index_data(refdict, citelist, specific_names):
+    """ calculate all the data associated with binomials ans specific names """
     name_table = create_name_table(citelist)
     unique_names = list()
     nameset = set()
@@ -1927,82 +1975,228 @@ def index_name_pages(refdict, citelist, specific_names, species_refs, logfile):
                             genus_cnts[genus] = {y: 0 for y in range(START_YEAR, CURRENT_YEAR + 1)}
                         gcnts = genus_cnts[genus]
                         gcnts[y] += 1
-    create_genus_chronology(genus_cnts)
+    # create_genus_chronology(genus_cnts)
 
     # create name index
-    with codecs.open(WEBOUT_PATH + "names/index.html", "w", "utf-8") as outfile:
+    # with codecs.open(WEBOUT_PATH + "names/index.html", "w", "utf-8") as outfile:
+    #     common_html_header(outfile, "Name Index", "../")
+    #     outfile.write("    <header>\n")
+    #     outfile.write("      <h1>Name Index</h1>\n")
+    #     outfile.write("      <nav>\n")
+    #     outfile.write("        <ul>\n")
+    #     outfile.write("          <li><a href=\"" + NAME_SUM_URL +
+    #                   "\"><span class=\"fa fa-line-chart\"></span> Name Summary</a></li>\n")
+    #     outfile.write("          <li><a href=\"../" + SPECIES_URL +
+    #                   "\"><span class=\"fa fa-check-circle\"></span> Accepted Species</a></li>\n")
+    #     outfile.write("        </ul>\n")
+    #     outfile.write("      </nav>\n")
+    #     outfile.write("    </header>\n")
+    #     outfile.write("    <p>\n")
+    #     outfile.write("      This is an index of every scientific name (including all alternate spellings) which have"
+    #                   " been applied to fiddler crabs or placed in the fiddler crab genus.\n")
+    #     outfile.write("    </p>\n")
+    #     outfile.write("    <p>\n")
+    #     outfile.write("      For the binomials, every publication which used that name is provided, as well as the "
+    #                   "best estimate as to which species, as we understand them today, the author was actually "
+    #                   "referring.\n")
+    #     outfile.write("    </p>\n")
+    #     outfile.write("    <p>\n")
+    #     outfile.write("      For the specific names, only the primary spelling is listed below, but all alternate "
+    #                   "spellings and inclusive binomials are included on the linked page, as well as general "
+    #                   "information on the status of each specific name.\n")
+    #     outfile.write("    </p>\n")
+    #     outfile.write("    <div class=\"namecol\">\n")
+    #     outfile.write("      <h3>Binomials (and other Compound Names)</h3>\n")
+    #     outfile.write("      <ul>\n")
+    #     outfile.write("\n")
+    #     binomial_usage_cnts_by_year = {}
+    #     for name in unique_names:
+    #         sname = match_specific_name(name, specific_names)
+    #         namefile = name_to_filename(name)
+    #         outfile.write("        <li><a href=\"" + namefile + ".html\">" + format_name_string(name) + "</a></li>\n")
+    #         create_binomial_name_page(name, namefile, refdict, citelist, name_table, sname, logfile)
+    #         binomial_usage_cnts_by_year[name] = test_create_binomial_name_page(name, namefile, refdict, citelist,
+    #                                                                            name_table, sname, logfile)
+    binomial_usage_cnts_by_year = {}
+    for name in unique_names:
+        # sname = match_specific_name(name, specific_names)
+        # namefile = name_to_filename(name)
+        # binomial_usage_cnts_by_year[name] = create_binomial_name_page(name, namefile, refdict, citelist,
+        #                                                               name_table, sname, logfile)
+        binomial_usage_cnts_by_year[name] = calculate_binomial_yearly_cnts(name, refdict, citelist)
+
+        # outfile.write("      </ul>\n")
+        # outfile.write("    </div>\n")
+        # outfile.write("    <div class=\"namecol\">\n")
+        # outfile.write("      <h3>Specific Names</h3>\n")
+        # outfile.write("      <ul>\n")
+        # outfile.write("\n")
+        # specific_year_cnts = {}
+        # specific_usage_cnts_by_year = {}
+        # for name in specific_names:
+        #     outfile.write("        <li><a href=\"sn_" + name.name + ".html\">" +
+        #                   format_name_string(name.name) + "</a></li>\n")
+        #     create_specific_name_page(name, unique_names, refdict, logfile)
+        #     specific_usage_cnts_by_year[name.name] = test_create_specific_name_page(name, unique_names, refdict,
+        #                                                                             binomial_usage_cnts_by_year,
+        #                                                                             logfile)
+        #     tmpkey = name.priority_source
+        #     if tmpkey != ".":
+        #         y = refdict[tmpkey].citation
+        #         y = y[y.find("(")+1:y.find(")")]
+        #         if (y != "?") and (y.lower() != "in press"):
+        #             if y[0] == "~":
+        #                 y = y[1:]
+        #             if len(y) > 4:
+        #                 y = y[:4]
+        #             y = int(y)
+        #             if y in specific_year_cnts:
+        #                 specific_year_cnts[y] += 1
+        #             else:
+        #                 specific_year_cnts[y] = 1
+
+    specific_year_cnts = {}
+    specific_usage_cnts_by_year = {}
+    for name in specific_names:
+        # outfile.write("        <li><a href=\"sn_" + name.name + ".html\">" +
+        #               format_name_string(name.name) + "</a></li>\n")
+        # specific_usage_cnts_by_year[name.name] = create_specific_name_page(name, unique_names, refdict,
+        #                                                                    binomial_usage_cnts_by_year, logfile)
+        specific_usage_cnts_by_year[name.name] = calculate_specific_name_yearly_cnts(name, unique_names,
+                                                                                     binomial_usage_cnts_by_year)
+        tmpkey = name.priority_source
+        if tmpkey != ".":
+            y = refdict[tmpkey].citation
+            y = y[y.find("(") + 1:y.find(")")]
+            if (y != "?") and (y.lower() != "in press"):
+                if y[0] == "~":
+                    y = y[1:]
+                if len(y) > 4:
+                    y = y[:4]
+                y = int(y)
+                if y in specific_year_cnts:
+                    specific_year_cnts[y] += 1
+                else:
+                    specific_year_cnts[y] = 1
+
+        # outfile.write("      </ul>\n")
+        # outfile.write("    </div>\n")
+        # common_html_footer(outfile, "../")
+    # create_name_summary(total_binomial_year_cnts, specific_year_cnts, species_refs)
+    return (unique_names, binomial_usage_cnts_by_year, specific_usage_cnts_by_year, genus_cnts,
+            total_binomial_year_cnts, name_table)
+
+
+def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_table, species_refs, genus_cnts,
+                         binomial_usage_cnts_by_year, total_binomial_year_cnts, outfile, do_print, logfile):
+    """ create an index of binomials and specific names """
+    if not do_print:
+        create_genus_chronology(genus_cnts)
+
+    # create name index
+    if not do_print:
         common_html_header(outfile, "Name Index", "../")
-        outfile.write("    <header>\n")
-        outfile.write("      <h1>Name Index</h1>\n")
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + NAME_SUM_URL +
-                      "\"><span class=\"fa fa-line-chart\"></span> Name Summary</a></li>\n")
-        outfile.write("          <li><a href=\"../" + SPECIES_URL +
-                      "\"><span class=\"fa fa-check-circle\"></span> Accepted Species</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-        outfile.write("    </header>\n")
-        outfile.write("    <p>\n")
-        outfile.write("      This is an index of every scientific name (including all alternate spellings) which have "
-                      "been applied to fiddler crabs or placed in the fiddler crab genus.\n")
-        outfile.write("    </p>\n")
-        outfile.write("    <p>\n")
-        outfile.write("      For the binomials, every publication which used that name is provided, as well as the "
-                      "best estimate as to which species, as we understand them today, the author was actually "
-                      "referring.\n")
-        outfile.write("    </p>\n")
-        outfile.write("    <p>\n")
-        outfile.write("      For the specific names, only the primary spelling is listed below, but all alternate "
-                      "spellings and inclusive binomials are included on the linked page, as well as general "
-                      "information on the status of each specific name.\n")
-        outfile.write("    </p>\n")
-        outfile.write("    <div class=\"namecol\">\n")
-        outfile.write("      <h3>Binomials (and other Compound Names)</h3>\n")
-        outfile.write("      <ul>\n")
-        outfile.write("\n")
-        binomial_usage_cnts_by_year = {}
-        for name in unique_names:
-            sname = match_specific_name(name, specific_names)
-            namefile = name_to_filename(name)
-            outfile.write("        <li><a href=\"" + namefile + ".html\">" + format_name_string(name) + "</a></li>\n")
-            create_binomial_name_page(name, namefile, refdict, citelist, name_table, sname, logfile)
-            binomial_usage_cnts_by_year[name] = test_create_binomial_name_page(name, namefile, refdict, citelist,
-                                                                               name_table, sname, logfile)
-        outfile.write("      </ul>\n")
-        outfile.write("    </div>\n")
-        outfile.write("    <div class=\"namecol\">\n")
-        outfile.write("      <h3>Specific Names</h3>\n")
-        outfile.write("      <ul>\n")
-        outfile.write("\n")
-        specific_year_cnts = {}
-        specific_usage_cnts_by_year = {}
-        for name in specific_names:
-            outfile.write("        <li><a href=\"sn_" + name.name + ".html\">" +
-                          format_name_string(name.name) + "</a></li>\n")
-            create_specific_name_page(name, unique_names, refdict, logfile)
-            specific_usage_cnts_by_year[name.name] = test_create_specific_name_page(name, unique_names, refdict,
-                                                                                    binomial_usage_cnts_by_year,
-                                                                                    logfile)
-            tmpkey = name.priority_source
-            if tmpkey != ".":
-                y = refdict[tmpkey].citation
-                y = y[y.find("(")+1:y.find(")")]
-                if (y != "?") and (y.lower() != "in press"):
-                    if y[0] == "~":
-                        y = y[1:]
-                    if len(y) > 4:
-                        y = y[:4]
-                    y = int(y)
-                    if y in specific_year_cnts:
-                        specific_year_cnts[y] += 1
-                    else:
-                        specific_year_cnts[y] = 1
-        outfile.write("      </ul>\n")
-        outfile.write("    </div>\n")
+    outfile.write("    <header id=\"name_index\">\n")
+    outfile.write("      <h1>Name Index</h1>\n")
+    outfile.write("      <nav>\n")
+    outfile.write("        <ul>\n")
+    outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") + NAME_SUM_URL +
+                  "\"><span class=\"fa fa-line-chart\"></span> Name Summary</a></li>\n")
+    outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + SPECIES_URL +
+                  "\"><span class=\"fa fa-check-circle\"></span> Accepted Species</a></li>\n")
+    outfile.write("        </ul>\n")
+    outfile.write("      </nav>\n")
+    outfile.write("    </header>\n")
+    outfile.write("    <p>\n")
+    outfile.write("      This is an index of every scientific name (including all alternate spellings) which have "
+                  "been applied to fiddler crabs or placed in the fiddler crab genus.\n")
+    outfile.write("    </p>\n")
+    outfile.write("    <p>\n")
+    outfile.write("      For the binomials, every publication which used that name is provided, as well as the "
+                  "best estimate as to which species, as we understand them today, the author was actually "
+                  "referring.\n")
+    outfile.write("    </p>\n")
+    outfile.write("    <p>\n")
+    outfile.write("      For the specific names, only the primary spelling is listed below, but all alternate "
+                  "spellings and inclusive binomials are included on the linked page, as well as general "
+                  "information on the status of each specific name.\n")
+    outfile.write("    </p>\n")
+    outfile.write("    <div class=\"namecol\">\n")
+    outfile.write("      <h3>Binomials (and other Compound Names)</h3>\n")
+    outfile.write("      <ul>\n")
+    outfile.write("\n")
+    for name in unique_names:
+        # sname = match_specific_name(name, specific_names)
+        namefile = name_to_filename(name)
+        outfile.write("        <li><a href=\"" + rel_link_prefix(do_print, "") + namefile + ".html\">" +
+                      format_name_string(name) + "</a></li>\n")
+        # if do_print:
+        #     write_binomial_name_page(name, binomial_usage_cnts_by_year[name], refdict, citelist, name_table, sname,
+        #                              logfile, outfile, True)
+        # else:
+        #     with codecs.open(WEBOUT_PATH + "names/" + namefile + ".html", "w", "utf-8") as suboutfile:
+        #         write_binomial_name_page(name, binomial_usage_cnts_by_year[name], refdict, citelist, name_table,
+        #                                  sname, logfile, suboutfile, False)
+
+    outfile.write("      </ul>\n")
+    outfile.write("    </div>\n")
+    outfile.write("    <div class=\"namecol\">\n")
+    outfile.write("      <h3>Specific Names</h3>\n")
+    outfile.write("      <ul>\n")
+    outfile.write("\n")
+    specific_year_cnts = {}
+    for name in specific_names:
+        outfile.write("        <li><a href=\"" + rel_link_prefix(do_print, "") + "sn_" + name.name + ".html\">" +
+                      format_name_string(name.name) + "</a></li>\n")
+        # if do_print:
+        #     write_specific_name_page(name, unique_names, refdict, binomial_usage_cnts_by_year, logfile, outfile,
+        #                              True)
+        # else:
+        #     with codecs.open(WEBOUT_PATH + "names/sn_" + name.name + ".html", "w", "utf-8") as suboutfile:
+        #         write_specific_name_page(name, unique_names, refdict, binomial_usage_cnts_by_year, logfile, suboutfile,
+        #                                  False)
+
+        tmpkey = name.priority_source
+        if tmpkey != ".":
+            y = refdict[tmpkey].citation
+            y = y[y.find("(")+1:y.find(")")]
+            if (y != "?") and (y.lower() != "in press"):
+                if y[0] == "~":
+                    y = y[1:]
+                if len(y) > 4:
+                    y = y[:4]
+                y = int(y)
+                if y in specific_year_cnts:
+                    specific_year_cnts[y] += 1
+                else:
+                    specific_year_cnts[y] = 1
+    outfile.write("      </ul>\n")
+    outfile.write("    </div>\n")
+    if not do_print:
         common_html_footer(outfile, "../")
-    create_name_summary(total_binomial_year_cnts, specific_year_cnts, species_refs)
-    return unique_names, binomial_usage_cnts_by_year, specific_usage_cnts_by_year
+
+    if not do_print:
+        create_name_summary(total_binomial_year_cnts, specific_year_cnts, species_refs)
+
+    # write out individual pages for each binomaila name and specific name
+    for name in unique_names:
+        sname = match_specific_name(name, specific_names)
+        namefile = name_to_filename(name)
+        if do_print:
+            write_binomial_name_page(name, binomial_usage_cnts_by_year[name], refdict, citelist, name_table, sname,
+                                     logfile, outfile, True)
+        else:
+            with codecs.open(WEBOUT_PATH + "names/" + namefile + ".html", "w", "utf-8") as suboutfile:
+                write_binomial_name_page(name, binomial_usage_cnts_by_year[name], refdict, citelist, name_table,
+                                         sname, logfile, suboutfile, False)
+    for name in specific_names:
+        if do_print:
+            write_specific_name_page(name, unique_names, refdict, binomial_usage_cnts_by_year, logfile, outfile,
+                                     True)
+        else:
+            with codecs.open(WEBOUT_PATH + "names/sn_" + name.name + ".html", "w", "utf-8") as suboutfile:
+                write_specific_name_page(name, unique_names, refdict, binomial_usage_cnts_by_year, logfile, suboutfile,
+                                         False)
 
 
 def specific_name_pages(citelist, specific_names, logfile):
@@ -2025,7 +2219,7 @@ def specific_name_pages(citelist, specific_names, logfile):
             report_error(logfile, "Missing specific name: " + n)
 
 
-def create_map_html(species):
+def create_map_html(species, do_print):
     """ output geographic ranges to HTML """
     regions = ("Eastern Atlantic",
                "Western Atlantic",
@@ -2057,51 +2251,50 @@ def create_map_html(species):
                 if s.region == r:
                     if s.status != "fossil":
                         outfile.write("        <li>" +
-                                      create_species_link(s.species, "", "") +
+                                      create_species_link(s.species, "", "", do_print) +
                                       "</li>\n")
             outfile.write("      </ul>\n")
             outfile.write("    </section>\n")
         common_html_footer(outfile, "")
 
 
-def create_common_names_html(filename):
+def write_common_names_pages(outfile, common_name_data, do_print):
     """ output common names to HTML """
-    with codecs.open(filename, "r", "utf-8") as infile:
-        lines = infile.readlines()
-    with codecs.open(WEBOUT_PATH + COMMON_URL, "w", "utf-8") as outfile:
+    if not do_print:
         common_html_header(outfile, "Common Names of Fiddler Crabs", "")
-        outfile.write("    <header>\n")
-        outfile.write("      <h1>Common Names of Fiddler Crabs</h1>\n")
-        outfile.write("    </header>\n")
-        outfile.write("\n")
-        outfile.write("    <p>\n")
-        outfile.write("      Following is a summery of common names for crabs in the genus "
-                      "<em class=\"species\">Uca</em>. See <a href=\"uca_species.html\">individual species</a> for "
-                      "more information on the common names of a particular species.\n")
-        outfile.write("    </p>\n")
-        outfile.write("    <dl class=\"common\">\n")
-        first_level = True
-        for line in lines[1:]:
-            line = line.strip()
-            if line != "":
-                text_level, text = line.split("\t")
-                if text_level == "T":
-                    if not first_level:
-                        outfile.write("        </dd>\n")
-                    else:
-                        first_level = False
-                    outfile.write("      <dt>" + text + "</dt>\n")
-                    outfile.write("        <dd>\n")
-                elif text_level == "P":
-                    outfile.write("          <p>\n")
-                    outfile.write("            " + text + "\n")
-                    outfile.write("          </p>\n")
-                elif text_level == "B":
-                    outfile.write("          <blockquote>\n")
-                    outfile.write("            " + text + "\n")
-                    outfile.write("          </blockquote>\n")
-        outfile.write("        </dd>\n")
-        outfile.write("    </dl>\n")
+    outfile.write("    <header id=\"" + COMMON_URL + "\">\n")
+    outfile.write("      <h1>Common Names of Fiddler Crabs</h1>\n")
+    outfile.write("    </header>\n")
+    outfile.write("\n")
+    outfile.write("    <p>\n")
+    outfile.write("      Following is a summary of common names for crabs in the genus "
+                  "<em class=\"species\">Uca</em>. See <a href=\"" + rel_link_prefix(do_print, "") + SPECIES_URL +
+                  "\">individual species</a> for more information on the common names of a particular species.\n")
+    outfile.write("    </p>\n")
+    outfile.write("    <dl class=\"common\">\n")
+    first_level = True
+    for line in common_name_data[1:]:
+        line = line.strip()
+        if line != "":
+            text_level, text = line.split("\t")
+            if text_level == "T":
+                if not first_level:
+                    outfile.write("        </dd>\n")
+                else:
+                    first_level = False
+                outfile.write("      <dt>" + text + "</dt>\n")
+                outfile.write("        <dd>\n")
+            elif text_level == "P":
+                outfile.write("          <p>\n")
+                outfile.write("            " + text + "\n")
+                outfile.write("          </p>\n")
+            elif text_level == "B":
+                outfile.write("          <blockquote>\n")
+                outfile.write("            " + text + "\n")
+                outfile.write("          </blockquote>\n")
+    outfile.write("        </dd>\n")
+    outfile.write("    </dl>\n")
+    if not do_print:
         common_html_footer(outfile, "")
 
 
@@ -2122,7 +2315,7 @@ def connect_refs_to_species(species, citelist):
     return species_refs
 
 
-def write_species_list(specieslist):
+def write_species_list(specieslist, do_print):
     """ output species index HTML """
     with codecs.open(WEBOUT_PATH + SPECIES_URL, "w", "utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Species", "")
@@ -2144,7 +2337,7 @@ def write_species_list(specieslist):
         outfile.write("\n")
         outfile.write("    <ul id=\"splist\">\n")
         for species in specieslist:
-            outfile.write("      <li>" + create_species_link(species.species, species.status, "") + "</li>\n")
+            outfile.write("      <li>" + create_species_link(species.species, species.status, "", do_print) + "</li>\n")
         outfile.write("    </ul>\n")
         common_html_footer(outfile, "")
 
@@ -2467,7 +2660,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
         common_html_footer(outfile, "")
 
 
-def create_photos_html(specieslist, photos):
+def create_photos_html(specieslist, photos, do_print):
     create_blank_index(WEBOUT_PATH + "photos/index.html")
     """ create the photos index page """
     with codecs.open(WEBOUT_PATH + PHOTO_URL, "w", "utf-8") as outfile:
@@ -2488,7 +2681,7 @@ def create_photos_html(specieslist, photos):
             species = sp.species
             status = sp.status
             outfile.write("    <section class=\"photosection\">\n")
-            outfile.write("      <h2>" + create_species_link(species, status, "") + "</h2>\n")
+            outfile.write("      <h2>" + create_species_link(species, status, "", do_print) + "</h2>\n")
             photo_n = 0
             for photo in photos:
                 splist = photo.species.split(";")
@@ -2726,16 +2919,16 @@ def create_art_html(artlist):
 
 
 def species_to_html(specieslist, references, specific_names, all_names, photos, videos, art, species_refs, refdict,
-                    binomial_name_cnts, specific_name_cnts, logfile):
+                    binomial_name_cnts, specific_name_cnts, logfile, do_print):
     """ output species list and individual species pages """
-    write_species_list(specieslist)
+    write_species_list(specieslist, do_print)
     for species in specieslist:
         sprefs = species_refs[species.species]
         write_species_page(species, references, specific_names, all_names, photos, videos, art, sprefs, refdict,
                            binomial_name_cnts, specific_name_cnts, logfile)
 
 
-def create_systematics_html(subgenlist, specieslist):
+def create_systematics_html(subgenlist, specieslist, do_print):
     """ create the systematics page """
     with codecs.open(WEBOUT_PATH + SYST_URL, "w", "utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Systematics", "")
@@ -2901,12 +3094,12 @@ def create_systematics_html(subgenlist, specieslist):
                           subgen.subgenus + "</em> " + subgen.author + "</a></h3>\n")
             outfile.write("      <dl>\n")
             outfile.write("        <dt>Type</dt>\n")
-            outfile.write("        <dd>" + create_species_link(subgen.type_species, "", "") + "</dd>\n")
+            outfile.write("        <dd>" + create_species_link(subgen.type_species, "", "", do_print) + "</dd>\n")
             outfile.write("        <dt>All Species</dt>\n")
             splist = []
             for s in specieslist:
                 if s.subgenus == subgen.subgenus:
-                    splist.append(create_species_link(s.species, s.status, ""))
+                    splist.append(create_species_link(s.species, s.status, "", do_print))
             outfile.write("        <dd>" + ", ".join(splist) + "</dd>\n")
             outfile.write("      </dl>\n")
             outfile.write("      <p>\n")
@@ -3137,148 +3330,170 @@ def summarize_languages(refs):
     return languages
 
 
-def create_life_cycle():
+def write_life_cycle_pages(outfile, do_print):
     """ create the life cycle page """
-    with codecs.open(WEBOUT_PATH + LIFECYCLE_URL, "w", "utf-8") as outfile:
+    if not do_print:
         common_html_header(outfile, "Fiddler Crab Life Cycle", "")
-        outfile.write("    <header>\n")
-        outfile.write("      <h1>Life Cycle</h1>\n")
-        outfile.write("    </header>\n")
-        outfile.write("\n")
-        outfile.write("    <p>\n")
-        outfile.write("      Following is a rough outline of the stages of the life of a fiddler crab. "
-                      "The photographs are from a mix of species.\n")
-        outfile.write("    </p>\n")
-        outfile.write("\n")
-        outfile.write("    <section class=\"spsection\">\n")
-        outfile.write("      <h2>Egg</h2>\n")
-        outfile.write("      <p>\n")
-        outfile.write("      Fertilized female fiddler crabs carry hundreds to thousands of eggs under their abdomen. "
-                      "These are sometimes known as &ldquo;sponge&rdquo; crabs.\n")
-        outfile.write("      </p>\n")
-        outfile.write("      <figure class=\"sppic\">\n")
-        outfile.write("        <a href=\"photos\\u_rapax10.html\"><picture><img src=\"photos/U_rapax10tn.jpg\" "
-                      "alt=\"Gravid female\" title=\"Gravid female\" /></picture></a>\n")
-        outfile.write("        <figcaption>Gravid female</figcaption>")
-        outfile.write("      </figure>\n")
-        outfile.write("      <figure class=\"sppic\">\n")
-        outfile.write("        <a href=\"photos\\u_rapax11.html\"><picture><img src=\"photos/U_rapax11tn.jpg\" "
-                      "alt=\"Gravid female\" title=\"Gravid female\" /></picture></a>\n")
-        outfile.write("        <figcaption>Close up of eggs</figcaption>")
-        outfile.write("      </figure>\n")
-        outfile.write("    </section>\n")
-        outfile.write("\n")
-        outfile.write("    <section class=\"spsection\">\n")
-        outfile.write("      <h2>Zoea</h2>\n")
-        outfile.write("      <p>\n")
-        outfile.write("        When the eggs are ready, the mother goes into the water and allows the eggs to hatch "
-                      "into microscopic free-swimming larvae. The early stage larvae are known as zoea.\n")
-        outfile.write("      </p>\n")
-        outfile.write("      <figure class=\"sppic\">\n")
-        outfile.write("        <a href=\"photos\\u_ecuadoriensis07.html\"><picture>"
-                      "<img src=\"photos/U_ecuadoriensis07tn.jpg\" alt=\"zoea\" title=\"zoea\" /></picture></a>\n")
-        outfile.write("        <figcaption>Zoea</figcaption>")
-        outfile.write("      </figure>\n")
-        outfile.write("      <figure class=\"sppic\">\n")
-        outfile.write("        <a href=\"photos\\u_ecuadoriensis08.html\">"
-                      "<picture><img src=\"photos/U_ecuadoriensis08tn.jpg\" alt=\"zoea\" "
-                      "title=\"zoea\" /></picture></a>\n")
-        outfile.write("        <figcaption>Zoea</figcaption>")
-        outfile.write("      </figure>\n")
-        outfile.write("    </section>\n")
-        outfile.write("\n")
-        outfile.write("    <section class=\"spsection\">\n")
-        outfile.write("    <h2>Megalopa</h2>\n")
-        outfile.write("      <p>\n")
-        outfile.write("        The larvae live in the open water as part of the plankton. "
-                      "As they grow and go through a number of molt stages. Older larvae are known as megalopa.\n")
-        outfile.write("      </p>\n")
-        outfile.write("      <figure class=\"sppic\">\n")
-        outfile.write("        <a href=\"photos\\u_ecuadoriensis09.html\"><picture>"
-                      "<img src=\"photos/U_ecuadoriensis09tn.jpg\" alt=\"megalopa\" "
-                      "title=\"megalopa\" /></picture></a>\n")
-        outfile.write("        <figcaption>Megalopa</figcaption>")
-        outfile.write("      </figure>\n")
-        outfile.write("    </section>\n")
-        outfile.write("\n")
-        outfile.write("    <section class=\"spsection\">\n")
-        outfile.write("    <h2>Crab</h2>\n")
-        outfile.write("      <p>\n")
-        outfile.write("        At the end of the final larval stage, the larvae molt into immature crabs. "
-                      "The amount of time spent as a swimming larvae (hatching to true crab stage) varies among "
-                      "species, but ranges from a few weeks to a few months.\n")
-        outfile.write("      </p>\n")
-        outfile.write("      <figure class=\"sppic\">\n")
-        outfile.write("        <a href=\"photos\\u_ecuadoriensis10.html\"><picture>"
-                      "<img src=\"photos/U_ecuadoriensis10tn.jpg\" alt=\"early stage crab\" title=\"early stage "
-                      "crab\" /></picture></a>\n")
-        outfile.write("        <figcaption>Early Stage Full Crab</figcaption>")
-        outfile.write("      </figure>\n")
-        outfile.write("      <p style=\"clear: both\">\n")
-        outfile.write("        The crabs return to land and begin to grow; juvenile male and female crabs look "
-                      "alike.\n")
-        outfile.write("      </p>\n")
-        outfile.write("      <figure class=\"sppic\">\n")
-        outfile.write("        <a href=\"photos\\u_pugilator21.html\"><picture>"
-                      "<img src=\"photos/U_pugilator21tn.jpg\" alt=\"juveniles\" "
-                      "title=\"juveniles\" /></picture></a>\n")
-        outfile.write("        <figcaption>Juvenile Crabs</figcaption>")
-        outfile.write("      </figure>\n")
-        outfile.write("      <p style=\"clear: both\">\n")
-        outfile.write("        As they grown larger and turn into adults, the secondary-sexual characteristics "
-                      "(<em>e.g.</em>, the asymmetric claws) begin to develop. "
-                      "Adult crabs mate and the cycle starts over.\n")
-        outfile.write("      </p>\n")
-        outfile.write("      <figure class=\"sppic\">\n")
-        outfile.write("        <a href=\"photos\\u_tangeri10.html\"><picture>"
-                      "<img src=\"photos/U_tangeri10tn.jpg\" alt=\"adult female\" "
-                      "title=\"adult female\" /></picture></a>\n")
-        outfile.write("        <figcaption>Adult Female</figcaption>")
-        outfile.write("      </figure>\n")
-        outfile.write("      <figure class=\"sppic\">\n")
-        outfile.write("        <a href=\"photos\\u_tangeri12.html\"><picture>"
-                      "<img src=\"photos/U_tangeri12tn.jpg\" alt=\"adult male\" "
-                      "title=\"adult male\" /></picture></a>\n")
-        outfile.write("        <figcaption>Adult Male</figcaption>")
-        outfile.write("      </figure>\n")
-        outfile.write("    </section>\n")
+        media_path = ""
+    else:
+        media_path = WEBOUT_PATH
+
+    outfile.write("    <header =\"" + LIFECYCLE_URL + "\">\n")
+    outfile.write("      <h1>Life Cycle</h1>\n")
+    outfile.write("    </header>\n")
+    outfile.write("\n")
+    outfile.write("    <p>\n")
+    outfile.write("      Following is a rough outline of the stages of the life of a fiddler crab. "
+                  "The photographs are from a mix of species.\n")
+    outfile.write("    </p>\n")
+    outfile.write("\n")
+    outfile.write("    <section class=\"spsection\">\n")
+    outfile.write("      <h2>Egg</h2>\n")
+    outfile.write("      <p>\n")
+    outfile.write("      Fertilized female fiddler crabs carry hundreds to thousands of eggs under their abdomen. "
+                  "These are sometimes known as &ldquo;sponge&rdquo; crabs.\n")
+    outfile.write("      </p>\n")
+    outfile.write("      <figure class=\"sppic\">\n")
+    outfile.write("        <a href=\"photos/u_rapax10.html\"><picture><img src=\"" + media_path +
+                  "photos/U_rapax10tn.jpg\" "
+                  "alt=\"Gravid female\" title=\"Gravid female\" /></picture></a>\n")
+    outfile.write("        <figcaption>Gravid female</figcaption>")
+    outfile.write("      </figure>\n")
+    outfile.write("      <figure class=\"sppic\">\n")
+    outfile.write("        <a href=\"photos/u_rapax11.html\"><picture><img src=\"" + media_path +
+                  "photos/U_rapax11tn.jpg\" "
+                  "alt=\"Gravid female\" title=\"Gravid female\" /></picture></a>\n")
+    outfile.write("        <figcaption>Close up of eggs</figcaption>")
+    outfile.write("      </figure>\n")
+    outfile.write("    </section>\n")
+    outfile.write("\n")
+    outfile.write("    <section class=\"spsection\">\n")
+    outfile.write("      <h2>Zoea</h2>\n")
+    outfile.write("      <p>\n")
+    outfile.write("        When the eggs are ready, the mother goes into the water and allows the eggs to hatch "
+                  "into microscopic free-swimming larvae. The early stage larvae are known as zoea.\n")
+    outfile.write("      </p>\n")
+    outfile.write("      <figure class=\"sppic\">\n")
+    outfile.write("        <a href=\"photos/u_ecuadoriensis07.html\"><picture>"
+                  "<img src=\"" + media_path + "photos/U_ecuadoriensis07tn.jpg\" alt=\"zoea\" title=\"zoea\" />"
+                  "</picture></a>\n")
+    outfile.write("        <figcaption>Zoea</figcaption>")
+    outfile.write("      </figure>\n")
+    outfile.write("      <figure class=\"sppic\">\n")
+    outfile.write("        <a href=\"photos/u_ecuadoriensis08.html\">"
+                  "<picture><img src=\"" + media_path + "photos/U_ecuadoriensis08tn.jpg\" alt=\"zoea\" "
+                  "title=\"zoea\" /></picture></a>\n")
+    outfile.write("        <figcaption>Zoea</figcaption>")
+    outfile.write("      </figure>\n")
+    outfile.write("    </section>\n")
+    outfile.write("\n")
+    outfile.write("    <section class=\"spsection\">\n")
+    outfile.write("    <h2>Megalopa</h2>\n")
+    outfile.write("      <p>\n")
+    outfile.write("        The larvae live in the open water as part of the plankton. "
+                  "As they grow and go through a number of molt stages. Older larvae are known as megalopa.\n")
+    outfile.write("      </p>\n")
+    outfile.write("      <figure class=\"sppic\">\n")
+    outfile.write("        <a href=\"photos/u_ecuadoriensis09.html\"><picture>"
+                  "<img src=\"" + media_path + "photos/U_ecuadoriensis09tn.jpg\" alt=\"megalopa\" "
+                  "title=\"megalopa\" /></picture></a>\n")
+    outfile.write("        <figcaption>Megalopa</figcaption>")
+    outfile.write("      </figure>\n")
+    outfile.write("    </section>\n")
+    outfile.write("\n")
+    outfile.write("    <section class=\"spsection\">\n")
+    outfile.write("    <h2>Crab</h2>\n")
+    outfile.write("      <p>\n")
+    outfile.write("        At the end of the final larval stage, the larvae molt into immature crabs. "
+                  "The amount of time spent as a swimming larvae (hatching to true crab stage) varies among "
+                  "species, but ranges from a few weeks to a few months.\n")
+    outfile.write("      </p>\n")
+    outfile.write("      <figure class=\"sppic\">\n")
+    outfile.write("        <a href=\"photos/u_ecuadoriensis10.html\"><picture>"
+                  "<img src=\"" + media_path + "photos/U_ecuadoriensis10tn.jpg\" alt=\"early stage crab\" "
+                  "title=\"early stage crab\" /></picture></a>\n")
+    outfile.write("        <figcaption>Early Stage Full Crab</figcaption>")
+    outfile.write("      </figure>\n")
+    outfile.write("      <p style=\"clear: both\">\n")
+    outfile.write("        The crabs return to land and begin to grow; juvenile male and female crabs look "
+                  "alike.\n")
+    outfile.write("      </p>\n")
+    outfile.write("      <figure class=\"sppic\">\n")
+    outfile.write("        <a href=\"photos/u_pugilator21.html\"><picture>"
+                  "<img src=\"" + media_path + "photos/U_pugilator21tn.jpg\" alt=\"juveniles\" "
+                  "title=\"juveniles\" /></picture></a>\n")
+    outfile.write("        <figcaption>Juvenile Crabs</figcaption>")
+    outfile.write("      </figure>\n")
+    outfile.write("      <p style=\"clear: both\">\n")
+    outfile.write("        As they grown larger and turn into adults, the secondary-sexual characteristics "
+                  "(<em>e.g.</em>, the asymmetric claws) begin to develop. "
+                  "Adult crabs mate and the cycle starts over.\n")
+    outfile.write("      </p>\n")
+    outfile.write("      <figure class=\"sppic\">\n")
+    outfile.write("        <a href=\"photos/u_tangeri10.html\"><picture>"
+                  "<img src=\"" + media_path + "photos/U_tangeri10tn.jpg\" alt=\"adult female\" "
+                  "title=\"adult female\" /></picture></a>\n")
+    outfile.write("        <figcaption>Adult Female</figcaption>")
+    outfile.write("      </figure>\n")
+    outfile.write("      <figure class=\"sppic\">\n")
+    outfile.write("        <a href=\"photos/u_tangeri12.html\"><picture>"
+                  "<img src=\"" + media_path + "photos/U_tangeri12tn.jpg\" alt=\"adult male\" "
+                  "title=\"adult male\" /></picture></a>\n")
+    outfile.write("        <figcaption>Adult Male</figcaption>")
+    outfile.write("      </figure>\n")
+    outfile.write("    </section>\n")
+    if not do_print:
         common_html_footer(outfile, "")
 
 
-def create_phylogeny():
+def write_phylogeny_pages(outfile, do_print):
     """ create the phylogeny page """
-    with codecs.open(WEBOUT_PATH + TREE_URL, "w", "utf-8") as outfile:
+    if not do_print:
         common_html_header(outfile, "Fiddler Crab Phylogeny", "")
-        outfile.write("    <header>\n")
-        outfile.write("      <h1>Phylogeny</h1>\n")
-        outfile.write("    </header>\n")
-        outfile.write("\n")
-        outfile.write("    <p>\n")
-        outfile.write("     The phylogeny of fiddler crabs is still largely unresolved. Two trees are shown below: one "
-                      "just the subgenera and one including all species. These are both rough, conservative estimates "
-                      "based on combining information from <a href=\"references/Levinton1996.html\">Levinton <em>et "
-                      "al.</em> (1996)</a>, <a href=\"references/Sturmbauer1996.html\">Sturmbauer <em>et al.</em> "
-                      "(1996)</a>, <a href=\"references/Rosenberg2001.html\">Rosenberg (2001)</a>, "
-                      "<a href=\"references/Shih2009.html\">Shih <em>et al.</em> (2009)</a>, "
-                      "<a href=\"references/Shih2010.1.html\">Shih <em>et al.</em> (2010)</a>, "
-                      "<a href=\"references/Landstorfer2010.html\">Landstorfer &amp; Schubart (2010)</a>, "
-                      "<a href=\"references/Shih2012.html\">Shih <em>et al.</em> (2012)</a>, "
-                      "<a href=\"references/Shih2013.html\">Shih <em>et al.</em> (2013a)</a>, "
-                      "<a href=\"references/Shih2013.2.html\">Shih <em>et al.</em> (2013b)</a>, "
-                      "and <a href=\"references/Shih2015.2.html\">Shih (2015)</a>.\n")
-        outfile.write("    </p>\n")
-        outfile.write("\n")
-        outfile.write("    <section class=\"spsection\">\n")
-        outfile.write("      <h2>Subgenera Phylogeny</h2>\n")
-        outfile.write("      <object id=\"subgenera_phylogeny\" data=\"images/tree_subgenera.svg\" "
-                      "type=\"image/svg+xml\"></object>\n")
-        outfile.write("    </section>\n")
-        outfile.write("    <section class=\"spsection\">\n")
-        outfile.write("      <h2>Species Phylogeny</h2>\n")
-        outfile.write("      <object id=\"species_phylogeny\" data=\"images/tree_species.svg\" "
-                      "type=\"image/svg+xml\"></object>\n")
-        outfile.write("    </section>\n")
-        outfile.write("\n")
+        media_path = ""
+    else:
+        media_path = WEBOUT_PATH
+    outfile.write("    <header>\n")
+    outfile.write("      <h1>Phylogeny</h1>\n")
+    outfile.write("    </header>\n")
+    outfile.write("\n")
+    outfile.write("    <p>\n")
+    outfile.write("     The phylogeny of fiddler crabs is still largely unresolved. Two trees are shown below: one "
+                  "just the subgenera and one including all species. These are both rough, conservative estimates "
+                  "based on combining information from "
+                  "<a href=\"" + rel_link_prefix(do_print, "references/") + "Levinton1996.html\">Levinton "
+                                                                            "<em>et al.</em> (1996)</a>, "
+                  "<a href=\"" + rel_link_prefix(do_print, "references/") + "Sturmbauer1996.html\">Sturmbauer "
+                                                                            "<em>et al.</em> (1996)</a>, "
+                  "<a href=\"" + rel_link_prefix(do_print, "references/") + "Rosenberg2001.html\">Rosenberg "
+                                                                            "(2001)</a>, "
+                  "<a href=\"" + rel_link_prefix(do_print, "references/") + "Shih2009.html\">Shih <em>et al.</em> "
+                                                                            "(2009)</a>, "
+                  "<a href=\"" + rel_link_prefix(do_print, "references/") + "Shih2010.1.html\">Shih <em>et al.</em> "
+                                                                            "(2010)</a>, "
+                  "<a href=\"" + rel_link_prefix(do_print, "references/") + "Landstorfer2010.html\">Landstorfer &amp; "
+                                                                            "Schubart (2010)</a>, "
+                  "<a href=\"" + rel_link_prefix(do_print, "references/") + "Shih2012.html\">Shih <em>et al.</em> "
+                                                                            "(2012)</a>, "
+                  "<a href=\"" + rel_link_prefix(do_print, "references/") + "Shih2013.html\">Shih <em>et al.</em> "
+                                                                            "(2013a)</a>, "
+                  "<a href=\"" + rel_link_prefix(do_print, "references/") + "Shih2013.2.html\">Shih <em>et al.</em> "
+                                                                            "(2013b)</a>, "
+                  "and <a href=\"" + rel_link_prefix(do_print, "references/") + "Shih2015.2.html\">Shih (2015)</a>.\n")
+    outfile.write("    </p>\n")
+    outfile.write("\n")
+    outfile.write("    <section class=\"spsection\">\n")
+    outfile.write("      <h2>Subgenera Phylogeny</h2>\n")
+    outfile.write("      <object id=\"subgenera_phylogeny\" data=\"" + media_path + "images/tree_subgenera.svg\" "
+                  "type=\"image/svg+xml\"></object>\n")
+    outfile.write("    </section>\n")
+    outfile.write("    <section class=\"spsection\">\n")
+    outfile.write("      <h2>Species Phylogeny</h2>\n")
+    outfile.write("      <object id=\"species_phylogeny\" data=\"" + media_path + "images/tree_species.svg\" "
+                  "type=\"image/svg+xml\"></object>\n")
+    outfile.write("    </section>\n")
+    outfile.write("\n")
+    if not do_print:
         common_html_footer(outfile, "")
 
 
@@ -3474,46 +3689,62 @@ def create_citation_page(refdict):
         common_html_footer(outfile, "")
 
 
-def create_index(species):
+# def media_path(do_print):
+#     if do_print:
+#         return WEBOUT_PATH
+#     else:
+#         return ""
+
+
+def write_introduction(outfile, species, do_print):
     """ create the site index """
-    with codecs.open(WEBOUT_PATH + "index.html", "w", "utf-8") as outfile:
+    if not do_print:
         common_html_header(outfile, "Fiddler Crabs (Genus Uca)", "")
-        outfile.write("    <p>\n")
-        scnt = 0
-        for s in species:
-            if s.status != "fossil":
-                scnt += 1
-        outfile.write("      Fiddler crabs are small, semi-terrestrial crabs of the genus <em "
-                      "class=\"species\">Uca</em> that are characterized by extreme cheliped asymmetry in males.  "
-                      "They are most closely related to the <em class=\"species\">Ocypode</em> (ghost crabs). "
-                      "<a href=\"" + SPECIES_URL + "\">There are currently {} recognized extant "
-                      "species</a>.\n".format(scnt))
-        outfile.write("    </p>\n")
-        outfile.write("    <div class=\"indeximages\">\n")
-        outfile.write("      <picture><img src=\"photos/U_mjoebergi04tn.jpg\" /></picture>\n")
-        outfile.write("      <picture><img src=\"photos/U_minax07tn.jpg\" /></picture>\n")
-        outfile.write("      <picture><img src=\"photos/U_crassipes19tn.jpg\" /></picture>\n")
-        outfile.write("    </div>\n")
-        outfile.write("\n")
-        outfile.write("    <h2>Classification</h2>\n")
-        outfile.write("    <table>\n")
-        outfile.write("      <tr><td class=\"classcol1\">Kingdom</td><td>Animalia</td></tr>\n")
-        outfile.write("      <tr><td class=\"classcol1\">Phylum</td><td>Arthropoda</td></tr>\n")
-        outfile.write("      <tr><td class=\"classcol1\">Class</td><td>Crustacea</td></tr>\n")
-        outfile.write("      <tr><td class=\"classcol1\">Sub-class</td><td>Malocostraca</td></tr>\n")
-        outfile.write("      <tr><td class=\"classcol1\">Order</td><td>Decapoda</td></tr>\n")
-        outfile.write("      <tr><td class=\"classcol1\">Infraorder</td><td>Brachyura</td></tr>\n")
-        outfile.write("      <tr><td class=\"classcol1\">Superfamily</td><td>Ocypodoidea</td></tr>\n")
-        outfile.write("      <tr><td class=\"classcol1\">Family</td><td>Ocypodidae</td></tr>\n")
-        outfile.write("      <tr><td class=\"classcol1\">Subfamily</td><td>Ocypodinae</td>\n")
-        outfile.write("      <tr><td class=\"classcol1\">Genus</td><td><em class=\"species\">Uca</em></td>\n")
-        outfile.write("    </table>\n")
-        outfile.write("\n")
-        outfile.write("    <p>\n")
-        outfile.write("      The common English name &ldquo;Fiddler Crab&rdquo; comes from the feeding of the "
-                      "males, where the movement of the small claw from the ground to its mouth "
-                      "resembles the motion of a someone moving a bow across a fiddle (the large claw).\n")
-        outfile.write("    </p>\n")
+    else:
+        outfile.write("    <header id=\"introduction\">\n")
+        outfile.write("      <h1>Introduction</h1>\n")
+        outfile.write("    </header>\n")
+    outfile.write("    <p>\n")
+    scnt = 0
+    for s in species:
+        if s.status != "fossil":
+            scnt += 1
+    outfile.write("      Fiddler crabs are small, semi-terrestrial crabs of the genus <em "
+                  "class=\"species\">Uca</em> that are characterized by extreme cheliped asymmetry in males.  "
+                  "They are most closely related to the <em class=\"species\">Ocypode</em> (ghost crabs). "
+                  "<a href=\"" + rel_link_prefix(do_print, "") + SPECIES_URL + "\">There are currently {} recognized "
+                  "extant species</a>.\n".format(scnt))
+    outfile.write("    </p>\n")
+    if do_print:
+        media_path = WEBOUT_PATH
+    else:
+        media_path = ""
+    outfile.write("    <div class=\"indeximages\">\n")
+    outfile.write("      <picture><img src=\"" + media_path + "photos/U_mjoebergi04tn.jpg\" /></picture>\n")
+    outfile.write("      <picture><img src=\"" + media_path + "photos/U_minax07tn.jpg\" /></picture>\n")
+    outfile.write("      <picture><img src=\"" + media_path + "photos/U_crassipes19tn.jpg\" /></picture>\n")
+    outfile.write("    </div>\n")
+    outfile.write("\n")
+    outfile.write("    <h2>Classification</h2>\n")
+    outfile.write("    <table>\n")
+    outfile.write("      <tr><td class=\"classcol1\">Kingdom</td><td>Animalia</td></tr>\n")
+    outfile.write("      <tr><td class=\"classcol1\">Phylum</td><td>Arthropoda</td></tr>\n")
+    outfile.write("      <tr><td class=\"classcol1\">Class</td><td>Crustacea</td></tr>\n")
+    outfile.write("      <tr><td class=\"classcol1\">Sub-class</td><td>Malocostraca</td></tr>\n")
+    outfile.write("      <tr><td class=\"classcol1\">Order</td><td>Decapoda</td></tr>\n")
+    outfile.write("      <tr><td class=\"classcol1\">Infraorder</td><td>Brachyura</td></tr>\n")
+    outfile.write("      <tr><td class=\"classcol1\">Superfamily</td><td>Ocypodoidea</td></tr>\n")
+    outfile.write("      <tr><td class=\"classcol1\">Family</td><td>Ocypodidae</td></tr>\n")
+    outfile.write("      <tr><td class=\"classcol1\">Subfamily</td><td>Ocypodinae</td>\n")
+    outfile.write("      <tr><td class=\"classcol1\">Genus</td><td><em class=\"species\">Uca</em></td>\n")
+    outfile.write("    </table>\n")
+    outfile.write("\n")
+    outfile.write("    <p>\n")
+    outfile.write("      The common English name &ldquo;Fiddler Crab&rdquo; comes from the feeding of the "
+                  "males, where the movement of the small claw from the ground to its mouth "
+                  "resembles the motion of a someone moving a bow across a fiddle (the large claw).\n")
+    outfile.write("    </p>\n")
+    if not do_print:
         outfile.write("    <h2>Information</h2>\n")
         outfile.write("    <ul class=\"fa-ul\">\n")
         outfile.write("      <li><span class=\"fa-li fa fa-signal fa-rotate-270\"></span><a href=\"" + SYST_URL +
@@ -3578,6 +3809,49 @@ def create_output_paths():
         os.makedirs(WEBOUT_PATH + "morphology/")
 
 
+def print_cover():
+    pass
+    # outfile.write("    <div id=\"cover_page\">\n")
+    # outfile.write("    <div>\n")
+    # outfile.write("\n")
+
+
+def print_title_page(outfile):
+    outfile.write("    <div id=\"title_page\">\n")
+    outfile.write("     <p class=\"book_title\">Fiddler Crabs</p>\n")
+    outfile.write("     <p class=\"book_subtitle\">Fiddler Crabs</p>\n")
+    outfile.write("    </div>\n")
+    outfile.write("\n")
+
+
+def print_copyright_page(outfile):
+    outfile.write("    <div id=\"copyright_page\">\n")
+    outfile.write("     <p>Copyright ....</p>\n")
+    outfile.write("    </div>\n")
+    outfile.write("\n")
+
+
+def print_table_of_contents(outfile):
+    outfile.write("    <div id=\"table_of_contents\">\n")
+    outfile.write("     <h1>Table of Contents</h1>\n")
+    outfile.write("     <ul>\n")
+    outfile.write("       <li><a href=\"#introduction\">Introduction</a></li>\n")
+    outfile.write("       <li><a href=\"#" + COMMON_URL + "\">Common Names</a></li>\n")
+    outfile.write("       <li><a href=\"#" + TREE_URL + "\">Phylogeny</a></li>\n")
+    outfile.write("       <li><a href=\"#" + LIFECYCLE_URL + "\">Life Cycle</a></li>\n")
+    outfile.write("       <li><a href=\"#" + REF_URL + "\">Publications</a></li>\n")
+    outfile.write("     </ul>\n")
+    outfile.write("    </div>\n")
+    outfile.write("\n")
+
+
+def print_specific_pages(outfile):
+    # print_cover(outfile)
+    print_title_page(outfile)
+    print_copyright_page(outfile)
+    print_table_of_contents(outfile)
+
+
 def start_print(outfile):
     outfile.write("<!DOCTYPE HTML>\n")
     outfile.write("<html lang=\"en\">\n")
@@ -3609,15 +3883,20 @@ def build_site():
         print("...Connecting References...")
         species_refs = connect_refs_to_species(species, citelist)
         print("...Writing References...")
-        with codecs.open(WEBOUT_PATH + REF_URL, "w", "utf-8") as outfile:
-            write_reference_bibliography(references, False, outfile, logfile)
-        # reference_summary(len(references), yeardat, yeardat1900, citecount, languages)
-        write_reference_pages(references, refdict, citelist, False, None, logfile)
+        # with codecs.open(WEBOUT_PATH + REF_URL, "w", "utf-8") as outfile:
+        #     write_reference_bibliography(references, False, outfile, logfile)
+        # with codecs.open(WEBOUT_PATH + REF_SUM_URL, "w", "utf-8") as outfile:
+        #     write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, False, outfile)
+        # write_reference_pages(references, refdict, citelist, False, None, logfile)
         print("...Reading Species Names...")
         specific_names = read_specific_names_data("data/specific_names.txt")
-        all_names, binomial_name_cnts, specific_name_cnts = index_name_pages(refdict, citelist, specific_names,
-                                                                             species_refs, logfile)
-        specific_name_pages(citelist, specific_names, logfile)
+        (all_names, binomial_name_cnts, specific_name_cnts, genus_cnts, total_binomial_year_cnts,
+         name_table) = calculate_name_index_data(refdict, citelist, specific_names)
+        # with codecs.open(WEBOUT_PATH + "names/index.html", "w", "utf-8") as outfile:
+            ### write_all_name_pages(refdict, citelist, specific_names, species_refs, outfile, False, logfile)
+            # write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
+            #                      binomial_name_cnts, total_binomial_year_cnts, outfile, False, logfile)
+        # specific_name_pages(citelist, specific_names, logfile)
         # print("...Reading Photos and Videos...")
         # photos = read_photo_data("data/photos.txt")
         # videos = read_video_data("data/videos.txt")
@@ -3627,22 +3906,39 @@ def build_site():
         #                 binomial_name_cnts, specific_name_cnts, logfile)
         # subgenera = read_subgenera_data("data/subgenera.txt")
         # create_systematics_html(subgenera, species)
-        # create_common_names_html("data/common_names.txt")
+        common_name_data = read_common_name_data("data/common_names.txt")
+        # with codecs.open(WEBOUT_PATH + COMMON_URL, "w", "utf-8") as outfile:
+        #     write_common_names_pages(outfile, common_name_data, False)
         # create_photos_html(species, photos)
         # create_art_html(art)
         # create_videos_html(videos)
         # create_map_html(species)
-        # create_life_cycle()
-        # create_phylogeny()
+        # with codecs.open(WEBOUT_PATH + LIFECYCLE_URL, "w", "utf-8") as outfile:
+        #     write_life_cycle_pages(outfile, False)
+        # with codecs.open(WEBOUT_PATH + TREE_URL, "w", "utf-8") as outfile:
+        #     write_phylogeny_pages(outfile, False)
         # morphology = read_morphology_data("data/morphology.txt")
         # create_morphology_pages(morphology)
-        # create_index(species)
+        # with codecs.open(WEBOUT_PATH + "index.html", "w", "utf-8") as outfile:
+        #     write_introduction(outfile, species, False)
         # create_citation_page(refdict)
-    with codecs.open("print.html", "w", "utf-8") as printfile:
-        start_print(printfile)
-        write_reference_bibliography(references, True, printfile, logfile)
-        write_reference_pages(references, refdict, citelist, True, printfile, logfile)
-        end_print(printfile)
+
+        # print version
+        print("...Creating Print Version...")
+        with codecs.open("print.html", "w", "utf-8") as printfile:
+            start_print(printfile)
+            print_specific_pages(printfile)
+            write_introduction(printfile, species, True)
+            write_common_names_pages(printfile, common_name_data, True)
+            write_phylogeny_pages(printfile, True)
+            write_life_cycle_pages(printfile, True)
+            write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
+                                 binomial_name_cnts, total_binomial_year_cnts, printfile, True, logfile)
+            # the script pages do not work in print at this point
+            # write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, True, printfile)
+            write_reference_bibliography(references, True, printfile, logfile)
+            write_reference_pages(references, refdict, citelist, True, printfile, logfile)
+            end_print(printfile)
     print("done")
 
 
