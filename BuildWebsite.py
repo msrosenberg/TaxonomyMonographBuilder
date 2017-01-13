@@ -2736,7 +2736,8 @@ def write_species_page(species, references, specific_names, all_names, photos, v
                         outfile.write("    <p>\n")
                         outfile.write("      Videos are available on the web at "
                                       "<a href=\"http://www.fiddlercrab.info/uca_videos.html\">"
-                                      "http://www.fiddlercrab.info/uca_videos.html</a> or by following the embedded links.")
+                                      "http://www.fiddlercrab.info/uca_videos.html</a> or by following the embedded "
+                                      "links.")
                         outfile.write("    </p>\n")
                     outfile.write("      <dl class=\"vidlist\">\n")
                 outfile.write("            <dt><a class=\"vidlink\" href=\"" + abs_link_prefix(do_print) + vfname +
