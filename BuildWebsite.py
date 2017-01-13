@@ -460,9 +460,9 @@ def common_header_part1(outfile, title, indexpath):
     outfile.write("    <link rel=\"stylesheet\" href=\"http://fonts.googleapis.com/css?family=Merienda+One|"
                   "Lora:400,700,400italic,700italic\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath + "uca_style.css\" />\n")
-    # outfile.write("    <script src=\"https://use.fontawesome.com/3669ad7c2b.js\"></script>\n")
-    outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath +
-                  "images/font-awesome/css/font-awesome.min.css\" />\n")
+    outfile.write("    <script src=\"https://use.fontawesome.com/3669ad7c2b.js\"></script>\n")
+    # outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath +
+    #               "images/font-awesome/css/font-awesome.min.css\" />\n")
     outfile.write("    <link rel=\"author\" href=\"mailto:msr@asu.edu\" />\n")
 
 
@@ -2491,7 +2491,8 @@ def write_species_photo_page(outfile, fname, species, common_name, caption, pn, 
         common_html_footer(outfile, "../")
 
 
-def write_species_video_page(fname, species, common_name, video, vn):
+# def write_species_video_page(fname, species, common_name, video, vn):
+def write_species_video_page(fname, video, vn):
     """ create page for a specific video """
     with codecs.open(fname, "w", "utf-8") as outfile:
         if ";" in video.species:
@@ -2499,14 +2500,15 @@ def write_species_video_page(fname, species, common_name, video, vn):
             vtitle = "Uca " + video.species.replace(";", " & Uca ")
             is_multi = True
         else:
-            spname = species
-            vtitle = "Uca " + species
+            # spname = species
+            spname = video.species
+            vtitle = "Uca " + video.species
             is_multi = False
         common_html_header(outfile, vtitle + " Video", "../")
         outfile.write("    <header>\n")
         outfile.write("      <h1><em class=\"species\">" + vtitle + "</em> Video</h1>\n")
-        if not is_multi:
-            outfile.write("      <h2>" + common_name + "</h2>\n")
+        # if not is_multi:
+        #     outfile.write("      <h2>" + common_name + "</h2>\n")
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
         if is_multi:
@@ -2516,7 +2518,7 @@ def write_species_video_page(fname, species, common_name, video, vn):
                               ".html\"><span class=\"fa fa-info-circle\"></span> <em class=\"species\">Uca " + s +
                               "</em> page</a></li>\n")
         else:
-            outfile.write("          <li><a href=\"../u_" + species +
+            outfile.write("          <li><a href=\"../u_" + video.species +
                           ".html\"><span class=\"fa fa-info-circle\"></span> Species page</a></li>\n")
         outfile.write("          <li><a href=\"../" + VIDEO_URL +
                       "\"><span class=\"fa fa-video-camera\"></span> All species videos</a></li>\n")
@@ -2864,55 +2866,81 @@ def write_photo_index(specieslist, photos, do_print, outfile, logfile):
                                                  photo.species, False)
 
 
-def write_video_index(videos):
-    create_blank_index(WEBOUT_PATH + "video/index.html")
+def write_video_index(videos, do_print, outfile, logfile):
     """ create the videos page """
     sectitle = ("Feeding", "Male Waving and Other Displays", "Female Display", "Fighting", "Mating", "Miscellaneous")
     secshort = ("Feeding", "Male Display", "Female Display", "Fighting", "Mating", "Miscellaneous")
     secanchor = ("feeding", "display", "female", "fighting", "mating", "misc")
-
-    with codecs.open(WEBOUT_PATH + VIDEO_URL, "w", "utf-8") as outfile:
+    # with codecs.open(WEBOUT_PATH + VIDEO_URL, "w", "utf-8") as outfile:
+    if not do_print:
+        create_blank_index(WEBOUT_PATH + "video/index.html")
         common_html_header(outfile, "Fiddler Crab Videos", "")
-        outfile.write("    <header id=\"" + VIDEO_URL + "\">\n")
-        outfile.write("      <h1>Videos</h1>\n")
+    outfile.write("    <header id=\"" + VIDEO_URL + "\">\n")
+    outfile.write("      <h1>Videos</h1>\n")
+    if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
         for i, x in enumerate(secshort):
             outfile.write("          <li><a href=\"#" + secanchor[i] + "\">" + x + "</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
-        outfile.write("    </header>\n")
+    outfile.write("    </header>\n")
+    outfile.write("\n")
+    if do_print:
+        outfile.write("    <p>\n")
+        outfile.write("      Videos are available on the web at "
+                      "<a href=\"http://www.fiddlercrab.info/uca_videos.html\">"
+                      "http://www.fiddlercrab.info/uca_videos.html</a> or by following the embedded links.")
+        outfile.write("    </p>\n")
+    outfile.write("    <p>\n")
+    if do_print:
+        linktxt = "individual species' page"
+    else:
+        linktxt = "<a href=\"" + rel_link_prefix(do_print, "") + SPECIES_URL + "\">individual species' page</a>"
+    outfile.write("      Most of these videos predate digital video (let alone HD) and were recorded on Hi8 tape. "
+                  "Hopefully they will eventually be replaced by higher quality video. These are grouped by "
+                  "activity. Videos for specific species can be found on the " + linktxt + ".\n")
+    outfile.write("    </p>\n")
+    outfile.write("    <p>\n")
+    outfile.write("      Total video count is " + str(len(videos)) + "\n")
+    outfile.write("    </p>\n")
+    for i, x in enumerate(sectitle):
         outfile.write("\n")
-        outfile.write("    <p>\n")
-        outfile.write("      Most of these videos predate digital video (let alone HD) and were recorded on Hi8 tape. "
-                      "Hopefully they will eventually be replaced by higher quality video. These are grouped by "
-                      "activity. Videos for specific species can be found on the "
-                      "<a href=\"" + SPECIES_URL + "\">individual species' page</a>.\n")
-        outfile.write("    </p>\n")
-        outfile.write("    <p>\n")
-        outfile.write("      Total video count is " + str(len(videos)) + "\n")
-        outfile.write("    </p>\n")
-        for i, x in enumerate(sectitle):
-            outfile.write("\n")
-            outfile.write("    <section class=\"spsection\">\n")
-            outfile.write("      <h2><a name=\"" + secanchor[i] + "\">" + x + "</a></h2>\n")
-            outfile.write("      <dl class=\"vidlist\">\n")
-            for video in videos:
-                if video.activity == secanchor[i]:
-                    vn = int(video.n)
-                    if ";" in video.species:
-                        spname = video.species.replace(";", "_")
-                    else:
-                        spname = video.species
-                    vfname = "video/u_" + spname + format(vn, "0>2") + ".html"
-                    outfile.write("            <dt><a class=\"vidlink\" href=\"" + vfname + "\">" + video.caption +
-                                  "</a></dt>\n")
-                    outfile.write("              <dd>" + video.length + ", " + video.size + ", " + video.format +
-                                  "</dd>\n")
-            outfile.write("      </dl>\n")
-            outfile.write("    </section>\n")
+        outfile.write("    <section class=\"spsection\">\n")
+        outfile.write("      <h2><a name=\"" + secanchor[i] + "\">" + x + "</a></h2>\n")
+        outfile.write("      <dl class=\"vidlist\">\n")
+        for video in videos:
+            if video.activity == secanchor[i]:
+                vn = int(video.n)
+                if ";" in video.species:
+                    spname = video.species.replace(";", "_")
+                else:
+                    spname = video.species
+                vfname = "video/u_" + spname + format(vn, "0>2") + ".html"
+                outfile.write("            <dt><a class=\"vidlink\" href=\"" + abs_link_prefix(do_print) + vfname +
+                              "\">" + video.caption + "</a></dt>\n")
+                outfile.write("              <dd>" + video.length + ", " + video.size + ", " + video.format +
+                              "</dd>\n")
+        outfile.write("      </dl>\n")
+        outfile.write("    </section>\n")
+    # write individual video pages
+    if not do_print:
         common_html_footer(outfile, "")
-        # write_species_video_page(vfname, species.species, species.common, video, vn)
+        for video in videos:
+            vn = int(video.n)
+            if ";" in video.species:
+                spname = video.species.replace(";", "_")
+            else:
+                spname = video.species
+            vfname = WEBOUT_PATH + "video/u_" + spname + format(vn, "0>2") + ".html"
+            # write_species_video_page(vfname, species.species, species.common, video, vn)
+            write_species_video_page(vfname, video, vn)
+            # copy video to web output directory
+            tmp_name = "video/U_" + spname + format(vn, "0>2") + "." + video.format.lower()
+            try:
+                shutil.copy2(MEDIA_PATH + tmp_name, WEBOUT_PATH + "video/")
+            except FileNotFoundError:
+                report_error(logfile, "Missing file: " + tmp_name)
 
 
 def write_specific_art_page(outfile, art, backurl, backtext, do_print):
@@ -4054,11 +4082,11 @@ def write_main_morphology_pages(morphology, outfile, do_print, logfile):
             write_morphology_index(morphology, do_print, suboutfile)
 
 
-def create_citation_page(refdict):
+def write_citation_page(refdict):
     """ create page with site citation info """
     with codecs.open(WEBOUT_PATH + CITE_URL, "w", "utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Website Citation", "")
-        outfile.write("    <header>\n")
+        outfile.write("    <header id=\"" + CITE_URL + "\">\n")
         outfile.write("      <h1>Citation Info</h1>\n")
         outfile.write("    </header>\n")
         outfile.write("\n")
@@ -4081,13 +4109,6 @@ def create_citation_page(refdict):
                       "Github</a></li>\n")
         outfile.write("    </ul>\n")
         common_html_footer(outfile, "")
-
-
-# def media_path(do_print):
-#     if do_print:
-#         return WEBOUT_PATH
-#     else:
-#         return ""
 
 
 def write_introduction(outfile, species, do_print):
@@ -4388,7 +4409,8 @@ def build_site():
         with codecs.open(WEBOUT_PATH + PHOTO_URL, "w", "utf-8") as outfile:
             write_photo_index(species, photos, False, outfile, logfile)
         write_all_art_pages(art, False, None, logfile)
-        # create_videos_html(videos)
+        with codecs.open(WEBOUT_PATH + VIDEO_URL, "w", "utf-8") as outfile:
+            write_video_index(videos, False, outfile, logfile)
         with codecs.open(WEBOUT_PATH + MAP_URL, "w", "utf-8") as outfile:
             write_geography_page(species, outfile, False)
         with codecs.open(WEBOUT_PATH + LIFECYCLE_URL, "w", "utf-8") as outfile:
@@ -4400,7 +4422,7 @@ def build_site():
             write_main_morphology_pages(morphology, outfile, False, logfile)
         with codecs.open(WEBOUT_PATH + "index.html", "w", "utf-8") as outfile:
             write_introduction(outfile, species, False)
-        # create_citation_page(refdict)
+        write_citation_page(refdict)
 
         # print version
         print("...Creating Print Version...")
@@ -4419,9 +4441,8 @@ def build_site():
                                  binomial_name_cnts, total_binomial_year_cnts, printfile, True, logfile)
             write_photo_index(species, photos, True, printfile, logfile)
             write_all_art_pages(art, True, printfile, logfile)
-            # create_videos_html(videos)
+            write_video_index(videos, True, printfile, logfile)
             # write_geography_page(species, printfile, True)
-            # create_citation_page(refdict)
             # write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, True, printfile)
             write_reference_bibliography(references, True, printfile, logfile)
             write_reference_pages(references, refdict, citelist, True, printfile, logfile)
