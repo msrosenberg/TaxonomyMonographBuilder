@@ -2700,7 +2700,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
                 pfname = "photo_u_" + species.species + format(pn, "0>2") + ".html"
                 tname = species.species
             outfile.write("      <figure class=\"sppic\">\n")
-            outfile.write("        <a href=\"" + rel_link_prefix(do_print, WEBOUT_PATH + "photos/") + pfname +
+            outfile.write("        <a href=\"" + rel_link_prefix(do_print, "photos/") + pfname +
                           "\"><picture><img src=\"" + media_path + "photos/U_" + tname + format(pn, "0>2") +
                           "tn.jpg\" alt=\"Uca " + species.species + "\" title=\"Uca " + species.species +
                           "\" /></picture></a>\n")
@@ -2750,11 +2750,11 @@ def write_species_page(species, references, specific_names, all_names, photos, v
         for art in artlist:
             slist = art.species.split(";")
             if species.species in slist:
-                pfname = WEBOUT_PATH + "art/" + art.image + ".html"
+                # pfname = "art/" + art.image + ".html"
                 outfile.write("      <figure class=\"sppic\">\n")
-                outfile.write("        <a href=\"" + pfname + "\"><picture><img src=\"" + media_path + "art/" +
-                              art.image + "_tn." + art.ext + "\" alt=\"" + art.title + "\" title=\"" +
-                              art.title + "\" /></picture></a>\n")
+                outfile.write("        <a href=\"" + rel_link_prefix(do_print, "art/") + art.image +
+                              ".html\"><picture><img src=\"" + media_path + "art/" + art.image + "_tn." + art.ext +
+                              "\" alt=\"" + art.title + "\" title=\"" + art.title + "\" /></picture></a>\n")
                 outfile.write("      </figure>\n")
                 artn += 1
         if artn == 0:
@@ -2770,7 +2770,6 @@ def write_species_page(species, references, specific_names, all_names, photos, v
     outfile.write("      <h2><a name=\"refs\"><span class=\"fa fa-book\"></span> References</a></h2>\n")
     outfile.write("      <div id=\"citation\">\n")
     outfile.write("        <ul>\n")
-    # for i, ref in enumerate(references):
     for ref in references:
         if ref.cite_key in sprefs:
             outfile.write("          <li>" + format_reference_full(ref, do_print, logfile) + "</li>\n")
@@ -2916,7 +2915,7 @@ def write_video_index(videos):
         # write_species_video_page(vfname, species.species, species.common, video, vn)
 
 
-def write_science_art_page(outfile, art, backurl, backtext, do_print):
+def write_specific_art_page(outfile, art, backurl, backtext, do_print):
     """ create the individual page for each piece of art """
     # with codecs.open(fname, "w", "utf-8") as outfile:
     ptitle = art.title + " (" + art.author + " " + art.year + ")"
@@ -2951,7 +2950,7 @@ def write_science_art_page(outfile, art, backurl, backtext, do_print):
         common_html_footer(outfile, "../")
 
 
-def create_art_science_html(artlist, do_print, outfile):
+def write_art_science_pages(artlist, do_print, outfile):
     """ create the art science index """
     # with codecs.open(WEBOUT_PATH + ART_SCI_URL, "w", "utf-8") as outfile:
     if not do_print:
@@ -2994,15 +2993,15 @@ def create_art_science_html(artlist, do_print, outfile):
                                   "\" alt=\"" + art.title + "\" title=\"" + art.title + "\" /></picture></a>\n")
                     outfile.write("      </figure>\n")
                     if do_print:
-                        write_science_art_page(outfile, art, ART_SCI_URL, "All Scientific Drawings", do_print)
+                        write_specific_art_page(outfile, art, ART_SCI_URL, "All Scientific Drawings", do_print)
                     else:
                         with codecs.open(WEBOUT_PATH + "art/" + art.image + ".html", "w", "utf-8") as suboutfile:
-                            write_science_art_page(suboutfile, art, ART_SCI_URL, "All Scientific Drawings", do_print)
+                            write_specific_art_page(suboutfile, art, ART_SCI_URL, "All Scientific Drawings", do_print)
     if not do_print:
         common_html_footer(outfile, "")
 
 
-def create_art_stamps_html(artlist, do_print, outfile):
+def write_art_stamps_pages(artlist, do_print, outfile):
     """ create the art stamps index """
     # with codecs.open(WEBOUT_PATH + ART_STAMP_URL, "w", "utf-8") as outfile:
     if not do_print:
@@ -3044,15 +3043,15 @@ def create_art_stamps_html(artlist, do_print, outfile):
                                   "\" alt=\"" + art.title + "\" title=\"" + art.title + "\" /></picture></a>\n")
                     outfile.write("      </figure>\n")
                     if do_print:
-                        write_science_art_page(outfile, art, ART_STAMP_URL, "All Stamps", do_print)
+                        write_specific_art_page(outfile, art, ART_STAMP_URL, "All Stamps", do_print)
                     else:
                         with codecs.open(WEBOUT_PATH + "art/" + art.image + ".html", "w", "utf-8") as suboutfile:
-                            write_science_art_page(suboutfile, art, ART_STAMP_URL, "All Stamps", do_print)
+                            write_specific_art_page(suboutfile, art, ART_STAMP_URL, "All Stamps", do_print)
     if not do_print:
         common_html_footer(outfile, "")
 
     
-def create_art_crafts_html(artlist, do_print, outfile):
+def write_art_crafts_pages(artlist, do_print, outfile):
     """ create the art craft index """
     # with codecs.open(WEBOUT_PATH + ART_CRAFT_URL, "w", "utf-8") as outfile:
     if not do_print:
@@ -3100,10 +3099,10 @@ def create_art_crafts_html(artlist, do_print, outfile):
                     #               art.title + "\" /></picture></a>\n")
                     outfile.write("      </figure>\n")
                     if do_print:
-                        write_science_art_page(outfile, art, ART_CRAFT_URL, "All Crafts", do_print)
+                        write_specific_art_page(outfile, art, ART_CRAFT_URL, "All Crafts", do_print)
                     else:
                         with codecs.open(WEBOUT_PATH + "art/" + art.image + ".html", "w", "utf-8") as suboutfile:
-                            write_science_art_page(suboutfile, art, ART_CRAFT_URL, "All Crafts", do_print)
+                            write_specific_art_page(suboutfile, art, ART_CRAFT_URL, "All Crafts", do_print)
     if not do_print:
         common_html_footer(outfile, "")
 
@@ -3111,16 +3110,16 @@ def create_art_crafts_html(artlist, do_print, outfile):
 def write_all_art_pages(artlist, do_print, outfile, logfile):
     """ create the art pages """
     if do_print:
-        create_art_science_html(artlist, do_print, outfile)
-        create_art_stamps_html(artlist, do_print, outfile)
-        create_art_crafts_html(artlist, do_print, outfile)
+        write_art_science_pages(artlist, do_print, outfile)
+        write_art_stamps_pages(artlist, do_print, outfile)
+        write_art_crafts_pages(artlist, do_print, outfile)
     else:
         with codecs.open(WEBOUT_PATH + ART_CRAFT_URL, "w", "utf-8") as suboutfile:
-            create_art_crafts_html(artlist, do_print, suboutfile)
+            write_art_crafts_pages(artlist, do_print, suboutfile)
         with codecs.open(WEBOUT_PATH + ART_STAMP_URL, "w", "utf-8") as suboutfile:
-            create_art_stamps_html(artlist, do_print, suboutfile)
+            write_art_stamps_pages(artlist, do_print, suboutfile)
         with codecs.open(WEBOUT_PATH + ART_SCI_URL, "w", "utf-8") as suboutfile:
-            create_art_science_html(artlist, do_print, suboutfile)
+            write_art_science_pages(artlist, do_print, suboutfile)
     # copy art files
     if not do_print:
         for art in artlist:
