@@ -4207,25 +4207,50 @@ def write_introduction(outfile, species, do_print):
 
 
 def create_output_paths():
-    # create web output directory if it does not already exist
-    if not os.path.exists(WEBOUT_PATH):
-        os.makedirs(WEBOUT_PATH)
-    if not os.path.exists(WEBOUT_PATH + "photos/"):
-        os.makedirs(WEBOUT_PATH + "photos/")
-    if not os.path.exists(WEBOUT_PATH + "video/"):
-        os.makedirs(WEBOUT_PATH + "video/")
-    if not os.path.exists(WEBOUT_PATH + "references/"):
-        os.makedirs(WEBOUT_PATH + "references/")
-    if not os.path.exists(WEBOUT_PATH + "names/"):
-        os.makedirs(WEBOUT_PATH + "names/")
-    if not os.path.exists(WEBOUT_PATH + "art/"):
-        os.makedirs(WEBOUT_PATH + "art/")
-    if not os.path.exists(WEBOUT_PATH + "morphology/"):
-        os.makedirs(WEBOUT_PATH + "morphology/")
-    if not os.path.exists(WEBOUT_PATH + "images/"):
-        os.makedirs(WEBOUT_PATH + "images/")
-    if not os.path.exists(WEBOUT_PATH + "maps/"):
-        os.makedirs(WEBOUT_PATH + "maps/")
+    def create_path_and_index(subdir):
+        if not os.path.exists(WEBOUT_PATH + subdir):
+            os.makedirs(WEBOUT_PATH + subdir)
+        create_blank_index(WEBOUT_PATH + subdir + "index.html")
+    """
+    create web output directories if they do not already exist
+    add a blank index to each one
+    """
+    create_path_and_index("")
+    create_path_and_index("photos/")
+    create_path_and_index("video/")
+    create_path_and_index("references/")
+    create_path_and_index("names/")
+    create_path_and_index("art/")
+    create_path_and_index("morphology/")
+    create_path_and_index("maps/")
+    create_path_and_index("images/")
+    # if not os.path.exists(WEBOUT_PATH):
+    #     os.makedirs(WEBOUT_PATH)
+    # create_blank_index(WEBOUT_PATH + "index.html")
+    # if not os.path.exists(WEBOUT_PATH + "photos/"):
+    #     os.makedirs(WEBOUT_PATH + "photos/")
+    # create_blank_index(WEBOUT_PATH + "photos/index.html")
+    # if not os.path.exists(WEBOUT_PATH + "video/"):
+    #     os.makedirs(WEBOUT_PATH + "video/")
+    # create_blank_index(WEBOUT_PATH + "video/index.html")
+    # if not os.path.exists(WEBOUT_PATH + "references/"):
+    #     os.makedirs(WEBOUT_PATH + "references/")
+    # create_blank_index(WEBOUT_PATH + "references/index.html")
+    # if not os.path.exists(WEBOUT_PATH + "names/"):
+    #     os.makedirs(WEBOUT_PATH + "names/")
+    # create_blank_index(WEBOUT_PATH + "names/index.html")
+    # if not os.path.exists(WEBOUT_PATH + "art/"):
+    #     os.makedirs(WEBOUT_PATH + "art/")
+    # create_blank_index(WEBOUT_PATH + "art/index.html")
+    # if not os.path.exists(WEBOUT_PATH + "morphology/"):
+    #     os.makedirs(WEBOUT_PATH + "morphology/")
+    # create_blank_index(WEBOUT_PATH + "morphology/index.html")
+    # if not os.path.exists(WEBOUT_PATH + "images/"):
+    #     os.makedirs(WEBOUT_PATH + "images/")
+    # create_blank_index(WEBOUT_PATH + "images/index.html")
+    # if not os.path.exists(WEBOUT_PATH + "maps/"):
+    #     os.makedirs(WEBOUT_PATH + "maps/")
+    # create_blank_index(WEBOUT_PATH + "maps/index.html")
 
 
 def copy_support_files(logfile):
