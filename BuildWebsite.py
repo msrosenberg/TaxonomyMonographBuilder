@@ -2719,25 +2719,31 @@ def write_species_page(species, references, specific_names, all_names, photos, v
     if not is_fossil:
         outfile.write("    <section class=\"spsection\">\n")
         outfile.write("      <h2><a name=\"video\"><span class=\"fa fa-video-camera\"></span> Video</a></h2>\n")
-        videon = 0
+        video_n = 0
         for video in videos:
             slist = video.species.split(";")
             if species.species in slist:
                 vn = int(video.n)
                 if ";" in video.species:
                     nl = video.species.replace(";", "_")
-                    vfname = WEBOUT_PATH + "video/u_" + nl + format(vn, "0>2") + ".html"
+                    vfname = "video/u_" + nl + format(vn, "0>2") + ".html"
                 else:
-                    vfname = WEBOUT_PATH + "video/u_" + species.species + format(vn, "0>2") + ".html"
-                videon += 1
-                if videon == 1:
+                    vfname = "video/u_" + species.species + format(vn, "0>2") + ".html"
+                video_n += 1
+                if video_n == 1:
+                    if do_print:
+                        outfile.write("    <p>\n")
+                        outfile.write("      Videos are available on the web at "
+                                      "<a href=\"http://www.fiddlercrab.info/uca_videos.html\">"
+                                      "http://www.fiddlercrab.info/uca_videos.html</a> or by following the embedded links.")
+                        outfile.write("    </p>\n")
                     outfile.write("      <dl class=\"vidlist\">\n")
-                outfile.write("            <dt><a class=\"vidlink\" href=\"" + vfname + "\">" +
-                              video.caption + "</a></dt>\n")
+                outfile.write("            <dt><a class=\"vidlink\" href=\"" + abs_link_prefix(do_print) + vfname +
+                              "\">" + video.caption + "</a></dt>\n")
                 outfile.write("              <dd>" + video.length + ", " + video.size + ", " +
                               video.format + "</dd>\n")
                 # write_species_video_page(vfname, species.species, species.common, video, vn)
-        if videon == 0:
+        if video_n == 0:
             outfile.write("      <p>\n")
             outfile.write("        <em>No videos available at this time.</em>\n")
             outfile.write("      </p>\n")
