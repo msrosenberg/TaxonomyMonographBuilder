@@ -530,6 +530,7 @@ def common_html_footer(outfile, indexpath):
     outfile.write("       <p id=\"contact\">Questions or comments about the site? Contact "
                   "<a href=\"mailto:msr@asu.edu\"><span class=\"fa fa-envelope-o\"></span> "
                   "Dr. Michael S. Rosenberg</a></p>\n")
+    outfile.write("       <p id=\"release\">Release: " + VERSION + "</p>\n")
     outfile.write("       <p id=\"copyright\">Copyright &copy; 2003&ndash;" + str(CURRENT_YEAR) +
                   " All Rights Reserved</p>\n")
     outfile.write("    </footer>\n")
