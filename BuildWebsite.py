@@ -1201,8 +1201,8 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
 
 
 def write_reference_pages(reflist, refdict, citelist, do_print, printfile, logfile):
-    if not do_print:
-        create_blank_index(WEBOUT_PATH + "references/index.html")
+    # if not do_print:
+    #     create_blank_index(WEBOUT_PATH + "references/index.html")
     name_table = create_name_table(citelist)
     update_cite_list(citelist)
     for ref in reflist:
@@ -2785,7 +2785,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
 def write_photo_index(specieslist, photos, do_print, outfile, logfile):
     """ create the photos index page """
     if not do_print:
-        create_blank_index(WEBOUT_PATH + "photos/index.html")
+        # create_blank_index(WEBOUT_PATH + "photos/index.html")
         common_html_header(outfile, "Fiddler Crab Photos", "")
         media_path = ""
     else:
@@ -2873,7 +2873,7 @@ def write_video_index(videos, do_print, outfile, logfile):
     secanchor = ("feeding", "display", "female", "fighting", "mating", "misc")
     # with codecs.open(WEBOUT_PATH + VIDEO_URL, "w", "utf-8") as outfile:
     if not do_print:
-        create_blank_index(WEBOUT_PATH + "video/index.html")
+        # create_blank_index(WEBOUT_PATH + "video/index.html")
         common_html_header(outfile, "Fiddler Crab Videos", "")
     outfile.write("    <header id=\"" + VIDEO_URL + "\">\n")
     outfile.write("      <h1>Videos</h1>\n")
@@ -2984,7 +2984,7 @@ def write_art_science_pages(artlist, do_print, outfile):
     if not do_print:
         common_html_header(outfile, "Fiddler Crab Art - Scientific", "")
         media_path = ""
-        create_blank_index(WEBOUT_PATH + "art/index.html")
+        # create_blank_index(WEBOUT_PATH + "art/index.html")
     else:
         media_path = MEDIA_PATH
     outfile.write("    <header id=\"" + ART_SCI_URL + "\">\n")
@@ -4298,7 +4298,7 @@ def copy_map_files(species, logfile):
         shutil.copy2("media/maps/uca.kmz", WEBOUT_PATH + "maps/")
     except FileNotFoundError:
         report_error(logfile, "Missing file: media/maps/uca.kmz")
-    create_blank_index(WEBOUT_PATH + "maps/index.html")
+    # create_blank_index(WEBOUT_PATH + "maps/index.html")
 
 
 def print_cover():
