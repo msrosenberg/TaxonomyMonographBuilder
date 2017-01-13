@@ -462,7 +462,7 @@ def common_header_part1(outfile, title, indexpath):
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath + "uca_style.css\" />\n")
     # outfile.write("    <script src=\"https://use.fontawesome.com/3669ad7c2b.js\"></script>\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath +
-                  "images/font-awesome/css/font-awesome.min.css\">\n")
+                  "images/font-awesome/css/font-awesome.min.css\" />\n")
     outfile.write("    <link rel=\"author\" href=\"mailto:msr@asu.edu\" />\n")
 
 
@@ -2924,7 +2924,7 @@ def write_specific_art_page(outfile, art, backurl, backtext, do_print):
         media_path = ""
     else:
         media_path = MEDIA_PATH + "art/"
-    outfile.write("    <header id=\" " + art.image + ".html\">\n")
+    outfile.write("    <header id=\"" + art.image + ".html\">\n")
     outfile.write("      <h1><em class=\"species\">" + art.title + "</em></h1>\n")
     outfile.write("      <h2>" + art.author + " (" + art.year + ")</h2>\n")
     outfile.write("      <nav>\n")
@@ -2992,13 +2992,18 @@ def write_art_science_pages(artlist, do_print, outfile):
                                   ".html\"><picture><img src=\"" + media_path + "art/" + art.image + "_tn." + art.ext +
                                   "\" alt=\"" + art.title + "\" title=\"" + art.title + "\" /></picture></a>\n")
                     outfile.write("      </figure>\n")
+    if not do_print:
+        common_html_footer(outfile, "")
+    for a in artsource:
+        for art in artlist:
+            if art.art_type == "science":
+                artist = art.author + " (" + art.year + ")"
+                if artist == a:
                     if do_print:
                         write_specific_art_page(outfile, art, ART_SCI_URL, "All Scientific Drawings", do_print)
                     else:
                         with codecs.open(WEBOUT_PATH + "art/" + art.image + ".html", "w", "utf-8") as suboutfile:
                             write_specific_art_page(suboutfile, art, ART_SCI_URL, "All Scientific Drawings", do_print)
-    if not do_print:
-        common_html_footer(outfile, "")
 
 
 def write_art_stamps_pages(artlist, do_print, outfile):
@@ -3042,13 +3047,17 @@ def write_art_stamps_pages(artlist, do_print, outfile):
                                   ".html\"><picture><img src=\"" + media_path + "art/" + art.image + "_tn." + art.ext +
                                   "\" alt=\"" + art.title + "\" title=\"" + art.title + "\" /></picture></a>\n")
                     outfile.write("      </figure>\n")
+    if not do_print:
+        common_html_footer(outfile, "")
+    for a in artsource:
+        for art in artlist:
+            if art.art_type == "stamp":
+                if art.author == a:
                     if do_print:
                         write_specific_art_page(outfile, art, ART_STAMP_URL, "All Stamps", do_print)
                     else:
                         with codecs.open(WEBOUT_PATH + "art/" + art.image + ".html", "w", "utf-8") as suboutfile:
                             write_specific_art_page(suboutfile, art, ART_STAMP_URL, "All Stamps", do_print)
-    if not do_print:
-        common_html_footer(outfile, "")
 
     
 def write_art_crafts_pages(artlist, do_print, outfile):
@@ -3098,13 +3107,17 @@ def write_art_crafts_pages(artlist, do_print, outfile):
                     #               art.image + "_tn." + art.ext + "\" alt=\"" + art.title + "\" title=\"" +
                     #               art.title + "\" /></picture></a>\n")
                     outfile.write("      </figure>\n")
+    if not do_print:
+        common_html_footer(outfile, "")
+    for a in artsource:
+        for art in artlist:
+            if art.art_type == "origami":
+                if art.author == a:
                     if do_print:
                         write_specific_art_page(outfile, art, ART_CRAFT_URL, "All Crafts", do_print)
                     else:
                         with codecs.open(WEBOUT_PATH + "art/" + art.image + ".html", "w", "utf-8") as suboutfile:
                             write_specific_art_page(suboutfile, art, ART_CRAFT_URL, "All Crafts", do_print)
-    if not do_print:
-        common_html_footer(outfile, "")
 
 
 def write_all_art_pages(artlist, do_print, outfile, logfile):
@@ -4317,6 +4330,8 @@ def start_print(outfile):
     outfile.write("    <meta charset=\"utf-8\" />\n")
     outfile.write("    <title>Fiddler Crabs</title>\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"print.css\" />\n")
+    outfile.write("    <link rel=\"stylesheet\" href=\"" + MEDIA_PATH +
+                  "images/font-awesome/css/font-awesome.min.css\" />\n")
     outfile.write("  </head>\n")
     outfile.write("\n")
     outfile.write("  <body>\n")
