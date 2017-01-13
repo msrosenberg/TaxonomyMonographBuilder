@@ -4255,7 +4255,7 @@ def copy_support_files(logfile):
                 "stylifera75.png"}
     for filename in filelist:
         try:
-            shutil.copy2("resources/images/" + filename, WEBOUT_PATH + "images/")
+            shutil.copy2("media/images/" + filename, WEBOUT_PATH + "images/")
         except FileNotFoundError:
             report_error(logfile, "Missing file: resources/images/" + filename)
 
