@@ -2727,9 +2727,9 @@ def write_species_page(species, references, specific_names, all_names, photos, v
                 vn = int(video.n)
                 if ";" in video.species:
                     nl = video.species.replace(";", "_")
-                    vfname = "video/u_" + nl + format(vn, "0>2") + ".html"
+                    vfname = "video/video_u_" + nl + format(vn, "0>2") + ".html"
                 else:
-                    vfname = "video/u_" + species.species + format(vn, "0>2") + ".html"
+                    vfname = "video/video_u_" + species.species + format(vn, "0>2") + ".html"
                 video_n += 1
                 if video_n == 1:
                     if do_print:
@@ -2924,7 +2924,7 @@ def write_video_index(videos, do_print, outfile, logfile):
                     spname = video.species.replace(";", "_")
                 else:
                     spname = video.species
-                vfname = "video/u_" + spname + format(vn, "0>2") + ".html"
+                vfname = "video/video_u_" + spname + format(vn, "0>2") + ".html"
                 outfile.write("            <dt><a class=\"vidlink\" href=\"" + abs_link_prefix(do_print) + vfname +
                               "\">" + video.caption + "</a></dt>\n")
                 outfile.write("              <dd>" + video.length + ", " + video.size + ", " + video.format +
@@ -2940,7 +2940,7 @@ def write_video_index(videos, do_print, outfile, logfile):
                 spname = video.species.replace(";", "_")
             else:
                 spname = video.species
-            vfname = WEBOUT_PATH + "video/u_" + spname + format(vn, "0>2") + ".html"
+            vfname = WEBOUT_PATH + "video/video_u_" + spname + format(vn, "0>2") + ".html"
             # write_species_video_page(vfname, species.species, species.common, video, vn)
             write_species_video_page(vfname, video, vn)
             # copy video to web output directory
