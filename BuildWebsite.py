@@ -4143,9 +4143,12 @@ def write_introduction(outfile, species, do_print):
     else:
         media_path = ""
     outfile.write("    <div class=\"indeximages\">\n")
-    outfile.write("      <picture><img src=\"" + media_path + "photos/U_mjoebergi04tn.jpg\" /></picture>\n")
-    outfile.write("      <picture><img src=\"" + media_path + "photos/U_minax07tn.jpg\" /></picture>\n")
-    outfile.write("      <picture><img src=\"" + media_path + "photos/U_crassipes19tn.jpg\" /></picture>\n")
+    outfile.write("      <picture><img class=\"thumbnail\" src=\"" + media_path +
+                  "photos/U_mjoebergi04tn.jpg\" /></picture>\n")
+    outfile.write("      <picture><img class=\"thumbnail\" src=\"" + media_path +
+                  "photos/U_minax07tn.jpg\" /></picture>\n")
+    outfile.write("      <picture><img class=\"thumbnail\" src=\"" + media_path +
+                  "photos/U_crassipes19tn.jpg\" /></picture>\n")
     outfile.write("    </div>\n")
     outfile.write("\n")
     outfile.write("    <h2>Classification</h2>\n")
@@ -4510,8 +4513,8 @@ def build_site():
                 write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
                                      binomial_name_cnts, total_binomial_year_cnts, printfile, True, logfile)
                 write_photo_index(species, photos, True, printfile, logfile)
-                write_all_art_pages(art, True, printfile, logfile)
                 write_video_index(videos, True, printfile, logfile)
+                write_all_art_pages(art, True, printfile, logfile)
                 # write_geography_page(species, printfile, True)
                 # write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, True, printfile)
                 write_reference_bibliography(references, True, printfile, logfile)
