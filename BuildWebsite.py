@@ -2704,9 +2704,9 @@ def write_species_page(species, references, specific_names, all_names, photos, v
                 tname = species.species
             outfile.write("      <figure class=\"sppic\">\n")
             outfile.write("        <a href=\"" + rel_link_prefix(do_print, "photos/") + pfname +
-                          "\"><picture><img src=\"" + media_path + "photos/U_" + tname + format(pn, "0>2") +
-                          "tn.jpg\" alt=\"Uca " + species.species + "\" title=\"Uca " + species.species +
-                          "\" /></picture></a>\n")
+                          "\"><picture><img class=\"thumbnail\" src=\"" + media_path + "photos/U_" + tname +
+                          format(pn, "0>2") + "tn.jpg\" alt=\"Uca " + species.species + "\" title=\"Uca " +
+                          species.species + "\" /></picture></a>\n")
             outfile.write("      </figure>\n")
             # write_species_photo_page(pfname, species.species, species.common, photo.caption, pn,
             #                          photo.species)
@@ -2763,8 +2763,9 @@ def write_species_page(species, references, specific_names, all_names, photos, v
                 # pfname = "art/" + art.image + ".html"
                 outfile.write("      <figure class=\"sppic\">\n")
                 outfile.write("        <a href=\"" + rel_link_prefix(do_print, "art/") + art.image +
-                              ".html\"><picture><img src=\"" + media_path + "art/" + art.image + "_tn." + art.ext +
-                              "\" alt=\"" + art.title + "\" title=\"" + art.title + "\" /></picture></a>\n")
+                              ".html\"><picture><img class=\"thumbnail\" src=\"" + media_path + "art/" + art.image +
+                              "_tn." + art.ext + "\" alt=\"" + art.title + "\" title=\"" + art.title +
+                              "\" /></picture></a>\n")
                 outfile.write("      </figure>\n")
                 artn += 1
         if artn == 0:
@@ -2828,7 +2829,7 @@ def write_photo_index(specieslist, photos, do_print, outfile, logfile):
                 pfname = "photo_u_" + spname + format(pn, "0>2") + ".html"
                 outfile.write("      <figure class=\"sppic\">\n")
                 outfile.write("        <a href=\"" + rel_link_prefix(do_print, "photos/") + pfname +
-                              "\"><picture><img src=\"" + media_path + "photos/U_" + spname +
+                              "\"><picture><img class=\"thumbnail\" src=\"" + media_path + "photos/U_" + spname +
                               format(pn, "0>2") + "tn.jpg\" alt=\"Uca " + spname + "\" title=\"Uca " + spname +
                               "\" /></picture></a>\n")
                 outfile.write("      </figure>\n")
@@ -3025,8 +3026,9 @@ def write_art_science_pages(artlist, do_print, outfile):
                     # pfname = "art/" + art.image + ".html"
                     outfile.write("      <figure class=\"sppic\">\n")
                     outfile.write("        <a href=\"" + rel_link_prefix(do_print, "art/") + art.image +
-                                  ".html\"><picture><img src=\"" + media_path + "art/" + art.image + "_tn." + art.ext +
-                                  "\" alt=\"" + art.title + "\" title=\"" + art.title + "\" /></picture></a>\n")
+                                  ".html\"><picture><img class=\"thumbnail\" src=\"" + media_path + "art/" +
+                                  art.image + "_tn." + art.ext + "\" alt=\"" + art.title + "\" title=\"" +
+                                  art.title + "\" /></picture></a>\n")
                     outfile.write("      </figure>\n")
     if not do_print:
         common_html_footer(outfile, "")
@@ -3080,8 +3082,9 @@ def write_art_stamps_pages(artlist, do_print, outfile):
                     # pfname = "art/" + art.image + ".html"
                     outfile.write("      <figure class=\"sppic\">\n")
                     outfile.write("        <a href=\"" + rel_link_prefix(do_print, "art/") + art.image +
-                                  ".html\"><picture><img src=\"" + media_path + "art/" + art.image + "_tn." + art.ext +
-                                  "\" alt=\"" + art.title + "\" title=\"" + art.title + "\" /></picture></a>\n")
+                                  ".html\"><picture><img class=\"thumbnail\" src=\"" + media_path + "art/" +
+                                  art.image + "_tn." + art.ext + "\" alt=\"" + art.title + "\" title=\"" + art.title +
+                                  "\" /></picture></a>\n")
                     outfile.write("      </figure>\n")
     if not do_print:
         common_html_footer(outfile, "")
@@ -3137,8 +3140,9 @@ def write_art_crafts_pages(artlist, do_print, outfile):
                 if art.author == a:
                     outfile.write("      <figure class=\"sppic\">\n")
                     outfile.write("        <a href=\"" + rel_link_prefix(do_print, "art/") + art.image +
-                                  ".html\"><picture><img src=\"" + media_path + "art/" + art.image + "_tn." + art.ext +
-                                  "\" alt=\"" + art.title + "\" title=\"" + art.title + "\" /></picture></a>\n")
+                                  ".html\"><picture><img class=\"thumbnail\" src=\"" + media_path + "art/" +
+                                  art.image + "_tn." + art.ext + "\" alt=\"" + art.title + "\" title=\"" + art.title +
+                                  "\" /></picture></a>\n")
                     # outfile.write("        <a href=\"" + pfname + "\"><picture><img src=\"" + media_path + "art/" +
                     #               art.image + "_tn." + art.ext + "\" alt=\"" + art.title + "\" title=\"" +
                     #               art.title + "\" /></picture></a>\n")
