@@ -3367,7 +3367,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     # subgenera section
     outfile.write("    <section class=\"spsection\">\n")
     outfile.write("      <h2><a name=\"subgenera\">Subgenera</a></h2>\n")
-    outfile.write("      <p>")
+    outfile.write("      <p>\n")
     outfile.write("       There have been two major proposals for splitting up the genus, one by " +
                   # "<a href=\"references/Bott1973.2.html\">Bott (1973)</a> and the other by "
                   # "<a href=\"references/Crane1975.html\">Crane (1975)</a>. Neither is based on a numerical "
@@ -3379,8 +3379,8 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
                   "was a reference in the literature, it almost always used Crane's names and not Bott's. "
                   "Bott also split the genus into multiple genera rather than subgenera, an unnecessary "
                   "complication in most researcher's minds.\n")
-    outfile.write("      </p>")
-    outfile.write("      <p>")
+    outfile.write("      </p>\n")
+    outfile.write("      <p>\n")
     # outfile.write("       <a href=\"references/Rosenberg2001.html\">Rosenberg (2001)</a> partly cleared up the "
     outfile.write("       " + format_reference_cite(refdict["Rosenberg2001"], do_print, AUTHOR_OUT, logfile) +
                   " partly cleared up the confusion between the two systems. More recent work by " +
@@ -3397,7 +3397,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
                   format_reference_cite(refdict["Landstorfer2010"], do_print, AUTHOR_OUT, logfile) + ", and " +
                   format_reference_cite(refdict["Shih2015.2"], do_print, AUTHOR_OUT, logfile) +
                   " have continued to refine the subgenera as detailed below.\n")
-    outfile.write("      </p>")
+    outfile.write("      </p>\n")
     outfile.write("      <ul>\n")
     for subgen in subgenlist:
         outfile.write("        <li><a href=\"#"+subgen.subgenus + "\">Subgenus <em class=\"species\">" +
@@ -3405,7 +3405,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("      </ul>\n")
 
     for subgen in subgenlist:
-        outfile.write("      <hr />")
+        outfile.write("      <hr />\n")
         outfile.write("      <h3>Subgenus <a name=\"" + subgen.subgenus + "\"><em class=\"species\">" +
                       subgen.subgenus + "</em> " + subgen.author + "</a></h3>\n")
         outfile.write("      <dl>\n")
@@ -3830,11 +3830,11 @@ def write_phylogeny_pages(outfile, do_print, refdict, logfile):
         # copy trees to webout directory
         for tree in treelist:
             try:
-                shutil.copy2(MEDIA_PATH + "images/" + tree, WEBOUT_PATH + "images/")
+                shutil.copy2("resources/images/" + tree, WEBOUT_PATH + "images/")
             except FileNotFoundError:
-                report_error(logfile, "File missing: images/" + tree)
+                report_error(logfile, "File missing: resources/images/" + tree)
     else:
-        media_path = MEDIA_PATH
+        media_path = "resources/"
     outfile.write("    <header id=\"" + TREE_URL + "\">\n")
     outfile.write("      <h1>Phylogeny</h1>\n")
     outfile.write("    </header>\n")
@@ -4288,7 +4288,7 @@ def copy_support_files(logfile):
                 "stylifera75.png"}
     for filename in filelist:
         try:
-            shutil.copy2("media/images/" + filename, WEBOUT_PATH + "images/")
+            shutil.copy2("resources/images/" + filename, WEBOUT_PATH + "images/")
         except FileNotFoundError:
             report_error(logfile, "Missing file: resources/images/" + filename)
 
@@ -4416,8 +4416,7 @@ def start_print(outfile):
     outfile.write("    <title>Fiddler Crabs</title>\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/print.css\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/uca_style.css\" />\n")
-    outfile.write("    <link rel=\"stylesheet\" href=\"" + MEDIA_PATH +
-                  "images/font-awesome/css/font-awesome.min.css\" />\n")
+    outfile.write("    <link rel=\"stylesheet\" href=\"resources/images/font-awesome/css/font-awesome.min.css\" />\n")
     outfile.write("  </head>\n")
     outfile.write("\n")
     outfile.write("  <body>\n")
