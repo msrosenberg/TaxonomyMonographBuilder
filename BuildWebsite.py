@@ -1412,7 +1412,7 @@ def write_binomial_name_page(name, name_by_year, refdict, citelist, name_table, 
         outfile.write("\n")
 
     # write name table
-    outfile.write("    <h3>Publications Using this Name</h3>\n")
+    outfile.write("    <h3 class=\"nobookmark\">Publications Using this Name</h3>\n")
     outfile.write("    <table class=\"citetable\">\n")
     outfile.write("      <tr>\n")
     outfile.write("        <th>Citation</th>\n")
@@ -1566,7 +1566,7 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
     outfile.write("    </header>\n")
     outfile.write("\n")
     outfile.write("    <section class=\"topspsection\">\n")
-    outfile.write("      <h3>History</h3>\n")
+    outfile.write("      <h3 class=\"nobookmark\">History</h3>\n")
     outfile.write("      <dl>\n")
     if specific_name.synonym != ".":
         if specific_name.synonym in specific_name.variations:
@@ -1610,13 +1610,13 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
 
     if specific_name.notes != ".":
         outfile.write("    <section class=\"spsection\">\n")
-        outfile.write("      <h3>Notes/Comments</h3>\n")
+        outfile.write("      <h3 class=\"nobookmark\">Notes/Comments</h3>\n")
         outfile.write("      <p>\n")
         outfile.write("        " + specific_name.notes + "\n")
         outfile.write("      </p>\n")
         outfile.write("    </section>\n")
     outfile.write("    <section class=\"spsection\">\n")
-    outfile.write("      <h3>Binomials Using this Specific Name</h3>\n")
+    outfile.write("      <h3 class=\"nobookmark\">Binomials Using this Specific Name</h3>\n")
     outfile.write("      <ul>\n")
     for n in binomial_names:
         x = clean_specific_name(n)
@@ -2508,7 +2508,7 @@ def write_species_photo_page(outfile, fname, species, common_name, caption, pn, 
     outfile.write("      <h1 class=\"nobookmark\"><em class=\"species\">" + ptitle + "</em> Photo</h1>\n")
     if not is_multi:
         if common_name != "#":
-            outfile.write("      <h2>" + common_name + "</h2>\n")
+            outfile.write("      <h2 class=\"nobookmark\">" + common_name + "</h2>\n")
     outfile.write("      <nav>\n")
     outfile.write("        <ul>\n")
     if is_multi:
@@ -2622,9 +2622,9 @@ def write_species_page(species, references, specific_names, all_names, photos, v
         sc = ""
     outfile.write("      <h1 class=\"species bookmark2\">Uca " + species.species + sc + "</h1>\n")
     if is_fossil:
-        outfile.write("      <h2>Fossil</h2>\n")
+        outfile.write("      <h2 class=\"nobookmark\">Fossil</h2>\n")
     else:
-        outfile.write("      <h2>" + species.common + "</h2>\n")
+        outfile.write("      <h2 class=\"nobookmark\">" + species.common + "</h2>\n")
     # the species page navigation links only make sense on a webpage, not the printed version
     if not do_print:
         outfile.write("      <nav>\n")
@@ -2654,7 +2654,8 @@ def write_species_page(species, references, specific_names, all_names, photos, v
     outfile.write("    </section>\n")
     outfile.write("\n")
     outfile.write("    <section class=\"spsection\">\n")
-    outfile.write("      <h2 id=\"info\" class=\"nobookmark\"><span class=\"fa fa-info-circle\"></span> Information</h2>\n")
+    outfile.write("      <h2 id=\"info\" class=\"nobookmark\"><span class=\"fa fa-info-circle\"></span> "
+                  "Information</h2>\n")
     outfile.write("      <dl>\n")
     outfile.write("       <dt>Subgenus</dt>\n")
     outfile.write("         <dd><a href=\"" + rel_link_prefix(do_print, "") + SYST_URL + "#" + species.subgenus +
@@ -2767,7 +2768,8 @@ def write_species_page(species, references, specific_names, all_names, photos, v
     outfile.write("\n")
     if not is_fossil:
         outfile.write("    <section class=\"spsection\">\n")
-        outfile.write("      <h2 id=\"video\" class=\"nobookmark\"><span class=\"fa fa-video-camera\"></span> Video</h2>\n")
+        outfile.write("      <h2 id=\"video\" class=\"nobookmark\"><span class=\"fa fa-video-camera\"></span> "
+                      "Video</h2>\n")
         video_n = 0
         for video in videos:
             slist = video.species.split(";")
@@ -2824,7 +2826,8 @@ def write_species_page(species, references, specific_names, all_names, photos, v
         outfile.write("\n")
 
     outfile.write("    <section class=\"spsection\">\n")
-    outfile.write("      <h2 id=\"references\" class=\"nobookmark\"><span class=\"fa fa-book\"></span> References</h2>\n")
+    outfile.write("      <h2 id=\"references\" class=\"nobookmark\"><span class=\"fa fa-book\"></span> "
+                  "References</h2>\n")
     outfile.write("      <div class=\"reference_list\">\n")
     outfile.write("        <ul>\n")
     for ref in references:
@@ -2864,7 +2867,8 @@ def write_photo_index(specieslist, photos, do_print, outfile, logfile):
         species = sp.species
         status = sp.status
         outfile.write("    <section class=\"photosection\">\n")
-        outfile.write("      <h2 class=\"nobookmark\">" + create_species_link(species, status, "", do_print) + "</h2>\n")
+        outfile.write("      <h2 class=\"nobookmark\">" + create_species_link(species, status, "", do_print) +
+                      "</h2>\n")
         photo_n = 0
         for photo in photos:
             splist = photo.species.split(";")
@@ -3018,7 +3022,7 @@ def write_specific_art_page(outfile, art, backurl, backtext, do_print):
         media_path = ""
     outfile.write("    <header id=\"" + art.image + ".html\">\n")
     outfile.write("      <h1 class=\"nobookmark\"><em class=\"species\">" + art.title + "</em></h1>\n")
-    outfile.write("      <h2>" + art.author + " (" + art.year + ")</h2>\n")
+    outfile.write("      <h2 class=\"nobookmark\">" + art.author + " (" + art.year + ")</h2>\n")
     outfile.write("      <nav>\n")
     outfile.write("        <ul>\n")
     if art.species != "n/a":
@@ -3181,7 +3185,7 @@ def write_art_crafts_pages(artlist, do_print, outfile):
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
     outfile.write("\n")
-    outfile.write("      <h2 id=\"origami\">Origami</h2>\n")
+    outfile.write("      <h2 id=\"origami\" class=\"nobookmark\">Origami</h2>\n")
     artsource = []
     cnt = 0
     for art in artlist:
@@ -3305,7 +3309,8 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     # genus section
     outfile.write("    <section class=\"spsection\">\n")
     outfile.write("      <h2 id=\"genus\" class=\"bookmark2\">Genus <em class=\"species\">Uca</em> Leach, 1814</h2>\n")
-    outfile.write("      <h3 class=\"nobookmark\">Type species: <em class=\"species\">Cancer vocans major</em> Herbst, 1782</h3>\n")
+    outfile.write("      <h3 class=\"nobookmark\">Type species: <em class=\"species\">Cancer vocans major</em> "
+                  "Herbst, 1782</h3>\n")
     outfile.write("      <p>\n")
     outfile.write("         The earliest description of the type species of <em class=\"species\">Uca</em> is from "
                   "a drawing in " + format_reference_cite(refdict["Seba1758"], do_print, AUTHOR_OUT, logfile) +
@@ -4124,7 +4129,8 @@ def write_main_morphology_pages(morphology, outfile, do_print, logfile):
             index_page = "#morphology_index.html"
         else:
             index_page = "morphology/index.html"
-        outfile.write("          <li><a href=\"" + index_page + "\"><span class=\"fa fa-list\"></span> Index</a></li>\n")
+        outfile.write("          <li><a href=\"" + index_page + "\"><span class=\"fa fa-list\"></span> "
+                      "Index</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -4611,7 +4617,7 @@ def build_site():
                 # write_geography_page(species, printfile, True)
                 # write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, True, printfile)
                 write_reference_bibliography(references, True, printfile, logfile)
-                # write_reference_pages(references, refdict, citelist, True, printfile, logfile)
+                write_reference_pages(references, refdict, citelist, True, printfile, logfile)
                 end_print(printfile)
     print("done")
 
