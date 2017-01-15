@@ -3800,13 +3800,13 @@ def write_life_cycle_pages(outfile, do_print):
     outfile.write("        <a href=\"photos/u_rapax10.html\"><picture><img src=\"" + media_path +
                   "photos/U_rapax10tn.jpg\" "
                   "alt=\"Gravid female\" title=\"Gravid female\" /></picture></a>\n")
-    outfile.write("        <figcaption>Gravid female</figcaption>")
+    outfile.write("        <figcaption>Gravid female</figcaption>\n")
     outfile.write("      </figure>\n")
     outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_rapax11.html\"><picture><img src=\"" + media_path +
                   "photos/U_rapax11tn.jpg\" "
                   "alt=\"Gravid female\" title=\"Gravid female\" /></picture></a>\n")
-    outfile.write("        <figcaption>Close up of eggs</figcaption>")
+    outfile.write("        <figcaption>Close up of eggs</figcaption>\n")
     outfile.write("      </figure>\n")
     outfile.write("    </section>\n")
     outfile.write("\n")
@@ -3820,13 +3820,13 @@ def write_life_cycle_pages(outfile, do_print):
     outfile.write("        <a href=\"photos/u_ecuadoriensis07.html\"><picture>"
                   "<img src=\"" + media_path + "photos/U_ecuadoriensis07tn.jpg\" alt=\"zoea\" title=\"zoea\" />"
                   "</picture></a>\n")
-    outfile.write("        <figcaption>Zoea</figcaption>")
+    outfile.write("        <figcaption>Zoea</figcaption>\n")
     outfile.write("      </figure>\n")
     outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_ecuadoriensis08.html\">"
                   "<picture><img src=\"" + media_path + "photos/U_ecuadoriensis08tn.jpg\" alt=\"zoea\" "
                   "title=\"zoea\" /></picture></a>\n")
-    outfile.write("        <figcaption>Zoea</figcaption>")
+    outfile.write("        <figcaption>Zoea</figcaption>\n")
     outfile.write("      </figure>\n")
     outfile.write("    </section>\n")
     outfile.write("\n")
@@ -3840,7 +3840,7 @@ def write_life_cycle_pages(outfile, do_print):
     outfile.write("        <a href=\"photos/u_ecuadoriensis09.html\"><picture>"
                   "<img src=\"" + media_path + "photos/U_ecuadoriensis09tn.jpg\" alt=\"megalopa\" "
                   "title=\"megalopa\" /></picture></a>\n")
-    outfile.write("        <figcaption>Megalopa</figcaption>")
+    outfile.write("        <figcaption>Megalopa</figcaption>\n")
     outfile.write("      </figure>\n")
     outfile.write("    </section>\n")
     outfile.write("\n")
@@ -3855,7 +3855,7 @@ def write_life_cycle_pages(outfile, do_print):
     outfile.write("        <a href=\"photos/u_ecuadoriensis10.html\"><picture>"
                   "<img src=\"" + media_path + "photos/U_ecuadoriensis10tn.jpg\" alt=\"early stage crab\" "
                   "title=\"early stage crab\" /></picture></a>\n")
-    outfile.write("        <figcaption>Early Stage Full Crab</figcaption>")
+    outfile.write("        <figcaption>Early Stage Full Crab</figcaption>\n")
     outfile.write("      </figure>\n")
     outfile.write("      <p style=\"clear: both\">\n")
     outfile.write("        The crabs return to land and begin to grow; juvenile male and female crabs look "
@@ -3865,7 +3865,7 @@ def write_life_cycle_pages(outfile, do_print):
     outfile.write("        <a href=\"photos/u_pugilator21.html\"><picture>"
                   "<img src=\"" + media_path + "photos/U_pugilator21tn.jpg\" alt=\"juveniles\" "
                   "title=\"juveniles\" /></picture></a>\n")
-    outfile.write("        <figcaption>Juvenile Crabs</figcaption>")
+    outfile.write("        <figcaption>Juvenile Crabs</figcaption>\n")
     outfile.write("      </figure>\n")
     outfile.write("      <p style=\"clear: both\">\n")
     outfile.write("        As they grown larger and turn into adults, the secondary-sexual characteristics "
@@ -3876,13 +3876,13 @@ def write_life_cycle_pages(outfile, do_print):
     outfile.write("        <a href=\"photos/u_tangeri10.html\"><picture>"
                   "<img src=\"" + media_path + "photos/U_tangeri10tn.jpg\" alt=\"adult female\" "
                   "title=\"adult female\" /></picture></a>\n")
-    outfile.write("        <figcaption>Adult Female</figcaption>")
+    outfile.write("        <figcaption>Adult Female</figcaption>\n")
     outfile.write("      </figure>\n")
     outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_tangeri12.html\"><picture>"
                   "<img src=\"" + media_path + "photos/U_tangeri12tn.jpg\" alt=\"adult male\" "
                   "title=\"adult male\" /></picture></a>\n")
-    outfile.write("        <figcaption>Adult Male</figcaption>")
+    outfile.write("        <figcaption>Adult Male</figcaption>\n")
     outfile.write("      </figure>\n")
     outfile.write("    </section>\n")
     if do_print:
