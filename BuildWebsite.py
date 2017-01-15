@@ -4346,6 +4346,26 @@ def print_copyright_page(outfile):
 
     outfile.write("    </div>\n")
     outfile.write("\n")
+    """
+    outfile.write("    <p>\n")
+    outfile.write("      Generally it is best to cite the primary literature, whenever possible. However, the "
+                  "following paper describes much of the data that is unique to this website:\n")
+    outfile.write("    </p>\n")
+    outfile.write("    <div id=\"citation\">\n")
+    outfile.write("      <ul>\n")
+    ref = refdict["Rosenberg2014"]  # citation describing the database
+    outfile.write("        <li><a href=\"references/Rosenberg2014.html\">" + ref.formatted_html + "</a></li>\n")
+    outfile.write("      </ul>\n")
+    outfile.write("    </div>\n")
+    outfile.write("    <ul class=\"fa-ul\">\n")
+    outfile.write("      <li><span class=\"fa-li fa fa-file-pdf-o\"></span>"
+                  "<a href=\"http://dx.plos.org/10.1371/journal.pone.0101704\">Read paper online at "
+                  "PLoS ONE</a></li>\n")
+    outfile.write("      <li><span class=\"fa-li fa fa-github\"></span>"
+                  "<a href=\"https://github.com/msrosenberg/fiddlercrab.info\">Website data repository on "
+                  "Github</a></li>\n")
+    outfile.write("    </ul>\n")
+    """
 
 
 def print_table_of_contents(outfile, species_list):
@@ -4357,7 +4377,7 @@ def print_table_of_contents(outfile, species_list):
     outfile.write("       <li><a href=\"#" + SYST_URL + "\">Systematics Overview</a></li>\n")
     outfile.write("       <li><a href=\"#" + TREE_URL + "\">Phylogeny</a></li>\n")
     outfile.write("       <li><a href=\"#" + LIFECYCLE_URL + "\">Life Cycle</a></li>\n")
-    # outfile.write("       <li><a href=\"#" + SPECIES_URL + "\">Species List</a>\n")
+    # outfile.write("       <li><a href=\"#" + MAP_URL + "\">Biogeography</a></li>\n")
     outfile.write("       <li>Species\n")
     outfile.write("         <ul>\n")
     for species in species_list:
@@ -4485,8 +4505,9 @@ def build_site():
                 write_phylogeny_pages(printfile, True, refdict, logfile)
                 write_life_cycle_pages(printfile, True)
                 write_main_morphology_pages(morphology, printfile, True, logfile)
-                write_species_info_pages(species, references, specific_names, all_names, photos, videos, art, species_refs,
-                                         refdict, binomial_name_cnts, specific_name_cnts, logfile, printfile, True)
+                write_species_info_pages(species, references, specific_names, all_names, photos, videos, art,
+                                         species_refs, refdict, binomial_name_cnts, specific_name_cnts, logfile,
+                                         printfile, True)
                 write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
                                      binomial_name_cnts, total_binomial_year_cnts, printfile, True, logfile)
                 write_photo_index(species, photos, True, printfile, logfile)
