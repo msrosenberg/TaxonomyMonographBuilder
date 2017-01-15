@@ -2715,6 +2715,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
         outfile.write("      <p>\n")
         outfile.write("        <em>No pictures available at this time.</em>\n")
         outfile.write("      </p>\n")
+    outfile.write("    </section>\n")
 
     outfile.write("\n")
     if not is_fossil:
