@@ -791,7 +791,7 @@ def write_reference_bibliography(reflist, do_print, outfile, logfile):
     outfile.write("    </p>\n")
     outfile.write("\n")
     outfile.write("    <section class=\"spsection\">\n")
-    outfile.write("      <div id=\"citation\">\n")
+    outfile.write("      <div class=\"reference_list\">\n")
     outfile.write("        <ul>\n")
     for ref in reflist:
         outfile.write("          <li>" + format_reference_full(ref, do_print, logfile) + "</li>\n")
@@ -2590,7 +2590,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
             outfile.write("          <li><a href=\"#video\"><span class=\"fa fa-video-camera\"></span> "
                           "Video</a></li>\n")
             outfile.write("          <li><a href=\"#art\"><span class=\"fa fa-paint-brush\"></span> Art</a></li>\n")
-        outfile.write("          <li><a href=\"#refs\"><span class=\"fa fa-book\"></span> References</a></li>\n")
+        outfile.write("          <li><a href=\"#references\"><span class=\"fa fa-book\"></span> References</a></li>\n")
         outfile.write("          <li><a href=\"uca_species.html\"><span class=\"fa fa-list\"></span> "
                       "Species List</a></li>\n")
         outfile.write("        </ul>\n")
@@ -2598,7 +2598,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
     outfile.write("    </header>\n")
     outfile.write("\n")
     outfile.write("    <section class=\"topspsection\">\n")
-    outfile.write("      <h2><a name=\"type\">Type Description</a></h2>\n")
+    outfile.write("      <h2 id=\"type\">Type Description</h2>\n")
     outfile.write("      <dl>\n")
     outfile.write("        <dt><em class=\"species\">" + species.type_species + "</em></dt>\n")
     tref = refdict[species.type_reference]
@@ -2607,7 +2607,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
     outfile.write("    </section>\n")
     outfile.write("\n")
     outfile.write("    <section class=\"spsection\">\n")
-    outfile.write("      <h2><a name=\"info\"><span class=\"fa fa-info-circle\"></span> Information</a></h2>\n")
+    outfile.write("      <h2 id=\"info\"><span class=\"fa fa-info-circle\"></span> Information</h2>\n")
     outfile.write("      <dl>\n")
     outfile.write("       <dt>Subgenus</dt>\n")
     outfile.write("         <dd><a href=\"" + rel_link_prefix(do_print, "") + SYST_URL + "#" + species.subgenus +
@@ -2688,7 +2688,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
     outfile.write("    </section>\n")
     outfile.write("\n")
     outfile.write("    <section class=\"spsection\">\n")
-    outfile.write("      <h2><a name=\"pics\"><span class=\"fa fa-camera\"></span> Photos</a></h2>\n")
+    outfile.write("      <h2 id=\"pics\"><span class=\"fa fa-camera\"></span> Photos</h2>\n")
     photo_n = 0
     for photo in photos:
         slist = photo.species.split(";")
@@ -2720,7 +2720,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
     outfile.write("\n")
     if not is_fossil:
         outfile.write("    <section class=\"spsection\">\n")
-        outfile.write("      <h2><a name=\"video\"><span class=\"fa fa-video-camera\"></span> Video</a></h2>\n")
+        outfile.write("      <h2 id=\"video\"><span class=\"fa fa-video-camera\"></span> Video</h2>\n")
         video_n = 0
         for video in videos:
             slist = video.species.split(";")
@@ -2756,7 +2756,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
         outfile.write("\n")
 
         outfile.write("    <section class=\"spsection\">\n")
-        outfile.write("      <h2><a name=\"art\"><span class=\"fa fa-paint-brush\"></span> Art</a></h2>\n")
+        outfile.write("      <h2 id=\"art\"><span class=\"fa fa-paint-brush\"></span> Art</h2>\n")
         artn = 0
         for art in artlist:
             slist = art.species.split(";")
@@ -2777,8 +2777,8 @@ def write_species_page(species, references, specific_names, all_names, photos, v
         outfile.write("\n")
 
     outfile.write("    <section class=\"spsection\">\n")
-    outfile.write("      <h2><a name=\"refs\"><span class=\"fa fa-book\"></span> References</a></h2>\n")
-    outfile.write("      <div id=\"citation\">\n")
+    outfile.write("      <h2 id=\"references\"><span class=\"fa fa-book\"></span> References</h2>\n")
+    outfile.write("      <div class=\"reference_list\">\n")
     outfile.write("        <ul>\n")
     for ref in references:
         if ref.cite_key in sprefs:
@@ -2915,7 +2915,7 @@ def write_video_index(videos, do_print, outfile, logfile):
     for i, x in enumerate(sectitle):
         outfile.write("\n")
         outfile.write("    <section class=\"spsection\">\n")
-        outfile.write("      <h2><a name=\"" + secanchor[i] + "\">" + x + "</a></h2>\n")
+        outfile.write("      <h2 name=\"" + secanchor[i] + "\">" + x + "</h2>\n")
         outfile.write("      <dl class=\"vidlist\">\n")
         for video in videos:
             if video.activity == secanchor[i]:
@@ -3115,7 +3115,7 @@ def write_art_crafts_pages(artlist, do_print, outfile):
     outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
     outfile.write("\n")
-    outfile.write("      <h2><a name=\"origami\">Origami</a></h2>\n")
+    outfile.write("      <h2 id=\"origami\">Origami</h2>\n")
     artsource = []
     cnt = 0
     for art in artlist:
@@ -3241,7 +3241,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
 
     # genus section
     outfile.write("    <section class=\"spsection\">\n")
-    outfile.write("      <h2><a name=\"genus\">Genus <em class=\"species\">Uca</em> Leach, 1814</a></h2>\n")
+    outfile.write("      <h2 id=\"genus\">Genus <em class=\"species\">Uca</em> Leach, 1814</h2>\n")
     outfile.write("      <h3>Type species: <em class=\"species\">Cancer vocans major</em> Herbst, 1782</h3>\n")
     outfile.write("      <p>\n")
     outfile.write("         The earliest description of the type species of <em class=\"species\">Uca</em> is from "
@@ -3369,7 +3369,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
 
     # subgenera section
     outfile.write("    <section class=\"spsection\">\n")
-    outfile.write("      <h2><a name=\"subgenera\">Subgenera</a></h2>\n")
+    outfile.write("      <h2 id=\"subgenera\">Subgenera</h2>\n")
     outfile.write("      <p>\n")
     outfile.write("       There have been two major proposals for splitting up the genus, one by " +
                   # "<a href=\"references/Bott1973.2.html\">Bott (1973)</a> and the other by "
@@ -3409,8 +3409,8 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
 
     for subgen in subgenlist:
         outfile.write("      <hr />\n")
-        outfile.write("      <h3>Subgenus <a name=\"" + subgen.subgenus + "\"><em class=\"species\">" +
-                      subgen.subgenus + "</em> " + subgen.author + "</a></h3>\n")
+        outfile.write("      <h3 id=\"" + subgen.subgenus + "\">Subgenus <em class=\"species\">" +
+                      subgen.subgenus + "</em> " + subgen.author + "</h3>\n")
         outfile.write("      <dl>\n")
         outfile.write("        <dt>Type</dt>\n")
         outfile.write("        <dd>" + create_species_link(subgen.type_species, "", "", do_print) + "</dd>\n")
@@ -3431,7 +3431,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
 
     # species section
     outfile.write("    <section class=\"spsection\">\n")
-    outfile.write("      <h2><a name=\"species\">Species Level Systematics</a></h2>\n")
+    outfile.write("      <h2 id=\"species\">Species Level Systematics</h2>\n")
     outfile.write("      <ul>\n")
     outfile.write("        <li><a href=\"" + SPECIES_URL + "\">Currently recognized species</a></li>\n")
     outfile.write("      </ul>\n")
@@ -4105,7 +4105,7 @@ def write_citation_page(refdict):
         outfile.write("      Generally it is best to cite the primary literature, whenever possible. However, the "
                       "following paper describes much of the data that is unique to this website:\n")
         outfile.write("    </p>\n")
-        outfile.write("    <div id=\"citation\">\n")
+        outfile.write("    <div class=\"reference_list\">\n")
         outfile.write("      <ul>\n")
         ref = refdict["Rosenberg2014"]  # citation describing the database
         outfile.write("        <li><a href=\"references/Rosenberg2014.html\">" + ref.formatted_html + "</a></li>\n")
@@ -4357,7 +4357,7 @@ def print_copyright_page(outfile):
     outfile.write("      Generally it is best to cite the primary literature, whenever possible. However, the "
                   "following paper describes much of the data that is unique to this website:\n")
     outfile.write("    </p>\n")
-    outfile.write("    <div id=\"citation\">\n")
+    outfile.write("    <div class=\"reference_list\">\n")
     outfile.write("      <ul>\n")
     ref = refdict["Rosenberg2014"]  # citation describing the database
     outfile.write("        <li><a href=\"references/Rosenberg2014.html\">" + ref.formatted_html + "</a></li>\n")
@@ -4459,7 +4459,7 @@ def build_site():
         morphology = read_morphology_data("data/morphology.txt")
 
         # output website version
-        if False:
+        if True:
             create_output_paths()
             copy_support_files(logfile)
             print("...Writing References...")
