@@ -4364,6 +4364,17 @@ def print_table_of_contents(outfile, species_list):
         outfile.write("           <li>" + create_species_link(species.species, "", "", True) + "</li>\n")
     outfile.write("         </ul>\n")
     outfile.write("       </li>\n")
+
+    outfile.write("       <li><a href=\"#" + PHOTO_URL + "\">Photo Index</a></li>\n")
+    outfile.write("       <li><a href=\"#" + VIDEO_URL + "\">Video Index</a></li>\n")
+    outfile.write("       <li>Art</li>\n")
+    outfile.write("         <ul>\n")
+    outfile.write("           <li><a href=\"#" + ART_SCI_URL + "\">Scientific Drawings/a></li>\n")
+    outfile.write("           <li><a href=\"#" + ART_STAMP_URL + "\">Postage Stamps/a></li>\n")
+    outfile.write("           <li><a href=\"#" + ART_CRAFT_URL + "\">Crafts/a></li>\n")
+    outfile.write("         </ul>\n")
+    outfile.write("       </li>\n")
+    outfile.write("       </li>\n")
     outfile.write("       <li><a href=\"#" + REF_URL + "\">Publications</a></li>\n")
     outfile.write("     </ul>\n")
     outfile.write("    </div>\n")
@@ -4383,7 +4394,8 @@ def start_print(outfile):
     outfile.write("  <head>\n")
     outfile.write("    <meta charset=\"utf-8\" />\n")
     outfile.write("    <title>Fiddler Crabs</title>\n")
-    outfile.write("    <link rel=\"stylesheet\" href=\"print.css\" />\n")
+    outfile.write("    <link rel=\"stylesheet\" href=\"resources/print.css\" />\n")
+    outfile.write("    <link rel=\"stylesheet\" href=\"resources/uca_style.css\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"" + MEDIA_PATH +
                   "images/font-awesome/css/font-awesome.min.css\" />\n")
     outfile.write("  </head>\n")
@@ -4398,8 +4410,7 @@ def end_print(outfile):
 
 def build_site():
     with open("errorlog.txt", "w") as logfile:
-        create_output_paths()
-        copy_support_files(logfile)
+        # read data and do computation
         print("...Reading References...")
         references, refdict, citelist, yeardict, citecount = read_reference_data("data/references_cites.txt",
                                                                                  "data/references.html",
@@ -4410,76 +4421,82 @@ def build_site():
         species = read_species_data("data/species_info.txt")
         print("...Connecting References...")
         species_refs = connect_refs_to_species(species, citelist)
-        print("...Writing References...")
-        with codecs.open(WEBOUT_PATH + REF_URL, "w", "utf-8") as outfile:
-            write_reference_bibliography(references, False, outfile, logfile)
-        with codecs.open(WEBOUT_PATH + REF_SUM_URL, "w", "utf-8") as outfile:
-            write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, False, outfile)
-        write_reference_pages(references, refdict, citelist, False, None, logfile)
         print("...Reading Species Names...")
         specific_names = read_specific_names_data("data/specific_names.txt")
         (all_names, binomial_name_cnts, specific_name_cnts, genus_cnts, total_binomial_year_cnts,
          name_table) = calculate_name_index_data(refdict, citelist, specific_names)
-        print("...Writing Names Info...")
-        with codecs.open(WEBOUT_PATH + "names/index.html", "w", "utf-8") as outfile:
-            write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
-                                 binomial_name_cnts, total_binomial_year_cnts, outfile, False, logfile)
-        check_specific_names(citelist, specific_names, logfile)
+        common_name_data = read_common_name_data("data/common_names.txt")
+        subgenera = read_subgenera_data("data/subgenera.txt")
         print("...Reading Photos and Videos...")
         photos = read_photo_data("data/photos.txt")
         videos = read_video_data("data/videos.txt")
         art = read_art_data("data/art.txt")
-        print("...Writing Species...")
-        write_species_info_pages(species, references, specific_names, all_names, photos, videos, art, species_refs,
-                                 refdict, binomial_name_cnts, specific_name_cnts, logfile, None, False)
-        subgenera = read_subgenera_data("data/subgenera.txt")
-        copy_map_files(species, logfile)
-        with codecs.open(WEBOUT_PATH + SYST_URL, "w", "utf-8") as outfile:
-            write_systematics_overview(subgenera, species, refdict, outfile, False, logfile)
-        common_name_data = read_common_name_data("data/common_names.txt")
-        with codecs.open(WEBOUT_PATH + COMMON_URL, "w", "utf-8") as outfile:
-            write_common_names_pages(outfile, common_name_data, False)
-        with codecs.open(WEBOUT_PATH + PHOTO_URL, "w", "utf-8") as outfile:
-            write_photo_index(species, photos, False, outfile, logfile)
-        write_all_art_pages(art, False, None, logfile)
-        with codecs.open(WEBOUT_PATH + VIDEO_URL, "w", "utf-8") as outfile:
-            write_video_index(videos, False, outfile, logfile)
-        with codecs.open(WEBOUT_PATH + MAP_URL, "w", "utf-8") as outfile:
-            write_geography_page(species, outfile, False)
-        with codecs.open(WEBOUT_PATH + LIFECYCLE_URL, "w", "utf-8") as outfile:
-            write_life_cycle_pages(outfile, False)
-        with codecs.open(WEBOUT_PATH + TREE_URL, "w", "utf-8") as outfile:
-            write_phylogeny_pages(outfile, False, refdict, logfile)
         morphology = read_morphology_data("data/morphology.txt")
-        with codecs.open(WEBOUT_PATH + MORPH_URL, "w", "utf-8") as outfile:
-            write_main_morphology_pages(morphology, outfile, False, logfile)
-        with codecs.open(WEBOUT_PATH + "index.html", "w", "utf-8") as outfile:
-            write_introduction(outfile, species, False)
-        write_citation_page(refdict)
 
-        # print version
-        print("...Creating Print Version...")
-        with codecs.open("print.html", "w", "utf-8") as printfile:
-            start_print(printfile)
-            print_specific_pages(printfile, species)
-            write_introduction(printfile, species, True)
-            write_common_names_pages(printfile, common_name_data, True)
-            write_systematics_overview(subgenera, species, refdict, printfile, True, logfile)
-            write_phylogeny_pages(printfile, True, refdict, logfile)
-            write_life_cycle_pages(printfile, True)
-            write_main_morphology_pages(morphology, printfile, True, logfile)
+        # output website version
+        if False:
+            create_output_paths()
+            copy_support_files(logfile)
+            print("...Writing References...")
+            with codecs.open(WEBOUT_PATH + REF_URL, "w", "utf-8") as outfile:
+                write_reference_bibliography(references, False, outfile, logfile)
+            with codecs.open(WEBOUT_PATH + REF_SUM_URL, "w", "utf-8") as outfile:
+                write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, False, outfile)
+            write_reference_pages(references, refdict, citelist, False, None, logfile)
+            print("...Writing Names Info...")
+            with codecs.open(WEBOUT_PATH + "names/index.html", "w", "utf-8") as outfile:
+                write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
+                                     binomial_name_cnts, total_binomial_year_cnts, outfile, False, logfile)
+            check_specific_names(citelist, specific_names, logfile)
+            print("...Writing Species...")
             write_species_info_pages(species, references, specific_names, all_names, photos, videos, art, species_refs,
-                                     refdict, binomial_name_cnts, specific_name_cnts, logfile, printfile, True)
-            write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
-                                 binomial_name_cnts, total_binomial_year_cnts, printfile, True, logfile)
-            write_photo_index(species, photos, True, printfile, logfile)
-            write_all_art_pages(art, True, printfile, logfile)
-            write_video_index(videos, True, printfile, logfile)
-            # write_geography_page(species, printfile, True)
-            # write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, True, printfile)
-            write_reference_bibliography(references, True, printfile, logfile)
-            write_reference_pages(references, refdict, citelist, True, printfile, logfile)
-            end_print(printfile)
+                                     refdict, binomial_name_cnts, specific_name_cnts, logfile, None, False)
+            copy_map_files(species, logfile)
+            with codecs.open(WEBOUT_PATH + SYST_URL, "w", "utf-8") as outfile:
+                write_systematics_overview(subgenera, species, refdict, outfile, False, logfile)
+            with codecs.open(WEBOUT_PATH + COMMON_URL, "w", "utf-8") as outfile:
+                write_common_names_pages(outfile, common_name_data, False)
+            with codecs.open(WEBOUT_PATH + PHOTO_URL, "w", "utf-8") as outfile:
+                write_photo_index(species, photos, False, outfile, logfile)
+            write_all_art_pages(art, False, None, logfile)
+            with codecs.open(WEBOUT_PATH + VIDEO_URL, "w", "utf-8") as outfile:
+                write_video_index(videos, False, outfile, logfile)
+            with codecs.open(WEBOUT_PATH + MAP_URL, "w", "utf-8") as outfile:
+                write_geography_page(species, outfile, False)
+            with codecs.open(WEBOUT_PATH + LIFECYCLE_URL, "w", "utf-8") as outfile:
+                write_life_cycle_pages(outfile, False)
+            with codecs.open(WEBOUT_PATH + TREE_URL, "w", "utf-8") as outfile:
+                write_phylogeny_pages(outfile, False, refdict, logfile)
+            with codecs.open(WEBOUT_PATH + MORPH_URL, "w", "utf-8") as outfile:
+                write_main_morphology_pages(morphology, outfile, False, logfile)
+            with codecs.open(WEBOUT_PATH + "index.html", "w", "utf-8") as outfile:
+                write_introduction(outfile, species, False)
+            write_citation_page(refdict)
+
+        # output print version
+        if True:
+            print("...Creating Print Version...")
+            with codecs.open("print.html", "w", "utf-8") as printfile:
+                start_print(printfile)
+                print_specific_pages(printfile, species)
+                write_introduction(printfile, species, True)
+                write_common_names_pages(printfile, common_name_data, True)
+                write_systematics_overview(subgenera, species, refdict, printfile, True, logfile)
+                write_phylogeny_pages(printfile, True, refdict, logfile)
+                write_life_cycle_pages(printfile, True)
+                write_main_morphology_pages(morphology, printfile, True, logfile)
+                write_species_info_pages(species, references, specific_names, all_names, photos, videos, art, species_refs,
+                                         refdict, binomial_name_cnts, specific_name_cnts, logfile, printfile, True)
+                write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
+                                     binomial_name_cnts, total_binomial_year_cnts, printfile, True, logfile)
+                write_photo_index(species, photos, True, printfile, logfile)
+                write_all_art_pages(art, True, printfile, logfile)
+                write_video_index(videos, True, printfile, logfile)
+                # write_geography_page(species, printfile, True)
+                # write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, True, printfile)
+                write_reference_bibliography(references, True, printfile, logfile)
+                write_reference_pages(references, refdict, citelist, True, printfile, logfile)
+                end_print(printfile)
     print("done")
 
 
