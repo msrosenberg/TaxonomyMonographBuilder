@@ -3796,13 +3796,13 @@ def write_life_cycle_pages(outfile, do_print):
     outfile.write("      Fertilized female fiddler crabs carry hundreds to thousands of eggs under their abdomen. "
                   "These are sometimes known as &ldquo;sponge&rdquo; crabs.\n")
     outfile.write("      </p>\n")
-    outfile.write("      <figure class=\"sppic\">\n")
+    outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_rapax10.html\"><picture><img src=\"" + media_path +
                   "photos/U_rapax10tn.jpg\" "
                   "alt=\"Gravid female\" title=\"Gravid female\" /></picture></a>\n")
     outfile.write("        <figcaption>Gravid female</figcaption>")
     outfile.write("      </figure>\n")
-    outfile.write("      <figure class=\"sppic\">\n")
+    outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_rapax11.html\"><picture><img src=\"" + media_path +
                   "photos/U_rapax11tn.jpg\" "
                   "alt=\"Gravid female\" title=\"Gravid female\" /></picture></a>\n")
@@ -3816,13 +3816,13 @@ def write_life_cycle_pages(outfile, do_print):
     outfile.write("        When the eggs are ready, the mother goes into the water and allows the eggs to hatch "
                   "into microscopic free-swimming larvae. The early stage larvae are known as zoea.\n")
     outfile.write("      </p>\n")
-    outfile.write("      <figure class=\"sppic\">\n")
+    outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_ecuadoriensis07.html\"><picture>"
                   "<img src=\"" + media_path + "photos/U_ecuadoriensis07tn.jpg\" alt=\"zoea\" title=\"zoea\" />"
                   "</picture></a>\n")
     outfile.write("        <figcaption>Zoea</figcaption>")
     outfile.write("      </figure>\n")
-    outfile.write("      <figure class=\"sppic\">\n")
+    outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_ecuadoriensis08.html\">"
                   "<picture><img src=\"" + media_path + "photos/U_ecuadoriensis08tn.jpg\" alt=\"zoea\" "
                   "title=\"zoea\" /></picture></a>\n")
@@ -3836,7 +3836,7 @@ def write_life_cycle_pages(outfile, do_print):
     outfile.write("        The larvae live in the open water as part of the plankton. "
                   "As they grow and go through a number of molt stages. Older larvae are known as megalopa.\n")
     outfile.write("      </p>\n")
-    outfile.write("      <figure class=\"sppic\">\n")
+    outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_ecuadoriensis09.html\"><picture>"
                   "<img src=\"" + media_path + "photos/U_ecuadoriensis09tn.jpg\" alt=\"megalopa\" "
                   "title=\"megalopa\" /></picture></a>\n")
@@ -3851,7 +3851,7 @@ def write_life_cycle_pages(outfile, do_print):
                   "The amount of time spent as a swimming larvae (hatching to true crab stage) varies among "
                   "species, but ranges from a few weeks to a few months.\n")
     outfile.write("      </p>\n")
-    outfile.write("      <figure class=\"sppic\">\n")
+    outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_ecuadoriensis10.html\"><picture>"
                   "<img src=\"" + media_path + "photos/U_ecuadoriensis10tn.jpg\" alt=\"early stage crab\" "
                   "title=\"early stage crab\" /></picture></a>\n")
@@ -3861,7 +3861,7 @@ def write_life_cycle_pages(outfile, do_print):
     outfile.write("        The crabs return to land and begin to grow; juvenile male and female crabs look "
                   "alike.\n")
     outfile.write("      </p>\n")
-    outfile.write("      <figure class=\"sppic\">\n")
+    outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_pugilator21.html\"><picture>"
                   "<img src=\"" + media_path + "photos/U_pugilator21tn.jpg\" alt=\"juveniles\" "
                   "title=\"juveniles\" /></picture></a>\n")
@@ -3872,13 +3872,13 @@ def write_life_cycle_pages(outfile, do_print):
                   "(<em>e.g.</em>, the asymmetric claws) begin to develop. "
                   "Adult crabs mate and the cycle starts over.\n")
     outfile.write("      </p>\n")
-    outfile.write("      <figure class=\"sppic\">\n")
+    outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_tangeri10.html\"><picture>"
                   "<img src=\"" + media_path + "photos/U_tangeri10tn.jpg\" alt=\"adult female\" "
                   "title=\"adult female\" /></picture></a>\n")
     outfile.write("        <figcaption>Adult Female</figcaption>")
     outfile.write("      </figure>\n")
-    outfile.write("      <figure class=\"sppic\">\n")
+    outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_tangeri12.html\"><picture>"
                   "<img src=\"" + media_path + "photos/U_tangeri12tn.jpg\" alt=\"adult male\" "
                   "title=\"adult male\" /></picture></a>\n")
