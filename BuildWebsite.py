@@ -2937,7 +2937,7 @@ def write_video_index(videos, do_print, outfile, logfile):
     else:
         common_html_header(outfile, "Fiddler Crab Videos", "")
     outfile.write("    <header id=\"" + VIDEO_URL + "\">\n")
-    outfile.write("      <h1>Videos</h1>\n")
+    outfile.write("      <h1>Video Index</h1>\n")
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
