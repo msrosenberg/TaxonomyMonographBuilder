@@ -3210,13 +3210,10 @@ def write_species_info_pages(specieslist, references, specific_names, all_names,
 def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_print, logfile):
     """ create the systematics page """
     if not do_print:
-        common_html_header(outfile, "Fiddler Crab Life Cycle", "")
+        common_html_header(outfile, "Fiddler Crab Systematics", "")
         media_path = ""
     else:
         media_path = MEDIA_PATH
-
-    if not do_print:
-        common_html_header(outfile, "Fiddler Crab Systematics", "")
     outfile.write("    <header id=\"" + SYST_URL + "\">\n")
     outfile.write("      <h1>Systematics</h1>\n")
     if not do_print:
@@ -3329,7 +3326,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
                   "<em class=\"species\">U. heterochelos</em> was an objective junior synonym of "
                   "<em class=\"species\">U. major,</em> thus the type species has been referred to as "
                   "<em class=\"species\">U. major</em> ever since.\n")
-    outfile.write("      <p>\n")
+    outfile.write("      </p>\n")
     outfile.write("      <p>\n")
     # outfile.write("        However, <a href=\"references/Bott1973.1.html\">Bott (1973)</a> discovered that there "
     outfile.write("        However, " + format_reference_cite(refdict["Bott1973.1"], do_print, AUTHOR_OUT, logfile) +
@@ -3347,7 +3344,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
                   "the West African/European species rather than the American one; the American species, "
                   "which has been called <em class=\"species\">U. major</em> since 1962, would be called "
                   "<em class=\"species\">U. platydactylus,</em> a name not used since 1918.\n")
-    outfile.write("      <p>\n")
+    outfile.write("      </p>\n")
     outfile.write("      <p>\n")
     outfile.write("         To deal with this dilemma, the Society of Zoological Nomenclature officially "
                   "designated the holotype of <em class=\"species\">Gelasimus platydactylus</em> as a neotype "
@@ -3363,7 +3360,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
                   "the genus is named, <em class=\"species\">U. major</em> "
                   "(<em class=\"species\">Cancer vocans major</em>) is still the official type species of the "
                   "genus <em class=\"species\">Uca.</em>\n")
-    outfile.write("      <p>\n")
+    # outfile.write("      <p>\n")
     outfile.write("    </section>\n")
     outfile.write("\n")
 
@@ -3555,7 +3552,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("          </tr>\n")
     outfile.write("        </tbody>\n")
     outfile.write("      </table>\n")
-    outfile.write("      </p>\n")
+    # outfile.write("      </p>\n")
     outfile.write("      <table>\n")
     outfile.write("        <thead>\n")
     outfile.write("          <tr>\n")
@@ -3601,7 +3598,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("          </tr>\n")
     outfile.write("        </tbody>\n")
     outfile.write("      </table>\n")
-    outfile.write("      </p>\n")
+    # outfile.write("      </p>\n")
     outfile.write("      <table>\n")
     outfile.write("        <thead>\n")
     outfile.write("          <tr>\n")
@@ -4420,8 +4417,8 @@ def start_print(outfile):
     outfile.write("  <head>\n")
     outfile.write("    <meta charset=\"utf-8\" />\n")
     outfile.write("    <title>Fiddler Crabs</title>\n")
-    outfile.write("    <link rel=\"stylesheet\" href=\"resources/print.css\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/uca_style.css\" />\n")
+    outfile.write("    <link rel=\"stylesheet\" href=\"resources/print.css\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/images/font-awesome/css/font-awesome.min.css\" />\n")
     outfile.write("  </head>\n")
     outfile.write("\n")
