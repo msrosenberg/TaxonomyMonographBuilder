@@ -4493,7 +4493,7 @@ def print_table_of_contents(outfile, species_list):
     outfile.write("         <ul>\n")
     outfile.write("           <li><a href=\"#" + ART_SCI_URL + "\">Scientific Drawings</a></li>\n")
     outfile.write("           <li><a href=\"#" + ART_STAMP_URL + "\">Postage Stamps</a></li>\n")
-    outfile.write("           <li><a href=\"#" + ART_CRAFT_URL + "\">Crafts</a></li>\n")
+    outfile.write("           <li><a href=\"#" + ART_CRAFT_URL + "\">Arts &amp; Crafts</a></li>\n")
     outfile.write("         </ul>\n")
     outfile.write("       </li>\n")
     outfile.write("       </li>\n")
