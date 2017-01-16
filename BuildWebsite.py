@@ -771,13 +771,13 @@ def write_reference_bibliography(reflist, do_print, outfile, logfile):
         common_html_header(outfile, "Fiddler Crab Publications", "")
     outfile.write("    <header id=\"" + REF_URL + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Publications</h1>\n")
-    outfile.write("      <nav>\n")
-    outfile.write("        <ul>\n")
-    outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") + REF_SUM_URL +
-                  "\"><span class=\"fa fa-line-chart\"></span> Reference/Citation Summary</a></li>\n")
-    outfile.write("        </ul>\n")
-    outfile.write("      </nav>\n")
-
+    if not do_print:
+        outfile.write("      <nav>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") + REF_SUM_URL +
+                      "\"><span class=\"fa fa-line-chart\"></span> Reference/Citation Summary</a></li>\n")
+        outfile.write("        </ul>\n")
+        outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
     outfile.write("\n")
     outfile.write("    <p>\n")
@@ -1135,7 +1135,8 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
     else:
         common_html_header(outfile, ref.citation, "../")
     outfile.write("    <header id=\"" + ref.cite_key + ".html\">\n")
-    outfile.write("      <h1 class=\"nobookmark\">" + ref.citation + "</h1>\n")
+    if not do_print:
+        outfile.write("      <h1 class=\"nobookmark\">" + ref.citation + "</h1>\n")
     outfile.write("      <h2 class=\"nobookmark\">" + ref.formatted_html + "</h2>\n")
     if not do_print:
         outfile.write("      <nav>\n")
@@ -1397,11 +1398,12 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
     outfile.write("      <nav>\n")
     outfile.write("        <ul>\n")
     if species_name != "":
-        outfile.write("          <li><a href=\"sn_" + species_name +
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") + "sn_" + species_name +
                       ".html\"><span class=\"fa fa-window-minimize\"></span> " + format_name_string(species_name) +
                       "</a></li>\n")
-    outfile.write("          <li><a href=\"index.html\"><span class=\"fa fa-list\"></span> "
-                  "Full Name Index</a></li>\n")
+        if not do_print:
+            outfile.write("          <li><a href=\"index.html\"><span class=\"fa fa-list\"></span> Full Name "
+                          "Index</a></li>\n")
     outfile.write("        </ul>\n")
     outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -1624,7 +1626,8 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
         tmpnamelist = specific_name.variations.split(";")
         if (x != "") and (x in tmpnamelist):
             namefile = name_to_filename(n)
-            outfile.write("      <li><a href=\"" + namefile + ".html\">" + format_name_string(n) + "</a></li>\n")
+            outfile.write("      <li><a href=\"" + rel_link_prefix(do_print, "") + namefile + ".html\">" +
+                          format_name_string(n) + "</a></li>\n")
     outfile.write("      </ul>\n")
     outfile.write("    </section>\n")
 
@@ -2220,14 +2223,15 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
         common_html_header(outfile, "Name Index", "../")
     outfile.write("    <header id=\"name_index\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Name Index</h1>\n")
-    outfile.write("      <nav>\n")
-    outfile.write("        <ul>\n")
-    outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") + NAME_SUM_URL +
-                  "\"><span class=\"fa fa-line-chart\"></span> Name Summary</a></li>\n")
-    outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + SPECIES_URL +
-                  "\"><span class=\"fa fa-check-circle\"></span> Accepted Species</a></li>\n")
-    outfile.write("        </ul>\n")
-    outfile.write("      </nav>\n")
+    if not do_print:
+        outfile.write("      <nav>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") + NAME_SUM_URL +
+                      "\"><span class=\"fa fa-line-chart\"></span> Name Summary</a></li>\n")
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + SPECIES_URL +
+                      "\"><span class=\"fa fa-check-circle\"></span> Accepted Species</a></li>\n")
+        outfile.write("        </ul>\n")
+        outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
     outfile.write("    <p>\n")
     outfile.write("      This is an index of every scientific name (including all alternate spellings) which have "
@@ -2521,8 +2525,9 @@ def write_species_photo_page(outfile, fname, species, common_name, caption, pn, 
     else:
         outfile.write("          <li><a href=\"../u_" + species +
                       ".html\"><span class=\"fa fa-info-circle\"></span> Species page</a></li>\n")
-    outfile.write("          <li><a href=\"../" + PHOTO_URL +
-                  "\"><span class=\"fa fa-camera\"></span> All species photos</a></li>\n")
+    if not do_print:
+        outfile.write("          <li><a href=\"../" + PHOTO_URL +
+                      "\"><span class=\"fa fa-camera\"></span> All species photos</a></li>\n")
     outfile.write("        </ul>\n")
     outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -3032,8 +3037,9 @@ def write_specific_art_page(outfile, art, backurl, backtext, do_print):
     if art.cite_key != "n/a":
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../references/") + art.cite_key +
                       ".html\">Reference</a></li>\n")
-    outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + backurl + "\">" + backtext +
-                  "</a></li>\n")
+    if not do_print:
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + backurl + "\">" + backtext +
+                      "</a></li>\n")
     outfile.write("        </ul>\n")
     outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
