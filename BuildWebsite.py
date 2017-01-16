@@ -1557,12 +1557,13 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
 
     outfile.write("    <header id=\"sn_" + specific_name.name + ".html\" class=\"tabular_page\">\n")
     outfile.write("      <h1 class=\"nobookmark\">" + format_name_string(specific_name.name) + "</h1>\n")
-    outfile.write("      <nav>\n")
-    outfile.write("        <ul>\n")
-    outfile.write("          <li><a href=\"index.html\"><span class=\"fa fa-list\"></span> "
-                  "Full Name Index</a></li>\n")
-    outfile.write("        </ul>\n")
-    outfile.write("      </nav>\n")
+    if not do_print:
+        outfile.write("      <nav>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("          <li><a href=\"index.html\"><span class=\"fa fa-list\"></span> "
+                      "Full Name Index</a></li>\n")
+        outfile.write("        </ul>\n")
+        outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
     outfile.write("\n")
     outfile.write("    <section class=\"topspsection\">\n")
