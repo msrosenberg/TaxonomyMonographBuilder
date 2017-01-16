@@ -1340,8 +1340,8 @@ def calculate_binomial_yearly_cnts(name, refdict, citelist):
     return name_by_year
 
 
-def write_binomial_name_page(name, name_by_year, refdict, citelist, name_table, species_name, logfile, outfile,
-                             do_print):
+def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, name_table, species_name, logfile,
+                             outfile, do_print):
     """ create a page listing all citations using a specific binomial """
     # find citations for this name
     cites = []
@@ -1392,7 +1392,7 @@ def write_binomial_name_page(name, name_by_year, refdict, citelist, name_table, 
         outfile.write("    </script>\n")
         common_header_part2(outfile, "", False)
 
-    outfile.write("    <header id=\"" + name + ".html\" class=\"tabular_page\">\n")
+    outfile.write("    <header id=\"" + namefile + ".html\" class=\"tabular_page\">\n")
     outfile.write("      <h1 class=\"nobookmark\">" + format_name_string(name) + "</h1>\n")
     outfile.write("      <nav>\n")
     outfile.write("        <ul>\n")
@@ -1530,7 +1530,7 @@ def calculate_specific_name_yearly_cnts(specific_name, binomial_names, binomial_
 def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cnts, logfile, outfile, do_print):
     """ create a page with the history of a specific name """
     if do_print:
-        start_page_division(outfile, "name_page")
+        start_page_division(outfile, "base_page")
     else:
         common_header_part1(outfile, specific_name.name, "../")
         outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
@@ -2312,12 +2312,12 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
         sname = match_specific_name(name, specific_names)
         namefile = name_to_filename(name)
         if do_print:
-            write_binomial_name_page(name, binomial_usage_cnts_by_year[name], refdict, citelist, name_table, sname,
-                                     logfile, outfile, True)
+            write_binomial_name_page(name, namefile, binomial_usage_cnts_by_year[name], refdict, citelist, name_table,
+                                     sname, logfile, outfile, True)
         else:
             with codecs.open(WEBOUT_PATH + "names/" + namefile + ".html", "w", "utf-8") as suboutfile:
-                write_binomial_name_page(name, binomial_usage_cnts_by_year[name], refdict, citelist, name_table,
-                                         sname, logfile, suboutfile, False)
+                write_binomial_name_page(name, namefile, binomial_usage_cnts_by_year[name], refdict, citelist,
+                                         name_table, sname, logfile, suboutfile, False)
     for name in specific_names:
         if do_print:
             write_specific_name_page(name, unique_names, refdict, binomial_usage_cnts_by_year, logfile, outfile,
