@@ -2262,9 +2262,9 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
 
     outfile.write("      </ul>\n")
     outfile.write("    </div>\n")
-    outfile.write("    <div class=\"namecol\">\n")
+    outfile.write("    <div class=\"namecol pagebreak\">\n")
     outfile.write("      <h3 class=\"bookmark2\">Specific Names</h3>\n")
-    outfile.write("      <ul class=\"namelist\">\n")
+    outfile.write("      <ul class=\"spnamelist\">\n")
     outfile.write("\n")
     specific_year_cnts = {}
     for name in specific_names:
