@@ -4082,7 +4082,7 @@ def write_morphology_index(morphlist, do_print, outfile):
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
     outfile.write("\n")
-    outfile.write("     <ul>\n")
+    outfile.write("     <ul class=\"morphlist\">\n")
     uniquelist = {}
     for m in morphlist:
         if m.character in uniquelist:
