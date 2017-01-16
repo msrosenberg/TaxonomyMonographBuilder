@@ -3955,13 +3955,13 @@ def write_phylogeny_pages(outfile, do_print, refdict, logfile):
     outfile.write("\n")
     outfile.write("    <section class=\"spsection\">\n")
     outfile.write("      <h2 class=\"bookmark2\">Subgenera Phylogeny</h2>\n")
-    outfile.write("      <object id=\"subgenera_phylogeny\" data=\"" + media_path + "images/tree_subgenera.svg\" "
-                  "type=\"image/svg+xml\"></object>\n")
+    outfile.write("      <object id=\"subgenera_phylogeny\" class=\"tree_figure\" data=\"" + media_path +
+                  "images/tree_subgenera.svg\" type=\"image/svg+xml\"></object>\n")
     outfile.write("    </section>\n")
     outfile.write("    <section class=\"spsection\">\n")
     outfile.write("      <h2 class=\"bookmark2\">Species Phylogeny</h2>\n")
-    outfile.write("      <object id=\"species_phylogeny\" data=\"" + media_path + "images/tree_species.svg\" "
-                  "type=\"image/svg+xml\"></object>\n")
+    outfile.write("      <object id=\"species_phylogeny\" class=\"tree_figure\" data=\"" + media_path +
+                  "images/tree_species.svg\" type=\"image/svg+xml\"></object>\n")
     outfile.write("    </section>\n")
     outfile.write("\n")
     if do_print:
