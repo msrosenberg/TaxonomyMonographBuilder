@@ -2246,7 +2246,7 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
     outfile.write("    <div class=\"namecol\">\n")
     outfile.write("      <h3 class=\"bookmark2\">Binomials (and other Compound Names)</h3>\n")
     outfile.write("      <ul class=\"namelist\">\n")
-    outfile.write("\n")
+    # outfile.write("\n")
     for name in unique_names:
         # sname = match_specific_name(name, specific_names)
         namefile = name_to_filename(name)
@@ -2265,7 +2265,7 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
     outfile.write("    <div class=\"namecol pagebreak\">\n")
     outfile.write("      <h3 class=\"bookmark2\">Specific Names</h3>\n")
     outfile.write("      <ul class=\"spnamelist\">\n")
-    outfile.write("\n")
+    # outfile.write("\n")
     specific_year_cnts = {}
     for name in specific_names:
         outfile.write("        <li><a href=\"" + rel_link_prefix(do_print, "") + "sn_" + name.name + ".html\">" +
