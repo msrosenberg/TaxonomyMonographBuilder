@@ -1112,18 +1112,25 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
             # outfile.write("      <td style=\"text-align: center\"><img src=\"../images/gears.png\" alt=\"Computed\" "
             #               "title=\"Computed\" /></td>\n")
             outfile.write("      <td><span class=\"fa fa-gears\"></span> Computed</td>\n")
-        elif n.source in refdict:  # another reference
-            crossref = refdict[n.source]
-            outfile.write("      <td><a href=\"" + rel_link_prefix(do_print, "../references/") +
-                          crossref.cite_key + ".html\">" + crossref.citation + "</a></td>\n")
-        else:  # should start with a >
-            tmpsource = n.source[1:]
-            tmpsource = tmpsource.replace("MSR:", "")
-            tmpsource = tmpsource.replace("/", "/<br />")
-            tmpsource = tmpsource.replace("geography", "<span class=\"fa fa-map-o\"></span> Geography")
-            tmpsource = tmpsource.replace("synonymy", "<span class=\"fa fa-exchange\"></span> Synonymy")
-            outfile.write("      <td>" + tmpsource + "</td>\n")
-            # outfile.write("      <td>" + n.source[1:] + "</td>\n")
+        else:
+            if ";" in n.source:
+                source_list = n.source.split(";")
+            else:
+                source_list = [n.source]
+            source_strs = []
+            for source in source_list:
+                if source in refdict:  # another reference
+                    crossref = refdict[source]
+                    source_strs.append("<a href=\"" + rel_link_prefix(do_print, "../references/") +
+                                       crossref.cite_key + ".html\">" + crossref.citation + "</a>")
+                else:  # should start with a >
+                    tmpsource = source[1:]
+                    tmpsource = tmpsource.replace("MSR:", "")
+                    tmpsource = tmpsource.replace("/", "/<br />")
+                    tmpsource = tmpsource.replace("geography", "<span class=\"fa fa-map-o\"></span> Geography")
+                    tmpsource = tmpsource.replace("synonymy", "<span class=\"fa fa-exchange\"></span> Synonymy")
+                    source_strs.append(tmpsource)
+            outfile.write("      <td>" + ", ".join(source_strs) + "</td>\n")
 
         # notes
         if notecnt > 0:
