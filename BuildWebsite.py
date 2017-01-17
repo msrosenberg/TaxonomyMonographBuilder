@@ -4526,6 +4526,7 @@ def print_table_of_contents(outfile, species_list):
     outfile.write("       <li><a href=\"#" + SYST_URL + "\">Systematics Overview</a></li>\n")
     outfile.write("       <li><a href=\"#" + TREE_URL + "\">Phylogeny</a></li>\n")
     outfile.write("       <li><a href=\"#" + LIFECYCLE_URL + "\">Life Cycle</a></li>\n")
+    outfile.write("       <li><a href=\"#" + MORPH_URL + "\">Morphology</a></li>\n")
     # outfile.write("       <li><a href=\"#" + MAP_URL + "\">Biogeography</a></li>\n")
     # outfile.write("       <li>Species\n")
     outfile.write("       <li><a href=\"#" + SPECIES_URL + "\">Species</a>\n")
@@ -4535,6 +4536,7 @@ def print_table_of_contents(outfile, species_list):
     outfile.write("         </ul>\n")
     outfile.write("       </li>\n")
 
+    outfile.write("       <li><a href=\"#name_index\">Name Index</a></li>\n")
     outfile.write("       <li><a href=\"#" + PHOTO_URL + "\">Photo Index</a></li>\n")
     outfile.write("       <li><a href=\"#" + VIDEO_URL + "\">Video Index</a></li>\n")
     outfile.write("       <li>Art\n")
