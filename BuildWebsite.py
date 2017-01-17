@@ -4,6 +4,7 @@ import datetime
 import random
 import os
 import shutil
+import re
 
 WEBOUT_PATH = "webout/"
 MEDIA_PATH = "media/"
@@ -559,13 +560,6 @@ def create_blank_index(fname):
         outfile.write("</html>\n")
 
 
-# def convert_link(link, path, do_print):
-#     if do_print:
-#         return "#" + link
-#     else:
-#         return path + "/" + link
-
-
 def rel_link_prefix(do_print, prefix):
     if do_print:
         return "#"
@@ -580,22 +574,11 @@ def abs_link_prefix(do_absolute):
         return ""
 
 
-# def ref_file_link(do_print):
-#     # if do_print:
-#     #     return "print2.html"
-#     # else:
-#     #     return ""
-#     return ""
-
-
 def format_reference_full(ref, do_print, logfile):
     if ref.cite_key == "<pending>":
         return ref.formatted_html
     else:
-        # x = ref_file_link(do_print)
         try:
-            # return ("<a href=\"" + x + rel_link_prefix(do_print, "references/") + ref.cite_key + ".html\">" +
-            #         ref.formatted_html + "</a>")
             return ("<a href=\"" + rel_link_prefix(do_print, "references/") + ref.cite_key + ".html\">" +
                     ref.formatted_html + "</a>")
         except LookupError:
@@ -610,26 +593,36 @@ def format_reference_cite(ref, do_print, do_author, logfile):
     if ref.cite_key == "<pending>":
         return outstr
     else:
-        # x = ref_file_link(do_print)
         try:
-            # return ("<a href=\"" + x + rel_link_prefix(do_print, "references/") + ref.cite_key +
-            #         ".html\">" + outstr + "</a>")
             return ("<a href=\"" + rel_link_prefix(do_print, "references/") + ref.cite_key +
                     ".html\">" + outstr + "</a>")
         except LookupError:
             report_error(logfile, "missing label: " + ref.cite_key)
 
 
-# def format_reference_author(ref, do_print, logfile):
-#     outstr = ref.author() + " (" + str(ref.year()) + ")"
-#     if ref.cite_key == "<pending>":
-#         return outstr
-#     else:
-#         try:
-#             return ("<a href=\"" + rel_link_prefix(do_print, "references/") + ref.cite_key +
-#                     ".html\">" + outstr + "</a>")
-#         except LookupError:
-#             report_error(logfile, "missing label: " + ref.cite_key)
+def replace_reference_in_string(instr, refdict, do_print, logfile):
+    search_str = r"\[\[(?P<key>.+?),(?P<format>.+?)\]\]"
+    # for every citation reference in the string
+    for match in re.finditer(search_str, instr):
+        # create the new link text
+        ref = refdict[match.group("key")]
+        if match.group("format") == ".out":
+            link_str = format_reference_cite(ref, do_print, AUTHOR_OUT, logfile)
+        elif match.group("format") == ".in":
+            link_str = format_reference_cite(ref, do_print, AUTHOR_IN, logfile)
+        else:
+            link_str = "<a href=\"" + rel_link_prefix(do_print, "references/") + ref.cite_key + ".html\">" + \
+                       match.group("format") + "</a>"
+        # replace the cross-reference with the correct text
+        instr = re.sub(search_str, link_str, instr, 1)
+    return instr
+
+
+def replace_references(in_list, refdict, do_print, logfile):
+    out_list = []
+    for line in in_list:
+        out_list.append(replace_reference_in_string(line, refdict, do_print, logfile))
+    return out_list
 
 
 def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, languages, do_print, outfile):
@@ -1033,7 +1026,6 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
                 else:
                     outfile.write("      <td>" + n.common + "</td>\n")
             outfile.write("      <td>" + n.where + "</td>\n")
-            # uniquelist = uniquelist - {nref}
             uniquelist -= {nref}
         else:
             outfile.write("      <td>&nbsp;</td>\n")
@@ -4625,7 +4617,7 @@ def build_site():
             with codecs.open(WEBOUT_PATH + SYST_URL, "w", "utf-8") as outfile:
                 write_systematics_overview(subgenera, species, refdict, outfile, False, logfile)
             with codecs.open(WEBOUT_PATH + COMMON_URL, "w", "utf-8") as outfile:
-                write_common_names_pages(outfile, common_name_data, False)
+                write_common_names_pages(outfile, replace_references(common_name_data, refdict, False, logfile), False)
             with codecs.open(WEBOUT_PATH + PHOTO_URL, "w", "utf-8") as outfile:
                 write_photo_index(species, photos, False, outfile, logfile)
             write_all_art_pages(art, False, None, logfile)
@@ -4650,7 +4642,7 @@ def build_site():
                 start_print(printfile)
                 print_specific_pages(printfile, species)
                 write_introduction(printfile, species, True)
-                write_common_names_pages(printfile, common_name_data, True)
+                write_common_names_pages(printfile, replace_references(common_name_data, refdict, True, logfile), True)
                 write_systematics_overview(subgenera, species, refdict, printfile, True, logfile)
                 write_phylogeny_pages(printfile, True, refdict, logfile)
                 write_life_cycle_pages(printfile, True)
