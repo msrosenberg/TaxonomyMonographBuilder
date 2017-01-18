@@ -5,9 +5,13 @@ import random
 import os
 import shutil
 import re
+# external dependencies
+import pygal
+import pygal.style
 
 WEBOUT_PATH = "webout/"
 MEDIA_PATH = "media/"
+TMP_PATH = "temp/"
 
 SPECIES_URL = "uca_species.html"
 REF_URL = "uca_references.html"
@@ -625,130 +629,181 @@ def replace_references(in_list, refdict, do_print, logfile):
     return out_list
 
 
+def chart_style():
+    custom_style = pygal.style.DefaultStyle
+    custom_style.background = "transparent"
+    custom_style.plot_background = "transparent"
+    print(custom_style)
+    return custom_style
+
+
+def create_pie_chart_file(filename, data):
+    pie_chart = pygal.Pie(style=chart_style())
+    datalist = list(data.keys())
+    datalist.sort()
+    for d in datalist:
+        pie_chart.add(d, data[d])
+    pie_chart.render_to_file(TMP_PATH + filename)
+
+
+def create_bar_chart_file(filename, data, minx, maxx, y):
+    bar_chart = pygal.Bar(show_legend=False, width=1500, height=500, include_x_axis=True, x_label_rotation=-30,
+                          x_labels_major_every=10, show_minor_x_labels=False, style=chart_style())
+    bar_chart.x_labels = map(str, range(minx, maxx+1))
+    y_list = []
+    for d in data:
+        y_list.append(d[y])
+    bar_chart.add("", y_list)
+    bar_chart.render_to_file(TMP_PATH + filename)
+
+
+def create_stacked_bar_chart_file(filename, data, minx, maxx, cols):
+    bar_chart = pygal.StackedBar(legend_at_bottom=True, width=1500, height=500, include_x_axis=True,
+                                 x_label_rotation=-30, x_labels_major_every=10, show_minor_x_labels=False,
+                                 style=chart_style())
+    bar_chart.x_labels = map(str, range(minx, maxx+1))
+    for y in cols:
+        y_list = []
+        for d in data:
+            y_list.append(d[y[1]])
+        bar_chart.add(y[0], y_list)
+    bar_chart.render_to_file(TMP_PATH + filename)
+
+
+def create_line_chart_file(filename, data, minx, maxx, y):
+    line_chart = pygal.Line(show_legend=False, width=1500, height=500, include_x_axis=True, x_label_rotation=-30,
+                            x_labels_major_every=10, show_minor_x_labels=False, style=chart_style())
+    line_chart.x_labels = map(str, range(minx, maxx+1))
+    y_list = []
+    for d in data:
+        y_list.append(d[y])
+    line_chart.add("", y_list, show_dots=False)
+    line_chart.render_to_file(TMP_PATH + filename)
+
+
 def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, languages, do_print, outfile):
-    # reference summary page does not work in print version for now
     if do_print:
         start_page_division(outfile, "")
     else:
         common_header_part1(outfile, "Fiddler Crab Reference Summary", "")
-    outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
-    outfile.write("    <script type=\"text/javascript\">\n")
-    outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
-    outfile.write("      google.setOnLoadCallback(drawChart);\n")
-    outfile.write("      function drawChart() {\n")
-    outfile.write("        var data1 = google.visualization.arrayToDataTable([\n")
-    outfile.write("          ['Year', 'Cumulative Publications'],\n")
-    for y in year_data:
-        outfile.write("          ['" + str(y[0]) + "', " + str(y[2]) + "],\n")
-    outfile.write("        ]);\n")
-    outfile.write("\n")
-    outfile.write("        var data2 = google.visualization.arrayToDataTable([\n")
-    outfile.write("          ['Year', 'Publications'],\n")
-    for y in year_data:
-        outfile.write("          ['" + str(y[0]) + "', " + str(y[1]) + "],\n")
-    outfile.write("        ]);\n")
-    outfile.write("\n")
-    """
-    outfile.write("        var data3 = google.visualization.arrayToDataTable([\n")
-    outfile.write("          ['Year', 'Citations in DB', 'Pending'],\n")
-    for y in yearData:
-        outfile.write("          ['"+str(y[0])+"', "+str(y[3])+", "+str(y[1]-y[3])+"],\n")
-    outfile.write("        ]);\n")
-    outfile.write("\n")
-    """
-    outfile.write("        var data4 = google.visualization.arrayToDataTable([\n")
-    outfile.write("          ['Year', 'Publications'],\n")
-    for y in year_data_1900:
-        outfile.write("          ['" + str(y[0]) + "', " + str(y[1]) + "],\n")
-    outfile.write("        ]);\n")
-    outfile.write("\n")
-    outfile.write("        var data5 = google.visualization.arrayToDataTable([\n")
-    outfile.write("          ['Year', 'Citations in DB', 'Pending'],\n")
-    for y in year_data_1900:
-        outfile.write("          ['" + str(y[0]) + "', " + str(y[2]) + ", " + str(y[1]-y[2]) + "],\n")
-    outfile.write("        ]);\n")
+        outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
+        outfile.write("    <script type=\"text/javascript\">\n")
+        outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
+        outfile.write("      google.setOnLoadCallback(drawChart);\n")
+        outfile.write("      function drawChart() {\n")
+        outfile.write("        var data1 = google.visualization.arrayToDataTable([\n")
+        outfile.write("          ['Year', 'Cumulative Publications'],\n")
+        for y in year_data:
+            outfile.write("          ['" + str(y[0]) + "', " + str(y[2]) + "],\n")
+        outfile.write("        ]);\n")
+        outfile.write("\n")
+        outfile.write("        var data2 = google.visualization.arrayToDataTable([\n")
+        outfile.write("          ['Year', 'Publications'],\n")
+        for y in year_data:
+            outfile.write("          ['" + str(y[0]) + "', " + str(y[1]) + "],\n")
+        outfile.write("        ]);\n")
+        outfile.write("\n")
+        """
+        outfile.write("        var data3 = google.visualization.arrayToDataTable([\n")
+        outfile.write("          ['Year', 'Citations in DB', 'Pending'],\n")
+        for y in yearData:
+            outfile.write("          ['"+str(y[0])+"', "+str(y[3])+", "+str(y[1]-y[3])+"],\n")
+        outfile.write("        ]);\n")
+        outfile.write("\n")
+        """
+        outfile.write("        var data4 = google.visualization.arrayToDataTable([\n")
+        outfile.write("          ['Year', 'Publications'],\n")
+        for y in year_data_1900:
+            outfile.write("          ['" + str(y[0]) + "', " + str(y[1]) + "],\n")
+        outfile.write("        ]);\n")
+        outfile.write("\n")
+        outfile.write("        var data5 = google.visualization.arrayToDataTable([\n")
+        outfile.write("          ['Year', 'Citations in DB', 'Pending'],\n")
+        for y in year_data_1900:
+            outfile.write("          ['" + str(y[0]) + "', " + str(y[2]) + ", " + str(y[1]-y[2]) + "],\n")
+        outfile.write("        ]);\n")
 
-    outfile.write("        var data6 = google.visualization.arrayToDataTable([\n")
-    outfile.write("          ['Language', 'Count'],\n")
-    langlist = list(languages.keys())
-    langlist.sort()
-    for l in langlist:
-        outfile.write("          ['" + l + "', " + str(languages[l]) + "],\n")
-    outfile.write("        ]);\n")
+        outfile.write("        var data6 = google.visualization.arrayToDataTable([\n")
+        outfile.write("          ['Language', 'Count'],\n")
+        langlist = list(languages.keys())
+        langlist.sort()
+        for l in langlist:
+            outfile.write("          ['" + l + "', " + str(languages[l]) + "],\n")
+        outfile.write("        ]);\n")
 
-    outfile.write("\n")
-    outfile.write("        var options1 = {\n")
-    outfile.write("          title: \"Cumulative References by Year\", \n")
-    outfile.write("          legend: { position: 'none' }\n")
-    outfile.write("        };\n")
-    outfile.write("\n")
-    outfile.write("        var options2 = {\n")
-    outfile.write("          title: \"References by Year\", \n")
-    outfile.write("          legend: { position: 'none' }\n")
-    outfile.write("        };\n")
-    outfile.write("\n")
-    """
-    outfile.write("        var options3 = {\n")
-    outfile.write("          title: \"References with Citation Data in Database\", \n")
-    outfile.write("          legend: { position: 'bottom' },\n")
-    outfile.write("          isStacked: true\n")
-    outfile.write("        };\n")
-    outfile.write("\n")
-    """
-    outfile.write("        var options4 = {\n")
-    outfile.write("          title: \"References by Year (since 1900)\", \n")
-    outfile.write("          legend: { position: 'none' },\n")
-    outfile.write("          bar: { groupWidth: '80%' }\n")
-    outfile.write("        };\n")
-    outfile.write("\n")
-    outfile.write("        var options5 = {\n")
-    outfile.write("          title: \"References with Citation Data in Database (since 1900; all pre-1900 "
-                  "literature is complete)\", \n")
-    outfile.write("          legend: { position: 'bottom' },\n")
-    outfile.write("          isStacked: true,\n")
-    outfile.write("          bar: { groupWidth: '80%' }\n")
-    outfile.write("        };\n")
-    outfile.write("\n")
+        outfile.write("\n")
+        outfile.write("        var options1 = {\n")
+        outfile.write("          title: \"Cumulative References by Year\", \n")
+        outfile.write("          legend: { position: 'none' }\n")
+        outfile.write("        };\n")
+        outfile.write("\n")
+        outfile.write("        var options2 = {\n")
+        outfile.write("          title: \"References by Year\", \n")
+        outfile.write("          legend: { position: 'none' }\n")
+        outfile.write("        };\n")
+        outfile.write("\n")
+        """
+        outfile.write("        var options3 = {\n")
+        outfile.write("          title: \"References with Citation Data in Database\", \n")
+        outfile.write("          legend: { position: 'bottom' },\n")
+        outfile.write("          isStacked: true\n")
+        outfile.write("        };\n")
+        outfile.write("\n")
+        """
+        outfile.write("        var options4 = {\n")
+        outfile.write("          title: \"References by Year (since 1900)\", \n")
+        outfile.write("          legend: { position: 'none' },\n")
+        outfile.write("          bar: { groupWidth: '80%' }\n")
+        outfile.write("        };\n")
+        outfile.write("\n")
+        outfile.write("        var options5 = {\n")
+        outfile.write("          title: \"References with Citation Data in Database (since 1900; all pre-1900 "
+                      "literature is complete)\", \n")
+        outfile.write("          legend: { position: 'bottom' },\n")
+        outfile.write("          isStacked: true,\n")
+        outfile.write("          bar: { groupWidth: '80%' }\n")
+        outfile.write("        };\n")
+        outfile.write("\n")
 
-    outfile.write("        var options6 = {\n")
-    outfile.write("          title: \"Primary Language of References\", \n")
-    outfile.write("          titleTextStle: { fontSize: '16' },\n")
-    # outfile.write("          isStacked: true,\n")
-    # outfile.write("          bar: { groupWidth: '80%' }\n")
-    outfile.write("        };\n")
-    outfile.write("\n")
+        outfile.write("        var options6 = {\n")
+        outfile.write("          title: \"Primary Language of References\", \n")
+        outfile.write("          titleTextStle: { fontSize: '16' },\n")
+        # outfile.write("          isStacked: true,\n")
+        # outfile.write("          bar: { groupWidth: '80%' }\n")
+        outfile.write("        };\n")
+        outfile.write("\n")
 
-    outfile.write("        var chart = new google.visualization.LineChart"
-                  "(document.getElementById('chart_div'));\n")
-    outfile.write("        chart.draw(data1, options1);\n")
-    outfile.write("        var chart2 = new google.visualization.ColumnChart"
-                  "(document.getElementById('chart2_div'));\n")
-    outfile.write("        chart2.draw(data2, options2);\n")
-    # outfile.write("        var chart3 = new google.visualization.ColumnChart
-    #               "(document.getElementById('chart3_div'));\n")
-    # outfile.write("        chart3.draw(data3, options3);\n")
-    outfile.write("        var chart4 = new google.visualization.ColumnChart"
-                  "(document.getElementById('chart4_div'));\n")
-    outfile.write("        chart4.draw(data4, options4);\n")
-    outfile.write("        var chart5 = new google.visualization.ColumnChart"
-                  "(document.getElementById('chart5_div'));\n")
-    outfile.write("        chart5.draw(data5, options5);\n")
-    outfile.write("        var chart6 = new google.visualization.PieChart"
-                  "(document.getElementById('chart6_div'));\n")
-    outfile.write("        chart6.draw(data6, options6);\n")
-    outfile.write("      }\n")
-    outfile.write("    </script>\n")
-    if not do_print:
+        outfile.write("        var chart = new google.visualization.LineChart"
+                      "(document.getElementById('chart_div'));\n")
+        outfile.write("        chart.draw(data1, options1);\n")
+        outfile.write("        var chart2 = new google.visualization.ColumnChart"
+                      "(document.getElementById('chart2_div'));\n")
+        outfile.write("        chart2.draw(data2, options2);\n")
+        # outfile.write("        var chart3 = new google.visualization.ColumnChart
+        #               "(document.getElementById('chart3_div'));\n")
+        # outfile.write("        chart3.draw(data3, options3);\n")
+        outfile.write("        var chart4 = new google.visualization.ColumnChart"
+                      "(document.getElementById('chart4_div'));\n")
+        outfile.write("        chart4.draw(data4, options4);\n")
+        outfile.write("        var chart5 = new google.visualization.ColumnChart"
+                      "(document.getElementById('chart5_div'));\n")
+        outfile.write("        chart5.draw(data5, options5);\n")
+        outfile.write("        var chart6 = new google.visualization.PieChart"
+                      "(document.getElementById('chart6_div'));\n")
+        outfile.write("        chart6.draw(data6, options6);\n")
+        outfile.write("      }\n")
+        outfile.write("    </script>\n")
         common_header_part2(outfile, "", False)
 
     outfile.write("    <header id=\"" + REF_SUM_URL + "\">\n")
-    outfile.write("      <h1>Summary of References</h1>\n")
-    outfile.write("      <nav>\n")
-    outfile.write("        <ul>\n")
-    outfile.write("          <li><a href=\"" + REF_URL +
-                  "\"><span class=\"fa fa-list\"></span> Full Reference List</a></li>\n")
-    outfile.write("        </ul>\n")
-    outfile.write("      </nav>\n")
+    outfile.write("      <h1 class=\"bookmark1\">Summary of References</h1>\n")
+    if not do_print:
+        outfile.write("      <nav>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") + REF_URL +
+                      "\"><span class=\"fa fa-list\"></span> Full Reference List</a></li>\n")
+        outfile.write("        </ul>\n")
+        outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
     outfile.write("\n")
     outfile.write("    <p>\n")
@@ -756,18 +811,65 @@ def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, langua
                   format(datetime.date.isoformat(datetime.date.today())))
     outfile.write("      " + str(cite_count) + " of " + str(nrefs) +
                   " references  have had citation data recorded.\n")
-    outfile.write("      See also the <a href=\"names/" + NAME_SUM_URL + "\">name summary page</a> for information "
-                  "on reference patterns to specific species.\n")
+    outfile.write("      See also the <a href=\"" + rel_link_prefix(do_print, "names/") + NAME_SUM_URL +
+                  "\">name summary page</a> for information on reference patterns to specific species.\n")
     outfile.write("    </p>\n")
-    outfile.write("    <div id=\"chart6_div\"></div>\n")
-    outfile.write("    <div id=\"chart2_div\"></div>\n")
-    outfile.write("    <div id=\"chart4_div\"></div>\n")
-    # outfile.write("    <div id=\"chart3_div\"></div>\n")
-    outfile.write("    <div id=\"chart5_div\"></div>\n")
-    outfile.write("    <div id=\"chart_div\"></div>\n")
     if do_print:
+        # pie chart of languages
+        filename = "language_pie.svg"
+        create_pie_chart_file(filename, languages)
+        outfile.write("    <h3 class=\"nobookmark\">Primary Language of References</h3>\n")
+        outfile.write("    <figure>\n")
+        outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"pie_chart\" />\n")
+        outfile.write("    </figure>\n")
+
+        # pubs per year bar chart
+        miny = year_data[0][0]
+        maxy = CURRENT_YEAR
+        filename = "pubs_per_year_bar.svg"
+        create_bar_chart_file(filename, year_data, miny, maxy, 1)
+        outfile.write("    <h3 class=\"nobookmark\">References by Year</h3>\n")
+        outfile.write("    <figure>\n")
+        outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
+        outfile.write("    </figure>\n")
+
+        # pubs per year since 1900 bar chart
+        filename = "pubs_per_year_1900_bar.svg"
+        create_bar_chart_file(filename, year_data_1900, 1900, maxy, 1)
+        outfile.write("    <h3 class=\"nobookmark\">References by Year (since 1900)</h3>\n")
+        outfile.write("    <figure>\n")
+        outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
+        outfile.write("    </figure>\n")
+
+        # citation data in database
+        filename = "pubs_per_year_1900_complete_bar.svg"
+        tmp_dat = []
+        for y in year_data_1900:
+            tmp_dat.append([y[2], y[1] - y[2]])
+        dat_info = [["Citations in DB", 0], ["Pending", 1]]
+        create_stacked_bar_chart_file(filename, tmp_dat, 1900, maxy, dat_info)
+        outfile.write("    <h3 class=\"nobookmark\">References with Citation Data in Database (since 1900; all "
+                      "pre-1900 literature is complete)</h3>\n")
+        outfile.write("    <figure>\n")
+        outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
+        outfile.write("    </figure>\n")
+
+        # cumulative publications line chart
+        filename = "cumulative_pubs_line.svg"
+        create_line_chart_file(filename, year_data, miny, maxy, 2)
+        outfile.write("    <h3 class=\"nobookmark\">Cumulative References by Year</h3>\n")
+        outfile.write("    <figure>\n")
+        outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"line_chart\" />\n")
+        outfile.write("    </figure>\n")
+
         end_page_division(outfile)
     else:
+        outfile.write("    <div id=\"chart6_div\"></div>\n")
+        outfile.write("    <div id=\"chart2_div\"></div>\n")
+        outfile.write("    <div id=\"chart4_div\"></div>\n")
+        # outfile.write("    <div id=\"chart3_div\"></div>\n")
+        outfile.write("    <div id=\"chart5_div\"></div>\n")
+        outfile.write("    <div id=\"chart_div\"></div>\n")
         common_html_footer(outfile, "")
 
 
@@ -1374,20 +1476,7 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
         if c.name_note != ".":
             notecnt += 1
         uniquecites |= {c.cite_key}
-    # name_by_year = {y: 0 for y in range(START_YEAR, 2018)}
-    # for c in uniquecites:
-    #     y = refdict[c].citation
-    #     y = y[y.find("(") + 1:y.find(")")]
-    #     if (y != "?") and (y.lower() != "in press"):
-    #         if y[0] == "~":
-    #             y = y[1:]
-    #         if len(y) > 4:
-    #             y = y[:4]
-    #         y = int(y)
-    #         if START_YEAR <= y <= CURRENT_YEAR:
-    #             name_by_year[y] += 1
 
-    # with codecs.open(WEBOUT_PATH + "names/test_" + namefile + ".html", "w", "utf-8") as outfile:
     if do_print:
         start_page_division(outfile, "name_page")
     else:
@@ -1399,11 +1488,8 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
         outfile.write("      function drawChart() {\n")
         miny = START_YEAR
         maxy = CURRENT_YEAR
-        # byears = {y: 0 for y in range(miny, maxy+1)}
-        # for y in name_by_year:
-        #     byears[y] = name_by_year[y]
         maxcnt = max(name_by_year.values())
-        setup_chronology_chart("Number of Uses of Name per Year", 0, miny, maxy, maxcnt, name_by_year, False, outfile)
+        setup_chronology_chart(0, miny, maxy, maxcnt, name_by_year, outfile)
         outfile.write("      }\n")
         outfile.write("    </script>\n")
         common_header_part2(outfile, "", False)
@@ -1425,11 +1511,11 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
     outfile.write("\n")
 
     if not do_print:
-        write_chronology_chart_div(0, outfile)
+        write_chronology_chart_div(0, outfile, "Number of Uses of Name per Year", False)
         outfile.write("\n")
 
     # write name table
-    outfile.write("    <h3 class=\"nobookmark\">Publications Using this Name</h3>\n")
+    outfile.write("    <h3 class=\"nobookmark\" style=\"clear: both\">Publications Using this Name</h3>\n")
     outfile.write("    <table class=\"citetable\">\n")
     outfile.write("      <tr>\n")
     outfile.write("        <th class=\"citation_col\">Citation</th>\n")
@@ -1449,84 +1535,6 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
         end_page_division(outfile)
     else:
         common_html_footer(outfile, "../")
-
-
-"""
-def create_specific_name_page(name, binomial_names, refdict, logfile):
-    # create a page with the history of a specific name
-    with codecs.open(WEBOUT_PATH + "names/sn_" + name.name + ".html", "w", "utf-8") as outfile:
-        common_html_header(outfile, name.name, "../")
-        outfile.write("    <header>\n")
-        outfile.write("      <h1>" + format_name_string(name.name) + "</h1>\n")
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"index.html\"><span class=\"fa fa-list\"></span> "
-                      "Full Name Index</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-        outfile.write("    </header>\n")
-        outfile.write("\n")
-        outfile.write("    <section class=\"topspsection\">\n")
-        outfile.write("      <h3>History</h3>\n")
-        outfile.write("      <dl>\n")
-        if name.synonym != ".":
-            if name.synonym in name.variations:
-                outfile.write("        <dt>Species</dt>\n")
-            else:
-                outfile.write("        <dt>Primary Senior Synonym</dt>\n")
-            if name.synonym == "?":
-                outfile.write("          <dd>Unknown</dd>\n")
-            elif name.synonym.startswith(">"):
-                outfile.write("          <dd><em class=\"species\">" +
-                              name.synonym[1:] + "</em></dd>\n")
-            else:
-                outfile.write("          <dd>" +
-                              create_species_link(name.synonym, "", "../") +
-                              "</dd>\n")
-        outfile.write("        <dt>Original Usage</dt>\n")
-        outfile.write("          <dd>" + format_name_string(name.original_binomial) + "</dd>\n")
-        outfile.write("        <dt>Original Source with Priority</dt>\n")
-        refname = ""
-        if name.priority_source != ".":
-            try:
-                ref = refdict[name.priority_source]
-                refname = ref.formatted_html
-            except LookupError:
-                # print(name.priority_source)
-                report_error(logfile, name.priority_source)
-        else:
-            refname = "unknown"
-        outfile.write("          <dd>" + refname + "</dd>\n")
-        outfile.write("        <dt>Derivation</dt>\n")
-        if name.meaning == ".":
-            outfile.write("          <dd>unknown</dd>\n")
-        else:
-            outfile.write("          <dd>" + name.meaning + "</dd>\n")
-        outfile.write("      <dl>\n")
-        outfile.write("    </section>\n")
-        outfile.write("\n")
-        if name.notes != ".":
-            outfile.write("    <section class=\"spsection\">\n")
-            outfile.write("      <h3>Notes/Comments</h3>\n")
-            outfile.write("      <p>\n")
-            outfile.write("        " + name.notes + "\n")
-            outfile.write("      </p>\n")
-            outfile.write("    </section>\n")
-        outfile.write("    <section class=\"spsection\">\n")
-        outfile.write("      <h3>Binomials Using this Specific Name</h3>\n")
-        outfile.write("      <ul>\n")
-        for n in binomial_names:
-            x = clean_specific_name(n)
-            tmpnamelist = name.variations.split(";")
-            if (x != "") and (x in tmpnamelist):
-                namefile = name_to_filename(n)
-                outfile.write("      <li><a href=\"" + namefile + ".html\">" +
-                              format_name_string(n) + "</a></li>\n")
-        outfile.write("      </ul>\n")
-        outfile.write("    </section>\n")
-
-        common_html_footer(outfile, "../")
-"""
 
 
 def calculate_specific_name_yearly_cnts(specific_name, binomial_names, binomial_cnts):
@@ -1567,7 +1575,7 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
                     if miny <= y <= maxy:
                         byears[y] += cnts[y]
         maxcnt = max(byears.values())
-        setup_chronology_chart("Number of Uses of Name per Year", 0, miny, maxy, maxcnt, byears, False, outfile)
+        setup_chronology_chart(0, miny, maxy, maxcnt, byears, outfile)
         outfile.write("      }\n")
         outfile.write("    </script>\n")
         common_header_part2(outfile, "", False)
@@ -1623,17 +1631,17 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
     outfile.write("\n")
 
     if not do_print:
-        write_chronology_chart_div(0, outfile)
+        write_chronology_chart_div(0, outfile, "Number of Uses of Name per Year", False)
         outfile.write("\n")
 
     if specific_name.notes != ".":
-        outfile.write("    <section class=\"spsection\">\n")
+        outfile.write("    <section class=\"spsection\" style=\"clear: both\">\n")
         outfile.write("      <h3 class=\"nobookmark\">Notes/Comments</h3>\n")
         outfile.write("      <p>\n")
         outfile.write("        " + specific_name.notes + "\n")
         outfile.write("      </p>\n")
         outfile.write("    </section>\n")
-    outfile.write("    <section class=\"spsection\">\n")
+    outfile.write("    <section class=\"spsection\" style=\"clear: both\">\n")
     outfile.write("      <h3 class=\"nobookmark\">Binomials Using this Specific Name</h3>\n")
     outfile.write("      <ul>\n")
     for n in binomial_names:
@@ -1652,7 +1660,7 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
         common_html_footer(outfile, "../")
 
 
-def setup_chronology_chart(title, n, miny, maxy, maxcnt, yearly_data, is_species, outfile):
+def setup_chronology_chart(n, miny, maxy, maxcnt, yearly_data, outfile):
     nstr = str(n)
     outfile.write("        var data" + nstr + " = google.visualization.arrayToDataTable([\n")
     outfile.write("          ['Year', 'Number of Uses', 'Number of Uses'],\n")
@@ -1677,11 +1685,10 @@ def setup_chronology_chart(title, n, miny, maxy, maxcnt, yearly_data, is_species
     outfile.write("        ]);\n")
     outfile.write("\n")
     outfile.write("        var options" + nstr + " = {\n")
-    outfile.write("          title: \"" + title + "\", \n")
-    if is_species:
-        outfile.write("          titleTextStyle: { italic: true },\n")
+    # outfile.write("          title: \"" + title + "\", \n")
+    # if is_species:
+    #     outfile.write("          titleTextStyle: { italic: true },\n")
     outfile.write("          legend: { position: 'none' },\n")
-    # outfile.write("          height: 300,\n")
     outfile.write("          lineWidth: 1,\n")
     outfile.write("          areaOpacity: 1.0,\n")
     outfile.write("          series: { 0: { color: 'black'},\n")
@@ -1692,7 +1699,14 @@ def setup_chronology_chart(title, n, miny, maxy, maxcnt, yearly_data, is_species
     outfile.write("                   baselineColor: 'none',\n")
     outfile.write("                   minValue: -" + str(maxcnt) + ",\n")
     outfile.write("                   maxValue: " + str(maxcnt) + "\n")
+    outfile.write("                 },\n")
+
+    outfile.write("          chartArea: { left:50,\n")
+    outfile.write("                       top:10,\n")
+    outfile.write("                       width:\"100%\",\n")
+    outfile.write("                       height:\"80%\"\n")
     outfile.write("                 }\n")
+
     outfile.write("        };\n")
     outfile.write("\n")
     outfile.write("        var chart" + nstr + " = new google.visualization.AreaChart(document.getElementById"
@@ -1701,8 +1715,15 @@ def setup_chronology_chart(title, n, miny, maxy, maxcnt, yearly_data, is_species
     outfile.write("\n")
 
 
-def write_chronology_chart_div(n, outfile):
-    outfile.write("    <div id=\"chronchart" + str(n) + "_div\" class=\"chronchart\"></div>\n")
+def write_chronology_chart_div(n, outfile, title, is_species):
+    if is_species:
+        title_str = "<em class=\"species\">" + title + "</em>"
+    else:
+        title_str = title
+    outfile.write("    <div class=\"chron_div\">\n")
+    outfile.write("      <div class=\"chronchart_title\">" + title_str + "</div>\n")
+    outfile.write("      <div id=\"chronchart" + str(n) + "_div\" class=\"chronchart\"></div>\n")
+    outfile.write("    </div>\n")
 
 
 def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, specific_synlist, specific_name_counts):
@@ -1732,17 +1753,17 @@ def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, s
         maxcnt = max(total_cnts.values())
 
         # setup_chronology_chart("All Names", 0, miny, maxy, max(total_cnts.values()), total_cnts, False, outfile)
-        setup_chronology_chart("All Names", 0, miny, maxy, maxcnt, total_cnts, False, outfile)
+        setup_chronology_chart(0, miny, maxy, maxcnt, total_cnts, outfile)
         adjust = 1
 
         name_cnts.sort(reverse=True)
         # put accepted name first, followed by the rest in decreasing frequency
-        order = [species]
+        sp_order = [species]
         for x in name_cnts:
             if x[1] != species:
-                order.append(x[1])
-        for i, name in enumerate(order):
-            setup_chronology_chart(name, i + adjust, miny, maxy, maxcnt, specific_name_counts[name], True, outfile)
+                sp_order.append(x[1])
+        for i, name in enumerate(sp_order):
+            setup_chronology_chart(i + adjust, miny, maxy, maxcnt, specific_name_counts[name], outfile)
         adjust += len(specific_synlist)
 
         # --binomials--
@@ -1758,15 +1779,14 @@ def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, s
         name_cnts.sort(reverse=True)
         # put accepted name first, followed by the rest in decreasing frequency
         if ("Uca " + species) in binomial_synlist:
-            order = ["Uca " + species]
+            bi_order = ["Uca " + species]
         else:
-            order = []
+            bi_order = []
         for x in name_cnts:
             if x[1] != "Uca " + species:
-                order.append(x[1])
-        for i, name in enumerate(order):
-            setup_chronology_chart(name, i + adjust, miny, maxy, maxcnt, binomial_name_counts[clean_name(name)], True,
-                                   outfile)
+                bi_order.append(x[1])
+        for i, name in enumerate(bi_order):
+            setup_chronology_chart(i + adjust, miny, maxy, maxcnt, binomial_name_counts[clean_name(name)], outfile)
 
         outfile.write("      }\n")
         outfile.write("    </script>\n")
@@ -1782,16 +1802,17 @@ def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, s
         # outfile.write("      </nav>\n")
         outfile.write("    </header>\n")
         outfile.write("\n")
-        write_chronology_chart_div(0, outfile)
+        write_chronology_chart_div(0, outfile, "All Names", False)
         adjust = 1
-        outfile.write("    <p>Accepted name is listed first, followed by synonyms in decreasing order of use.</p>")
+        outfile.write("    <p style=\"clear: both\">Accepted name is listed first, followed by synonyms in decreasing "
+                      "order of use.</p>")
         outfile.write("    <h2>Specific Synonyms</h2>\n")
-        for i in range(len(specific_synlist)):
-            write_chronology_chart_div(i + adjust, outfile)
+        for i, name in enumerate(sp_order):
+            write_chronology_chart_div(i + adjust, outfile, name, True)
         adjust += len(specific_synlist)
-        outfile.write("    <h2>Binomial Synonyms</h2>\n")
-        for i in range(len(binomial_synlist)):
-            write_chronology_chart_div(i + adjust, outfile)
+        outfile.write("    <h2 style=\"clear: both\">Binomial Synonyms</h2>\n")
+        for i, name in enumerate(bi_order):
+            write_chronology_chart_div(i + adjust, outfile, name, True)
 
         common_html_footer(outfile, "../")
 
@@ -1989,7 +2010,7 @@ def create_genus_chronology(genus_cnts):
         maxcnt = max(total_cnts.values())
 
         # setup_chronology_chart("All Genera", 0, miny, maxy, max(total_cnts.values()), total_cnts, False, outfile)
-        setup_chronology_chart("All Genera", 0, miny, maxy, max(total_cnts.values()), total_cnts, False, outfile)
+        setup_chronology_chart(0, miny, maxy, max(total_cnts.values()), total_cnts, outfile)
         adjust = 1
 
         name_cnts.sort(reverse=True)
@@ -1999,7 +2020,7 @@ def create_genus_chronology(genus_cnts):
             if x[1] != "Uca":
                 order.append(x[1])
         for i, name in enumerate(order):
-            setup_chronology_chart(name, i + adjust, miny, maxy, maxcnt, genus_cnts[name], True, outfile)
+            setup_chronology_chart(i + adjust, miny, maxy, maxcnt, genus_cnts[name], outfile)
 
         outfile.write("      }\n")
         outfile.write("    </script>\n")
@@ -2015,12 +2036,13 @@ def create_genus_chronology(genus_cnts):
         # outfile.write("      </nav>\n")
         outfile.write("    </header>\n")
         outfile.write("\n")
-        write_chronology_chart_div(0, outfile)
+        write_chronology_chart_div(0, outfile, "All Genera", False)
         adjust = 1
-        outfile.write("    <p>Accepted name is listed first, followed by synonyms in decreasing order of use.</p>")
+        outfile.write("    <p style=\"clear: both\">Accepted name is listed first, followed by synonyms in decreasing "
+                      "order of use.</p>")
         outfile.write("    <h2>Genus Synonyms</h2>\n")
-        for i in range(len(genus_cnts)):
-            write_chronology_chart_div(i + adjust, outfile)
+        for i, name in enumerate(order):
+            write_chronology_chart_div(i + adjust, outfile, name, True)
 
         common_html_footer(outfile, "../")
 
@@ -3967,26 +3989,6 @@ def write_phylogeny_pages(outfile, do_print, refdict, logfile):
     outfile.write("     The phylogeny of fiddler crabs is still largely unresolved. Two trees are shown below: one "
                   "just the subgenera and one including all species. These are both rough, conservative estimates "
                   "based on combining information from " +
-                  # "<a href=\"" + rel_link_prefix(do_print, "references/") + "Levinton1996.html\">Levinton "
-                  #                                                           "<em>et al.</em> (1996)</a>, "
-                  # "<a href=\"" + rel_link_prefix(do_print, "references/") + "Sturmbauer1996.html\">Sturmbauer "
-                  #                                                           "<em>et al.</em> (1996)</a>, "
-                  # "<a href=\"" + rel_link_prefix(do_print, "references/") + "Rosenberg2001.html\">Rosenberg "
-                  #                                                           "(2001)</a>, "
-                  # "<a href=\"" + rel_link_prefix(do_print, "references/") + "Shih2009.html\">Shih <em>et al.</em> "
-                  #                                                           "(2009)</a>, "
-                  # "<a href=\"" + rel_link_prefix(do_print, "references/") + "Shih2010.1.html\">Shih <em>et al.</em> "
-                  #                                                           "(2010)</a>, "
-                  # "<a href=\"" + rel_link_prefix(do_print, "references/") + "Landstorfer2010.html\">Landstorfer &amp;"
-                  #                                                           " Schubart (2010)</a>, "
-                  # "<a href=\"" + rel_link_prefix(do_print, "references/") + "Shih2012.html\">Shih <em>et al.</em> "
-                  #                                                           "(2012)</a>, "
-                  # "<a href=\"" + rel_link_prefix(do_print, "references/") + "Shih2013.html\">Shih <em>et al.</em> "
-                  #                                                           "(2013a)</a>, "
-                  # "<a href=\"" + rel_link_prefix(do_print, "references/") + "Shih2013.2.html\">Shih <em>et al.</em> "
-                  #                                                           "(2013b)</a>, "
-                  # "and <a href=\"" + rel_link_prefix(do_print, "references/") +
-                  # "Shih2015.2.html\">Shih (2015)</a>.\n")
                   format_reference_cite(refdict["Levinton1996"], do_print, AUTHOR_OUT, logfile) + ", " +
                   format_reference_cite(refdict["Sturmbauer1996"], do_print, AUTHOR_OUT, logfile) + ", " +
                   format_reference_cite(refdict["Rosenberg2001"], do_print, AUTHOR_OUT, logfile) + ", " +
@@ -4363,14 +4365,15 @@ def write_introduction(outfile, species, do_print):
 
 
 def create_output_paths():
-    def create_path_and_index(subdir):
-        if not os.path.exists(WEBOUT_PATH + subdir):
-            os.makedirs(WEBOUT_PATH + subdir)
-        create_blank_index(WEBOUT_PATH + subdir + "index.html")
     """
     create web output directories if they do not already exist
     add a blank index to each one
     """
+    def create_path_and_index(subdir):
+        if not os.path.exists(WEBOUT_PATH + subdir):
+            os.makedirs(WEBOUT_PATH + subdir)
+        create_blank_index(WEBOUT_PATH + subdir + "index.html")
+
     create_path_and_index("")
     create_path_and_index("photos/")
     create_path_and_index("video/")
@@ -4380,33 +4383,6 @@ def create_output_paths():
     create_path_and_index("morphology/")
     create_path_and_index("maps/")
     create_path_and_index("images/")
-    # if not os.path.exists(WEBOUT_PATH):
-    #     os.makedirs(WEBOUT_PATH)
-    # create_blank_index(WEBOUT_PATH + "index.html")
-    # if not os.path.exists(WEBOUT_PATH + "photos/"):
-    #     os.makedirs(WEBOUT_PATH + "photos/")
-    # create_blank_index(WEBOUT_PATH + "photos/index.html")
-    # if not os.path.exists(WEBOUT_PATH + "video/"):
-    #     os.makedirs(WEBOUT_PATH + "video/")
-    # create_blank_index(WEBOUT_PATH + "video/index.html")
-    # if not os.path.exists(WEBOUT_PATH + "references/"):
-    #     os.makedirs(WEBOUT_PATH + "references/")
-    # create_blank_index(WEBOUT_PATH + "references/index.html")
-    # if not os.path.exists(WEBOUT_PATH + "names/"):
-    #     os.makedirs(WEBOUT_PATH + "names/")
-    # create_blank_index(WEBOUT_PATH + "names/index.html")
-    # if not os.path.exists(WEBOUT_PATH + "art/"):
-    #     os.makedirs(WEBOUT_PATH + "art/")
-    # create_blank_index(WEBOUT_PATH + "art/index.html")
-    # if not os.path.exists(WEBOUT_PATH + "morphology/"):
-    #     os.makedirs(WEBOUT_PATH + "morphology/")
-    # create_blank_index(WEBOUT_PATH + "morphology/index.html")
-    # if not os.path.exists(WEBOUT_PATH + "images/"):
-    #     os.makedirs(WEBOUT_PATH + "images/")
-    # create_blank_index(WEBOUT_PATH + "images/index.html")
-    # if not os.path.exists(WEBOUT_PATH + "maps/"):
-    #     os.makedirs(WEBOUT_PATH + "maps/")
-    # create_blank_index(WEBOUT_PATH + "maps/index.html")
 
 
 def copy_support_files(logfile):
@@ -4603,7 +4579,7 @@ def build_site():
         morphology = read_morphology_data("data/morphology.txt")
 
         # output website version
-        if False:
+        if True:
             create_output_paths()
             copy_support_files(logfile)
             print("...Writing References...")
@@ -4663,7 +4639,7 @@ def build_site():
                 write_video_index(videos, True, printfile, logfile)
                 write_all_art_pages(art, True, printfile, logfile)
                 # write_geography_page(species, printfile, True)
-                # write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, True, printfile)
+                write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, True, printfile)
                 write_reference_bibliography(references, True, printfile, logfile)
 
             #     end_print(printfile)
