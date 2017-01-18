@@ -633,7 +633,8 @@ def chart_style():
     custom_style = pygal.style.DefaultStyle
     custom_style.background = "transparent"
     custom_style.plot_background = "transparent"
-    print(custom_style)
+    custom_style.label_font_size = 15
+    custom_style.major_label_font_size = 15
     return custom_style
 
 
@@ -879,7 +880,7 @@ def write_reference_bibliography(reflist, do_print, outfile, logfile):
     else:
         common_html_header(outfile, "Fiddler Crab Publications", "")
     outfile.write("    <header id=\"" + REF_URL + "\">\n")
-    outfile.write("      <h1 class=\"bookmark1\">Publications</h1>\n")
+    outfile.write("      <h1 class=\"bookmark1\">Full Reference List</h1>\n")
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
@@ -4521,7 +4522,12 @@ def print_table_of_contents(outfile, species_list):
     outfile.write("           <li><a href=\"#" + ART_CRAFT_URL + "\">Arts &amp; Crafts</a></li>\n")
     outfile.write("         </ul>\n")
     outfile.write("       </li>\n")
-    outfile.write("       <li><a href=\"#" + REF_URL + "\">Publications</a></li>\n")
+    outfile.write("       <li>References\n")
+    outfile.write("         <ul>\n")
+    outfile.write("           <li><a href=\"#" + REF_SUM_URL + "\">Summary of References</a></li>\n")
+    outfile.write("           <li><a href=\"#" + REF_URL + "\">Full Reference List</a></li>\n")
+    outfile.write("         </ul>\n")
+    outfile.write("       </li>\n")
     outfile.write("     </ul>\n")
     outfile.write("    </div>\n")
     outfile.write("\n")
@@ -4579,7 +4585,7 @@ def build_site():
         morphology = read_morphology_data("data/morphology.txt")
 
         # output website version
-        if True:
+        if False:
             create_output_paths()
             copy_support_files(logfile)
             print("...Writing References...")
@@ -4641,11 +4647,6 @@ def build_site():
                 # write_geography_page(species, printfile, True)
                 write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, True, printfile)
                 write_reference_bibliography(references, True, printfile, logfile)
-
-            #     end_print(printfile)
-            # with codecs.open("print2.html", "w", "utf-8") as printfile:
-            #     start_print(printfile)
-
                 write_reference_pages(references, refdict, citelist, True, printfile, logfile)
                 end_print(printfile)
     print("done")
