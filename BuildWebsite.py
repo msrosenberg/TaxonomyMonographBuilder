@@ -6,8 +6,9 @@ import os
 import shutil
 import re
 # external dependencies
-import pygal
-import pygal.style
+# import pygal
+# import pygal.style
+import matplotlib.pyplot as mplpy
 
 WEBOUT_PATH = "webout/"
 MEDIA_PATH = "media/"
@@ -629,57 +630,211 @@ def replace_references(in_list, refdict, do_print, logfile):
     return out_list
 
 
-def chart_style():
-    custom_style = pygal.style.DefaultStyle
-    custom_style.background = "transparent"
-    custom_style.plot_background = "transparent"
-    custom_style.label_font_size = 15
-    custom_style.major_label_font_size = 15
-    return custom_style
+# def chart_style():
+#     custom_style = pygal.style.DefaultStyle
+#     custom_style.background = "transparent"
+#     custom_style.plot_background = "transparent"
+#     custom_style.label_font_size = 15
+#     custom_style.major_label_font_size = 15
+#     return custom_style
 
 
 def create_pie_chart_file(filename, data):
-    pie_chart = pygal.Pie(style=chart_style())
+    # pie_chart = pygal.Pie(style=chart_style())
+    # datalist = list(data.keys())
+    # datalist.sort()
+    # for d in datalist:
+    #     pie_chart.add(d, data[d])
+    # pie_chart.render_to_file(TMP_PATH + filename)
+
     datalist = list(data.keys())
     datalist.sort()
+    sizes = []
     for d in datalist:
-        pie_chart.add(d, data[d])
-    pie_chart.render_to_file(TMP_PATH + filename)
+        sizes.append(data[d])
+    fig, faxes = mplpy.subplots(figsize=[6, 3])
+    # cl = [i for i in range(len(data))]
+    # faxes.pie(sizes, labels=datalist, autopct="%1.1f%%")
+    # color_list = mplpy.cm.Vega20(cl)
+    # my approximation of the pygal color scheme
+    color_list = ["salmon", "royalblue", "lightseagreen", "gold", "darkorange", "mediumorchid", "deepskyblue",
+                  "lightgreen", "sandybrown", "palevioletred", "lightskyblue", "mediumaquamarine", "lemonchiffon"]
+    # tol14rainbow
+    # color_list = ["#882E72", "#B178A6", "#D6C1DE", "#1965B0", "#5289C7", "#7BAFDE", "#4EB265", "#90C987", "#CAE0AB",
+    #                  "#F7EE55", "#F6C141", "#F1932D", "#E8601C", "#DC050C"]
+    # color brewer paired (12)
+    # color_list = ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6',
+    #               '#6a3d9a', '#ffff99', '#b15928']
+    # color brewer set3 (12)
+    # color_list = ['#8dd3c7', '#ffffb3', '#bebada', '#fb8072', '#80b1d3', '#fdb462', '#b3de69', '#fccde5', '#d9d9d9',
+    #               '#bc80bd', '#ccebc5', '#ffed6f']
+    faxes.pie(sizes, colors=color_list, startangle=90, counterclock=False)
+    faxes.axis("equal")
+    faxes.legend(datalist, loc="upper left", frameon=False)
+    mplpy.rcParams["svg.fonttype"] = "none"
+    mplpy.tight_layout()
+    mplpy.savefig(TMP_PATH + filename)
+    mplpy.clf()
 
 
 def create_bar_chart_file(filename, data, minx, maxx, y):
-    bar_chart = pygal.Bar(show_legend=False, width=1500, height=500, include_x_axis=True, x_label_rotation=-30,
-                          x_labels_major_every=10, show_minor_x_labels=False, style=chart_style())
-    bar_chart.x_labels = map(str, range(minx, maxx+1))
-    y_list = []
-    for d in data:
-        y_list.append(d[y])
-    bar_chart.add("", y_list)
-    bar_chart.render_to_file(TMP_PATH + filename)
+    # bar_chart = pygal.Bar(show_legend=False, width=1500, height=500, include_x_axis=True, x_label_rotation=-30,
+    #                       x_labels_major_every=10, show_minor_x_labels=False, style=chart_style())
+    # bar_chart.x_labels = map(str, range(minx, maxx+1))
+    # y_list = []
+    # for d in data:
+    #     y_list.append(d[y])
+    # bar_chart.add("", y_list)
+    # bar_chart.render_to_file(TMP_PATH + filename)
+
+    x_list = [x for x in range(minx, maxx+1)]
+    y_list = [d[y] for d in data]
+    fig, faxes = mplpy.subplots(figsize=[6.5, 2])
+    faxes.bar(x_list, y_list, color="blue", edgecolor="darkblue")
+    faxes.spines["right"].set_visible(False)
+    faxes.spines["top"].set_visible(False)
+    if maxx-minx > 200:
+        tick_step = 40
+    else:
+        tick_step = 20
+    mplpy.xticks([i for i in range(minx, maxx + 1, tick_step)])
+    mplpy.rcParams["svg.fonttype"] = "none"
+    mplpy.tight_layout()
+    mplpy.savefig(TMP_PATH + filename)
+    mplpy.clf()
 
 
 def create_stacked_bar_chart_file(filename, data, minx, maxx, cols):
-    bar_chart = pygal.StackedBar(legend_at_bottom=True, width=1500, height=500, include_x_axis=True,
-                                 x_label_rotation=-30, x_labels_major_every=10, show_minor_x_labels=False,
-                                 style=chart_style())
-    bar_chart.x_labels = map(str, range(minx, maxx+1))
-    for y in cols:
-        y_list = []
-        for d in data:
-            y_list.append(d[y[1]])
-        bar_chart.add(y[0], y_list)
-    bar_chart.render_to_file(TMP_PATH + filename)
+    # bar_chart = pygal.StackedBar(legend_at_bottom=True, width=1500, height=500, include_x_axis=True,
+    #                              x_label_rotation=-30, x_labels_major_every=10, show_minor_x_labels=False,
+    #                              style=chart_style())
+    # bar_chart.x_labels = map(str, range(minx, maxx+1))
+    # for y in cols:
+    #     y_list = []
+    #     for d in data:
+    #         y_list.append(d[y[1]])
+    #     bar_chart.add(y[0], y_list)
+    # bar_chart.render_to_file(TMP_PATH + filename)
+
+    # currently assumes only two stacked bars
+    x_list = [x for x in range(minx, maxx+1)]
+    fig, faxes = mplpy.subplots(figsize=[6.5, 2])
+    col_names = [c[0] for c in cols]
+    y_list1 = [d[cols[0][1]] for d in data]
+    y_list2 = [d[cols[1][1]] for d in data]
+    faxes.bar(x_list, y_list1, color="blue", edgecolor="darkblue")
+    # faxes.bar(x_list, y_list1, fc=(0,0,1,0.8), edgecolor="darkblue")
+    faxes.bar(x_list, y_list2, bottom=y_list1, color="red", edgecolor="darkred")
+    faxes.spines["right"].set_visible(False)
+    faxes.spines["top"].set_visible(False)
+    faxes.legend(col_names, loc="upper left", frameon=False)
+    mplpy.rcParams["svg.fonttype"] = "none"
+    mplpy.tight_layout()
+    mplpy.savefig(TMP_PATH + filename)
+    mplpy.clf()
+
+
+def create_qual_bar_chart_file(filename, label_list, data_dict):
+    x_list = [x for x in range(len(label_list))]
+    y_list = [data_dict[x] for x in label_list]
+    fig, faxes = mplpy.subplots(figsize=[6.5, 3])
+    faxes.bar(x_list, y_list, color="blue", edgecolor="darkblue")
+    mplpy.xticks(rotation="vertical", style="italic")
+    tick_list = x_list[::4]
+    tick_labels = label_list[::4]
+    faxes.set_xticks(tick_list)
+    faxes.set_xticklabels(tick_labels)
+    # faxes.set_xticks(x_list)
+    # faxes.set_xticklabels(label_list)
+    faxes.spines["right"].set_visible(False)
+    faxes.spines["top"].set_visible(False)
+    mplpy.rcParams["svg.fonttype"] = "none"
+    mplpy.tight_layout()
+    mplpy.savefig(TMP_PATH + filename)
+    mplpy.clf()
 
 
 def create_line_chart_file(filename, data, minx, maxx, y):
-    line_chart = pygal.Line(show_legend=False, width=1500, height=500, include_x_axis=True, x_label_rotation=-30,
-                            x_labels_major_every=10, show_minor_x_labels=False, style=chart_style())
-    line_chart.x_labels = map(str, range(minx, maxx+1))
+    # line_chart = pygal.Line(show_legend=False, width=1500, height=500, include_x_axis=True, x_label_rotation=-30,
+    #                         x_labels_major_every=10, show_minor_x_labels=False, style=chart_style())
+    # line_chart.x_labels = map(str, range(minx, maxx+1))
+    # y_list = []
+    # for d in data:
+    #     y_list.append(d[y])
+    # line_chart.add("", y_list, show_dots=False)
+    # line_chart.render_to_file(TMP_PATH + filename)
+
+    x_list = [x for x in range(minx, maxx+1)]
+    y_list = [d[y] for d in data]
+    fig, faxes = mplpy.subplots(figsize=[6.5, 2])
+    faxes.plot(x_list, y_list, "blue")
+    faxes.spines["right"].set_visible(False)
+    faxes.spines["top"].set_visible(False)
+    if maxx-minx > 200:
+        tick_step = 40
+    else:
+        tick_step = 20
+    mplpy.xticks([i for i in range(minx, maxx + 1, tick_step)])
+    mplpy.rcParams["svg.fonttype"] = "none"
+    mplpy.tight_layout()
+    mplpy.savefig(TMP_PATH + filename, format="svg")
+    mplpy.clf()
+
+
+def create_chronology_chart_file(filename, miny, maxy, maxcnt, yearly_data):
+    # nstr = str(n)
+    # tmp_style = chart_style()
+    # tmp_style.colors = ["#000000", "#000000"]
+    # tmp_style.opacity = "1.0"
+    # area_chart = pygal.Line(show_legend=False, width=1500, height=500, include_x_axis=False, x_label_rotation=-30,
+    #                         x_labels_major_every=10, show_minor_x_labels=False, style=chart_style(),
+    #                         range=(-maxcnt, maxcnt), show_y_labels=False)
+    # area_chart.x_labels = map(str, range(miny, maxy + 1))
     y_list = []
-    for d in data:
-        y_list.append(d[y])
-    line_chart.add("", y_list, show_dots=False)
-    line_chart.render_to_file(TMP_PATH + filename)
+    for y in range(miny, maxy + 1):
+        if yearly_data[y] != 0:
+            y_list.append(yearly_data[y])
+        else:
+            do_null = True
+            if miny < y < maxy:
+                if (yearly_data[y + 1] != 0) or (yearly_data[y - 1] != 0):
+                    do_null = False
+            elif y > miny:
+                if yearly_data[y-1] != 0:
+                    do_null = False
+            elif y < maxy:
+                if yearly_data[y+1] != 0:
+                    do_null = False
+            if do_null:
+                y_list.append(None)
+            else:
+                y_list.append(0)
+    y2_list = []
+    for x in y_list:
+        if x is None:
+            y2_list.append(None)
+        else:
+            y2_list.append(-x)
+    # area_chart.add("", y_list, show_dots=False, allow_interruptions=True, fill=True)
+    # area_chart.add("", y2_list, show_dots=False, allow_interruptions=True, fill=True)
+    # area_chart.render_to_file(TMP_PATH + filename)
+
+    x = [y for y in range(miny, maxy+1)]
+    # fig, faxes = mplpy.subplots(figsize=[6.5, 2])
+    fig, faxes = mplpy.subplots(figsize=[6.5, 1.5])
+    mplpy.ylim(-maxcnt, maxcnt)
+    mplpy.xlim(miny, maxy)
+    faxes.fill(x, y_list, "black")
+    faxes.fill(x, y2_list, "black")
+    for spine in faxes.spines:
+        faxes.spines[spine].set_visible(False)
+    cur_axes = mplpy.gca()
+    cur_axes.axes.get_yaxis().set_visible(False)
+    mplpy.xticks([i for i in range(miny, maxy+1, 20)])
+    mplpy.rcParams["svg.fonttype"] = "none"
+    mplpy.tight_layout()
+    mplpy.savefig(TMP_PATH + filename)
+    mplpy.close()
 
 
 def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, languages, do_print, outfile):
@@ -820,17 +975,21 @@ def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, langua
         filename = "language_pie.svg"
         create_pie_chart_file(filename, languages)
         outfile.write("    <h3 class=\"nobookmark\">Primary Language of References</h3>\n")
-        outfile.write("    <figure>\n")
+        outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"pie_chart\" />\n")
         outfile.write("    </figure>\n")
 
         # pubs per year bar chart
-        miny = year_data[0][0]
-        maxy = CURRENT_YEAR
+        miny = CURRENT_YEAR
+        maxy = START_YEAR
+        for y in year_data:
+            miny = min(miny, y[0])
+            maxy = max(maxy, y[0])
+
         filename = "pubs_per_year_bar.svg"
         create_bar_chart_file(filename, year_data, miny, maxy, 1)
         outfile.write("    <h3 class=\"nobookmark\">References by Year</h3>\n")
-        outfile.write("    <figure>\n")
+        outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
         outfile.write("    </figure>\n")
 
@@ -838,7 +997,7 @@ def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, langua
         filename = "pubs_per_year_1900_bar.svg"
         create_bar_chart_file(filename, year_data_1900, 1900, maxy, 1)
         outfile.write("    <h3 class=\"nobookmark\">References by Year (since 1900)</h3>\n")
-        outfile.write("    <figure>\n")
+        outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
         outfile.write("    </figure>\n")
 
@@ -851,7 +1010,7 @@ def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, langua
         create_stacked_bar_chart_file(filename, tmp_dat, 1900, maxy, dat_info)
         outfile.write("    <h3 class=\"nobookmark\">References with Citation Data in Database (since 1900; all "
                       "pre-1900 literature is complete)</h3>\n")
-        outfile.write("    <figure>\n")
+        outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
         outfile.write("    </figure>\n")
 
@@ -859,7 +1018,7 @@ def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, langua
         filename = "cumulative_pubs_line.svg"
         create_line_chart_file(filename, year_data, miny, maxy, 2)
         outfile.write("    <h3 class=\"nobookmark\">Cumulative References by Year</h3>\n")
-        outfile.write("    <figure>\n")
+        outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"line_chart\" />\n")
         outfile.write("    </figure>\n")
 
@@ -1008,7 +1167,7 @@ def create_species_link(species, status, path, do_print):
     else:
         sc = ""
     return ("<a href=\"" + rel_link_prefix(do_print, path) + "u_" + species + ".html\"><em class=\"species\">Uca " +
-            species + "</em></a>" + sc)
+            species + "</em>" + sc + "</a>")
 
 
 def format_name_string(x):
@@ -1208,12 +1367,8 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
         if n.source == ".":  # currently not listed
             outfile.write("      <td>&nbsp;</td>\n")                   
         elif n.source == "<":  # original name retained
-            # outfile.write("      <td>Original</td>\n")
             outfile.write("      <td><span class=\"fa fa-arrow-left\"></span> Original</td>\n")
         elif n.source == "=":  # automatically computer
-            # outfile.write("      <td>Computed</td>\n")
-            # outfile.write("      <td style=\"text-align: center\"><img src=\"../images/gears.png\" alt=\"Computed\" "
-            #               "title=\"Computed\" /></td>\n")
             outfile.write("      <td><span class=\"fa fa-gears\"></span> Computed</td>\n")
         else:
             if ";" in n.source:
@@ -1329,9 +1484,6 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
         cl.sort()
         outfile.write("     " + ", ".join(cl) + "\n")
         outfile.write("    </p>\n")
-    # else:
-    #   outfile.write("    <p>\n")
-    # outfile.write("    </p>\n")
 
     if do_print:
         end_page_division(outfile)
@@ -1340,8 +1492,7 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
 
 
 def write_reference_pages(reflist, refdict, citelist, do_print, printfile, logfile):
-    # if not do_print:
-    #     create_blank_index(WEBOUT_PATH + "references/index.html")
+    """ control function to loop through creating a page for every reference """
     name_table = create_name_table(citelist)
     update_cite_list(citelist)
     for ref in reflist:
@@ -1361,64 +1512,6 @@ def clean_name(x):
     return x
 
 
-"""
-def create_binomial_name_page(name, namefile, refdict, citelist, name_table, species_name, logfile):
-    # create a page listing all citations using a specific binomial
-    with codecs.open(WEBOUT_PATH + "names/" + namefile + ".html", "w", "utf-8") as outfile:
-        common_html_header(outfile, name, "../")
-        outfile.write("    <header>\n")
-        outfile.write("      <h1>" + format_name_string(name) + "</h1>\n")
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        if species_name != "":
-            outfile.write("          <li><a href=\"sn_" + species_name +
-                          ".html\"><span class=\"fa fa-window-minimize\"></span> " + format_name_string(species_name) +
-                          "</a></li>\n")
-        outfile.write("          <li><a href=\"index.html\"><span class=\"fa fa-list\"></span> "
-                      "Full Name Index</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-        outfile.write("    </header>\n")
-        outfile.write("\n")
-
-        # find citations for this name
-        cites = []
-        for c in citelist:
-            clean = clean_name(c.name)
-            if clean.lower() == name.lower():
-                cites.append(c)
-        comcnt = 0
-        notecnt = 0
-        uniquecites = set()
-        for c in cites:
-            if c.common != ".":
-                comcnt += 1
-            if c.name_note != ".":
-                notecnt += 1
-            # uniquecites = uniquecites | {c.cite_key}
-            uniquecites |= {c.cite_key}
-
-        # write name table
-        outfile.write("    <h3>Publications Using this Name</h3>\n")
-        outfile.write("    <table class=\"citetable\">\n")
-        outfile.write("      <tr>\n")
-        outfile.write("        <th>Citation</th>\n")
-        if comcnt > 0:
-            outfile.write("        <th>Common Name(s)</th>\n")
-        outfile.write("        <th>Where</th>\n")
-        outfile.write("        <th>Applied to...</th>\n")
-        outfile.write("        <th>Accepted Name</th>\n")
-        outfile.write("        <th>Source of Accepted</th>\n")
-        if notecnt > 0:
-            outfile.write("        <th>Note(s)</th>\n")
-        outfile.write("      </tr>\n")
-        output_name_table(True, outfile, cites, uniquecites, notecnt, comcnt, refdict, name_table, logfile)
-        outfile.write("    <p>\n")
-        outfile.write("    </p>\n")
-        common_html_footer(outfile, "../")
-"""
-
-
 def calculate_binomial_yearly_cnts(name, refdict, citelist):
     miny = START_YEAR
     maxy = CURRENT_YEAR
@@ -1428,14 +1521,8 @@ def calculate_binomial_yearly_cnts(name, refdict, citelist):
         clean = clean_name(c.name)
         if clean.lower() == name.lower():
             cites.append(c)
-    # comcnt = 0
-    # notecnt = 0
     uniquecites = set()
     for c in cites:
-        # if c.common != ".":
-        #     comcnt += 1
-        # if c.name_note != ".":
-        #     notecnt += 1
         uniquecites |= {c.cite_key}
     name_by_year = {y: 0 for y in range(miny, maxy+1)}
     for c in uniquecites:
@@ -1443,19 +1530,6 @@ def calculate_binomial_yearly_cnts(name, refdict, citelist):
         if y is not None:
             if miny <= y <= maxy:
                 name_by_year[y] += 1
-        # y = refdict[c].citation
-        # y = y[y.find("(") + 1:y.find(")")]
-        # if (y != "?") and (y.lower() != "in press"):
-        #     if y[0] == "~":
-        #         y = y[1:]
-        #     if len(y) > 4:
-        #         y = y[:4]
-        #     y = int(y)
-        #     if miny <= y <= maxy:
-        #         name_by_year[y] += 1
-    # byears = {y: 0 for y in range(miny, maxy+1)}
-    # for y in name_by_year:
-    #     byears[y] = name_by_year[y]
     return name_by_year
 
 
@@ -1478,21 +1552,27 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
             notecnt += 1
         uniquecites |= {c.cite_key}
 
+    miny = START_YEAR
+    maxy = CURRENT_YEAR
+    maxcnt = max(name_by_year.values())
+    image_name = ""
     if do_print:
         start_page_division(outfile, "name_page")
+        if maxcnt > 0:
+            image_name = name_to_filename(name) + "_chronology.svg"
+            create_chronology_chart_file(image_name,  miny, maxy, maxcnt, name_by_year)
     else:
         common_header_part1(outfile, name, "../")
-        outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
-        outfile.write("    <script type=\"text/javascript\">\n")
-        outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
-        outfile.write("      google.setOnLoadCallback(drawChart);\n")
-        outfile.write("      function drawChart() {\n")
-        miny = START_YEAR
-        maxy = CURRENT_YEAR
-        maxcnt = max(name_by_year.values())
-        setup_chronology_chart(0, miny, maxy, maxcnt, name_by_year, outfile)
-        outfile.write("      }\n")
-        outfile.write("    </script>\n")
+        if maxcnt > 0:
+            outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
+            outfile.write("    <script type=\"text/javascript\">\n")
+            outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
+            outfile.write("      google.setOnLoadCallback(drawChart);\n")
+            outfile.write("      function drawChart() {\n")
+            image_name = 0
+            setup_chronology_chart(image_name, miny, maxy, maxcnt, name_by_year, outfile)
+            outfile.write("      }\n")
+            outfile.write("    </script>\n")
         common_header_part2(outfile, "", False)
 
     outfile.write("    <header id=\"" + namefile + ".html\" class=\"tabular_page\">\n")
@@ -1511,12 +1591,12 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
     outfile.write("    </header>\n")
     outfile.write("\n")
 
-    if not do_print:
-        write_chronology_chart_div(0, outfile, "Number of Uses of Name per Year", False)
+    if maxcnt > 0:
+        write_chronology_chart_div(image_name, outfile, None, "Number of Uses of Name per Year", False, do_print, False)
         outfile.write("\n")
 
     # write name table
-    outfile.write("    <h3 class=\"nobookmark\" style=\"clear: both\">Publications Using this Name</h3>\n")
+    outfile.write("    <h3 class=\"nobookmark\">Publications Using this Name</h3>\n")
     outfile.write("    <table class=\"citetable\">\n")
     outfile.write("      <tr>\n")
     outfile.write("        <th class=\"citation_col\">Citation</th>\n")
@@ -1555,30 +1635,36 @@ def calculate_specific_name_yearly_cnts(specific_name, binomial_names, binomial_
 
 def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cnts, logfile, outfile, do_print):
     """ create a page with the history of a specific name """
+    miny = START_YEAR
+    maxy = CURRENT_YEAR
+    byears = {y: 0 for y in range(miny, maxy + 1)}
+    for n in binomial_names:
+        sp_name = clean_specific_name(n)
+        tmpnamelist = specific_name.variations.split(";")
+        if (sp_name != "") and (sp_name in tmpnamelist):
+            cnts = binomial_cnts[clean_name(n)]
+            for y in cnts:
+                if miny <= y <= maxy:
+                    byears[y] += cnts[y]
+    maxcnt = max(byears.values())
+    image_name = ""
     if do_print:
         start_page_division(outfile, "base_page")
+        if maxcnt > 0:
+            image_name = name_to_filename(specific_name.name) + "_chronology.svg"
+            create_chronology_chart_file(image_name,  miny, maxy, maxcnt, byears)
     else:
         common_header_part1(outfile, specific_name.name, "../")
-        outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
-        outfile.write("    <script type=\"text/javascript\">\n")
-        outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
-        outfile.write("      google.setOnLoadCallback(drawChart);\n")
-        outfile.write("      function drawChart() {\n")
-        miny = START_YEAR
-        maxy = CURRENT_YEAR
-        byears = {y: 0 for y in range(miny, maxy+1)}
-        for n in binomial_names:
-            sp_name = clean_specific_name(n)
-            tmpnamelist = specific_name.variations.split(";")
-            if (sp_name != "") and (sp_name in tmpnamelist):
-                cnts = binomial_cnts[clean_name(n)]
-                for y in cnts:
-                    if miny <= y <= maxy:
-                        byears[y] += cnts[y]
-        maxcnt = max(byears.values())
-        setup_chronology_chart(0, miny, maxy, maxcnt, byears, outfile)
-        outfile.write("      }\n")
-        outfile.write("    </script>\n")
+        if maxcnt > 0:
+            outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
+            outfile.write("    <script type=\"text/javascript\">\n")
+            outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
+            outfile.write("      google.setOnLoadCallback(drawChart);\n")
+            outfile.write("      function drawChart() {\n")
+            image_name = 0
+            setup_chronology_chart(image_name, miny, maxy, maxcnt, byears, outfile)
+            outfile.write("      }\n")
+            outfile.write("    </script>\n")
         common_header_part2(outfile, "", False)
 
     outfile.write("    <header id=\"sn_" + specific_name.name + ".html\" class=\"tabular_page\">\n")
@@ -1631,8 +1717,8 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
     outfile.write("    </section>\n")
     outfile.write("\n")
 
-    if not do_print:
-        write_chronology_chart_div(0, outfile, "Number of Uses of Name per Year", False)
+    if maxcnt > 0:
+        write_chronology_chart_div(image_name, outfile, None, "Number of Uses of Name per Year", False, do_print, False)
         outfile.write("\n")
 
     if specific_name.notes != ".":
@@ -1686,9 +1772,6 @@ def setup_chronology_chart(n, miny, maxy, maxcnt, yearly_data, outfile):
     outfile.write("        ]);\n")
     outfile.write("\n")
     outfile.write("        var options" + nstr + " = {\n")
-    # outfile.write("          title: \"" + title + "\", \n")
-    # if is_species:
-    #     outfile.write("          titleTextStyle: { italic: true },\n")
     outfile.write("          legend: { position: 'none' },\n")
     outfile.write("          lineWidth: 1,\n")
     outfile.write("          areaOpacity: 1.0,\n")
@@ -1701,13 +1784,12 @@ def setup_chronology_chart(n, miny, maxy, maxcnt, yearly_data, outfile):
     outfile.write("                   minValue: -" + str(maxcnt) + ",\n")
     outfile.write("                   maxValue: " + str(maxcnt) + "\n")
     outfile.write("                 },\n")
-
+    outfile.write("          hAxis: { showTextEvery: 10},\n")
     outfile.write("          chartArea: { left:50,\n")
     outfile.write("                       top:10,\n")
-    outfile.write("                       width:\"100%\",\n")
+    outfile.write("                       width:\"95%\",\n")
     outfile.write("                       height:\"80%\"\n")
     outfile.write("                 }\n")
-
     outfile.write("        };\n")
     outfile.write("\n")
     outfile.write("        var chart" + nstr + " = new google.visualization.AreaChart(document.getElementById"
@@ -1716,105 +1798,140 @@ def setup_chronology_chart(n, miny, maxy, maxcnt, yearly_data, outfile):
     outfile.write("\n")
 
 
-def write_chronology_chart_div(n, outfile, title, is_species):
+def write_chronology_chart_div(n, outfile, linkfile, title, is_species, do_print, do_multi):
+    # n can be either the file name (print) or the chart # on the page (web)
     if is_species:
-        title_str = "<em class=\"species\">" + title + "</em>"
+        if linkfile is not None:
+            fn = rel_link_prefix(do_print, "") + name_to_filename(linkfile) + ".html"
+            title_str = "<a href=\"" + fn + "\"><em class=\"species\">" + title + "</em></a>"
+        else:
+            title_str = "<em class=\"species\">" + title + "</em>"
     else:
         title_str = title
     outfile.write("    <div class=\"chron_div\">\n")
-    outfile.write("      <div class=\"chronchart_title\">" + title_str + "</div>\n")
-    outfile.write("      <div id=\"chronchart" + str(n) + "_div\" class=\"chronchart\"></div>\n")
+    if do_multi:
+        position = "left"
+    else:
+        position = "top"
+    outfile.write("      <div class=\"chronchart_title_" + position + "\">" + title_str + "</div>\n")
+    if do_print:
+        outfile.write("      <div class=\"chronchart_" + position + "\"><img src=\"" + TMP_PATH + n + "\" /></div>\n")
+    else:
+        outfile.write("      <div id=\"chronchart_" + position + "" + str(n) + "_div\" class=\"chronchart\"></div>\n")
     outfile.write("    </div>\n")
 
 
-def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, specific_synlist, specific_name_counts):
+def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, specific_synlist, specific_name_counts,
+                              do_print, outfile):
     """ create a page with the chronological history of a specific name and its synonyms """
-    with codecs.open(WEBOUT_PATH + "names/synonyms_" + species + ".html", "w", "utf-8") as outfile:
+    miny = START_YEAR
+    maxy = CURRENT_YEAR
+    # --all totals and specific names--
+    # find max count across all synonyms
+    name_cnts = []
+    total_cnts = {y: 0 for y in range(miny, maxy + 1)}
+    for name in specific_synlist:
+        cnts = specific_name_counts[name]
+        for y in cnts:
+            total_cnts[y] += cnts[y]
+        total = sum(cnts.values())
+        name_cnts.append([total, name])
+    maxcnt = max(total_cnts.values())
+    name_cnts.sort(reverse=True)
+    # put accepted name first, followed by the rest in decreasing frequency
+    sp_order = [species]
+    for x in name_cnts:
+        if x[1] != species:
+            sp_order.append(x[1])
+
+    # --binomials--
+    # find max count across all binomial synonyms
+    bmaxcnt = 0
+    name_cnts = []
+    for name in binomial_synlist:
+        cnts = binomial_name_counts[clean_name(name)]
+        tmpmax = max(cnts.values())
+        bmaxcnt = max(bmaxcnt, tmpmax)
+        total = sum(cnts.values())
+        name_cnts.append([total, name])
+    name_cnts.sort(reverse=True)
+    # put accepted name first, followed by the rest in decreasing frequency
+    if ("Uca " + species) in binomial_synlist:
+        bi_order = ["Uca " + species]
+    else:
+        bi_order = []
+    for x in name_cnts:
+        if x[1] != "Uca " + species:
+            bi_order.append(x[1])
+
+    if do_print:
+        start_page_division(outfile, "synonym_page")
+        image_name = "synonym_" + name_to_filename(species) + "_total_chronology.svg"
+        create_chronology_chart_file(image_name,  miny, maxy, maxcnt, total_cnts)
+        for name in sp_order:
+            image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
+            create_chronology_chart_file(image_name, miny, maxy, maxcnt, specific_name_counts[name])
+        for name in bi_order:
+            image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
+            create_chronology_chart_file(image_name, miny, maxy, maxcnt, binomial_name_counts[clean_name(name)])
+    else:
         common_header_part1(outfile, species, "../")
         outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
         outfile.write("    <script type=\"text/javascript\">\n")
         outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
         outfile.write("      google.setOnLoadCallback(drawChart);\n")
         outfile.write("      function drawChart() {\n")
-        miny = START_YEAR
-        maxy = CURRENT_YEAR
-        # --all totals and specific names--
-        # find max count across all synonyms
-        # maxcnt = 0
-        name_cnts = []
-        total_cnts = {y: 0 for y in range(miny, maxy+1)}
-        for name in specific_synlist:
-            cnts = specific_name_counts[name]
-            for y in cnts:
-                total_cnts[y] += cnts[y]
-            # tmpmax = max(cnts.values())
-            # maxcnt = max(maxcnt, tmpmax)
-            total = sum(cnts.values())
-            name_cnts.append([total, name])
-        maxcnt = max(total_cnts.values())
-
-        # setup_chronology_chart("All Names", 0, miny, maxy, max(total_cnts.values()), total_cnts, False, outfile)
-        setup_chronology_chart(0, miny, maxy, maxcnt, total_cnts, outfile)
+        image_name = 0
+        setup_chronology_chart(image_name, miny, maxy, maxcnt, total_cnts, outfile)
         adjust = 1
-
-        name_cnts.sort(reverse=True)
-        # put accepted name first, followed by the rest in decreasing frequency
-        sp_order = [species]
-        for x in name_cnts:
-            if x[1] != species:
-                sp_order.append(x[1])
         for i, name in enumerate(sp_order):
             setup_chronology_chart(i + adjust, miny, maxy, maxcnt, specific_name_counts[name], outfile)
         adjust += len(specific_synlist)
-
-        # --binomials--
-        # find max count across all synonyms
-        maxcnt = 0
-        name_cnts = []
-        for name in binomial_synlist:
-            cnts = binomial_name_counts[clean_name(name)]
-            tmpmax = max(cnts.values())
-            maxcnt = max(maxcnt, tmpmax)
-            total = sum(cnts.values())
-            name_cnts.append([total, name])
-        name_cnts.sort(reverse=True)
-        # put accepted name first, followed by the rest in decreasing frequency
-        if ("Uca " + species) in binomial_synlist:
-            bi_order = ["Uca " + species]
-        else:
-            bi_order = []
-        for x in name_cnts:
-            if x[1] != "Uca " + species:
-                bi_order.append(x[1])
         for i, name in enumerate(bi_order):
-            setup_chronology_chart(i + adjust, miny, maxy, maxcnt, binomial_name_counts[clean_name(name)], outfile)
-
+            setup_chronology_chart(i + adjust, miny, maxy, bmaxcnt, binomial_name_counts[clean_name(name)], outfile)
         outfile.write("      }\n")
         outfile.write("    </script>\n")
         common_header_part2(outfile, "", False)
 
-        outfile.write("    <header>\n")
-        outfile.write("      <h1>Synonym Chronology of " + format_name_string("Uca " + species) + "</h1>\n")
-        # outfile.write("      <nav>\n")
-        # outfile.write("        <ul>\n")
-        # outfile.write("          <li><a href=\"index.html\"><span class=\"fa fa-list\"></span> "
-        #               "Full Name Index</a></li>\n")
-        # outfile.write("        </ul>\n")
-        # outfile.write("      </nav>\n")
-        outfile.write("    </header>\n")
-        outfile.write("\n")
-        write_chronology_chart_div(0, outfile, "All Names", False)
-        adjust = 1
-        outfile.write("    <p style=\"clear: both\">Accepted name is listed first, followed by synonyms in decreasing "
-                      "order of use.</p>")
-        outfile.write("    <h2>Specific Synonyms</h2>\n")
-        for i, name in enumerate(sp_order):
-            write_chronology_chart_div(i + adjust, outfile, name, True)
-        adjust += len(specific_synlist)
-        outfile.write("    <h2 style=\"clear: both\">Binomial Synonyms</h2>\n")
-        for i, name in enumerate(bi_order):
-            write_chronology_chart_div(i + adjust, outfile, name, True)
+    outfile.write("    <header>\n")
+    outfile.write("      <h1 class=\"nobookmark\">Synonym Chronology of " + format_name_string("Uca " + species) +
+                  "</h1>\n")
+    if not do_print:
+        outfile.write("      <nav>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + species +
+                      ".html\"><span class=\"fa fa-info-circle\"></span> Species page</a></li>\n")
+        outfile.write("        </ul>\n")
+        outfile.write("      </nav>\n")
+    outfile.write("    </header>\n")
+    outfile.write("\n")
+    if do_print:
+        image_name = "synonym_" + name_to_filename(species) + "_total_chronology.svg"
+    else:
+        image_name = 0
+    write_chronology_chart_div(image_name, outfile, None, "All Names", False, do_print, True)
+    adjust = 1
+    outfile.write("    <p style=\"clear: both\">Accepted name is listed first, followed by synonyms in decreasing "
+                  "order of use.</p>\n")
+    outfile.write("    <h2 class=\"nobookmark\">Specific Synonyms</h2>\n")
+    for i, name in enumerate(sp_order):
+        if do_print:
+            image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
+        else:
+            image_name = i + adjust
+        write_chronology_chart_div(image_name, outfile, "sn_"+name, name, True, do_print, True)
+    adjust += len(specific_synlist)
+    outfile.write("    <h2  class=\"nobookmark\" style=\"clear: both\">Binomial Synonyms</h2>\n")
+    for i, name in enumerate(bi_order):
+        if do_print:
+            image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
+        else:
+            image_name = i + adjust
+        write_chronology_chart_div(image_name, outfile, name, name, True, do_print, True)
 
+    if do_print:
+        end_page_division(outfile)
+    else:
         common_html_footer(outfile, "../")
 
 
@@ -1832,46 +1949,41 @@ def match_specific_name(name, specific_names):
         return y
 
 
-def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs):
-    with codecs.open(WEBOUT_PATH + "names/" + NAME_SUM_URL, "w", "utf-8") as outfile:
+def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do_print, outfile):
+    miny = START_YEAR
+    maxy = CURRENT_YEAR
+    byears = []
+    c = 0
+    for y in range(miny, maxy+1):
+        if y in binomial_year_cnts:
+            c = c + binomial_year_cnts[y]
+            byears.append([y, binomial_year_cnts[y], c])
+        else:
+            byears.append([y, 0, c])
+
+    miny = 1758
+    maxy = CURRENT_YEAR
+    syears = []
+    c = 0
+    for y in range(miny, maxy+1):
+        if y in specific_year_cnts:
+            c = c + specific_year_cnts[y]
+            syears.append([y, specific_year_cnts[y], c])
+        else:
+            syears.append([y, 0, c])
+    tmpslist = list(species_refs.keys())
+    tmpslist.sort()
+    ref_cnts = {s: len(species_refs[s]) for s in tmpslist}
+
+    if do_print:
+        start_page_division(outfile, "base_page")
+    else:
         common_header_part1(outfile, "Fiddler Crab Name Summary", "../")
         outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
         outfile.write("    <script type=\"text/javascript\">\n")
         outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
         outfile.write("      google.setOnLoadCallback(drawChart);\n")
         outfile.write("      function drawChart() {\n")
-        miny = CURRENT_YEAR
-        maxy = 0
-        for y in binomial_year_cnts:
-            if y < miny:
-                miny = y
-            if y > maxy:
-                maxy = y
-        byears = []
-        c = 0
-        for y in range(miny, maxy+1):
-            if y in binomial_year_cnts:
-                c = c + binomial_year_cnts[y]
-                byears.append([y, binomial_year_cnts[y], c])
-            else:
-                byears.append([y, 0, c])
-
-        miny = CURRENT_YEAR
-        maxy = 0
-        for y in specific_year_cnts:
-            if y < miny:
-                miny = y
-            if y > maxy:
-                maxy = y
-        syears = []
-        c = 0
-        for y in range(miny, maxy+1):
-            if y in specific_year_cnts:
-                c = c + specific_year_cnts[y]
-                syears.append([y, specific_year_cnts[y], c])
-            else:
-                syears.append([y, 0, c])
-
         outfile.write("        var data1 = google.visualization.arrayToDataTable([\n")
         outfile.write("          ['Year', 'Cumulative Unique Binomial/Compound Names'],\n")
         for y in byears:
@@ -1898,11 +2010,8 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs):
         outfile.write("\n")
         outfile.write("        var data5 = google.visualization.arrayToDataTable([\n")
         outfile.write("          ['Species', 'Referring References'],\n")
-        tmpslist = list(species_refs.keys())
-        tmpslist.sort()
         for s in tmpslist:
-            outfile.write("          ['" + s + "', " + str(len(species_refs[s])) +
-                          "],\n")
+            outfile.write("          ['" + s + "', " + str(ref_cnts[s]) + "],\n")
         outfile.write("        ]);\n")
         outfile.write("\n")
         outfile.write("        var options1 = {\n")
@@ -1951,8 +2060,10 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs):
         outfile.write("      }\n")
         outfile.write("    </script>\n")
         common_header_part2(outfile, "", False)
-        outfile.write("    <header>\n")
-        outfile.write("      <h1>Summary of Names</h1>\n")
+
+    outfile.write("    <header>\n")
+    outfile.write("      <h1 class=\"bookmark2\">Summary of Names</h1>\n")
+    if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
         outfile.write("          <li><a href=\".\"><span class=\"fa fa-list\"></span> Name Index</a></li>\n")
@@ -1960,15 +2071,53 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs):
                       "\"><span class=\"fa fa-check-circle\"></span> Accepted Species</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
-        outfile.write("    </header>\n")
-        outfile.write("\n")
-        outfile.write("    <p>\n")
-        outfile.write("      A summary of the names in the database (last updated {}).\n".
-                      format(datetime.date.isoformat(datetime.date.today())))
-        outfile.write("      Most of these data are only based on <a href=\"../" + REF_SUM_URL +
-                      "\">references whose citation data is already included in the database</a>.\n")
-        # outfile.write("      "+str(citeCount)+" of "+str(nrefs)+" references  have had citation data recorded.\n")
-        outfile.write("    </p>\n")
+    outfile.write("    </header>\n")
+    outfile.write("\n")
+    outfile.write("    <p>\n")
+    outfile.write("      A summary of the names in the database (last updated {}).\n".
+                  format(datetime.date.isoformat(datetime.date.today())))
+    outfile.write("      Most of these data are only based on <a href=\"../" + REF_SUM_URL +
+                  "\">references whose citation data is already included in the database</a>.\n")
+    outfile.write("    </p>\n")
+
+    if do_print:
+        filename = "cumulative_binames_line.svg"
+        create_line_chart_file(filename, byears, START_YEAR, CURRENT_YEAR, 2)
+        outfile.write("    <h3 class=\"nobookmark\">Cumulative Unique Binomial/Compound Names by Year</h3>\n")
+        outfile.write("    <figure class=\"graph\">\n")
+        outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"line_chart\" />\n")
+        outfile.write("    </figure>\n")
+
+        filename = "binames_per_year.svg_bar.svg"
+        create_bar_chart_file(filename, byears, START_YEAR, CURRENT_YEAR, 1)
+        outfile.write("    <h3 class=\"nobookmark\">Unique Binomial/Compound Names by Year</h3>\n")
+        outfile.write("    <figure class=\"graph\">\n")
+        outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
+        outfile.write("    </figure>\n")
+
+        filename = "cumulative_spnames_line.svg"
+        create_line_chart_file(filename, syears, 1758, CURRENT_YEAR, 2)
+        outfile.write("    <h3 class=\"nobookmark\">Cumulative Unique Specific Names by Year</h3>\n")
+        outfile.write("    <figure class=\"graph\">\n")
+        outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"line_chart\" />\n")
+        outfile.write("    </figure>\n")
+
+        filename = "spnames_per_year_bar.svg"
+        create_bar_chart_file(filename, syears, 1758, CURRENT_YEAR, 1)
+        outfile.write("    <h3 class=\"nobookmark\">Unique Specific Names by Year</h3>\n")
+        outfile.write("    <figure class=\"graph\">\n")
+        outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
+        outfile.write("    </figure>\n")
+
+        filename = "refs_per_species_bar.svg"
+        create_qual_bar_chart_file(filename, tmpslist, ref_cnts)
+        outfile.write("    <h3 class=\"nobookmark\">Number of References Referring to Accepted Species</h3>\n")
+        outfile.write("    <figure class=\"graph\">\n")
+        outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
+        outfile.write("    </figure>\n")
+
+        end_page_division(outfile)
+    else:
         outfile.write("    <div id=\"namechart1_div\"></div>\n")
         outfile.write("    <div id=\"namechart2_div\"></div>\n")
         outfile.write("    <div id=\"namechart3_div\"></div>\n")
@@ -1984,67 +2133,83 @@ def extract_genus(name):
         return name
 
 
-def create_genus_chronology(genus_cnts):
+def create_genus_chronology(genus_cnts, do_print, outfile):
     """ create a page with the chronological history of the genera """
-    with codecs.open(WEBOUT_PATH + "names/synonyms_uca.html", "w", "utf-8") as outfile:
+    miny = START_YEAR
+    maxy = CURRENT_YEAR
+    # --all totals and specific names--
+    # find max count across all synonyms
+    maxcnt = 0
+    name_cnts = []
+    total_cnts = {y: 0 for y in range(miny, maxy + 1)}
+    for name in genus_cnts:
+        cnts = genus_cnts[name]
+        for y in cnts:
+            total_cnts[y] += cnts[y]
+        tmpmax = max(cnts.values())
+        maxcnt = max(maxcnt, tmpmax)
+        total = sum(cnts.values())
+        name_cnts.append([total, name])
+    maxcnt = max(total_cnts.values())
+    name_cnts.sort(reverse=True)
+    # put accepted name first, followed by the rest in decreasing frequency
+    order = ["Uca"]
+    for x in name_cnts:
+        if x[1] != "Uca":
+            order.append(x[1])
+    if do_print:
+        start_page_division(outfile, "synonym_page")
+        filename = "Genus_total_chronology.svg"
+        create_chronology_chart_file(filename, miny, maxy, maxcnt, total_cnts)
+        for name in order:
+            filename = "Genus_" + name + "_chronology.svg"
+            create_chronology_chart_file(filename, miny, maxy, maxcnt, genus_cnts[name])
+    else:
         common_header_part1(outfile, "Uca", "../")
         outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
         outfile.write("    <script type=\"text/javascript\">\n")
         outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
         outfile.write("      google.setOnLoadCallback(drawChart);\n")
         outfile.write("      function drawChart() {\n")
-        miny = START_YEAR
-        maxy = CURRENT_YEAR
-        # --all totals and specific names--
-        # find max count across all synonyms
-        maxcnt = 0
-        name_cnts = []
-        total_cnts = {y: 0 for y in range(miny, maxy+1)}
-        for name in genus_cnts:
-            cnts = genus_cnts[name]
-            for y in cnts:
-                total_cnts[y] += cnts[y]
-            tmpmax = max(cnts.values())
-            maxcnt = max(maxcnt, tmpmax)
-            total = sum(cnts.values())
-            name_cnts.append([total, name])
-        maxcnt = max(total_cnts.values())
-
-        # setup_chronology_chart("All Genera", 0, miny, maxy, max(total_cnts.values()), total_cnts, False, outfile)
-        setup_chronology_chart(0, miny, maxy, max(total_cnts.values()), total_cnts, outfile)
+        setup_chronology_chart(0, miny, maxy, maxcnt, total_cnts, outfile)
         adjust = 1
-
-        name_cnts.sort(reverse=True)
-        # put accepted name first, followed by the rest in decreasing frequency
-        order = ["Uca"]
-        for x in name_cnts:
-            if x[1] != "Uca":
-                order.append(x[1])
         for i, name in enumerate(order):
             setup_chronology_chart(i + adjust, miny, maxy, maxcnt, genus_cnts[name], outfile)
-
         outfile.write("      }\n")
         outfile.write("    </script>\n")
         common_header_part2(outfile, "", False)
 
-        outfile.write("    <header>\n")
-        outfile.write("      <h1>Synonym Chronology of the genus " + format_name_string("Uca") + "</h1>\n")
-        # outfile.write("      <nav>\n")
-        # outfile.write("        <ul>\n")
-        # outfile.write("          <li><a href=\"index.html\"><span class=\"fa fa-list\"></span> "
-        #               "Full Name Index</a></li>\n")
-        # outfile.write("        </ul>\n")
-        # outfile.write("      </nav>\n")
-        outfile.write("    </header>\n")
-        outfile.write("\n")
-        write_chronology_chart_div(0, outfile, "All Genera", False)
-        adjust = 1
-        outfile.write("    <p style=\"clear: both\">Accepted name is listed first, followed by synonyms in decreasing "
-                      "order of use.</p>")
-        outfile.write("    <h2>Genus Synonyms</h2>\n")
-        for i, name in enumerate(order):
-            write_chronology_chart_div(i + adjust, outfile, name, True)
+    outfile.write("    <header>\n")
+    outfile.write("      <h1 class=\"bookmark2\">Synonym Chronology of the genus " + format_name_string("Uca") +
+                  "</h1>\n")
+    if not do_print:
+        outfile.write("      <nav>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") +
+                      "index.html\"><span class=\"fa fa-list\"></span> Full Name Index</a></li>\n")
+        outfile.write("        </ul>\n")
+        outfile.write("      </nav>\n")
+    outfile.write("    </header>\n")
+    outfile.write("\n")
+    if do_print:
+        filename = "Genus_total_chronology.svg"
+    else:
+        filename = 0
+    write_chronology_chart_div(filename, outfile, None, "All Genera", False, do_print, True)
+    adjust = 1
+    outfile.write("    <p style=\"clear: both\">Accepted name is listed first, followed by synonyms in decreasing "
+                  "order of use.</p>\n")
+    outfile.write("    <h2 class=\"nobookmark\">Genus Synonyms</h2>\n")
+    for i, name in enumerate(order):
+        if do_print:
+            filename = "Genus_" + name + "_chronology.svg"
+        else:
+            filename = i + adjust
+        write_chronology_chart_div(filename, outfile, None, name, True, do_print, True)
 
+    if do_print:
+        end_page_division(outfile)
+    else:
         common_html_footer(outfile, "../")
 
 
@@ -2082,18 +2247,6 @@ def calculate_name_index_data(refdict, citelist, specific_names):
                         total_binomial_year_cnts[y] += 1
                     else:
                         total_binomial_year_cnts[y] = 1
-                # y = refdict[c.cite_key].citation
-                # y = y[y.find("(")+1:y.find(")")]
-                # if (y != "?") and (y.lower() != "in press"):
-                #     if y[0] == "~":
-                #         y = y[1:]
-                #     if len(y) > 4:
-                #         y = y[:4]
-                #     y = int(y)
-                #     if y in total_binomial_year_cnts:
-                #         total_binomial_year_cnts[y] += 1
-                #     else:
-                #         total_binomial_year_cnts[y] = 1
     unique_names.sort(key=lambda s: s.lower())
 
     # identify genera used per paper
@@ -2117,110 +2270,14 @@ def calculate_name_index_data(refdict, citelist, specific_names):
                             genus_cnts[genus] = {y: 0 for y in range(START_YEAR, CURRENT_YEAR + 1)}
                         gcnts = genus_cnts[genus]
                         gcnts[y] += 1
-        # y = refdict[c].citation
-        # y = y[y.find("(") + 1:y.find(")")]
-        # if (y != "?") and (y.lower() != "in press"):
-        #     if y[0] == "~":
-        #         y = y[1:]
-        #     if len(y) > 4:
-        #         y = y[:4]
-        #     y = int(y)
-        #     if START_YEAR <= y <= CURRENT_YEAR:
-        #         genera_set = genera_per_paper[c]
-        #         for genus in genera_set:
-        #             genus = clean_genus(genus)
-        #             if genus != "":
-        #                 if genus not in genus_cnts:
-        #                     genus_cnts[genus] = {y: 0 for y in range(START_YEAR, CURRENT_YEAR + 1)}
-        #                 gcnts = genus_cnts[genus]
-        #                 gcnts[y] += 1
-    # create_genus_chronology(genus_cnts)
 
-    # create name index
-    # with codecs.open(WEBOUT_PATH + "names/index.html", "w", "utf-8") as outfile:
-    #     common_html_header(outfile, "Name Index", "../")
-    #     outfile.write("    <header>\n")
-    #     outfile.write("      <h1>Name Index</h1>\n")
-    #     outfile.write("      <nav>\n")
-    #     outfile.write("        <ul>\n")
-    #     outfile.write("          <li><a href=\"" + NAME_SUM_URL +
-    #                   "\"><span class=\"fa fa-line-chart\"></span> Name Summary</a></li>\n")
-    #     outfile.write("          <li><a href=\"../" + SPECIES_URL +
-    #                   "\"><span class=\"fa fa-check-circle\"></span> Accepted Species</a></li>\n")
-    #     outfile.write("        </ul>\n")
-    #     outfile.write("      </nav>\n")
-    #     outfile.write("    </header>\n")
-    #     outfile.write("    <p>\n")
-    #     outfile.write("      This is an index of every scientific name (including all alternate spellings) which have"
-    #                   " been applied to fiddler crabs or placed in the fiddler crab genus.\n")
-    #     outfile.write("    </p>\n")
-    #     outfile.write("    <p>\n")
-    #     outfile.write("      For the binomials, every publication which used that name is provided, as well as the "
-    #                   "best estimate as to which species, as we understand them today, the author was actually "
-    #                   "referring.\n")
-    #     outfile.write("    </p>\n")
-    #     outfile.write("    <p>\n")
-    #     outfile.write("      For the specific names, only the primary spelling is listed below, but all alternate "
-    #                   "spellings and inclusive binomials are included on the linked page, as well as general "
-    #                   "information on the status of each specific name.\n")
-    #     outfile.write("    </p>\n")
-    #     outfile.write("    <div class=\"namecol\">\n")
-    #     outfile.write("      <h3>Binomials (and other Compound Names)</h3>\n")
-    #     outfile.write("      <ul>\n")
-    #     outfile.write("\n")
-    #     binomial_usage_cnts_by_year = {}
-    #     for name in unique_names:
-    #         sname = match_specific_name(name, specific_names)
-    #         namefile = name_to_filename(name)
-    #         outfile.write("        <li><a href=\"" + namefile + ".html\">" + format_name_string(name) + "</a></li>\n")
-    #         create_binomial_name_page(name, namefile, refdict, citelist, name_table, sname, logfile)
-    #         binomial_usage_cnts_by_year[name] = test_create_binomial_name_page(name, namefile, refdict, citelist,
-    #                                                                            name_table, sname, logfile)
     binomial_usage_cnts_by_year = {}
     for name in unique_names:
-        # sname = match_specific_name(name, specific_names)
-        # namefile = name_to_filename(name)
-        # binomial_usage_cnts_by_year[name] = create_binomial_name_page(name, namefile, refdict, citelist,
-        #                                                               name_table, sname, logfile)
         binomial_usage_cnts_by_year[name] = calculate_binomial_yearly_cnts(name, refdict, citelist)
-
-        # outfile.write("      </ul>\n")
-        # outfile.write("    </div>\n")
-        # outfile.write("    <div class=\"namecol\">\n")
-        # outfile.write("      <h3>Specific Names</h3>\n")
-        # outfile.write("      <ul>\n")
-        # outfile.write("\n")
-        # specific_year_cnts = {}
-        # specific_usage_cnts_by_year = {}
-        # for name in specific_names:
-        #     outfile.write("        <li><a href=\"sn_" + name.name + ".html\">" +
-        #                   format_name_string(name.name) + "</a></li>\n")
-        #     create_specific_name_page(name, unique_names, refdict, logfile)
-        #     specific_usage_cnts_by_year[name.name] = test_create_specific_name_page(name, unique_names, refdict,
-        #                                                                             binomial_usage_cnts_by_year,
-        #                                                                             logfile)
-        #     tmpkey = name.priority_source
-        #     if tmpkey != ".":
-        #         y = refdict[tmpkey].citation
-        #         y = y[y.find("(")+1:y.find(")")]
-        #         if (y != "?") and (y.lower() != "in press"):
-        #             if y[0] == "~":
-        #                 y = y[1:]
-        #             if len(y) > 4:
-        #                 y = y[:4]
-        #             y = int(y)
-        #             if y in specific_year_cnts:
-        #                 specific_year_cnts[y] += 1
-        #             else:
-        #                 specific_year_cnts[y] = 1
 
     specific_year_cnts = {}
     specific_usage_cnts_by_year = {}
     for name in specific_names:
-        # outfile.write("        <li><a href=\"sn_" + name.name + ".html\">" +
-        #               format_name_string(name.name) + "</a></li>\n")
-        # specific_usage_cnts_by_year[name.name] = create_specific_name_page(name, unique_names, refdict,
-        #                                                                    binomial_usage_cnts_by_year, logfile)
         specific_usage_cnts_by_year[name.name] = calculate_specific_name_yearly_cnts(name, unique_names,
                                                                                      binomial_usage_cnts_by_year)
         tmpkey = name.priority_source
@@ -2231,22 +2288,6 @@ def calculate_name_index_data(refdict, citelist, specific_names):
                     specific_year_cnts[y] += 1
                 else:
                     specific_year_cnts[y] = 1
-            # y = refdict[tmpkey].citation
-            # y = y[y.find("(") + 1:y.find(")")]
-            # if (y != "?") and (y.lower() != "in press"):
-            #     if y[0] == "~":
-            #         y = y[1:]
-            #     if len(y) > 4:
-            #         y = y[:4]
-            #     y = int(y)
-            #     if y in specific_year_cnts:
-            #         specific_year_cnts[y] += 1
-            #     else:
-            #         specific_year_cnts[y] = 1
-        # outfile.write("      </ul>\n")
-        # outfile.write("    </div>\n")
-        # common_html_footer(outfile, "../")
-    # create_name_summary(total_binomial_year_cnts, specific_year_cnts, species_refs)
     return (unique_names, binomial_usage_cnts_by_year, specific_usage_cnts_by_year, genus_cnts,
             total_binomial_year_cnts, name_table)
 
@@ -2257,7 +2298,6 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
     if do_print:
         start_page_division(outfile, "index_page")
     else:
-        create_genus_chronology(genus_cnts)
         common_html_header(outfile, "Name Index", "../")
     outfile.write("    <header id=\"name_index\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Name Index</h1>\n")
@@ -2268,6 +2308,8 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
                       "\"><span class=\"fa fa-line-chart\"></span> Name Summary</a></li>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + SPECIES_URL +
                       "\"><span class=\"fa fa-check-circle\"></span> Accepted Species</a></li>\n")
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") +
+                      "synonyms_uca.html\">Synonyms of <em class=\"species\">Uca</em></a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -2290,17 +2332,9 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
     outfile.write("      <ul class=\"namelist\">\n")
     # outfile.write("\n")
     for name in unique_names:
-        # sname = match_specific_name(name, specific_names)
         namefile = name_to_filename(name)
         outfile.write("        <li><a href=\"" + rel_link_prefix(do_print, "") + namefile + ".html\">" +
                       format_name_string(name) + "</a></li>\n")
-        # if do_print:
-        #     write_binomial_name_page(name, binomial_usage_cnts_by_year[name], refdict, citelist, name_table, sname,
-        #                              logfile, outfile, True)
-        # else:
-        #     with codecs.open(WEBOUT_PATH + "names/" + namefile + ".html", "w", "utf-8") as suboutfile:
-        #         write_binomial_name_page(name, binomial_usage_cnts_by_year[name], refdict, citelist, name_table,
-        #                                  sname, logfile, suboutfile, False)
 
     outfile.write("      </ul>\n")
     outfile.write("    </div>\n")
@@ -2312,14 +2346,6 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
     for name in specific_names:
         outfile.write("        <li><a href=\"" + rel_link_prefix(do_print, "") + "sn_" + name.name + ".html\">" +
                       format_name_string(name.name) + "</a></li>\n")
-        # if do_print:
-        #     write_specific_name_page(name, unique_names, refdict, binomial_usage_cnts_by_year, logfile, outfile,
-        #                              True)
-        # else:
-        #     with codecs.open(WEBOUT_PATH + "names/sn_" + name.name + ".html", "w", "utf-8") as suboutfile:
-        #        write_specific_name_page(name, unique_names, refdict, binomial_usage_cnts_by_year, logfile, suboutfile,
-        #                                  False)
-
         tmpkey = name.priority_source
         if tmpkey != ".":
             y = refdict[tmpkey].year()
@@ -2328,18 +2354,6 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
                     specific_year_cnts[y] += 1
                 else:
                     specific_year_cnts[y] = 1
-            # y = refdict[tmpkey].citation
-            # y = y[y.find("(")+1:y.find(")")]
-            # if (y != "?") and (y.lower() != "in press"):
-            #     if y[0] == "~":
-            #         y = y[1:]
-            #     if len(y) > 4:
-            #         y = y[:4]
-            #     y = int(y)
-            #     if y in specific_year_cnts:
-            #         specific_year_cnts[y] += 1
-            #     else:
-            #         specific_year_cnts[y] = 1
     outfile.write("      </ul>\n")
     outfile.write("    </div>\n")
     if do_print:
@@ -2347,10 +2361,16 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
     else:
         common_html_footer(outfile, "../")
 
-    if not do_print:
-        create_name_summary(total_binomial_year_cnts, specific_year_cnts, species_refs)
+    if do_print:
+        create_name_summary(total_binomial_year_cnts, specific_year_cnts, species_refs, do_print, outfile)
+        create_genus_chronology(genus_cnts, do_print, outfile)
+    else:
+        with codecs.open(WEBOUT_PATH + "names/" + NAME_SUM_URL, "w", "utf-8") as suboutfile:
+            create_name_summary(total_binomial_year_cnts, specific_year_cnts, species_refs, do_print, suboutfile)
+        with codecs.open(WEBOUT_PATH + "names/synonyms_uca.html", "w", "utf-8") as suboutfile:
+            create_genus_chronology(genus_cnts, do_print, suboutfile)
 
-    # write out individual pages for each binomaila name and specific name
+    # write out individual pages for each binomial name and specific name
     for name in unique_names:
         sname = match_specific_name(name, specific_names)
         namefile = name_to_filename(name)
@@ -2740,8 +2760,6 @@ def write_species_page(species, references, specific_names, all_names, photos, v
                       rel_link_prefix(do_print, "names/") + "synonyms_" + species.species +
                       ".html\">Chronology</a>)</dt>\n")
         outfile.write("         <dd><em class=\"species\">" + ", ".join(llist) + "</em></dd>\n")
-        create_synonym_chronology(species.species, binomial_synlist, binomial_name_counts, specific_synlist,
-                                  specific_name_cnts)
 
     # Geographic Range
     outfile.write("       <dt>Geographic Range</dt>\n")
@@ -2809,8 +2827,6 @@ def write_species_page(species, references, specific_names, all_names, photos, v
                           format(pn, "0>2") + "tn.jpg\" alt=\"Uca " + species.species + "\" title=\"Uca " +
                           species.species + "\" /></picture></a>\n")
             outfile.write("      </figure>\n")
-            # write_species_photo_page(pfname, species.species, species.common, photo.caption, pn,
-            #                          photo.species)
             photo_n += 1
     if photo_n == 0:
         outfile.write("      <p>\n")
@@ -2850,7 +2866,6 @@ def write_species_page(species, references, specific_names, all_names, photos, v
                               "\">" + video.caption + "</a></dt>\n")
                 outfile.write("              <dd>" + video.length + ", " + video.size + ", " +
                               video.format + "</dd>\n")
-                # write_species_video_page(vfname, species.species, species.common, video, vn)
         if video_n == 0:
             outfile.write("      <p>\n")
             outfile.write("        <em>No videos available at this time.</em>\n")
@@ -2904,6 +2919,15 @@ def write_species_page(species, references, specific_names, all_names, photos, v
     else:
         common_html_footer(outfile, "")
 
+    if len(binomial_synlist) > 0:
+        if do_print:
+            create_synonym_chronology(species.species, binomial_synlist, binomial_name_counts, specific_synlist,
+                                      specific_name_cnts, do_print, outfile)
+        else:
+            with codecs.open(WEBOUT_PATH + "names/synonyms_" + species.species + ".html", "w", "utf-8") as suboutfile:
+                create_synonym_chronology(species.species, binomial_synlist, binomial_name_counts, specific_synlist,
+                                          specific_name_cnts, do_print, suboutfile)
+
 
 def write_photo_index(specieslist, photos, do_print, outfile, logfile):
     """ create the photos index page """
@@ -2911,7 +2935,6 @@ def write_photo_index(specieslist, photos, do_print, outfile, logfile):
         start_page_division(outfile, "index_page")
         media_path = MEDIA_PATH
     else:
-        # create_blank_index(WEBOUT_PATH + "photos/index.html")
         common_html_header(outfile, "Fiddler Crab Photos", "")
         media_path = ""
     outfile.write("    <header id=\"" + PHOTO_URL + "\">\n")
@@ -2998,7 +3021,6 @@ def write_video_index(videos, do_print, outfile, logfile):
     sectitle = ("Feeding", "Male Waving and Other Displays", "Female Display", "Fighting", "Mating", "Miscellaneous")
     secshort = ("Feeding", "Male Display", "Female Display", "Fighting", "Mating", "Miscellaneous")
     secanchor = ("video_feeding", "video_display", "video_female", "video_fighting", "video_mating", "video_misc")
-    # with codecs.open(WEBOUT_PATH + VIDEO_URL, "w", "utf-8") as outfile:
     if do_print:
         start_page_division(outfile, "index_page")
     else:
@@ -3075,7 +3097,6 @@ def write_video_index(videos, do_print, outfile, logfile):
 
 def write_specific_art_page(outfile, art, backurl, backtext, do_print):
     """ create the individual page for each piece of art """
-    # with codecs.open(fname, "w", "utf-8") as outfile:
     ptitle = art.title + " (" + art.author + " " + art.year + ")"
     if do_print:
         start_page_division(outfile, "art_page")
@@ -3120,14 +3141,12 @@ def write_specific_art_page(outfile, art, backurl, backtext, do_print):
 
 def write_art_science_pages(artlist, do_print, outfile):
     """ create the art science index """
-    # with codecs.open(WEBOUT_PATH + ART_SCI_URL, "w", "utf-8") as outfile:
     if do_print:
         start_page_division(outfile, "index_page")
         media_path = MEDIA_PATH
     else:
         common_html_header(outfile, "Fiddler Crab Art - Scientific", "")
         media_path = ""
-        # create_blank_index(WEBOUT_PATH + "art/index.html")
     outfile.write("    <header id=\"" + ART_SCI_URL + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Scientific Drawings</h1>\n")
     outfile.write("    </header>\n")
@@ -3180,7 +3199,6 @@ def write_art_science_pages(artlist, do_print, outfile):
 
 def write_art_stamps_pages(artlist, do_print, outfile):
     """ create the art stamps index """
-    # with codecs.open(WEBOUT_PATH + ART_STAMP_URL, "w", "utf-8") as outfile:
     if do_print:
         start_page_division(outfile, "index_page")
         media_path = MEDIA_PATH
@@ -3238,7 +3256,6 @@ def write_art_stamps_pages(artlist, do_print, outfile):
     
 def write_art_crafts_pages(artlist, do_print, outfile):
     """ create the art craft index """
-    # with codecs.open(WEBOUT_PATH + ART_CRAFT_URL, "w", "utf-8") as outfile:
     if do_print:
         start_page_division(outfile, "index_page")
         media_path = MEDIA_PATH
@@ -3385,10 +3402,6 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("         The earliest description of the type species of <em class=\"species\">Uca</em> is from "
                   "a drawing in " + format_reference_cite(refdict["Seba1758"], do_print, AUTHOR_OUT, logfile) +
                   ", which he called <em class=\"species\">Cancer uka una, Brasiliensibus</em> (shown below).\n")
-    # outfile.write("         The earliest description of the type species of <em class=\"species\">Uca</em> is from "
-    #               "a drawing in <a href=\"" + rel_link_prefix(do_print, "references/") +
-    #                "Seba1758.html\">Seba (1758)</a>, which he called "
-    #               "<em class=\"species\">Cancer uka una, Brasiliensibus</em> (shown below).\n")
     outfile.write("      </p>\n")
     outfile.write("      <figure>\n")
     outfile.write("        <picture><img src=\"" + media_path + "art/Seba_Uca_una.jpg\" "
@@ -3398,7 +3411,6 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("      </figure>\n")
     outfile.write("      <p>\n")
     outfile.write("        A number of authors subsequently used this same picture as a basis for naming the "
-                  # "species (<a href=\"references/Manning1981.html\">Manning and Holthuis 1981</a>).  "
                   "species (" + format_reference_cite(refdict["Manning1981"], do_print, AUTHOR_IN, logfile) + ").  "
                   "<em class=\"species\">Cancer vocans major</em> Herbst, 1782; "
                   "<em class=\"species\">Ocypode heterochelos</em> Lamarck, 1801; "
@@ -3411,7 +3423,6 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("      </p>\n")
     outfile.write("      <blockquote>\n")
     outfile.write("        As an aside, Seba's name, <em class=\"species\">Cancer uka una</em> comes from the "
-                  # "nomenclature of <a href=\"references/Marcgrave1648.html\">Marcgrave (1648)</a>, who mispelled "
                   "nomenclature of " + format_reference_cite(refdict["Marcgrave1648"], do_print, AUTHOR_OUT, logfile) +
                   ", who mispelled &ldquo;u&ccedil;a una&rdquo; as &ldquo;uca una&rdquo;. Not only did Seba copy the "
                   "mispelling, but he applied it to the fiddler crab instead of the mangrove crab (which is today "
@@ -3420,13 +3431,11 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
                   "name <em class=\"species\">Gelasimus</em> for fiddler crabs was so that "
                   "<em class=\"species\">Uca</em> could be applied to mangrove crabs; as this was an invalid "
                   "proposal, <em class=\"species\">Uca</em> is retained for fiddlers, despite being due to a pair of "
-                  # "pair of errors (<a href=\"references/Tavares1993.html\">Tavares 1993</a>).\n")
                   "errors (" + format_reference_cite(refdict["Tavares1993"], do_print, AUTHOR_IN, logfile) + ").\n")
     outfile.write("        <figure class=\"syspic\">\n")
     outfile.write("          <picture><img src=\"" + media_path + "art/Marcgrave_Maracoani.png\" "
                   "alt=\"Marcgrave's Maracoani\" title=\"Marcgrave's Maracoani\"></picture>\n")
     outfile.write("          <figcaption>Oldest known drawing of a fiddler crab "
-                  # "(<a href=\"references/Marcgrave1648.html\">Marcgrave, 1648</a>). He labeled it "
                   "(" + format_reference_cite(refdict["Marcgrave1648"], do_print, AUTHOR_IN, logfile) + "). "
                   "He labeled it &ldquo;Maracoani&rdquo;, and it represents the namesake of the species "
                   "<em class=\"species\">Uca maracoani.</em></figcaption>\n")
@@ -3435,7 +3444,6 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("          <picture><img src=\"" + media_path + "art/Marcgrave_Uca_una.png\" "
                   "alt=\"Marcgrave's Uca una\" title=\"Marcgrave's Uca una\"></picture>\n")
     outfile.write("          <figcaption>The drawing actually labeled &ldquo;Uca Una&rdquo; by "
-                  # "<a href=\"references/Marcgrave1648.html\">Marcgrave (1648)</a> is not a fiddler crab. "
                   + format_reference_cite(refdict["Marcgrave1648"], do_print, AUTHOR_OUT, logfile) +
                   " is not a fiddler crab. Today this species is known as the mangrove crab "
                   "<em class=\"species\">Ucides cordatus.</em></figcaption>\n")
@@ -3444,7 +3452,6 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("          <picture><img src=\"" + media_path + "art/Marcgrave_Ciecie_Ete.png\" "
                   "alt=\"Marcgrave's Ciecie Ete\" title=\"Marcgrave's Ciecie Ete\"></picture>\n")
     outfile.write("          <figcaption>The other fiddler crab drawing found in "
-                  # "<a href=\"references/Marcgrave1648.html\">Marcrgrave (1648)</a>, labeled "
                   + format_reference_cite(refdict["Marcgrave1648"], do_print, AUTHOR_OUT, logfile) + ", labeled "
                   "&ldquo;Ciecie Ete&rdquo; (he also refers to a very similar species called "
                   "&ldquo;Ciecie Panema&rdquo;). This figure is believed to most likely represent "
@@ -3453,31 +3460,25 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("      </blockquote>\n")
     outfile.write("      <p>\n")
     outfile.write("        For about 60 years, the genus was known as <em class=\"species\">Gelasimus,</em> "
-                  # "until <a href=\"references/Rathbun1897.1.html\">Rathbun (1897)</a> showed that the abandonment "
                   "until " + format_reference_cite(refdict["Rathbun1897.1"], do_print, AUTHOR_OUT, logfile)
                   + " showed that the abandonment of the older name <em class=\"species\">Uca</em> did not conform to "
                   "zoological naming conventions. The type species of <em class=\"species\">Uca</em> was known as both "
                   "<em class=\"species\">Uca heterochelos</em> and <em class=\"species\">U. platydactylus,</em> "
-                  # "until <a href=\"references/Rathbun1918.2.html\">Rathbun (1918)</a> suggested the adoption of "
                   "until " + format_reference_cite(refdict["Rathbun1918.2"], do_print, AUTHOR_OUT, logfile) +
                   " suggested the adoption of "
                   "<em class=\"species\">U. heterochelos</em> as the valid name. Almost 50 years later, "
-                  # "<a href=\"references/Holthuis1962.html\">Holthuis (1962)</a> pointed out that "
                   + format_reference_cite(refdict["Holthuis1962"], do_print, AUTHOR_OUT, logfile) + " pointed out that "
                   "<em class=\"species\">U. heterochelos</em> was an objective junior synonym of "
                   "<em class=\"species\">U. major,</em> thus the type species has been referred to as "
                   "<em class=\"species\">U. major</em> ever since.\n")
     outfile.write("      </p>\n")
     outfile.write("      <p>\n")
-    # outfile.write("        However, <a href=\"references/Bott1973.1.html\">Bott (1973)</a> discovered that there "
     outfile.write("        However, " + format_reference_cite(refdict["Bott1973.1"], do_print, AUTHOR_OUT, logfile) +
                   " discovered that there "
                   "has been a universal  misinterpretation of the type species; the species pictured by Seba is "
                   "not the American species commonly referred to as "
                   "<em class=\"species\">U. major,</em> but rather the West African/Portuguese species called "
                   "<em class=\"species\">U. tangeri</em> (Eydoux, 1835). Correcting this error would have caused "
-                  # "a somewhat painful change of names (<a href=\"references/Holthuis1979.html\">Holthuis 1979</a>; "
-                  # "<a href=\"references/Manning1981.html\">Manning and Holthuis 1981</a>). The type species "
                   "a somewhat painful change of names (" +
                   format_reference_cite(refdict["Holthuis1979"], do_print, AUTHOR_IN, logfile) + "; " +
                   format_reference_cite(refdict["Manning1981"], do_print, AUTHOR_IN, logfile) +
@@ -3490,8 +3491,6 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("         To deal with this dilemma, the Society of Zoological Nomenclature officially "
                   "designated the holotype of <em class=\"species\">Gelasimus platydactylus</em> as a neotype "
                   "of <em class=\"species\">Cancer vocans major</em> (" +
-                  # "(<a href=\"references/Holthuis1979.html\">Holthuis 1979</a>; "
-                  # "<a href=\"references/ICZN1983.html\">ICZN Opinion 1262</a>). The result of this decision is "
                   format_reference_cite(refdict["Holthuis1979"], do_print, AUTHOR_IN, logfile) + "; " +
                   format_reference_cite(refdict["ICZN1983"], do_print, AUTHOR_IN, logfile) + "). "
                   "The result of this decision is "
@@ -3501,7 +3500,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
                   "the genus is named, <em class=\"species\">U. major</em> "
                   "(<em class=\"species\">Cancer vocans major</em>) is still the official type species of the "
                   "genus <em class=\"species\">Uca.</em>\n")
-    # outfile.write("      <p>\n")
+    outfile.write("      </p>\n")
     outfile.write("    </section>\n")
     outfile.write("\n")
 
@@ -3510,8 +3509,6 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("      <h2 id=\"subgenera\" class=\"bookmark2\">Subgenera</h2>\n")
     outfile.write("      <p>\n")
     outfile.write("       There have been two major proposals for splitting up the genus, one by " +
-                  # "<a href=\"references/Bott1973.2.html\">Bott (1973)</a> and the other by "
-                  # "<a href=\"references/Crane1975.html\">Crane (1975)</a>. Neither is based on a numerical "
                   format_reference_cite(refdict["Bott1973.2"], do_print, AUTHOR_OUT, logfile) + " and the other by " +
                   format_reference_cite(refdict["Crane1975"], do_print, AUTHOR_OUT, logfile) + ". "
                   "Neither is based on a numerical "
@@ -3522,15 +3519,8 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
                   "complication in most researcher's minds.\n")
     outfile.write("      </p>\n")
     outfile.write("      <p>\n")
-    # outfile.write("       <a href=\"references/Rosenberg2001.html\">Rosenberg (2001)</a> partly cleared up the "
     outfile.write("       " + format_reference_cite(refdict["Rosenberg2001"], do_print, AUTHOR_OUT, logfile) +
                   " partly cleared up the confusion between the two systems. More recent work by " +
-                  # "<a href=\"references/Beinlich2006.html\">Beinlich &amp; von Hagen (2006)</a>, "
-                  # "<a href=\"references/Shih2009.html\">Shih <em>et al.</em> (2009), "
-                  # "<a href=\"references/Spivak2009.html\">Spivak &amp; Cuesta (2009)</a>, "
-                  # "<a href=\"references/Naderloo2010.html\">Naderloo <em>et al.</em> (2010)</a>, "
-                  # "<a href=\"references/Landstorfer2010.html\">Landstorfer &amp; Schubart (2010)</a>, and "
-                  # "<a href=\"references/Shih2015.2.html\">Shih (2015)</a> have continued to refine the subgenera "
                   format_reference_cite(refdict["Beinlich2006"], do_print, AUTHOR_OUT, logfile) + ", " +
                   format_reference_cite(refdict["Shih2009"], do_print, AUTHOR_OUT, logfile) + ", " +
                   format_reference_cite(refdict["Spivak2009"], do_print, AUTHOR_OUT, logfile) + ", " +
@@ -3576,12 +3566,10 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("      <p>\n")
     outfile.write("For an overview of all <em class=\"species\">Uca</em> species, the best reference is " +
                   format_reference_cite(refdict["Crane1975"], do_print, AUTHOR_OUT, logfile) +
-                  # "<a href=\"references/Crane1975.html\">Crane (1975)</a>; any earlier major work would be "
                   "; any earlier major work would be "
                   "overridden by Crane's descriptions. For the most part, the taxa recognized by Crane are still "
                   "accepted today. A number of new species have been described since the publication of her "
                   "monograph, a few species has been discovered to be invalid, and two of her new species were "
-                  # "previously described by <a href=\"references/Bott1973.2.html\">Bott (1973)</a>; as with the "
                   "previously described by " +
                   format_reference_cite(refdict["Bott1973.2"], do_print, AUTHOR_OUT, logfile) + "; as with the "
                   "subgenera, his names have priority and take precedence. These changes are summarized below.\n")
@@ -3599,101 +3587,79 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("            <td colspan=\"2\"><strong>Note:</strong> The newly described (relative to Crane) "
                   "species <em class=\"species\">Uca pavo</em> George &amp; Jones, 1982, is a junior subsynonym "
                   "of <em class=\"species\">Uca capricornis</em> (see " +
-                  # "<a href=\"references/vonHagen1989.html\">von Hagen &amp; Jones 1989</a>)</td>\n")
                   format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_OUT, logfile) + ")</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("        </tfoot>\n")
     outfile.write("        <tbody>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca panacea</em></td>\n")
-    # outfile.write("            <td><a href=\"references/Novak1974.html\">Novak &amp; Salmon (1974)</a></td>\n")
     outfile.write("            <td>" + format_reference_cite(refdict["Novak1974"], do_print, AUTHOR_OUT, logfile) +
                   "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca marguerita</em></td>\n")
-    # outfile.write("            <td><a href=\"references/Thurman1981.1.html\">Thurman (1981)</a></td>\n")
     outfile.write("            <td>" + format_reference_cite(refdict["Thurman1981.1"], do_print, AUTHOR_OUT, logfile) +
                   "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca elegans</em></td>\n")
-    # outfile.write("            <td><a href=\"references/George1982.html\">George &amp; Jones (1982)</a></td>\n")
     outfile.write("            <td>" + format_reference_cite(refdict["George1982"], do_print, AUTHOR_OUT, logfile) +
                   "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca hirsutimanus</em></td>\n")
-    # outfile.write("            <td><a href=\"references/George1982.html\">George &amp; Jones (1982)</a></td>\n")
     outfile.write("            <td>" + format_reference_cite(refdict["George1982"], do_print, AUTHOR_OUT, logfile) +
                   "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca intermedia</em></td>\n")
-    # outfile.write("            <td><a href=\"references/vonPrahl1985.html\">von Prahl &amp; Toro (1985)</a></td>\n")
     outfile.write("            <td>" + format_reference_cite(refdict["vonPrahl1985"], do_print, AUTHOR_OUT, logfile) +
                   "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca victoriana</em></td>\n")
-    # outfile.write("            <td><a href=\"references/vonHagen1987.1.html\">von Hagen (1987)</a></td>\n")
     outfile.write("            <td>" + format_reference_cite(refdict["vonHagen1987.1"], do_print, AUTHOR_OUT, logfile) +
                   "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca albimana</em></td>\n")
-    # outfile.write("            <td><a href=\"references/Kossmann1877.html\">Kossmann (1877)</a>, "
-    #               "<a href=\"references/Shih2009.html\">Shih <em>et al.</em> (2009)</a>, "
-    #               "<a href=\"references/Naderloo2010.html\">Naderloo <em>et al.</em> (2010)</a></td>\n")
     outfile.write("            <td>" + format_reference_cite(refdict["Kossmann1877"], do_print, AUTHOR_OUT, logfile) +
                   ", " + format_reference_cite(refdict["Shih2009"], do_print, AUTHOR_OUT, logfile) + ", " +
                   format_reference_cite(refdict["Naderloo2010"], do_print, AUTHOR_OUT, logfile) + "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca iranica</em></td>\n")
-    # outfile.write("            <td><a href=\"references/Pretzmann1971.html\">Pretzmann (1971)</a>, "
-    #               "<a href=\"references/Shih2009.html\">Shih <em>et al.</em> (2009)</a>, "
-    #               "<a href=\"references/Naderloo2010.html\">Naderloo <em>et al.</em> (2010)</a></td>\n")
     outfile.write("            <td>" + format_reference_cite(refdict["Pretzmann1971"], do_print, AUTHOR_OUT, logfile) +
                   ", " + format_reference_cite(refdict["Shih2009"], do_print, AUTHOR_OUT, logfile) + ", " +
                   format_reference_cite(refdict["Naderloo2010"], do_print, AUTHOR_OUT, logfile) + "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca cryptica</em></td>\n")
-    # outfile.write("            <td><a href=\"references/Naderloo2010.html\">Naderloo <em>et al.</em> "
-    #               "(2010)</a></td>\n")
     outfile.write("            <td>" + format_reference_cite(refdict["Naderloo2010"], do_print, AUTHOR_OUT, logfile) +
                   "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca osa</em></td>\n")
-    # outfile.write("            <td><a href=\"references/Landstorfer2010.html\">Landstorfer &amp; Schubart "
-    #               "(2010)</a></td>\n")
     outfile.write("            <td>" + format_reference_cite(refdict["Landstorfer2010"], do_print, AUTHOR_OUT, logfile)
                   + "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca jocelynae</em></td>\n")
-    # outfile.write("            <td><a href=\"references/Shih2010.1.html\">Shih <em>et al.</em> (2010</a>)</td>\n")
     outfile.write("            <td>" + format_reference_cite(refdict["Shih2010.1"], do_print, AUTHOR_OUT, logfile) +
                   "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca splendida</em></td>\n")
-    # outfile.write("            <td><a href=\"references/Stimpson1858.html\">Stimpson (1858)</a>, "
-    #               "<a href=\"references/Shih2012.html\">Shih <em>et al.</em> (2012)</a></td>\n")
     outfile.write("            <td>" + format_reference_cite(refdict["Stimpson1858"], do_print, AUTHOR_OUT, logfile) +
                   ", " + format_reference_cite(refdict["Shih2012"], do_print, AUTHOR_OUT, logfile) + "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca boninensis</em></td>\n")
-    # outfile.write("            <td><a href=\"references/Shih2013.2.html\">Shih <em>et al.</em> (2013)</a></td>\n")
     outfile.write("            <td>" + format_reference_cite(refdict["Shih2013.2"], do_print, AUTHOR_OUT, logfile) +
                   "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("        </tbody>\n")
     outfile.write("      </table>\n")
-    # outfile.write("      </p>\n")
     outfile.write("      <table>\n")
     outfile.write("        <thead>\n")
     outfile.write("          <tr>\n")
@@ -3704,7 +3670,6 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("          <tr>\n")
     outfile.write("            <td colspan=\"3\"><strong>Note:</strong> <em class=\"species\">Uca australiae</em> "
                   "is probably not a valid species; it is based on a single specimen found washed up on the "
-                  # "Australian shore (<a href=\"references/George1982.html\">George &amp; Jones 1982</a>, "
                   "Australian shore (" + format_reference_cite(refdict["George1982"], do_print, AUTHOR_IN, logfile) +
                   ", among others)</td>\n")
     outfile.write("          </tr>\n")
@@ -3713,15 +3678,12 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca minima</em></td>\n")
     outfile.write("            <td><em class=\"species\">Uca signata</em></td>\n")
-    # outfile.write("            <td><a href=\"references/George1982.html\">George &amp; Jones (1982)</a></td>\n")
     outfile.write("            <td>" + format_reference_cite(refdict["George1982"], do_print, AUTHOR_OUT, logfile) +
                   "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca spinata</em></td>\n")
     outfile.write("            <td><em class=\"species\">Uca paradussumieri</em></td>\n")
-    # outfile.write("            <td><a href=\"references/Dai1991.html\">Dai &amp; Yang (1991)</a>; "
-    #               "<a href=\"references/Jones1994.html\">Jones &amp; Morton (1994)</a></td>\n")
     outfile.write("            <td>" + format_reference_cite(refdict["Dai1991"], do_print, AUTHOR_OUT, logfile) +
                   "; " + format_reference_cite(refdict["Jones1994"], do_print, AUTHOR_OUT, logfile) + "</td>\n")
     outfile.write("          </tr>\n")
@@ -3733,13 +3695,11 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca leptochela</em></td>\n")
     outfile.write("            <td><em class=\"species\">Uca festae</em></td>\n")
-    # outfile.write("            <td><a href=\"references/Beinlich2006.html\">Beinlich &amp; von Hagen (2006)</td>\n")
     outfile.write("            <td>" + format_reference_cite(refdict["Beinlich2006"], do_print, AUTHOR_OUT, logfile) +
                   "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("        </tbody>\n")
     outfile.write("      </table>\n")
-    # outfile.write("      </p>\n")
     outfile.write("      <table>\n")
     outfile.write("        <thead>\n")
     outfile.write("          <tr>\n")
@@ -3752,21 +3712,18 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("          <tr> \n")
     outfile.write("            <td><em class=\"species\">Uca longidigita</em></td>\n")
     outfile.write("            <td><em class=\"species\">Uca longidigitum</em></td>\n")
-    # outfile.write("            <td><a href=\"references/vonHagen1989.html\">von Hagen and Jones (1989)</a></td>\n")
     outfile.write("            <td>" + format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_OUT, logfile) +
                   "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca mjobergi</em></td>\n")
     outfile.write("            <td><em class=\"species\">Uca mjoebergi</em></td>\n")
-    # outfile.write("            <td><a href=\"references/vonHagen1989.html\">von Hagen and Jones (1989)</a></td>\n")
     outfile.write("            <td>" + format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_OUT, logfile) +
                   "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("        </tbody>\n")
     outfile.write("      </table>\n")
     outfile.write("      <p>\n")
-    # outfile.write("<a href=\"references/Crane1975.html\">Crane (1975)</a> tended to lump related taxa into "
     outfile.write(format_reference_cite(refdict["Crane1975"], do_print, AUTHOR_OUT, logfile) +
                   " tended to lump related taxa into "
                   "subspecies rather than treat them as distinct species. A number of studies since that time "
@@ -3780,23 +3737,11 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
                   format_reference_cite(refdict["Thurman1979"], do_print, AUTHOR_IN, logfile) + "; " +
                   format_reference_cite(refdict["Thurman1982"], do_print, AUTHOR_IN, logfile) + "; " +
                   format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_IN, logfile) + "). "
-                  # "<a href=\"references/Barnwell1980.html\">Barnwell 1980</a>; "
-                  # "<a href=\"references/Barnwell1984.1.html\">Barnwell and Thurman 1984</a>; "
-                  # "<a href=\"references/Collins1984.html\">Collins <em>et al.</em> 1984</a>; "
-                  # "<a href=\"references/Green1980.html\">Green 1980</a>; "
-                  # "<a href=\"references/Salmon1979.2.html\">Salmon <em>et al.</em> 1979</a>; "
-                  # "<a href=\"references/Salmon1987.2.html\">Salmon and Kettler 1987</a>; "
-                  # "<a href=\"references/Thurman1979.html\">Thurman 1979</a>, "
-                  # "<a href=\"references/Thurman1982.html\">Thurman 1982</a>; "
-                  # "<a href=\"references/vonHagen1989.html\">von Hagen and Jones 1989)</a>. "
                   "It has become common practice with many authors to ignore all of the subspecific designations "
                   "and treat each as a separate species (<em>e.g.,</em> " +
                   format_reference_cite(refdict["George1982"], do_print, AUTHOR_IN, logfile) + "; " +
                   format_reference_cite(refdict["Jones1994"], do_print, AUTHOR_IN, logfile) + "; " +
                   format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_IN, logfile) + "). "
-                  # "<a href=\"references/George1982.html\">George and Jones 1982</a>; "
-                  # "<a href=\"references/Jones1994.html\">Jones and Morton 1994</a>; "
-                  # "<a href=\"references/vonHagen1989.html\">von Hagen and Jones 1989</a>). "
                   "I follow this practice throughout this website.\n")
     outfile.write("      </p>\n")
     outfile.write("    </section>\n")
@@ -4036,8 +3981,6 @@ def find_morphology_parent(p, mlist):
 
 def write_morphology_page(morph, morphlist, do_print, outfile, logfile):
     """ create individual pages for morphology descriptions """
-    # with codecs.open(WEBOUT_PATH + "morphology/" + morphology_link(morph.parent, morph.character) + ".html",
-    #                  "w", "utf-8") as outfile:
     if morph.parent == ".":
         p = ""
     else:
@@ -4115,7 +4058,6 @@ def write_morphology_page(morph, morphlist, do_print, outfile, logfile):
 
 def write_morphology_index(morphlist, do_print, outfile):
     """ create index for morphology pages """
-    # with codecs.open(WEBOUT_PATH + "morphology/index.html", "w", "utf-8") as outfile:
     if do_print:
         start_page_division(outfile, "index_page")
     else:
@@ -4163,7 +4105,6 @@ def write_morphology_index(morphlist, do_print, outfile):
 
 def write_main_morphology_pages(morphology, outfile, do_print, logfile):
     """ create page for general morphology descriptions """
-    # with codecs.open(WEBOUT_PATH + MORPH_URL, "w", "utf-8") as outfile:
     if do_print:
         start_page_division(outfile, "base_page")
         media_path = MEDIA_PATH
@@ -4201,8 +4142,6 @@ def write_main_morphology_pages(morphology, outfile, do_print, logfile):
         if m.parent == ".":
             outfile.write("      <li><a href=\"" + rel_link_prefix(do_print, "morphology/") +
                           morphology_link(m.parent, m.character) + ".html\">" + m.character + "</a></li>\n")
-        # create_morphology_page(m, morphology)
-    # create_morphology_index(morphology)
     outfile.write("     </ul>\n")
     outfile.write("    </div>\n")
     outfile.write("    <figure class=\"morphimg\">\n")
@@ -4384,6 +4323,9 @@ def create_output_paths():
     create_path_and_index("morphology/")
     create_path_and_index("maps/")
     create_path_and_index("images/")
+    # create path for temp files
+    if not os.path.exists("temp/"):
+        os.makedirs("temp/")
 
 
 def copy_support_files(logfile):
@@ -4431,7 +4373,6 @@ def copy_map_files(species, logfile):
         shutil.copy2("media/maps/uca.kmz", WEBOUT_PATH + "maps/")
     except FileNotFoundError:
         report_error(logfile, "Missing file: media/maps/uca.kmz")
-    # create_blank_index(WEBOUT_PATH + "maps/index.html")
 
 
 def print_cover():
@@ -4585,7 +4526,7 @@ def build_site():
         morphology = read_morphology_data("data/morphology.txt")
 
         # output website version
-        if False:
+        if True:
             create_output_paths()
             copy_support_files(logfile)
             print("...Writing References...")
