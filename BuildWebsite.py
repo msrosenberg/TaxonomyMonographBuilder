@@ -2062,7 +2062,7 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
         common_header_part2(outfile, "", False)
 
     outfile.write("    <header>\n")
-    outfile.write("      <h1 class=\"bookmark2\">Summary of Names</h1>\n")
+    outfile.write("      <h1 id=\"" + NAME_SUM_URL + "\" class=\"bookmark2\">Summary of Names</h1>\n")
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
@@ -2195,6 +2195,10 @@ def create_genus_chronology(genus_cnts, do_print, outfile):
         filename = "Genus_total_chronology.svg"
     else:
         filename = 0
+    outfile.write("    <p>Chronological charts of different generic names for fiddler crabs. Strictly speaking"
+                  "not all of these are synonyms; the charts include instances when fiddler crabs were placed in "
+                  "other, valid, genera (<em>e.g.,</em> <em class=\"species\">Cancer</em>) as well as cases in the "
+                  "19th century when the genus <em class=\"species\">Uca</em> was used for non-fiddler crabs.</p>\n")
     write_chronology_chart_div(filename, outfile, None, "All Genera", False, do_print, True)
     adjust = 1
     outfile.write("    <p style=\"clear: both\">Accepted name is listed first, followed by synonyms in decreasing "
@@ -2328,7 +2332,7 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
                   "information on the status of each specific name.\n")
     outfile.write("    </p>\n")
     outfile.write("    <div class=\"namecol\">\n")
-    outfile.write("      <h3 class=\"bookmark2\">Binomials (and other Compound Names)</h3>\n")
+    outfile.write("      <h3 id=\"binomials\" class=\"bookmark2\">Binomials (and other Compound Names)</h3>\n")
     outfile.write("      <ul class=\"namelist\">\n")
     # outfile.write("\n")
     for name in unique_names:
@@ -2339,7 +2343,7 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
     outfile.write("      </ul>\n")
     outfile.write("    </div>\n")
     outfile.write("    <div class=\"namecol pagebreak\">\n")
-    outfile.write("      <h3 class=\"bookmark2\">Specific Names</h3>\n")
+    outfile.write("      <h3 id=\"specificnames\" class=\"bookmark2\">Specific Names</h3>\n")
     outfile.write("      <ul class=\"spnamelist\">\n")
     # outfile.write("\n")
     specific_year_cnts = {}
@@ -4443,13 +4447,17 @@ def print_table_of_contents(outfile, species_list):
     outfile.write("     <ul>\n")
     outfile.write("       <li><a href=\"#introduction\">Introduction</a></li>\n")
     outfile.write("       <li><a href=\"#" + COMMON_URL + "\">Common Names</a></li>\n")
-    outfile.write("       <li><a href=\"#" + SYST_URL + "\">Systematics Overview</a></li>\n")
+    outfile.write("       <li><a href=\"#" + SYST_URL + "\">Systematics Overview</a>\n")
+    outfile.write("         <ul>\n")
+    outfile.write("           <li><a href=\"#genus\">Genus</a></li>\n")
+    outfile.write("           <li><a href=\"#subgenera\">Subgenera</a></li>\n")
+    outfile.write("           <li><a href=\"#species\">Species</a></li>\n")
+    outfile.write("         </ul>\n")
+    outfile.write("       </li>\n")
     outfile.write("       <li><a href=\"#" + TREE_URL + "\">Phylogeny</a></li>\n")
     outfile.write("       <li><a href=\"#" + MAP_URL + "\">Geography</a></li>\n")
     outfile.write("       <li><a href=\"#" + LIFECYCLE_URL + "\">Life Cycle</a></li>\n")
     outfile.write("       <li><a href=\"#" + MORPH_URL + "\">Morphology</a></li>\n")
-    # outfile.write("       <li><a href=\"#" + MAP_URL + "\">Biogeography</a></li>\n")
-    # outfile.write("       <li>Species\n")
     outfile.write("       <li><a href=\"#" + SPECIES_URL + "\">Species</a>\n")
     outfile.write("         <ul>\n")
     for species in species_list:
@@ -4457,7 +4465,13 @@ def print_table_of_contents(outfile, species_list):
     outfile.write("         </ul>\n")
     outfile.write("       </li>\n")
 
-    outfile.write("       <li><a href=\"#name_index\">Name Index</a></li>\n")
+    outfile.write("       <li><a href=\"#name_index\">Name Index</a>\n")
+    outfile.write("         <ul>\n")
+    outfile.write("           <li><a href=\"#binomials\">Binomials and Other Compound Names</a>\n")
+    outfile.write("           <li><a href=\"#specificnames\">Specific Names</a>\n")
+    outfile.write("           <li><a href=\"#" + NAME_SUM_URL + "\">Summary of Names</a>\n")
+    outfile.write("         </ul>\n")
+    outfile.write("       </li>\n")
     outfile.write("       <li><a href=\"#" + PHOTO_URL + "\">Photo Index</a></li>\n")
     outfile.write("       <li><a href=\"#" + VIDEO_URL + "\">Video Index</a></li>\n")
     outfile.write("       <li>Art\n")
