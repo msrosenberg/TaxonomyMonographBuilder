@@ -674,7 +674,7 @@ def create_pie_chart_file(filename, data):
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     mplpy.savefig(TMP_PATH + filename)
-    mplpy.clf()
+    mplpy.close()
 
 
 def create_bar_chart_file(filename, data, minx, maxx, y):
@@ -701,7 +701,7 @@ def create_bar_chart_file(filename, data, minx, maxx, y):
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     mplpy.savefig(TMP_PATH + filename)
-    mplpy.clf()
+    mplpy.close()
 
 
 def create_stacked_bar_chart_file(filename, data, minx, maxx, cols):
@@ -731,7 +731,7 @@ def create_stacked_bar_chart_file(filename, data, minx, maxx, cols):
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     mplpy.savefig(TMP_PATH + filename)
-    mplpy.clf()
+    mplpy.close()
 
 
 def create_qual_bar_chart_file(filename, label_list, data_dict):
@@ -751,7 +751,7 @@ def create_qual_bar_chart_file(filename, label_list, data_dict):
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     mplpy.savefig(TMP_PATH + filename)
-    mplpy.clf()
+    mplpy.close()
 
 
 def create_line_chart_file(filename, data, minx, maxx, y):
@@ -778,7 +778,7 @@ def create_line_chart_file(filename, data, minx, maxx, y):
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     mplpy.savefig(TMP_PATH + filename, format="svg")
-    mplpy.clf()
+    mplpy.close()
 
 
 def create_chronology_chart_file(filename, miny, maxy, maxcnt, yearly_data):
@@ -2417,7 +2417,6 @@ def write_geography_page(species, outfile, do_print):
                "Western Atlantic",
                "Eastern Pacific",
                "Indo-West Pacific")
-    # with codecs.open(WEBOUT_PATH + MAP_URL, "w", "utf-8") as outfile:
     if do_print:
         start_page_division(outfile, "index_page")
     else:
@@ -2428,7 +2427,12 @@ def write_geography_page(species, outfile, do_print):
     outfile.write("\n")
     outfile.write("    <section class=\"topspsection\">\n")
     outfile.write("      <p class=\"map_section\">\n")
-    outfile.write("        <div id=\"map_canvas\"></div>\n")
+    if do_print:
+        outfile.write("      <figure>\n")
+        outfile.write("        <img src=\"media/maps/uca_map.svg\" />\n")
+        outfile.write("      </figure>\n")
+    else:
+        outfile.write("        <div id=\"map_canvas\"></div>\n")
     outfile.write("      </p>\n")
     outfile.write("      <p>\n")
     outfile.write("        The above map shows the approximate density of species richness, with denser color "
@@ -2740,14 +2744,11 @@ def write_species_page(species, references, specific_names, all_names, photos, v
     for spname in specific_names:
         if spname.synonym == species.species:
             varlist = spname.variations.split(";")
-            # tmpset = set()
             for varname in varlist:
                 for uname in all_names:
                     cleanname = clean_specific_name(uname)
                     if varname == cleanname:
                         binomial_synlist.append(uname)
-                        # tmpset |= {varname}
-                        # specific_synlist.append(varname)
             specific_synlist.append(spname.name)
     if len(binomial_synlist) > 0:
         binomial_synlist.sort(key=lambda s: s.lower())
@@ -2766,7 +2767,9 @@ def write_species_page(species, references, specific_names, all_names, photos, v
     outfile.write("         <dd>" + species.region + ": " + species.range + "</dd>\n")
     if not is_fossil:
         outfile.write("         <dd>\n")
-        if not do_print:
+        if do_print:
+            outfile.write("           <img src=\"media/maps/u_" + species.species + "_map.svg\" />\n")
+        else:
             outfile.write("           <div id=\"map_canvas_sp\"></div>\n")
         outfile.write("         </dd>\n")
         outfile.write("         <dd class=\"map_data\">\n")
@@ -4442,6 +4445,7 @@ def print_table_of_contents(outfile, species_list):
     outfile.write("       <li><a href=\"#" + COMMON_URL + "\">Common Names</a></li>\n")
     outfile.write("       <li><a href=\"#" + SYST_URL + "\">Systematics Overview</a></li>\n")
     outfile.write("       <li><a href=\"#" + TREE_URL + "\">Phylogeny</a></li>\n")
+    outfile.write("       <li><a href=\"#" + MAP_URL + "\">Geography</a></li>\n")
     outfile.write("       <li><a href=\"#" + LIFECYCLE_URL + "\">Life Cycle</a></li>\n")
     outfile.write("       <li><a href=\"#" + MORPH_URL + "\">Morphology</a></li>\n")
     # outfile.write("       <li><a href=\"#" + MAP_URL + "\">Biogeography</a></li>\n")
@@ -4526,7 +4530,7 @@ def build_site():
         morphology = read_morphology_data("data/morphology.txt")
 
         # output website version
-        if True:
+        if False:
             create_output_paths()
             copy_support_files(logfile)
             print("...Writing References...")
@@ -4575,6 +4579,7 @@ def build_site():
                 write_common_names_pages(printfile, replace_references(common_name_data, refdict, True, logfile), True)
                 write_systematics_overview(subgenera, species, refdict, printfile, True, logfile)
                 write_phylogeny_pages(printfile, True, refdict, logfile)
+                write_geography_page(species, printfile, True)
                 write_life_cycle_pages(printfile, True)
                 write_main_morphology_pages(morphology, printfile, True, logfile)
                 write_species_info_pages(species, references, specific_names, all_names, photos, videos, art,
@@ -4585,7 +4590,6 @@ def build_site():
                 write_photo_index(species, photos, True, printfile, logfile)
                 write_video_index(videos, True, printfile, logfile)
                 write_all_art_pages(art, True, printfile, logfile)
-                # write_geography_page(species, printfile, True)
                 write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, True, printfile)
                 write_reference_bibliography(references, True, printfile, logfile)
                 write_reference_pages(references, refdict, citelist, True, printfile, logfile)
