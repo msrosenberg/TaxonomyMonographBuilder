@@ -2430,14 +2430,14 @@ def write_geography_page(species, outfile, do_print):
     outfile.write("    </header>\n")
     outfile.write("\n")
     outfile.write("    <section class=\"topspsection\">\n")
-    outfile.write("      <p class=\"map_section\">\n")
+    outfile.write("      <div class=\"map_section\">\n")
     if do_print:
         outfile.write("      <figure>\n")
         outfile.write("        <img src=\"media/maps/uca_map.svg\" />\n")
         outfile.write("      </figure>\n")
     else:
         outfile.write("        <div id=\"map_canvas\"></div>\n")
-    outfile.write("      </p>\n")
+    outfile.write("      </div>\n")
     outfile.write("      <p>\n")
     outfile.write("        The above map shows the approximate density of species richness, with denser color "
                   "where more species are found. The range for each individual species can be found on its page, "
@@ -2449,7 +2449,7 @@ def write_geography_page(species, outfile, do_print):
         outfile.write("\n")
         outfile.write("    <section class=\"spsection\">\n")
         outfile.write("      <h2>" + r + "</h2>\n")
-        outfile.write("      <ul id=\"splist\">\n")
+        outfile.write("      <ul class=\"splist\">\n")
         for s in species:
             if s.region == r:
                 if s.status != "fossil":
@@ -2548,7 +2548,7 @@ def write_species_list(specieslist, outfile, do_print):
                   "and spellings.\n")
     outfile.write("    </p>")
     outfile.write("\n")
-    outfile.write("    <ul id=\"splist\">\n")
+    outfile.write("    <ul class=\"splist\">\n")
     for species in specieslist:
         outfile.write("      <li>" + create_species_link(species.species, species.status, "", do_print) + "</li>\n")
     outfile.write("    </ul>\n")
