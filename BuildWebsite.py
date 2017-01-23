@@ -431,6 +431,14 @@ def read_common_name_data(filename):
     return lines
 
 
+def remove_html(x):
+    """ remove any stray html tags from string before using as title of html documemnt """
+    regex = r"<.+?>"
+    return re.sub(regex, "", x)
+    # x = x.replace("<em>", "")
+    # x = x.replace("</em>","")
+
+
 # -----End input code---- #
 def common_header_part1(outfile, title, indexpath):
     """ part 1 of the header for all html """
@@ -439,7 +447,7 @@ def common_header_part1(outfile, title, indexpath):
     outfile.write("  <head>\n")
     outfile.write("    <meta charset=\"utf-8\" />\n")
     outfile.write("    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n")
-    outfile.write("    <title>" + title + "</title>\n")
+    outfile.write("    <title>" + remove_html(title) + "</title>\n")
     outfile.write("    <meta name=\"description\" content=\"Fiddler Crabs\" />\n")
     outfile.write("    <link rel=\"icon\" sizes=\"128x128\" href=\"" + indexpath +
                   "favicon128.png\" type=\"image/png\" />\n")
