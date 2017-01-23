@@ -1490,7 +1490,7 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
         for x in cs:
             cl.append(x)
         cl.sort()
-        outfile.write("     " + ", ".join(cl) + "\n")
+        outfile.write("     " + "\n, ".join(cl) + "\n")
         outfile.write("    </p>\n")
 
     if do_print:
