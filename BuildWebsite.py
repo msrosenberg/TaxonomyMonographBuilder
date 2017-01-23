@@ -2608,7 +2608,7 @@ def write_species_photo_page(outfile, fname, species, common_name, caption, pn, 
     outfile.write("\n")
     outfile.write("    <figure class=\"fullpic\">\n")
     outfile.write("      <picture><img src=\"" + media_path + "U_" + spname + format(pn, "0>2") + ".jpg\" alt=\"Uca " +
-                  species + "\" title=\"Uca " + species + "\" /></picture>\n")
+                  species + " photo\" title=\"Uca " + species + "\" /></picture>\n")
     outfile.write("      <figcaption>" + caption + "</figcaption>\n")
     outfile.write("    </figure>\n")
     if do_print:
@@ -2839,7 +2839,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
             outfile.write("      <figure class=\"sppic\">\n")
             outfile.write("        <a href=\"" + rel_link_prefix(do_print, "photos/") + pfname +
                           "\"><picture><img class=\"thumbnail\" src=\"" + media_path + "photos/U_" + tname +
-                          format(pn, "0>2") + "tn.jpg\" alt=\"Uca " + species.species + "\" title=\"Uca " +
+                          format(pn, "0>2") + "tn.jpg\" alt=\"Uca " + species.species + " thumbnail\" title=\"Uca " +
                           species.species + "\" /></picture></a>\n")
             outfile.write("      </figure>\n")
             photo_n += 1
@@ -2904,7 +2904,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
                 outfile.write("      <figure class=\"sppic\">\n")
                 outfile.write("        <a href=\"" + rel_link_prefix(do_print, "art/") + art.image +
                               ".html\"><picture><img class=\"thumbnail\" src=\"" + media_path + "art/" + art.image +
-                              "_tn." + art.ext + "\" alt=\"" + art.title + "\" title=\"" + art.title +
+                              "_tn." + art.ext + "\" alt=\"" + art.title + " thumbnail\" title=\"" + art.title +
                               "\" /></picture></a>\n")
                 outfile.write("      </figure>\n")
                 artn += 1
@@ -2984,8 +2984,8 @@ def write_photo_index(specieslist, photos, do_print, outfile, logfile):
                 outfile.write("      <figure class=\"sppic\">\n")
                 outfile.write("        <a href=\"" + rel_link_prefix(do_print, "photos/") + pfname +
                               "\"><picture><img class=\"thumbnail\" src=\"" + media_path + "photos/U_" + spname +
-                              format(pn, "0>2") + "tn.jpg\" alt=\"Uca " + spname + "\" title=\"Uca " + spname +
-                              "\" /></picture></a>\n")
+                              format(pn, "0>2") + "tn.jpg\" alt=\"Uca " + spname + " thumbnail\" title=\"Uca " +
+                              spname + "\" /></picture></a>\n")
                 outfile.write("      </figure>\n")
                 photo_n += 1
         if photo_n == 0:
@@ -3145,7 +3145,7 @@ def write_specific_art_page(outfile, art, backurl, backtext, do_print):
     outfile.write("\n")
     outfile.write("    <figure class=\"fullpic\">\n")
     outfile.write("      <picture><img src=\"" + media_path + art.image + "." + art.ext + "\" alt=\"" + ptitle +
-                  "\" title=\"" + ptitle + "\" /></picture>\n")
+                  " image\" title=\"" + ptitle + "\" /></picture>\n")
     outfile.write("      <figcaption>" + art.notes + "</figcaption>\n")
     outfile.write("    </figure>\n")
     if do_print:
@@ -3193,7 +3193,7 @@ def write_art_science_pages(artlist, do_print, outfile):
                     outfile.write("      <figure class=\"sppic\">\n")
                     outfile.write("        <a href=\"" + rel_link_prefix(do_print, "art/") + art.image +
                                   ".html\"><picture><img class=\"thumbnail\" src=\"" + media_path + "art/" +
-                                  art.image + "_tn." + art.ext + "\" alt=\"" + art.title + "\" title=\"" +
+                                  art.image + "_tn." + art.ext + "\" alt=\"" + art.title + " thumbnail\" title=\"" +
                                   art.title + "\" /></picture></a>\n")
                     outfile.write("      </figure>\n")
     if do_print:
@@ -3251,8 +3251,8 @@ def write_art_stamps_pages(artlist, do_print, outfile):
                     outfile.write("      <figure class=\"sppic\">\n")
                     outfile.write("        <a href=\"" + rel_link_prefix(do_print, "art/") + art.image +
                                   ".html\"><picture><img class=\"thumbnail\" src=\"" + media_path + "art/" +
-                                  art.image + "_tn." + art.ext + "\" alt=\"" + art.title + "\" title=\"" + art.title +
-                                  "\" /></picture></a>\n")
+                                  art.image + "_tn." + art.ext + "\" alt=\"" + art.title + " thumbnail\" title=\"" +
+                                  art.title + "\" /></picture></a>\n")
                     outfile.write("      </figure>\n")
     if do_print:
         end_page_division(outfile)
@@ -3312,8 +3312,8 @@ def write_art_crafts_pages(artlist, do_print, outfile):
                     outfile.write("      <figure class=\"sppic\">\n")
                     outfile.write("        <a href=\"" + rel_link_prefix(do_print, "art/") + art.image +
                                   ".html\"><picture><img class=\"thumbnail\" src=\"" + media_path + "art/" +
-                                  art.image + "_tn." + art.ext + "\" alt=\"" + art.title + "\" title=\"" + art.title +
-                                  "\" /></picture></a>\n")
+                                  art.image + "_tn." + art.ext + "\" alt=\"" + art.title + " thumbnail\" title=\"" +
+                                  art.title + "\" /></picture></a>\n")
                     # outfile.write("        <a href=\"" + pfname + "\"><picture><img src=\"" + media_path + "art/" +
                     #               art.image + "_tn." + art.ext + "\" alt=\"" + art.title + "\" title=\"" +
                     #               art.title + "\" /></picture></a>\n")
@@ -3421,7 +3421,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("      <figure>\n")
     outfile.write("        <picture><img src=\"" + media_path + "art/Seba_Uca_una.jpg\" "
                   "style=\"padding-left: 0; padding-right: 0; "
-                  "margin-left: 0; margin-right: 0; text-align: center\" alt=\"Seba's fiddler crab\" "
+                  "margin-left: 0; margin-right: 0; text-align: center\" alt=\"Seba's fiddler crab image\" "
                   "title=\"Seba's fiddler crab\" /></picture>\n")
     outfile.write("      </figure>\n")
     outfile.write("      <p>\n")
@@ -3449,7 +3449,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
                   "errors (" + format_reference_cite(refdict["Tavares1993"], do_print, AUTHOR_IN, logfile) + ").\n")
     outfile.write("        <figure class=\"syspic\">\n")
     outfile.write("          <picture><img src=\"" + media_path + "art/Marcgrave_Maracoani.png\" "
-                  "alt=\"Marcgrave's Maracoani\" title=\"Marcgrave's Maracoani\"></picture>\n")
+                  "alt=\"Marcgrave's Maracoani image\" title=\"Marcgrave's Maracoani\"></picture>\n")
     outfile.write("          <figcaption>Oldest known drawing of a fiddler crab "
                   "(" + format_reference_cite(refdict["Marcgrave1648"], do_print, AUTHOR_IN, logfile) + "). "
                   "He labeled it &ldquo;Maracoani&rdquo;, and it represents the namesake of the species "
@@ -3457,7 +3457,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("        </figure>\n")
     outfile.write("        <figure class=\"syspic\">\n")
     outfile.write("          <picture><img src=\"" + media_path + "art/Marcgrave_Uca_una.png\" "
-                  "alt=\"Marcgrave's Uca una\" title=\"Marcgrave's Uca una\"></picture>\n")
+                  "alt=\"Marcgrave's Uca una image\" title=\"Marcgrave's Uca una\"></picture>\n")
     outfile.write("          <figcaption>The drawing actually labeled &ldquo;Uca Una&rdquo; by "
                   + format_reference_cite(refdict["Marcgrave1648"], do_print, AUTHOR_OUT, logfile) +
                   " is not a fiddler crab. Today this species is known as the mangrove crab "
@@ -3465,7 +3465,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("        </figure>\n")
     outfile.write("        <figure class=\"syspic\">\n")
     outfile.write("          <picture><img src=\"" + media_path + "art/Marcgrave_Ciecie_Ete.png\" "
-                  "alt=\"Marcgrave's Ciecie Ete\" title=\"Marcgrave's Ciecie Ete\"></picture>\n")
+                  "alt=\"Marcgrave's Ciecie Ete image\" title=\"Marcgrave's Ciecie Ete\"></picture>\n")
     outfile.write("          <figcaption>The other fiddler crab drawing found in "
                   + format_reference_cite(refdict["Marcgrave1648"], do_print, AUTHOR_OUT, logfile) + ", labeled "
                   "&ldquo;Ciecie Ete&rdquo; (he also refers to a very similar species called "
@@ -3835,13 +3835,13 @@ def write_life_cycle_pages(outfile, do_print):
     outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_rapax10.html\"><picture><img src=\"" + media_path +
                   "photos/U_rapax10tn.jpg\" "
-                  "alt=\"Gravid female\" title=\"Gravid female\" /></picture></a>\n")
+                  "alt=\"Gravid female photo\" title=\"Gravid female\" /></picture></a>\n")
     outfile.write("        <figcaption>Gravid female</figcaption>\n")
     outfile.write("      </figure>\n")
     outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_rapax11.html\"><picture><img src=\"" + media_path +
                   "photos/U_rapax11tn.jpg\" "
-                  "alt=\"Gravid female\" title=\"Gravid female\" /></picture></a>\n")
+                  "alt=\"Gravid female photo\" title=\"Gravid female\" /></picture></a>\n")
     outfile.write("        <figcaption>Close up of eggs</figcaption>\n")
     outfile.write("      </figure>\n")
     outfile.write("    </section>\n")
@@ -3854,13 +3854,13 @@ def write_life_cycle_pages(outfile, do_print):
     outfile.write("      </p>\n")
     outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_ecuadoriensis07.html\"><picture>"
-                  "<img src=\"" + media_path + "photos/U_ecuadoriensis07tn.jpg\" alt=\"zoea\" title=\"zoea\" />"
+                  "<img src=\"" + media_path + "photos/U_ecuadoriensis07tn.jpg\" alt=\"zoea photo\" title=\"zoea\" />"
                   "</picture></a>\n")
     outfile.write("        <figcaption>Zoea</figcaption>\n")
     outfile.write("      </figure>\n")
     outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_ecuadoriensis08.html\">"
-                  "<picture><img src=\"" + media_path + "photos/U_ecuadoriensis08tn.jpg\" alt=\"zoea\" "
+                  "<picture><img src=\"" + media_path + "photos/U_ecuadoriensis08tn.jpg\" alt=\"zoea photo\" "
                   "title=\"zoea\" /></picture></a>\n")
     outfile.write("        <figcaption>Zoea</figcaption>\n")
     outfile.write("      </figure>\n")
@@ -3874,7 +3874,7 @@ def write_life_cycle_pages(outfile, do_print):
     outfile.write("      </p>\n")
     outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_ecuadoriensis09.html\"><picture>"
-                  "<img src=\"" + media_path + "photos/U_ecuadoriensis09tn.jpg\" alt=\"megalopa\" "
+                  "<img src=\"" + media_path + "photos/U_ecuadoriensis09tn.jpg\" alt=\"megalopa photo\" "
                   "title=\"megalopa\" /></picture></a>\n")
     outfile.write("        <figcaption>Megalopa</figcaption>\n")
     outfile.write("      </figure>\n")
@@ -3889,7 +3889,7 @@ def write_life_cycle_pages(outfile, do_print):
     outfile.write("      </p>\n")
     outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_ecuadoriensis10.html\"><picture>"
-                  "<img src=\"" + media_path + "photos/U_ecuadoriensis10tn.jpg\" alt=\"early stage crab\" "
+                  "<img src=\"" + media_path + "photos/U_ecuadoriensis10tn.jpg\" alt=\"early stage crab photo\" "
                   "title=\"early stage crab\" /></picture></a>\n")
     outfile.write("        <figcaption>Early Stage Full Crab</figcaption>\n")
     outfile.write("      </figure>\n")
@@ -3899,7 +3899,7 @@ def write_life_cycle_pages(outfile, do_print):
     outfile.write("      </p>\n")
     outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_pugilator21.html\"><picture>"
-                  "<img src=\"" + media_path + "photos/U_pugilator21tn.jpg\" alt=\"juveniles\" "
+                  "<img src=\"" + media_path + "photos/U_pugilator21tn.jpg\" alt=\"juveniles photo\" "
                   "title=\"juveniles\" /></picture></a>\n")
     outfile.write("        <figcaption>Juvenile Crabs</figcaption>\n")
     outfile.write("      </figure>\n")
@@ -3910,13 +3910,13 @@ def write_life_cycle_pages(outfile, do_print):
     outfile.write("      </p>\n")
     outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_tangeri10.html\"><picture>"
-                  "<img src=\"" + media_path + "photos/U_tangeri10tn.jpg\" alt=\"adult female\" "
+                  "<img src=\"" + media_path + "photos/U_tangeri10tn.jpg\" alt=\"adult female photo\" "
                   "title=\"adult female\" /></picture></a>\n")
     outfile.write("        <figcaption>Adult Female</figcaption>\n")
     outfile.write("      </figure>\n")
     outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_tangeri12.html\"><picture>"
-                  "<img src=\"" + media_path + "photos/U_tangeri12tn.jpg\" alt=\"adult male\" "
+                  "<img src=\"" + media_path + "photos/U_tangeri12tn.jpg\" alt=\"adult male photo\" "
                   "title=\"adult male\" /></picture></a>\n")
     outfile.write("        <figcaption>Adult Male</figcaption>\n")
     outfile.write("      </figure>\n")
@@ -4054,8 +4054,8 @@ def write_morphology_page(morph, morphlist, do_print, outfile, logfile):
         clist = [morph.caption]
     for i in range(len(plist)):
         outfile.write("    <figure class=\"morphimg\">\n")
-        outfile.write("      <picture><img src=\"" + media_path + plist[i] + "\" alt=\"" + clist[i] + "\" title=\"" +
-                      clist[i] + "\" /></picture>\n")
+        outfile.write("      <picture><img src=\"" + media_path + plist[i] + "\" alt=\"" + clist[i] + " image\" "
+                      "title=\"" + clist[i] + "\" /></picture>\n")
         outfile.write("      <figcaption>" + clist[i] + "</figcaption>\n")
         outfile.write("    </figure>\n")
         if not do_print:
@@ -4161,17 +4161,17 @@ def write_main_morphology_pages(morphology, outfile, do_print, logfile):
     outfile.write("    </div>\n")
     outfile.write("    <figure class=\"morphimg\">\n")
     outfile.write("      <picture><img src=\"" + media_path + "morphology/dorsal_view.png\" "
-                  "alt=\"dorsal view of crab\" title=\"dorsal view of crab\" /></picture>\n")
+                  "alt=\"dorsal view of crab image\" title=\"dorsal view of crab\" /></picture>\n")
     outfile.write("      <figcaption>Figure modified from Crane (1975).</figcaption>\n")
     outfile.write("    </figure>\n")
     outfile.write("    <figure class=\"morphimg\">\n")
     outfile.write("      <picture><img src=\"" + media_path + "morphology/ventral_view.png\" "
-                  "alt=\"ventral view of crab\" title=\"ventral view of crab\" /></picture>\n")
+                  "alt=\"ventral view of crab image\" title=\"ventral view of crab\" /></picture>\n")
     outfile.write("      <figcaption>Figure modified from Crane (1975).</figcaption>\n")
     outfile.write("    </figure>\n")
     outfile.write("    <figure class=\"morphimg\">\n")
     outfile.write("      <picture><img src=\"" + media_path + "morphology/anterior_view.png\" "
-                  "alt=\"anterior view of crab\" title=\"anterior view of crab\" /></picture>\n")
+                  "alt=\"anterior view of crab image\" title=\"anterior view of crab\" /></picture>\n")
     outfile.write("      <figcaption>Figure modified from Crane (1975).</figcaption>\n")
     outfile.write("    </figure>\n")
     if do_print:
@@ -4244,11 +4244,11 @@ def write_introduction(outfile, species, do_print):
         media_path = ""
     outfile.write("    <div class=\"indeximages\">\n")
     outfile.write("      <picture><img class=\"thumbnail\" src=\"" + media_path +
-                  "photos/U_mjoebergi04tn.jpg\" /></picture>\n")
+                  "photos/U_mjoebergi04tn.jpg\" alt=\"Uca mjoebergi photo\" /></picture>\n")
     outfile.write("      <picture><img class=\"thumbnail\" src=\"" + media_path +
-                  "photos/U_minax07tn.jpg\" /></picture>\n")
+                  "photos/U_minax07tn.jpg\" alt=\"Uca minax photo\" /></picture>\n")
     outfile.write("      <picture><img class=\"thumbnail\" src=\"" + media_path +
-                  "photos/U_crassipes19tn.jpg\" /></picture>\n")
+                  "photos/U_crassipes19tn.jpg\" alt=\"Uca crassipes photo\" /></picture>\n")
     outfile.write("    </div>\n")
     outfile.write("\n")
     outfile.write("    <h2 class=\"nobookmark\">Classification</h2>\n")
