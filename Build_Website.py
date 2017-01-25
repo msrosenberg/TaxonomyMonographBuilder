@@ -217,9 +217,9 @@ def format_reference_full(ref, do_print, logfile):
 
 
 def format_reference_cite(ref, do_print, author_style, logfile):
-    if author_style == AUTHOR_NOPAREN:
+    if author_style == AUTHOR_PAREN:
         outstr = ref.citation
-    elif author_style == AUTHOR_PAREN:
+    elif author_style == AUTHOR_NOPAREN:
         outstr = ref.author() + " " + str(ref.year())
     elif author_style == AUTHOR_NOPCOMMA:
         outstr = ref.author() + ", " + str(ref.year())
