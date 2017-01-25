@@ -10,20 +10,21 @@ completion of the code.
 """
 
 import zipfile
-import os
+# import os
 import matplotlib.pyplot as mplpy
+import TMB_Initialize
 
 TMP_PATH = "temp/"
 OUTPUT_PATH = "media/maps/"
 
 
-class Point():
+class Point:
     def __init__(self, lat=0.0, lon=0.0):
         self.lat = lat
         self.lon = lon
 
 
-class Polygon():
+class Polygon:
     def __init__(self):
         self.points = []
 
@@ -204,10 +205,6 @@ def read_base_map(filename):
                     new_polygon.points.append(new_point)
             else:
                 line = infile.readline()
-            # print(line)
-    # test
-    # for p in polygon_list:
-    #     print("# points =", p.n())
     return polygon_list
 
 
@@ -225,7 +222,6 @@ def add_line_to_map(faxes, points, minlon, maxlon, minlat, maxlat, lw, a):
         minlon = min(minlon, lon)
         maxlat = max(maxlat, lat)
         minlat = min(minlat, lat)
-    # faxes.plot(lons, lats, color="red", linewidth=5, alpha=0.4)
     faxes.plot(lons, lats, color="red", linewidth=lw, alpha=a)
     return minlon, maxlon, minlat, maxlat
 
@@ -255,10 +251,6 @@ def adjust_map_boundaries(minlon, maxlon, minlat, maxlat):
 def write_single_species_map_figure(base_map, species_map):
     fig, faxes = mplpy.subplots(figsize=[6.5, 3.25])
     draw_base_map(faxes, base_map)
-    # for polygon in base_map:
-    #     lons = [p.lon for p in polygon.points]
-    #     lats = [p.lat for p in polygon.points]
-    #     faxes.plot(lons, lats, "silver", linewidth=0.5)
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
     maxlat = -90
@@ -304,7 +296,6 @@ def write_all_species_map_figure(base_map, species_maps):
             else:
                 minlon, maxlon, minlat, maxlat = add_line_to_map(faxes, loc[2], minlon, maxlon, minlat, maxlat, 2, 0.1)
 
-    # minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
     mplpy.xlim(-180, 180)
     mplpy.ylim(-90, 90)
     # mplpy.xlabel("longitude")
@@ -318,18 +309,17 @@ def write_all_species_map_figure(base_map, species_maps):
 
 
 def main():
-    # will eventually need to put options here for choosing different paths, etc.
-    main_path = "fiddlercrab.info"
-    os.chdir(main_path)
+    init_data = TMB_Initialize.initialize()
 
-    input_file_name = "data/Fiddler Crabs.kml"
+    input_file_name = init_data.map_kml_file
     species_maps = read_raw(input_file_name)
     base_map = read_base_map("resources/world_map.txt")
-    # for m in species_maps:
-        # output_species_kml(m)
-        # write_single_species_map_figure(base_map, m)
-    # output_all_kml(bas_map, species_maps)
+    for m in species_maps:
+        output_species_kml(m)
+        write_single_species_map_figure(base_map, m)
+    output_all_kml(base_map, species_maps)
     write_all_species_map_figure(base_map, species_maps)
+
 
 if __name__ == "__main__":
     main()

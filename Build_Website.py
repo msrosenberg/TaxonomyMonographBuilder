@@ -1,13 +1,19 @@
+"""
+Taxonomy Monograph Builder
+"""
 
-import codecs
+# import codecs
 import datetime
 import random
 import os
 import shutil
 import re
+# local dependencies
+# from TMB_Classes import *
+from TMB_Import import *
+from TMB_Error import *
+import TMB_Initialize
 # external dependencies
-# import pygal
-# import pygal.style
 import matplotlib.pyplot as mplpy
 
 WEBOUT_PATH = "webout/"
@@ -40,395 +46,6 @@ AUTHOR_OUT = False
 AUTHOR_IN = True
 
 randSeed = random.randint(0, 10000)
-
-
-# ----classes----
-class ReferenceClass:
-    """ A class to hold references """
-    def __init__(self):
-        self.formatted_html = ""
-        self.citation = ""
-        self.cite_key = ""
-        self.language = ""
-
-    def year(self):
-        y = self.citation
-        y = y[y.find("(") + 1:y.find(")")]
-        if (y != "?") and (y.lower() != "in press"):
-            if y[0] == "~":
-                y = y[1:]
-            if len(y) > 4:
-                y = y[:4]
-            y = int(y)
-            return y
-        else:
-            return None
-
-    def author(self):
-        return self.citation[:self.citation.find("(")].strip()
-
-
-class SpecificNameClass:
-    """ a class to hold specific names """
-    def __init__(self):
-        self.name = ""
-        self.variations = ""
-        self.synonym = ""
-        self.original_binomial = ""
-        self.priority_source = ""
-        self.meaning = ""
-        self.notes = ""
-
-
-class SubgenusClass:
-    """ a class to hold subgenera """
-    def __init__(self):
-        self.subgenus = ""
-        self.author = ""
-        self.type_species = ""
-        self.notes = ""
-        self.taxonid = ""
-        self.eolid = ""
-
-
-class VideoClass:
-    """ a class to hold video information """
-    def __init__(self):
-        self.species = ""
-        self.n = 0
-        self.activity = ""
-        self.caption = ""
-        self.length = ""
-        self.size = ""
-        self.format = ""
-        self.date_location = ""
-        self.author = ""
-        self.notes = ""
-
-
-class PhotoClass:
-    """ a class to hold photo information """
-    def __init__(self):
-        self.species = ""
-        self.n = 0
-        self.caption = ""
-
-
-class ArtClass:
-    """ a class to hold art information """
-    def __init__(self):
-        self.art_type = ""
-        self.author = ""
-        self.year = ""
-        self.title = ""
-        self.image = ""
-        self.ext = ""
-        self.species = ""
-        self.notes = ""
-        self.cite_key = ""
-
-
-class MorphologyClass:
-    def __init__(self):
-        self.character = ""
-        self.parent = ""
-        self.image = ""
-        self.description = ""
-        self.caption = ""
-
-
-class SpeciesClass:
-    def __init__(self):
-        self.species = ""
-        self.subgenus = ""
-        self.type_species = ""
-        self.type_reference = ""
-        self.common = ""
-        self.commonext = ""
-        self.range = ""
-        self.range_references = ""
-        self.region = ""
-        self.status = ""
-        self.taxonid = ""
-        self.eolid = ""
-        self.inatid = ""
-        self.gbifid = ""
-
-
-class CitationClass:
-    def __init__(self):
-        self.cite_key = ""
-        self.name_key = ""
-        self.name = ""
-        self.common = ""
-        self.where = ""
-        self.context = ""
-        self.application = ""
-        self.cite_n = ""
-        self.actual = ""
-        self.source = ""
-        self.name_note = ""
-        self.general_note = ""
-
-    def __lt__(self, x):
-        if self.name == x.name:
-            if self.context == x.context:
-                return self.application < x.application
-            else:
-                return self.context < x.context
-        else:
-            return self.name < x.name
-
-
-# ----import data from file functions----
-def report_error(logfile, outstr):
-    print(outstr)
-    logfile.write(outstr + "\n")
-
-
-def read_reference_data(ref_filename, formatref_filename, citation_filename, logfile):
-    """ read reference data """
-    reflist = []
-    year_dat = {}
-    cite_done = {}
-    # citation and species data from text
-    with codecs.open(ref_filename, "r", "utf-8") as reffile:
-        for line in reffile:
-            line = line.replace("et al.", "<em>et al.</em>")
-            ref = line.strip().split("\t")
-            while len(ref) < 3:
-                ref.append("")
-            newref = ReferenceClass()
-            newref.citation = ref[0]
-            newref.cite_key = ref[1]
-            newref.language = ref[2]
-            # calculate publishing trend
-            y = newref.year()
-            if y is not None:
-                if y in year_dat:
-                    year_dat[y] += 1
-                else:
-                    year_dat[y] = 1
-            # y = ref[0]
-            # y = y[y.find("(")+1:y.find(")")]
-            # if (y != "?") and (y.lower() != "in press"):
-            #     if y[0] == "~":
-            #         y = y[1:]
-            #     if len(y) > 4:
-            #         y = y[:4]
-            #     y = int(y)
-            #     if y in year_dat:
-            #         year_dat[y] += 1
-            #     else:
-            #         year_dat[y] = 1
-            cite_done[ref[1]] = [False, y]
-            reflist.append(newref)
-
-    # formatted references from html
-    with codecs.open(formatref_filename, "r", "utf-8") as reffile:
-        c = -1
-        for line in reffile:
-            line = line.strip()
-            if line.endswith("<p>"):
-                line = line[:line.find("<p>")]
-                line = line.replace("<i>", "<em>")
-                line = line.replace("</i>", "</em>")
-                c += 1
-                newref = reflist[c]
-                newref.formatted_html = line
-    refdict = {}
-    for ref in reflist:
-        if ref.cite_key in refdict and ref.cite_key != "<pending>":
-            report_error(logfile, "Duplicate reference key:" + ref.cite_key)
-        refdict[ref.cite_key] = ref
-    # citation info
-    with open(citation_filename, "r") as reffile:
-        citelist = []
-        got_header = False
-        for line in reffile:
-            if not got_header:
-                got_header = True
-            else:
-                line = line.replace("\"\"", "\"")
-                cite = line.strip().split("\t")
-                for i, x in enumerate(cite):
-                    if x.startswith("\"") and x.endswith("\""):
-                        cite[i] = x[1:len(x)-1]
-                newcite = CitationClass()
-                newcite.cite_key = cite[0]
-                newcite.name_key = cite[1]
-                newcite.name = cite[2]
-                newcite.common = cite[3]
-                newcite.where = cite[4]
-                newcite.context = cite[5]
-                newcite.application = cite[6]
-                newcite.cite_n = cite[7]
-                newcite.actual = cite[8]
-                newcite.source = cite[9]
-                newcite.name_note = cite[10]
-                newcite.general_note = cite[11]
-                citelist.append(newcite)
-                cite_done[cite[0]][0] = True
-
-    cite_count = 0
-    for y in year_dat:
-        year_dat[y] = [year_dat[y], 0]
-    for x in cite_done:
-        c = cite_done[x]
-        if c[0]:
-            cite_count += 1
-            if c[1] in year_dat:
-                year_dat[c[1]][1] += 1
-    return reflist, refdict, citelist, year_dat, cite_count
-
-
-def read_simple_file(filename):
-    """ read data from generic flatfile """
-    with open(filename, "r") as infile:
-        splist = []
-        got_header = False
-        for line in infile:
-            if got_header:
-                line = line.strip()
-                line = line.replace("\"\"", "\"")
-                spinfo = line.split("\t")
-                for i, x in enumerate(spinfo):
-                    if x.startswith("\"") and x.endswith("\""):
-                        spinfo[i] = x[1:len(x)-1]
-                splist.append(spinfo)
-            else:
-                got_header = True
-    return splist
-
-
-def read_species_data(filename):
-    """ read data from species flatfile """
-    tmplist = read_simple_file(filename)
-    slist = []
-    for s in tmplist:
-        newspecies = SpeciesClass()
-        newspecies.species = s[0]
-        newspecies.subgenus = s[1]
-        newspecies.type_species = s[2]
-        newspecies.type_reference = s[3]
-        newspecies.common = s[4]
-        newspecies.commonext = s[5]
-        newspecies.range = s[6]
-        newspecies.range_references = s[7]
-        newspecies.region = s[8]
-        newspecies.status = s[9]
-        newspecies.taxonid = s[10]
-        newspecies.eolid = s[11]
-        newspecies.inatid = s[12]
-        newspecies.gbifid = s[13]
-        slist.append(newspecies)
-    return slist
-
-
-def read_photo_data(filename):
-    """ read data from photo flatfile """
-    tmplist = read_simple_file(filename)
-    plist = []
-    for p in tmplist:
-        newphoto = PhotoClass()
-        newphoto.species = p[0]
-        newphoto.n = p[1]
-        newphoto.caption = p[2]
-        plist.append(newphoto)
-    return plist
-
-
-def read_video_data(filename):
-    """ read data from video flatfile """
-    tmplist = read_simple_file(filename)
-    vlist = []
-    for v in tmplist:
-        newvideo = VideoClass()
-        newvideo.species = v[0]
-        newvideo.n = v[1]
-        newvideo.activity = v[2]
-        newvideo.caption = v[3]
-        newvideo.length = v[4]
-        newvideo.size = v[5]
-        newvideo.format = v[6]
-        newvideo.date_location = v[7]
-        newvideo.author = v[8]
-        newvideo.notes = v[9]
-        vlist.append(newvideo)
-    return vlist
-
-
-def read_subgenera_data(filename):
-    """ read subgenera data """
-    tmplist = read_simple_file(filename)
-    genlist = []
-    for g in tmplist:
-        newsubgenus = SubgenusClass()
-        newsubgenus.subgenus = g[0]
-        newsubgenus.author = g[1]
-        newsubgenus.type_species = g[2]
-        newsubgenus.notes = g[3]
-        newsubgenus.taxonid = g[4]
-        newsubgenus.eolid = g[5]
-        genlist.append(newsubgenus)
-    return genlist
-
-
-def read_specific_names_data(filename):
-    """ read specific name data """
-    tmplist = read_simple_file(filename)
-    splist = []
-    for s in tmplist:
-        newname = SpecificNameClass()
-        newname.name = s[0]
-        newname.variations = s[1]
-        newname.synonym = s[2]
-        newname.original_binomial = s[3]
-        newname.priority_source = s[4]
-        newname.meaning = s[5]
-        newname.notes = s[6]
-        splist.append(newname)
-    return splist
-
-
-def read_art_data(filename):
-    """ read art data """
-    tmplist = read_simple_file(filename)
-    artlist = []
-    for a in tmplist:
-        newart = ArtClass()
-        newart.art_type = a[0]
-        newart.cite_key = a[1]
-        newart.author = a[2]
-        newart.year = a[3]
-        newart.title = a[4]
-        newart.image = a[5]
-        newart.ext = a[6]
-        newart.species = a[7]
-        newart.notes = a[8]
-        artlist.append(newart)
-    return artlist
-
-
-def read_morphology_data(filename):
-    """ read morphology data """
-    tmplist = read_simple_file(filename)
-    morphlist = []
-    for m in tmplist:
-        newmorph = MorphologyClass()
-        newmorph.character = m[0]
-        newmorph.parent = m[1]
-        newmorph.image = m[2]
-        newmorph.caption = m[3]
-        newmorph.description = m[4]
-        morphlist.append(newmorph)
-    return morphlist
-
-
-def read_common_name_data(filename):
-    with codecs.open(filename, "r", "utf-8") as infile:
-        lines = infile.readlines()
-    return lines
 
 
 def remove_html(x):
@@ -1328,8 +945,11 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
                                 refname = ""
                         else:
                             extraref = ""                                
-                            # print(nstr, n.cite_key, n.application)
-                            refname = name_table[n.application][int(nstr)]
+                            try:
+                                refname = name_table[n.application][int(nstr)]
+                            except ValueError:
+                                report_error(logfile, "Citation " + n.cite_key + " tried to cite " + n.application +
+                                             " #" + nstr)
                         outfile.write("      <td><span class=\"fa fa-pencil-square-o\"></span> citation: "
                                       "<a href=\"" + rel_link_prefix(do_print, "../references/") + crossref.cite_key +
                                       ".html\">" + crossref.citation + "</a> → " + format_name_string(refname) +
@@ -1823,7 +1443,8 @@ def write_chronology_chart_div(n, outfile, linkfile, title, is_species, do_print
         position = "top"
     outfile.write("      <div class=\"chronchart_title_" + position + "\">" + title_str + "</div>\n")
     if do_print:
-        outfile.write("      <div class=\"chronchart_" + position + "\"><img src=\"" + TMP_PATH + n + "\" /></div>\n")
+        outfile.write("      <div class=\"chronchart_" + position + "\"><img src=\"" + TMP_PATH + n +
+                      "\" alt=\"chronology chart\" /></div>\n")
     else:
         outfile.write("      <div id=\"chronchart_" + position + "" + str(n) + "_div\" class=\"chronchart\"></div>\n")
     outfile.write("    </div>\n")
@@ -2441,7 +2062,8 @@ def write_geography_page(species, outfile, do_print):
     outfile.write("      <div class=\"map_section\">\n")
     if do_print:
         outfile.write("      <figure>\n")
-        outfile.write("        <img src=\"media/maps/uca_map.svg\" />\n")
+        outfile.write("        <img src=\"media/maps/uca_map.svg\" alt=\"Map\" "
+                      "title=\"Map of fiddler crab distribution\" />\n")
         outfile.write("      </figure>\n")
     else:
         outfile.write("        <div id=\"map_canvas\"></div>\n")
@@ -2780,7 +2402,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
     if not is_fossil:
         outfile.write("         <dd>\n")
         if do_print:
-            outfile.write("           <img src=\"media/maps/u_" + species.species + "_map.svg\" />\n")
+            outfile.write("           <img src=\"media/maps/u_" + species.species + "_map.svg\" alt=\"Map\" />\n")
         else:
             outfile.write("           <div id=\"map_canvas_sp\"></div>\n")
         outfile.write("         </dd>\n")
@@ -3550,7 +3172,8 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     for subgen in subgenlist:
         outfile.write("      <hr />\n")
         outfile.write("      <h3 id=\"" + subgen.subgenus + "\" class=\"bookmark3\">Subgenus <em class=\"species\">" +
-                      subgen.subgenus + "</em> " + subgen.author + "</h3>\n")
+                      subgen.subgenus + "</em> " +
+                      format_reference_cite(refdict[subgen.author], do_print, AUTHOR_IN, logfile) + "</h3>\n")
         outfile.write("      <dl>\n")
         outfile.write("        <dt>Type</dt>\n")
         outfile.write("        <dd>" + create_species_link(subgen.type_species, "", "", do_print) + "</dd>\n")
@@ -3902,7 +3525,7 @@ def write_life_cycle_pages(outfile, do_print):
     outfile.write("      </p>\n")
     outfile.write("      <figure class=\"lcpic\">\n")
     outfile.write("        <a href=\"photos/u_tangeri10.html\"><img src=\"" + media_path +
-                  "photos/U_tangeri10tn.jpg\" alt=\"adult female photo\" title=\"adult female\" /></picture></a>\n")
+                  "photos/U_tangeri10tn.jpg\" alt=\"adult female photo\" title=\"adult female\" /></a>\n")
     outfile.write("        <figcaption>Adult Female</figcaption>\n")
     outfile.write("      </figure>\n")
     outfile.write("      <figure class=\"lcpic\">\n")
@@ -4516,30 +4139,31 @@ def end_print(outfile):
     outfile.write("</html>\n")
 
 
-def build_site():
-    with open("errorlog.txt", "w") as logfile:
+def build_site(init_data):
+    with open(init_data.error_log, "w") as logfile:
         # read data and do computation
         print("...Reading References...")
-        references, refdict, citelist, yeardict, citecount = read_reference_data("data/references_cites.txt",
-                                                                                 "data/references.html",
-                                                                                 "data/citeinfo.txt", logfile)
+        references, refdict, citelist, yeardict, citecount = read_reference_data(init_data.reference_ciation_file,
+                                                                                 init_data.reference_file,
+                                                                                 init_data.citation_info_file,
+                                                                                 logfile)
         yeardat, yeardat1900 = summarize_year(yeardict)
         languages = summarize_languages(references)
         print("...Reading Species...")
-        species = read_species_data("data/species_info.txt")
+        species = read_species_data(init_data.species_data_file)
         print("...Connecting References...")
         species_refs = connect_refs_to_species(species, citelist)
         print("...Reading Species Names...")
-        specific_names = read_specific_names_data("data/specific_names.txt")
+        specific_names = read_specific_names_data(init_data.specific_names_file)
         (all_names, binomial_name_cnts, specific_name_cnts, genus_cnts, total_binomial_year_cnts,
          name_table) = calculate_name_index_data(refdict, citelist, specific_names)
-        common_name_data = read_common_name_data("data/common_names.txt")
-        subgenera = read_subgenera_data("data/subgenera.txt")
+        common_name_data = read_common_name_data(init_data.common_names_file)
+        subgenera = read_subgenera_data(init_data.subgenera_file)
         print("...Reading Photos and Videos...")
-        photos = read_photo_data("data/photos.txt")
-        videos = read_video_data("data/videos.txt")
-        art = read_art_data("data/art.txt")
-        morphology = read_morphology_data("data/morphology.txt")
+        photos = read_photo_data(init_data.photo_file)
+        videos = read_video_data(init_data.video_file)
+        art = read_art_data(init_data.art_file)
+        morphology = read_morphology_data(init_data.morphology_file)
 
         # output website version
         if False:
@@ -4594,14 +4218,18 @@ def build_site():
                 write_geography_page(species, printfile, True)
                 write_life_cycle_pages(printfile, True)
                 write_main_morphology_pages(morphology, printfile, True, logfile)
+                print("......Writing Species Pages......")
                 write_species_info_pages(species, references, specific_names, all_names, photos, videos, art,
                                          species_refs, refdict, binomial_name_cnts, specific_name_cnts, logfile,
                                          printfile, True)
+                print("......Writing Name Pages......")
                 write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
                                      binomial_name_cnts, total_binomial_year_cnts, printfile, True, logfile)
+                print("......Writing Media Pages......")
                 write_photo_index(species, photos, True, printfile, logfile)
                 write_video_index(videos, True, printfile, logfile)
                 write_all_art_pages(art, True, printfile, logfile)
+                print("......Writing Reference Pages......")
                 write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, True, printfile)
                 write_reference_bibliography(references, True, printfile, logfile)
                 write_reference_pages(references, refdict, citelist, True, printfile, logfile)
@@ -4611,10 +4239,11 @@ def build_site():
 
 def main():
     # will eventually need to put options here for choosing different paths, etc.
-    main_path = "fiddlercrab.info"
-    os.chdir(main_path)
+    # main_path = "fiddlercrab.info"
+    # os.chdir(main_path)
+    init_data = TMB_Initialize.initialize()
     # will need to read options from file
-    build_site()
+    build_site(init_data)
 
 
 if __name__ == "__main__":
