@@ -3,6 +3,7 @@ Module to cross-check location data
 """
 
 # import TMB_Classes
+import codecs
 from TMB_Import import *
 import TMB_Initialize
 
@@ -53,8 +54,8 @@ def parse_data(citations):
     return place_list
 
 
-def read_location_data():
-    with open("location_data.txt", "r") as infile:
+def read_location_data(filename):
+    with codecs.open(filename, "r", "utf-8") as infile:
         dohead = True
         names = []
         full = {}
@@ -108,23 +109,22 @@ def unknown_map(citations, locations):
 
 def main():
     init_data = TMB_Initialize.initialize()
-    # citation_data = read_citations()
     citation_data = read_citation_file(init_data.citation_info_file)
     location_set = parse_data(citation_data)
-    with open("location_all.txt", "w") as outfile:
+    with codecs.open("temp/location_all.txt", "w", "utf-8") as outfile:
         for l in location_set:
             outfile.write(l + "\n")
 
-    loc_names, location_data = read_location_data()
-    with open("location_clean.txt", "w") as outfile:
+    loc_names, location_data = read_location_data("data/location_data.txt")
+    with codecs.open("temp/location_clean.txt", "w", "utf-8") as outfile:
         for l in location_set:
             if l not in loc_names:
                 outfile.write(l + "\n")
 
-    species = read_species_data(init_data.species_data_file)
-    for s in species:
-        location_map(s.species, citation_data, location_data)
-    unknown_map(citation_data, location_data)
+    # species = read_species_data(init_data.species_data_file)
+    # for s in species:
+    #     location_map(s.species, citation_data, location_data)
+    # unknown_map(citation_data, location_data)
 
 
 if __name__ == "__main__":
