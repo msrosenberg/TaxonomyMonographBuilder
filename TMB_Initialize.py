@@ -20,6 +20,7 @@ class InitializationData:
         self.art_file = "data/art.txt"
         self.morphology_file = "data/morphology.txt"
         self.map_kml_file = "data/Fiddler Crabs.kml"
+        self.location_file = "data/location_data.txt"
         self.error_log = "errorlog.txt"
 
 

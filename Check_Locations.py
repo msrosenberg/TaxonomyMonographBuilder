@@ -2,8 +2,11 @@
 Module to cross-check location data
 """
 
-from TMB_Import import *
+# from TMB_Import import *
+import TMB_Import
 import TMB_Initialize
+import os
+import codecs
 
 
 def parse_data(citations):
@@ -19,22 +22,6 @@ def parse_data(citations):
                 places.add(p)
     place_list = sorted(list(places))
     return place_list
-
-
-def read_location_data(filename):
-    with codecs.open(filename, "r", "utf-8") as infile:
-        dohead = True
-        names = []
-        full = {}
-        for line in infile:
-            if dohead:
-                dohead = False
-            else:
-                d = line.strip().split("\t")
-                n = d[0].replace("\"", "")
-                names.append(n)
-                full[n] = (d[1], d[2])
-    return names, full
 
 
 def location_map(species, citations, locations):
@@ -76,17 +63,22 @@ def unknown_map(citations, locations):
 
 def main():
     init_data = TMB_Initialize.initialize()
-    citation_data = read_citation_file(init_data.citation_info_file)
+    citation_data = TMB_Import.read_citation_file(init_data.citation_info_file)
     location_set = parse_data(citation_data)
+    # create path for temp files
+    if not os.path.exists("temp/"):
+        os.makedirs("temp/")
+
     with codecs.open("temp/location_all.txt", "w", "utf-8") as outfile:
         for l in location_set:
             outfile.write(l + "\n")
 
-    loc_names, location_data = read_location_data("data/location_data.txt")
+    location_data = TMB_Import.read_location_data(init_data.location_file)
+    location_names = list(location_data.keys())
     with codecs.open("temp/location_clean.txt", "w", "utf-8") as outfile:
-        for l in location_set:
-            if l not in loc_names:
-                outfile.write(l + "\n")
+        for loc in location_set:
+            if loc not in location_names:
+                outfile.write(loc + "\n")
 
     # species = read_species_data(init_data.species_data_file)
     # for s in species:

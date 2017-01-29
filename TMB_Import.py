@@ -4,12 +4,12 @@ Functions to read data from files
 
 import codecs
 import TMB_Classes
-from TMB_Error import *
+from TMB_Error import report_error
 
 
 def read_simple_file(filename):
     """ read data from generic flatfile """
-    with open(filename, "r") as infile:
+    with codecs.open(filename, "r", "utf-8") as infile:
         splist = []
         got_header = False
         for line in infile:
@@ -28,7 +28,7 @@ def read_simple_file(filename):
 
 def read_citation_file(citation_filename):
     # citation info
-    with open(citation_filename, "r") as reffile:
+    with codecs.open(citation_filename, "r", "utf-8") as reffile:
         citelist = []
         got_header = False
         for line in reffile:
@@ -105,33 +105,6 @@ def read_reference_data(ref_filename, formatref_filename, citation_filename, log
         refdict[ref.cite_key] = ref
     # citation info
     citelist = read_citation_file(citation_filename)
-    # with open(citation_filename, "r") as reffile:
-    #     citelist = []
-    #     got_header = False
-    #     for line in reffile:
-    #         if not got_header:
-    #             got_header = True
-    #         else:
-    #             line = line.replace("\"\"", "\"")
-    #             cite = line.strip().split("\t")
-    #             for i, x in enumerate(cite):
-    #                 if x.startswith("\"") and x.endswith("\""):
-    #                     cite[i] = x[1:len(x)-1]
-    #             newcite = TMB_Classes.CitationClass()
-    #             newcite.cite_key = cite[0]
-    #             newcite.name_key = cite[1]
-    #             newcite.name = cite[2]
-    #             newcite.common = cite[3]
-    #             newcite.where = cite[4]
-    #             newcite.context = cite[5]
-    #             newcite.application = cite[6]
-    #             newcite.cite_n = cite[7]
-    #             newcite.actual = cite[8]
-    #             newcite.source = cite[9]
-    #             newcite.name_note = cite[10]
-    #             newcite.general_note = cite[11]
-    #             citelist.append(newcite)
-    #             cite_done[cite[0]][0] = True
     for c in citelist:
         cite_done[c.cite_key][0] = True
 
@@ -275,3 +248,21 @@ def read_common_name_data(filename):
     with codecs.open(filename, "r", "utf-8") as infile:
         lines = infile.readlines()
     return lines
+
+
+def read_location_data(filename):
+    tmplist = read_simple_file(filename)
+    locdict = {}
+    for loc in tmplist:
+        newloc = TMB_Classes.LocationClass()
+        newloc.name = loc[0]
+        newloc.latitude = float(loc[1])
+        newloc.longitude = float(loc[2])
+        newloc.notes = loc[3]
+        newloc.trimmed_name = loc[4]
+        if loc[5] != ".":
+            newloc.alternates = list(loc[5].split(";"))
+        if loc[6] != ".":
+            newloc.parent = loc[6]
+        locdict[newloc.name] = newloc
+    return locdict

@@ -139,3 +139,21 @@ class CitationClass:
                 return self.context < x.context
         else:
             return self.name < x.name
+
+
+class LocationClass:
+    def __init__(self):
+        self.name = ""
+        self.trimmed_name = ""
+        self.latitude = 0
+        self.longitude = 0
+        self.parent = None
+        self.notes = ""
+        self.children = []
+        self.alternates = []
+
+    def n_children(self):
+        return len(self.children)
+
+    def n_alternates(self):
+        return len(self.alternates)

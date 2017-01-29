@@ -2,17 +2,20 @@
 Taxonomy Monograph Builder
 """
 
-# import codecs
+import codecs
 import datetime
 import random
 import os
 import shutil
 import re
+import zipfile
 # local dependencies
 # from TMB_Classes import *
-from TMB_Import import *
-from TMB_Error import *
+# from TMB_Import import *
+import TMB_Import
+from TMB_Error import report_error
 import TMB_Initialize
+import TMB_Common_Maps
 # external dependencies
 import matplotlib.pyplot as mplpy
 
@@ -136,11 +139,22 @@ def common_species_html_header(outfile, title, indexpath, species):
         outfile.write("        var map = new google.maps.Map(document.getElementById(\"map_canvas\"),mapOptions);\n")
         outfile.write("        var ctaLayer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/uca.kmz\","
                       "{suppressInfoWindows: true});\n")
+        outfile.write("        var map2 = new google.maps.Map(document.getElementById(\"map2_canvas\"),mapOptions);\n")
+        outfile.write("        var ctaLayer2 = "
+                      "new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/uca_points.kmz\","
+                      "{suppressInfoWindows: false});\n")
     else:
+        # range map
         outfile.write("        var map = new google.maps.Map(document.getElementById(\"map_canvas_sp\"),mapOptions);\n")
         outfile.write("        var ctaLayer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/u_" +
                       species + ".kmz\",{suppressInfoWindows: true});\n")
+        # point map
+        outfile.write("        var map2 = new google.maps.Map(document.getElementById(\"map2_canvas_sp\"),"
+                      "mapOptions);\n")
+        outfile.write("        var ctaLayer2 = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/u_" +
+                      species + "_points.kmz\",{suppressInfoWindows: false});\n")
     outfile.write("        ctaLayer.setMap(map);\n")
+    outfile.write("        ctaLayer2.setMap(map2);\n")
     outfile.write("      }\n")
     outfile.write("    </script>\n")
     common_header_part2(outfile, indexpath, True)
@@ -258,6 +272,25 @@ def replace_references(in_list, refdict, do_print, logfile):
     for line in in_list:
         out_list.append(replace_reference_in_string(line, refdict, do_print, logfile))
     return out_list
+
+
+def clean_reference_html(ref):
+    """ add slightly better formatting to html formatted references """
+    # replace hyphens with an n-dash in page ranges
+    sstr = r"((?:Pp\. |:)[\d]+)(-)([\d]+)"
+    ref = re.sub(sstr, r"\1&ndash;\3", ref)
+    # print(re.sub(sstr, r"\1&ndash;\3", ref))
+
+    # replace hyphens with an n-dash in volume ranges
+    sstr = r"(\([\d]+)(-)([\d]+\))"
+    ref = re.sub(sstr, r"\1&ndash;\3", ref)
+    # print(re.sub(sstr, r"\1&ndash;\3", ref))
+    return ref
+
+
+def clean_references(references):
+    for ref in references:
+        ref.formatted_html = clean_reference_html(ref.formatted_html)
 
 
 # def chart_style():
@@ -864,6 +897,7 @@ def clean_specific_name(x):
                  "arenarius",
                  "raninus",
                  "serratus",
+                 "cordimana",
                  "spec.")
 
     if " " not in x:
@@ -2071,15 +2105,24 @@ def write_geography_page(species, outfile, do_print):
         outfile.write("        <img src=\"media/maps/uca_map.svg\" alt=\"Map\" "
                       "title=\"Map of fiddler crab distribution\" />\n")
         outfile.write("      </figure>\n")
+        outfile.write("      <figure>\n")
+        outfile.write("        <img src=\"temp/uca_point_map.svg\" alt=\"Point Map\" "
+                      "title=\"Point map of fiddler crab distribution\" />\n")
+        outfile.write("      </figure>\n")
     else:
         outfile.write("        <div id=\"map_canvas\"></div>\n")
+        outfile.write("        <div id=\"map2_canvas\"></div>\n")
     outfile.write("      </div>\n")
-    outfile.write("      <p>\n")
-    outfile.write("        The above map shows the approximate density of species richness, with denser color "
-                  "where more species are found. The range for each individual species can be found on its page, "
-                  "including specific citations for the range information. Below, species are grouped by broad "
-                  "geographic region.\n")
+    outfile.write("      <p style=\"clear: both;\">\n")
+    outfile.write("        The first map shows the approximate density of species richness, with denser color "
+                  "where more species are found. The second map shows approximate point locations where fiddler crabs "
+                  "have been recorded in the scientific record.\n")
     outfile.write("      </p>\n")
+    outfile.write("      <p>\n")
+    outfile.write("        Specific ranges for a species or name can be found on its associated pages. "
+                  "The list below sorts the species by major geographic region.\n")
+    outfile.write("      </p>\n")
+
     outfile.write("    </section>\n")
     for r in regions:
         outfile.write("\n")
@@ -2098,6 +2141,228 @@ def write_geography_page(species, outfile, do_print):
         end_page_division(outfile)
     else:
         common_html_footer(outfile, "")
+
+
+def create_location_hierarchy(point_locations, logfile):
+    """ got through all locations and add children to the parent locations """
+    loc_dict = {}
+    for p in point_locations:
+        loc = point_locations[p]
+        if loc.parent is not None:
+            if loc.parent in point_locations:
+                ploc = point_locations[loc.parent]
+                ploc.children.append(loc)
+            else:
+                report_error(logfile, "Location missing: " + loc.parent)
+        if loc.trimmed_name in loc_dict:
+            report_error(logfile, "Duplicate trimmed location name: " + loc.trimmed_name)
+        else:
+            loc_dict[loc.trimmed_name] = loc
+        for a in loc.alternates:
+            if a in loc_dict:
+                report_error(logfile, "Duplicate trimmed location name: " + a)
+            else:
+                loc_dict[a] = loc
+    return loc_dict
+
+
+# def write_location(loc, point_locations, indent):
+#     """ print a location and its child locations """
+#     print(indent + loc.trimmed_name)
+#     if loc.n_children() > 0:
+#         child_list = []
+#         for child in loc.children:
+#             child_list.append(child.name)
+#         child_list.sort()
+#         for child in child_list:
+#             write_location(point_locations[child], point_locations, indent + "  ")
+#
+#
+# def write_all_locations(point_locations):
+#     """ create a indented list of all point locations """
+#     top_list = []
+#     for p in point_locations:
+#         loc = point_locations[p]
+#         if loc.parent is None:
+#             top_list.append(loc.name)
+#     top_list.sort()
+#     for p in top_list:
+#         loc = point_locations[p]
+#         write_location(loc, point_locations, "")
+
+
+def write_location(outfile, loc, point_locations):
+    """ print a location and its child locations """
+    outfile.write("<li>" + loc.trimmed_name)
+    if loc.n_children() > 0:
+        child_list = []
+        for child in loc.children:
+            child_list.append(child.name)
+        child_list.sort()
+        outfile.write("\n <ul>\n")
+        for child in child_list:
+            write_location(outfile, point_locations[child], point_locations)
+        outfile.write(" </ul>\n")
+    outfile.write("</li>\n")
+
+
+def write_location_pages(outfile, do_print, point_locations, location_dict):
+    """ output observation location index to HTML """
+    if do_print:
+        start_page_division(outfile, "index_page")
+    else:
+        common_html_header(outfile, "Fiddler Crab Observation Locations", "../")
+    outfile.write("    <header id=\"location_index\">\n")
+    outfile.write("      <h1 class=\"bookmark1\">Location Index</h1>\n")
+    outfile.write("    </header>\n")
+    outfile.write("\n")
+    outfile.write("    <p>")
+    outfile.write("      The following indices include all locations extracted from the literature in the database "
+                  "where fiddler crabs have been reported. The first list includes all modern names in a rough,"
+                  "hierarchical framework, mostly by country and subregions within country. Bodies of water which "
+                  "cannot be associated with a single country are listed independently. The hierarchy is imperfect "
+                  "because some observations were general enough to cross political or other structural boundaries.\n")
+    outfile.write("    </p>")
+    outfile.write("    <p>")
+    outfile.write("      The second list is strictly alphabetical and includes archaic and older place names.\n")
+    outfile.write("    </p>")
+    outfile.write("    <p>")
+    outfile.write("    Each location is expressed as a single pair of coordinates, so all plotted points "
+                  "should only be viewed as an approximate location. Generally, a point on the shore was chosen to "
+                  "represent each locality, but occasionally an interior land point may have been chosen when no "
+                  "single shore point made sense, for example, in the case of a record on an island.\n")
+    outfile.write("    </p>")
+    outfile.write("\n")
+    outfile.write("    <h2 class=\"nobookmark\">Hierarchical List of Modern Location Names</h2>\n")
+    top_list = []
+    # full_list = []
+    for p in point_locations:
+        loc = point_locations[p]
+        if loc.parent is None:
+            top_list.append(loc.name)
+        # full_list.append(loc.trimmed_name)
+        # for a in loc.alternates:
+        #     full_list.append(a)
+    top_list.sort()
+    outfile.write("    <ul>\n")
+    for p in top_list:
+        loc = point_locations[p]
+        write_location(outfile, loc, point_locations)
+    outfile.write("    </ul>\n")
+    outfile.write("    <h2 class=\"nobookmark\">Alphabetical List of All Location Names</h2>\n")
+    full_list = list(location_dict.keys())
+    full_list.sort()
+    outfile.write("    <ul>\n")
+    for p in full_list:
+        outfile.write("   <li>" + p + "</li>\n")
+    outfile.write("    </ul>\n")
+
+    if do_print:
+        end_page_division(outfile)
+    else:
+        common_html_footer(outfile, "")
+
+
+def create_point_map_kml(title, place_list, point_locations):
+    # name = crab[0]
+    # locs = crab[1]
+    # name = name[name.find("Uca") + 4:name.find("</")]
+    with codecs.open(TMP_PATH + "doc.kml", "w", "utf-8") as outfile:
+        outfile.write("<?xml version=\"1.0\"?>\n")
+        outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
+        outfile.write(" <Document>\n")
+        outfile.write("  <Style id=\"species_observations\">\n")
+        # outfile.write("    <LineStyle>\n")
+        # outfile.write("      <color>FFFF55FF</color>\n")
+        # outfile.write("      <width>5</width>\n")
+        # outfile.write("    </LineStyle>\n")
+        outfile.write("  </Style>\n")
+        for p in place_list:
+            pnt = point_locations[p]
+            outfile.write("  <Placemark>\n")
+            outfile.write("    <name>" + p + "</name>\n")
+            outfile.write("    <description/>\n")
+            outfile.write("    <styleUrl>\n")
+            outfile.write("      #species_observations\n")
+            outfile.write("    </styleUrl>\n")
+            outfile.write("    <Point>\n")
+            outfile.write("     <coordinates>\n")
+            outfile.write("          " + str(pnt.longitude) + "," + str(pnt.latitude) + "\n")
+            outfile.write("     </coordinates>\n")
+            outfile.write("    </Point>\n")
+            outfile.write("  </Placemark>\n")
+        outfile.write(" </Document>\n")
+        outfile.write("</kml>\n")
+    with zipfile.ZipFile("media/maps/" + title + "_points.kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
+        myzip.write(TMP_PATH + "doc.kml")
+        myzip.close()
+
+
+def create_point_map_svg(title, place_list, point_locations, base_map, skip_axes):
+    fig, faxes = mplpy.subplots(figsize=[6.5, 3.25])
+    TMB_Common_Maps.draw_base_map(faxes, base_map)
+    for spine in faxes.spines:
+        faxes.spines[spine].set_visible(False)
+    maxlat = -90
+    minlat = 90
+    maxlon = -180
+    minlon = 180
+    lats = []
+    lons = []
+    # colors = []
+    for p in place_list:
+        if p in point_locations:
+            point = point_locations[p]
+            lats.append(point.latitude)
+            lons.append(point.longitude)
+            maxlon = max(maxlon, point.longitude)
+            minlon = min(minlon, point.longitude)
+            maxlat = max(maxlat, point.latitude)
+            minlat = min(minlat, point.latitude)
+
+    faxes.scatter(lons, lats, s=20, color="red", edgecolors="darkred", alpha=1, zorder=2)
+    minlon, maxlon, minlat, maxlat = TMB_Common_Maps.adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
+    mplpy.xlim(minlon, maxlon)
+    mplpy.ylim(minlat, maxlat)
+    if skip_axes:
+        faxes.axes.get_yaxis().set_visible(False)
+        faxes.axes.get_xaxis().set_visible(False)
+    else:
+        mplpy.xlabel("longitude")
+        mplpy.ylabel("latitude")
+    mplpy.rcParams["svg.fonttype"] = "none"
+    mplpy.tight_layout()
+    mplpy.savefig("temp/" + title + "_point_map.svg", format="svg")
+    mplpy.close()
+
+
+def create_point_map(species, point_locations, citelist, base_map, logfile):
+    places = set()
+    for c in citelist:
+        if (c.actual == species) and ((c.context == "location") or
+                                      (c.context == "specimen")):
+            p = c.application
+            if p[0] != "[":
+                if "[" in p:
+                    p = p[:p.find("[")-1]
+                if p in point_locations:
+                    places.add(p)
+                elif p != "?":
+                    report_error(logfile, "Missing point location: " + p)
+    place_list = sorted(list(places))
+    create_point_map_svg("u_" + species, place_list, point_locations, base_map, False)
+    create_point_map_kml("u_" + species, place_list, point_locations)
+    return place_list
+
+
+def create_all_point_maps(species, point_locations, citelist, base_map, logfile):
+    all_places = set()
+    for s in species:
+        new_places = create_point_map(s.species, point_locations, citelist, base_map, logfile)
+        all_places |= set(new_places)
+    all_list = sorted(list(all_places))
+    create_point_map_svg("uca", all_list, point_locations, base_map, True)
+    create_point_map_kml("uca", all_list, point_locations)
 
 
 def write_common_names_pages(outfile, common_name_data, do_print):
@@ -2194,7 +2459,6 @@ def write_species_list(specieslist, outfile, do_print):
         common_html_footer(outfile, "")
 
 
-# def write_species_photo_page(fname, species, common_name, caption, pn, pspecies):
 def write_species_photo_page(outfile, fname, species, common_name, caption, pn, pspecies, do_print):
     """ create page for a specific photo """
     if ";" in pspecies:
@@ -2403,14 +2667,16 @@ def write_species_page(species, references, specific_names, all_names, photos, v
         outfile.write("         <dd><em class=\"species\">" + ", ".join(llist) + "</em></dd>\n")
 
     # Geographic Range
-    outfile.write("       <dt>Geographic Range</dt>\n")
+    outfile.write("       <dt class=\"pagebreak\">Geographic Range</dt>\n")
     outfile.write("         <dd>" + species.region + ": " + species.range + "</dd>\n")
     if not is_fossil:
         outfile.write("         <dd>\n")
         if do_print:
             outfile.write("           <img src=\"media/maps/u_" + species.species + "_map.svg\" alt=\"Map\" />\n")
+            outfile.write("           <img src=\"temp/u_" + species.species + "_point_map.svg\" alt=\"Map\" />\n")
         else:
             outfile.write("           <div id=\"map_canvas_sp\"></div>\n")
+            outfile.write("           <div id=\"map2_canvas_sp\"></div>\n")
         outfile.write("         </dd>\n")
         outfile.write("         <dd class=\"map_data\">\n")
         maprefkeylist = species.range_references.split(";")
@@ -3968,6 +4234,7 @@ def create_output_paths():
     create_path_and_index("morphology/")
     create_path_and_index("maps/")
     create_path_and_index("images/")
+    create_path_and_index("locations/")
     # create path for temp files
     if not os.path.exists("temp/"):
         os.makedirs("temp/")
@@ -4013,11 +4280,19 @@ def copy_map_files(species, logfile):
                 shutil.copy2("media/maps/u_" + s.species + ".kmz", WEBOUT_PATH + "maps/")
             except FileNotFoundError:
                 report_error(logfile, "Missing file: media/maps/u_" + s.species + ".kmz")
+            try:
+                shutil.copy2("media/maps/u_" + s.species + "_points.kmz", WEBOUT_PATH + "maps/")
+            except FileNotFoundError:
+                report_error(logfile, "Missing file: media/maps/u_" + s.species + "_points.kmz")
     # combined map
     try:
         shutil.copy2("media/maps/uca.kmz", WEBOUT_PATH + "maps/")
     except FileNotFoundError:
         report_error(logfile, "Missing file: media/maps/uca.kmz")
+    try:
+        shutil.copy2("media/maps/uca_points.kmz", WEBOUT_PATH + "maps/")
+    except FileNotFoundError:
+        report_error(logfile, "Missing file: media/maps/uca_points.kmz")
 
 
 def print_cover():
@@ -4157,30 +4432,41 @@ def end_print(outfile):
 
 
 def build_site(init_data):
-    with open(init_data.error_log, "w") as logfile:
+    with codecs.open(init_data.error_log, "w", "utf-8") as logfile:
         # read data and do computation
         print("...Reading References...")
-        references, refdict, citelist, yeardict, citecount = read_reference_data(init_data.reference_ciation_file,
-                                                                                 init_data.reference_file,
-                                                                                 init_data.citation_info_file,
-                                                                                 logfile)
+        (references, refdict, citelist,
+         yeardict, citecount) = TMB_Import.read_reference_data(init_data.reference_ciation_file,
+                                                               init_data.reference_file,
+                                                               init_data.citation_info_file,
+                                                               logfile)
+        clean_references(references)
         yeardat, yeardat1900 = summarize_year(yeardict)
         languages = summarize_languages(references)
         print("...Reading Species...")
-        species = read_species_data(init_data.species_data_file)
+        species = TMB_Import.read_species_data(init_data.species_data_file)
         print("...Connecting References...")
         species_refs = connect_refs_to_species(species, citelist)
         print("...Reading Species Names...")
-        specific_names = read_specific_names_data(init_data.specific_names_file)
+        specific_names = TMB_Import.read_specific_names_data(init_data.specific_names_file)
         (all_names, binomial_name_cnts, specific_name_cnts, genus_cnts, total_binomial_year_cnts,
          name_table) = calculate_name_index_data(refdict, citelist, specific_names)
-        common_name_data = read_common_name_data(init_data.common_names_file)
-        subgenera = read_subgenera_data(init_data.subgenera_file)
+        common_name_data = TMB_Import.read_common_name_data(init_data.common_names_file)
+        subgenera = TMB_Import.read_subgenera_data(init_data.subgenera_file)
         print("...Reading Photos and Videos...")
-        photos = read_photo_data(init_data.photo_file)
-        videos = read_video_data(init_data.video_file)
-        art = read_art_data(init_data.art_file)
-        morphology = read_morphology_data(init_data.morphology_file)
+        photos = TMB_Import.read_photo_data(init_data.photo_file)
+        videos = TMB_Import.read_video_data(init_data.video_file)
+        art = TMB_Import.read_art_data(init_data.art_file)
+        morphology = TMB_Import.read_morphology_data(init_data.morphology_file)
+        point_locations = TMB_Import.read_location_data(init_data.location_file)
+        location_dict = create_location_hierarchy(point_locations, logfile)
+        print("...Creating Maps...")
+        base_map = TMB_Common_Maps.read_base_map("resources/world_map.txt")
+        # write_all_locations(point_locations)
+        # create_all_point_maps(species, point_locations, citelist, base_map, logfile)
+
+        with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
+            write_location_pages(outfile, False, point_locations, location_dict)
 
         # output website version
         if False:
@@ -4223,7 +4509,7 @@ def build_site(init_data):
             write_citation_page(refdict)
 
         # output print version
-        if True:
+        if False:
             print("...Creating Print Version...")
             with codecs.open("print.html", "w", "utf-8") as printfile:
                 start_print(printfile)

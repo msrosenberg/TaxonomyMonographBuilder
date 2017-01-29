@@ -10,26 +10,12 @@ completion of the code.
 """
 
 import zipfile
-# import os
 import matplotlib.pyplot as mplpy
 import TMB_Initialize
+import TMB_Common_Maps
 
 TMP_PATH = "temp/"
 OUTPUT_PATH = "media/maps/"
-
-
-class Point:
-    def __init__(self, lat=0.0, lon=0.0):
-        self.lat = lat
-        self.lon = lon
-
-
-class Polygon:
-    def __init__(self):
-        self.points = []
-
-    def n(self):
-        return len(self.points)
 
 
 def read_placemark(infile):
@@ -186,26 +172,26 @@ def output_all_kml(crabs):
         myzip.close()
 
 
-def read_base_map(filename):
-    polygon_list = []
-    with open(filename, "r") as infile:
-        line = infile.readline()
-        while line != "":
-            if line.startswith("Polygon"):
-                data = line.strip().split("\t")
-                new_polygon = Polygon()
-                polygon_list.append(new_polygon)
-                n = abs(int(data[1]))  # wtf??? why is one of the # of points negative?
-                new_point = Point(lat=float(data[3]), lon=float(data[2]))
-                new_polygon.points.append(new_point)
-                for i in range(n-1):
-                    line = infile.readline()
-                    data = line.strip().split("\t")
-                    new_point = Point(lat=float(data[1]), lon=float(data[0]))
-                    new_polygon.points.append(new_point)
-            else:
-                line = infile.readline()
-    return polygon_list
+# def read_base_map(filename):
+#     polygon_list = []
+#     with open(filename, "r") as infile:
+#         line = infile.readline()
+#         while line != "":
+#             if line.startswith("Polygon"):
+#                 data = line.strip().split("\t")
+#                 new_polygon = Polygon()
+#                 polygon_list.append(new_polygon)
+#                 n = abs(int(data[1]))  # wtf??? why is one of the # of points negative?
+#                 new_point = Point(lat=float(data[3]), lon=float(data[2]))
+#                 new_polygon.points.append(new_point)
+#                 for i in range(n-1):
+#                     line = infile.readline()
+#                     data = line.strip().split("\t")
+#                     new_point = Point(lat=float(data[1]), lon=float(data[0]))
+#                     new_polygon.points.append(new_point)
+#             else:
+#                 line = infile.readline()
+#     return polygon_list
 
 
 def add_line_to_map(faxes, points, minlon, maxlon, minlat, maxlat, lw, a):
@@ -226,31 +212,16 @@ def add_line_to_map(faxes, points, minlon, maxlon, minlat, maxlat, lw, a):
     return minlon, maxlon, minlat, maxlat
 
 
-def draw_base_map(faxes, base_map):
-    for polygon in base_map:
-        lons = [p.lon for p in polygon.points]
-        lats = [p.lat for p in polygon.points]
-        faxes.plot(lons, lats, "silver", linewidth=0.5)
-
-
-def adjust_map_boundaries(minlon, maxlon, minlat, maxlat):
-    # adjust ranges to keep map scale (2:1 ratio, lon to lat), with a 5 degree buffer
-    lon_range = maxlon - minlon + 10
-    lat_range = maxlat - minlat + 10
-    if lon_range > 2 * lat_range:
-        d = lon_range - 2 * lat_range
-        minlat -= d/2
-        maxlat += d/2
-    else:
-        d = 2 * lat_range - lon_range
-        minlon -= d/2
-        maxlon += d/2
-    return minlon-5, maxlon+5, minlat-5, maxlat+5
+# def draw_base_map(faxes, base_map):
+#     for polygon in base_map:
+#         lons = [p.lon for p in polygon.points]
+#         lats = [p.lat for p in polygon.points]
+#         faxes.plot(lons, lats, "silver", linewidth=0.5)
 
 
 def write_single_species_map_figure(base_map, species_map):
     fig, faxes = mplpy.subplots(figsize=[6.5, 3.25])
-    draw_base_map(faxes, base_map)
+    TMB_Common_Maps.draw_base_map(faxes, base_map)
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
     maxlat = -90
@@ -267,7 +238,7 @@ def write_single_species_map_figure(base_map, species_map):
         else:
             minlon, maxlon, minlat, maxlat = add_line_to_map(faxes, loc[2], minlon, maxlon, minlat, maxlat, 1, 1)
 
-    minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
+    minlon, maxlon, minlat, maxlat = TMB_Common_Maps.adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)
     mplpy.xlabel("longitude")
@@ -280,7 +251,7 @@ def write_single_species_map_figure(base_map, species_map):
 
 def write_all_species_map_figure(base_map, species_maps):
     fig, faxes = mplpy.subplots(figsize=[6.5, 3.25])
-    draw_base_map(faxes, base_map)
+    TMB_Common_Maps.draw_base_map(faxes, base_map)
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
     maxlat = -90
@@ -310,14 +281,12 @@ def write_all_species_map_figure(base_map, species_maps):
 
 def main():
     init_data = TMB_Initialize.initialize()
-
-    input_file_name = init_data.map_kml_file
-    species_maps = read_raw(input_file_name)
-    base_map = read_base_map("resources/world_map.txt")
+    species_maps = read_raw(init_data.map_kml_file)
+    base_map = TMB_Common_Maps.read_base_map("resources/world_map.txt")
     for m in species_maps:
         output_species_kml(m)
         write_single_species_map_figure(base_map, m)
-    output_all_kml(base_map, species_maps)
+    output_all_kml(species_maps)
     write_all_species_map_figure(base_map, species_maps)
 
 
