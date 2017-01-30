@@ -1271,7 +1271,7 @@ def calculate_specific_name_yearly_cnts(specific_name, binomial_names, binomial_
 
 
 def calculate_specific_locations(specific_name, binomial_names, binomial_locations):
-    locs = {}
+    locs = set()
     for n in binomial_names:
         sp_name = clean_specific_name(n)
         tmpnamelist = specific_name.variations.split(";")
