@@ -488,7 +488,7 @@ def create_all_name_maps(all_names, specific_names, point_locations,
         create_point_map_svg(namefile, place_list, point_locations, base_map, False)
         create_point_map_kml(namefile, place_list, point_locations)
     for name in specific_names:
-        namefile = "sn_" + name
+        namefile = "sn_" + name.name
         place_list = check_points(specific_point_locations[name], point_locations, logfile)
         create_point_map_svg(namefile, place_list, point_locations, base_map, False)
         create_point_map_kml(namefile, place_list, point_locations)
