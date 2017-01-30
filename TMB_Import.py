@@ -63,7 +63,8 @@ def read_reference_data(ref_filename, formatref_filename, citation_filename, log
     reflist = []
     year_dat = {}
     cite_done = {}
-    # reference citation data
+
+    # citation style data (Author, Year) and language for each reference
     with codecs.open(ref_filename, "r", "utf-8") as reffile:
         for line in reffile:
             line = line.replace("et al.", "<em>et al.</em>")
@@ -82,11 +83,10 @@ def read_reference_data(ref_filename, formatref_filename, citation_filename, log
                     year_dat[y] += 1
                 else:
                     year_dat[y] = 1
-            # cite_done[ref[1]] = [False, y]
             cite_done[newref.cite_key] = [False, y]
             reflist.append(newref)
 
-    # formatted references from html
+    # html formatted full references
     with codecs.open(formatref_filename, "r", "utf-8") as reffile:
         c = -1
         for line in reffile:
@@ -103,7 +103,8 @@ def read_reference_data(ref_filename, formatref_filename, citation_filename, log
         if ref.cite_key in refdict and ref.cite_key != "<pending>":
             report_error(logfile, "Duplicate reference key:" + ref.cite_key)
         refdict[ref.cite_key] = ref
-    # citation info
+
+    # citation records information
     citelist = read_citation_file(citation_filename)
     for c in citelist:
         cite_done[c.cite_key][0] = True

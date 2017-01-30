@@ -310,13 +310,6 @@ def clean_references(references):
 
 
 def create_pie_chart_file(filename, data):
-    # pie_chart = pygal.Pie(style=chart_style())
-    # datalist = list(data.keys())
-    # datalist.sort()
-    # for d in datalist:
-    #     pie_chart.add(d, data[d])
-    # pie_chart.render_to_file(TMP_PATH + filename)
-
     datalist = list(data.keys())
     datalist.sort()
     sizes = []
@@ -1128,7 +1121,7 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
 def write_reference_pages(reflist, refdict, citelist, do_print, printfile, logfile):
     """ control function to loop through creating a page for every reference """
     name_table = create_name_table(citelist)
-    update_cite_list(citelist)
+    # update_cite_list(citelist)  # moving this outside of write loop so as not to have it run twice
     for ref in reflist:
         if ref.cite_key != "<pending>":
             if do_print:
@@ -1873,7 +1866,7 @@ def clean_genus(genus):
 
 
 def calculate_name_index_data(refdict, citelist, specific_names):
-    """ calculate all the data associated with binomials ans specific names """
+    """ calculate all the data associated with binomials and specific names """
     name_table = create_name_table(citelist)
     unique_names = list()
     nameset = set()
@@ -2389,16 +2382,17 @@ def write_common_names_pages(outfile, common_name_data, do_print):
 def connect_refs_to_species(species, citelist):
     """ create list of references for each species """
     # create dictionary with empty reference lists
-    species_refs = {}
-    for s in species:
-        reflist = set()
-        species_refs[s.species] = reflist
+    # species_refs = {}
+    # for s in species:
+    #     reflist = set()
+    #     species_refs[s.species] = reflist
+    species_refs = {s.species:set() for s in species}
     # go through all citations
     for c in citelist:
         if c.actual in species_refs:
             reflist = species_refs[c.actual]
             reflist |= {c.cite_key}
-            species_refs[c.actual] = reflist
+            # species_refs[c.actual] = reflist  # note: this line is probably not necessary
     return species_refs
 
 
@@ -4439,6 +4433,7 @@ def build_site(init_data):
         print("...Reading Species...")
         species = TMB_Import.read_species_data(init_data.species_data_file)
         print("...Connecting References...")
+        update_cite_list(citelist)
         species_refs = connect_refs_to_species(species, citelist)
         print("...Reading Species Names...")
         specific_names = TMB_Import.read_specific_names_data(init_data.specific_names_file)
@@ -4454,7 +4449,6 @@ def build_site(init_data):
         point_locations = TMB_Import.read_location_data(init_data.location_file)
         location_dict = create_location_hierarchy(point_locations, logfile)
         print("...Creating Maps...")
-        # base_map = TMB_Common_Maps.read_base_map("resources/world_map.txt")
         # write_all_locations(point_locations)
         if SHOW_NEW:
             TMB_Create_Maps.create_all_maps(init_data, species, point_locations, citelist, logfile)
