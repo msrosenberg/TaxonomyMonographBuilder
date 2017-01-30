@@ -47,6 +47,9 @@ AUTHOR_NOPAREN = 0
 AUTHOR_PAREN = 1
 AUTHOR_NOPCOMMA = 2
 
+# this flag is to hide/display new materials still in progress from the general release
+SHOW_NEW = True
+
 randSeed = random.randint(0, 10000)
 
 
@@ -1216,9 +1219,11 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
     outfile.write("    </header>\n")
     outfile.write("\n")
 
-    if maxcnt > 0:
-        write_chronology_chart_div(image_name, outfile, None, "Number of Uses of Name per Year", False, do_print, False)
-        outfile.write("\n")
+    if SHOW_NEW:
+        if maxcnt > 0:
+            write_chronology_chart_div(image_name, outfile, None, "Number of Uses of Name per Year", False, do_print,
+                                       False)
+            outfile.write("\n")
 
     # write name table
     outfile.write("    <h3 class=\"nobookmark\">Publications Using this Name</h3>\n")
@@ -1342,9 +1347,11 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
     outfile.write("    </section>\n")
     outfile.write("\n")
 
-    if maxcnt > 0:
-        write_chronology_chart_div(image_name, outfile, None, "Number of Uses of Name per Year", False, do_print, False)
-        outfile.write("\n")
+    if SHOW_NEW:
+        if maxcnt > 0:
+            write_chronology_chart_div(image_name, outfile, None, "Number of Uses of Name per Year", False, do_print,
+                                       False)
+            outfile.write("\n")
 
     if specific_name.notes != ".":
         outfile.write("    <section class=\"spsection\" style=\"clear: both\">\n")
@@ -1443,7 +1450,7 @@ def write_chronology_chart_div(n, outfile, linkfile, title, is_species, do_print
         outfile.write("      <div class=\"chronchart_" + position + "\"><img src=\"" + TMP_PATH + n +
                       "\" alt=\"chronology chart\" /></div>\n")
     else:
-        outfile.write("      <div id=\"chronchart_" + position + "" + str(n) + "_div\" class=\"chronchart\"></div>\n")
+        outfile.write("      <div id=\"chronchart" + str(n) + "_div\" class=\"chronchart_" + position + "\"></div>\n")
     outfile.write("    </div>\n")
 
 
@@ -1938,8 +1945,9 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
                       "\"><span class=\"fa fa-line-chart\"></span> Name Summary</a></li>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + SPECIES_URL +
                       "\"><span class=\"fa fa-check-circle\"></span> Accepted Species</a></li>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") +
-                      "synonyms_uca.html\">Synonyms of <em class=\"species\">Uca</em></a></li>\n")
+        if SHOW_NEW:
+            outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") +
+                          "synonyms_uca.html\">Synonyms of <em class=\"species\">Uca</em></a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -2068,19 +2076,23 @@ def write_geography_page(species, outfile, do_print):
         outfile.write("      </figure>\n")
     else:
         outfile.write("        <div id=\"map_canvas\"></div>\n")
-        outfile.write("        <div id=\"map2_canvas\"></div>\n")
+        if SHOW_NEW:
+            outfile.write("        <div id=\"map2_canvas\"></div>\n")
         outfile.write("        <div class=\"map_download\">\n")
-        outfile.write("          <a href=\"maps/uca_map.svg\"><span class=\"fa fa-map-o\"></span> "
+        outfile.write("          <a href=\"maps/uca_map.svg\"><span class=\"fa fa-download\"></span> "
                       "Download SVG line map of ranges.</a> \n")
-        outfile.write("          <a href=\"maps/uca_point_map.svg\"><span class=\"fa fa-map-o\"></span> "
-                      "Download SVG line map of point locations.</a>\n")
+        if SHOW_NEW:
+            outfile.write("          <a href=\"maps/uca_point_map.svg\"><span class=\"fa fa-download\"></span> "
+                          "Download SVG line map of point locations.</a>\n")
         outfile.write("        </div>\n")
     outfile.write("      </div>\n")
     outfile.write("      <p>\n")
     outfile.write("        The first map shows the approximate density of species richness, with denser color "
-                  "where more species are found. The second map shows approximate point locations where fiddler crabs "
-                  "have been recorded in the scientific record.\n")
-    outfile.write("      </p>\n")
+                  "where more species are found. ")
+    if SHOW_NEW:
+        outfile.write("The second map shows approximate point locations where fiddler crabs "
+                      "have been recorded in the scientific record.")
+    outfile.write("\n      </p>\n")
     outfile.write("      <p>\n")
     outfile.write("        Specific ranges for a species or name can be found on its associated pages. "
                   "The list below sorts the species by major geographic region.\n")
@@ -2620,9 +2632,15 @@ def write_species_page(species, references, specific_names, all_names, photos, v
             namefile = name_to_filename(n)
             llist.append("<a href=\"" + rel_link_prefix(do_print, "names/") + namefile + ".html\">" +
                          format_name_string(n) + "</a>")
-        outfile.write("       <dt>Synonyms, Alternate Spellings, &amp; Name Forms (<a href=\"" +
-                      rel_link_prefix(do_print, "names/") + "synonyms_" + species.species +
-                      ".html\">Chronology</a>)</dt>\n")
+
+        tmpstr = "Synonyms, Alternate Spellings, &amp; Name Forms"
+        if SHOW_NEW:
+            tmpstr += "(<a href=\"" + rel_link_prefix(do_print, "names/") + "synonyms_" + species.species + \
+                      ".html\">Chronology</a>n"
+        outfile.write("       <dt>" + tmpstr + "</dt>\n")
+        # outfile.write("       <dt>Synonyms, Alternate Spellings, &amp; Name Forms (<a href=\"" +
+        #               rel_link_prefix(do_print, "names/") + "synonyms_" + species.species +
+        #               ".html\">Chronology</a>)</dt>\n")
         outfile.write("         <dd><em class=\"species\">" + ", ".join(llist) + "</em></dd>\n")
 
     # Geographic Range
@@ -2636,12 +2654,14 @@ def write_species_page(species, references, specific_names, all_names, photos, v
                           "alt=\"Map\" />\n")
         else:
             outfile.write("           <div id=\"map_canvas_sp\"></div>\n")
-            outfile.write("           <div id=\"map2_canvas_sp\"></div>\n")
+            if SHOW_NEW:
+                outfile.write("           <div id=\"map2_canvas_sp\"></div>\n")
             outfile.write("           <div class=\"map_download\">\n")
             outfile.write("             <a href=\"maps/u_" + species.species + "_map.svg\">"
-                          "<span class=\"fa fa-map-o\"></span> Download SVG line map of ranges.</a> \n")
-            outfile.write("             <a href=\"maps/u_" + species.species + "_point_map.svg\">"
-                          "<span class=\"fa fa-map-o\"></span> Download SVG line map of point locations.</a>\n")
+                          "<span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
+            if SHOW_NEW:
+                outfile.write("             <a href=\"maps/u_" + species.species + "_point_map.svg\">"
+                              "<span class=\"fa fa-download\"></span> Download SVG line map of point locations.</a>\n")
             outfile.write("           </div>\n")
         outfile.write("         </dd>\n")
         outfile.write("         <dd class=\"map_data\">\n")
@@ -2935,7 +2955,7 @@ def write_video_index(videos, do_print, outfile, logfile):
         outfile.write("      <h2 id=\"" + secanchor[i] + "\" class=\"nobookmark\">" + x + "</h2>\n")
         outfile.write("      <dl class=\"vidlist\">\n")
         for video in videos:
-            if video.activity == secanchor[i]:
+            if "video_" + video.activity == secanchor[i]:
                 vn = int(video.n)
                 if ";" in video.species:
                     spname = video.species.replace(";", "_")
@@ -4430,8 +4450,8 @@ def build_site(init_data):
         print("...Creating Maps...")
         # base_map = TMB_Common_Maps.read_base_map("resources/world_map.txt")
         # write_all_locations(point_locations)
-        # TMB_Create_Maps.create_all_point_maps(species, point_locations, citelist, logfile)
-        TMB_Create_Maps.create_all_maps(init_data, species, point_locations, citelist, logfile)
+        if SHOW_NEW:
+            TMB_Create_Maps.create_all_maps(init_data, species, point_locations, citelist, logfile)
 
         # temp location
         with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
@@ -4511,8 +4531,6 @@ def build_site(init_data):
 
 def main():
     # will eventually need to put options here for choosing different paths, etc.
-    # main_path = "fiddlercrab.info"
-    # os.chdir(main_path)
     init_data = TMB_Initialize.initialize()
     # will need to read options from file
     build_site(init_data)
