@@ -48,7 +48,7 @@ AUTHOR_PAREN = 1
 AUTHOR_NOPCOMMA = 2
 
 # this flag is to hide/display new materials still in progress from the general release
-SHOW_NEW = True
+SHOW_NEW = False
 
 randSeed = random.randint(0, 10000)
 
@@ -137,25 +137,31 @@ def common_species_html_header(outfile, title, indexpath, species):
     outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
     outfile.write("        };\n")
     if species == "":
+        # range map
         outfile.write("        var map = new google.maps.Map(document.getElementById(\"map_canvas\"),mapOptions);\n")
         outfile.write("        var ctaLayer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/uca.kmz\","
                       "{suppressInfoWindows: true});\n")
-        outfile.write("        var map2 = new google.maps.Map(document.getElementById(\"map2_canvas\"),mapOptions);\n")
-        outfile.write("        var ctaLayer2 = "
-                      "new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/uca_points.kmz\","
-                      "{suppressInfoWindows: false});\n")
+        # point map
+        if SHOW_NEW:
+            outfile.write("        var map2 = new google.maps.Map(document.getElementById(\"map2_canvas\"),"
+                          "mapOptions);\n")
+            outfile.write("        var ctaLayer2 = "
+                          "new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/uca_points.kmz\","
+                          "{suppressInfoWindows: false});\n")
     else:
         # range map
         outfile.write("        var map = new google.maps.Map(document.getElementById(\"map_canvas_sp\"),mapOptions);\n")
         outfile.write("        var ctaLayer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/u_" +
                       species + ".kmz\",{suppressInfoWindows: true});\n")
-        # point map
-        outfile.write("        var map2 = new google.maps.Map(document.getElementById(\"map2_canvas_sp\"),"
-                      "mapOptions);\n")
-        outfile.write("        var ctaLayer2 = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/u_" +
-                      species + "_points.kmz\",{suppressInfoWindows: false});\n")
+        if SHOW_NEW:
+            # point map
+            outfile.write("        var map2 = new google.maps.Map(document.getElementById(\"map2_canvas_sp\"),"
+                          "mapOptions);\n")
+            outfile.write("        var ctaLayer2 = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/u_" +
+                          species + "_points.kmz\",{suppressInfoWindows: false});\n")
     outfile.write("        ctaLayer.setMap(map);\n")
-    outfile.write("        ctaLayer2.setMap(map2);\n")
+    if SHOW_NEW:
+        outfile.write("        ctaLayer2.setMap(map2);\n")
     outfile.write("      }\n")
     outfile.write("    </script>\n")
     common_header_part2(outfile, indexpath, True)
@@ -1416,7 +1422,7 @@ def setup_chronology_chart(n, miny, maxy, maxcnt, yearly_data, outfile):
     outfile.write("                   minValue: -" + str(maxcnt) + ",\n")
     outfile.write("                   maxValue: " + str(maxcnt) + "\n")
     outfile.write("                 },\n")
-    outfile.write("          hAxis: { showTextEvery: 10},\n")
+    outfile.write("          hAxis: { showTextEvery: 20},\n")
     outfile.write("          chartArea: { left:50,\n")
     outfile.write("                       top:10,\n")
     outfile.write("                       width:\"95%\",\n")
@@ -4498,7 +4504,7 @@ def build_site(init_data):
             write_citation_page(refdict)
 
         # output print version
-        if True:
+        if False:
             print("...Creating Print Version...")
             with codecs.open("print.html", "w", "utf-8") as printfile:
                 start_print(printfile)
