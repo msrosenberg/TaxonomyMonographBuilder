@@ -13,7 +13,7 @@ import codecs
 import zipfile
 import matplotlib.pyplot as mplpy
 from TMB_Error import report_error
-from TMB_Common import name_to_filename
+from TMB_Common import *
 
 TMP_PATH = "temp/"
 OUTPUT_PATH = TMP_PATH + "maps/"
@@ -134,7 +134,7 @@ def output_species_kml(crab):
         outfile.write("  </Placemark>\n")
         outfile.write(" </Document>\n")
         outfile.write("</kml>\n")
-    with zipfile.ZipFile(OUTPUT_PATH + "u_" + name + ".kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
+    with zipfile.ZipFile(OUTPUT_PATH + rangemap_name("u_" + name) + ".kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
         myzip.write(TMP_PATH + "doc.kml")
         myzip.close()
 
@@ -182,7 +182,7 @@ def output_all_kml(crabs):
             outfile.write("  </Placemark>\n")
         outfile.write(" </Document>\n")
         outfile.write("</kml>\n")
-    with zipfile.ZipFile(OUTPUT_PATH + "uca.kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
+    with zipfile.ZipFile(OUTPUT_PATH + rangemap_name("uca_all") + ".kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
         myzip.write(TMP_PATH + "doc.kml")
         myzip.close()
 
@@ -322,7 +322,7 @@ def write_single_species_map_figure(base_map, species_map):
     mplpy.ylabel("latitude")
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    mplpy.savefig(OUTPUT_PATH + "u_" + name + "_map.svg", format="svg")
+    mplpy.savefig(OUTPUT_PATH + rangemap_name("u_" + name) + ".svg", format="svg")
     mplpy.close()
 
 
@@ -352,7 +352,7 @@ def write_all_species_map_figure(base_map, species_maps):
     faxes.axes.get_xaxis().set_visible(False)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    mplpy.savefig(OUTPUT_PATH + "uca_map.svg", format="svg")
+    mplpy.savefig(OUTPUT_PATH + rangemap_name("uca_all") + ".svg", format="svg")
     mplpy.close()
 
 
@@ -383,7 +383,7 @@ def create_point_map_kml(title, place_list, point_locations):
             outfile.write("  </Placemark>\n")
         outfile.write(" </Document>\n")
         outfile.write("</kml>\n")
-    with zipfile.ZipFile(OUTPUT_PATH + title + "_points.kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
+    with zipfile.ZipFile(OUTPUT_PATH + pointmap_name(title) + ".kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
         myzip.write(TMP_PATH + "doc.kml")
         myzip.close()
 
@@ -421,7 +421,7 @@ def create_point_map_svg(title, place_list, point_locations, base_map, skip_axes
         mplpy.ylabel("latitude")
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    mplpy.savefig(OUTPUT_PATH + title + "_point_map.svg", format="svg")
+    mplpy.savefig(OUTPUT_PATH + pointmap_name(title) + ".svg", format="svg")
     mplpy.close()
 
 
@@ -451,8 +451,8 @@ def create_all_point_maps(species, point_locations, citelist, base_map, logfile)
             new_places = create_point_map(s.species, point_locations, citelist, base_map, logfile)
             all_places |= set(new_places)
     all_list = sorted(list(all_places))
-    create_point_map_svg("uca", all_list, point_locations, base_map, True)
-    create_point_map_kml("uca", all_list, point_locations)
+    create_point_map_svg("uca_all", all_list, point_locations, base_map, True)
+    create_point_map_kml("uca_all", all_list, point_locations)
 
 
 def create_all_species_maps(init_data, species, point_locations, citelist, logfile):
@@ -469,17 +469,27 @@ def create_all_species_maps(init_data, species, point_locations, citelist, logfi
     create_all_point_maps(species, point_locations, citelist, base_map, logfile)
 
 
+def check_points(point_set, point_locations, logfile):
+    pset = set()
+    for p in point_set:
+        if p in point_locations:
+            pset |= {p}
+        elif p != "?":
+            report_error(logfile, "Missing point location: " + p)
+    return sorted(list(pset))
+
+
 def create_all_name_maps(all_names, specific_names, point_locations,
-                         specific_point_locations, binomial_point_locations):
+                         specific_point_locations, binomial_point_locations, logfile):
     base_map = read_base_map("resources/world_map.txt")
     for name in all_names:
-        namefile = name_to_filename(name)
-        place_list = sorted(list(binomial_point_locations[name]))
+        namefile = "name_" + name_to_filename(name)
+        place_list = check_points(binomial_point_locations[name], point_locations, logfile)
         create_point_map_svg(namefile, place_list, point_locations, base_map, False)
         create_point_map_kml(namefile, place_list, point_locations)
     for name in specific_names:
         namefile = "sn_" + name
-        place_list = sorted(list(specific_point_locations[name]))
+        place_list = check_points(specific_point_locations[name], point_locations, logfile)
         create_point_map_svg(namefile, place_list, point_locations, base_map, False)
         create_point_map_kml(namefile, place_list, point_locations)
 

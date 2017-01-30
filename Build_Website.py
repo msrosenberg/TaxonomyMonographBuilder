@@ -12,7 +12,7 @@ import re
 import TMB_Import
 import TMB_Create_Maps
 from TMB_Error import report_error
-from TMB_Common import name_to_filename
+from TMB_Common import *
 import TMB_Initialize
 # external dependencies
 import matplotlib.pyplot as mplpy
@@ -139,30 +139,32 @@ def common_species_html_header(outfile, title, indexpath, species):
     outfile.write("        };\n")
     if species == "":
         # range map
-        outfile.write("        var map = new google.maps.Map(document.getElementById(\"map_canvas\"),mapOptions);\n")
-        outfile.write("        var ctaLayer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/uca.kmz\","
-                      "{suppressInfoWindows: true});\n")
+        outfile.write("        var range_map = new google.maps.Map(document.getElementById(\"range_map_canvas\"),"
+                      "mapOptions);\n")
+        outfile.write("        var range_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
+                      rangemap_name("uca_all") + ".kmz\",{suppressInfoWindows: true});\n")
         # point map
         if SHOW_NEW:
-            outfile.write("        var map2 = new google.maps.Map(document.getElementById(\"map2_canvas\"),"
+            outfile.write("        var point_map = new google.maps.Map(document.getElementById(\"point_map_canvas\"),"
                           "mapOptions);\n")
-            outfile.write("        var ctaLayer2 = "
-                          "new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/uca_points.kmz\","
-                          "{suppressInfoWindows: false});\n")
+            outfile.write("        var point_layer = "
+                          "new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" + pointmap_name("uca_all") +
+                          ".kmz\",{suppressInfoWindows: false});\n")
     else:
         # range map
-        outfile.write("        var map = new google.maps.Map(document.getElementById(\"map_canvas_sp\"),mapOptions);\n")
-        outfile.write("        var ctaLayer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/u_" +
-                      species + ".kmz\",{suppressInfoWindows: true});\n")
+        outfile.write("        var range_map = new google.maps.Map(document.getElementById(\"sp_range_map_canvas\"),"
+                      "mapOptions);\n")
+        outfile.write("        var range_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
+                      rangemap_name("u_" + species) + ".kmz\",{suppressInfoWindows: true});\n")
         if SHOW_NEW:
             # point map
-            outfile.write("        var map2 = new google.maps.Map(document.getElementById(\"map2_canvas_sp\"),"
+            outfile.write("       var point_map = new google.maps.Map(document.getElementById(\"sp_point_map_canvas\"),"
                           "mapOptions);\n")
-            outfile.write("        var ctaLayer2 = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/u_" +
-                          species + "_points.kmz\",{suppressInfoWindows: false});\n")
-    outfile.write("        ctaLayer.setMap(map);\n")
+            outfile.write("        var point_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
+                          pointmap_name("u_" + species) + ".kmz\",{suppressInfoWindows: false});\n")
+    outfile.write("        range_layer.setMap(range_map);\n")
     if SHOW_NEW:
-        outfile.write("        ctaLayer2.setMap(map2);\n")
+        outfile.write("        point_layer.setMap(point_map);\n")
     outfile.write("      }\n")
     outfile.write("    </script>\n")
     common_header_part2(outfile, indexpath, True)
@@ -2118,9 +2120,9 @@ def write_geography_page(species, outfile, do_print):
                       "title=\"Point map of fiddler crab distribution\" />\n")
         outfile.write("      </figure>\n")
     else:
-        outfile.write("        <div id=\"map_canvas\"></div>\n")
+        outfile.write("        <div id=\"range_map_canvas\"></div>\n")
         if SHOW_NEW:
-            outfile.write("        <div id=\"map2_canvas\"></div>\n")
+            outfile.write("        <div id=\"point_map_canvas\"></div>\n")
         outfile.write("        <div class=\"map_download\">\n")
         outfile.write("          <a href=\"maps/uca_map.svg\"><span class=\"fa fa-download\"></span> "
                       "Download SVG line map of ranges.</a> \n")
@@ -2697,9 +2699,9 @@ def write_species_page(species, references, specific_names, all_names, photos, v
             outfile.write("           <img src=\"" + MAP_PATH + "u_" + species.species + "_point_map.svg\" "
                           "alt=\"Map\" />\n")
         else:
-            outfile.write("           <div id=\"map_canvas_sp\"></div>\n")
+            outfile.write("           <div id=\"sp_range_map_canvas\"></div>\n")
             if SHOW_NEW:
-                outfile.write("           <div id=\"map2_canvas_sp\"></div>\n")
+                outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
             outfile.write("           <div class=\"map_download\">\n")
             outfile.write("             <a href=\"maps/u_" + species.species + "_map.svg\">"
                           "<span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
@@ -4314,15 +4316,15 @@ def copy_map_files(species, logfile):
     # individual species maps
     for s in species:
         if s.status != "fossil":
-            copy_file(MAP_PATH + "u_" + s.species + ".kmz")
-            copy_file(MAP_PATH + "u_" + s.species + "_points.kmz")
-            copy_file(MAP_PATH + "u_" + s.species + "_map.svg")
-            copy_file(MAP_PATH + "u_" + s.species + "_point_map.svg")
+            copy_file(MAP_PATH + rangemap_name("u_" + s.species) + ".kmz")
+            copy_file(MAP_PATH + pointmap_name("u_" + s.species) + ".kmz")
+            copy_file(MAP_PATH + rangemap_name("u_" + s.species) + ".svg")
+            copy_file(MAP_PATH + pointmap_name("u_" + s.species) + ".svg")
     # combined map
-    copy_file(MAP_PATH + "uca.kmz")
-    copy_file(MAP_PATH + "uca_points.kmz")
-    copy_file(MAP_PATH + "uca_map.svg")
-    copy_file(MAP_PATH + "uca_point_map.svg")
+    copy_file(MAP_PATH + rangemap_name("uca_all") +  ".kmz")
+    copy_file(MAP_PATH + pointmap_name("uca_all") +  ".kmz")
+    copy_file(MAP_PATH + rangemap_name("uca_all") +  ".svg")
+    copy_file(MAP_PATH + pointmap_name("uca_all") +  ".svg")
 
 
 def print_cover():
@@ -4499,7 +4501,7 @@ def build_site(init_data):
         if SHOW_NEW:
             # TMB_Create_Maps.create_all_species_maps(init_data, species, point_locations, citelist, logfile)
             TMB_Create_Maps.create_all_name_maps(all_names, specific_names, point_locations,
-                                                 specific_point_locations, binomial_point_locations)
+                                                 specific_point_locations, binomial_point_locations, logfile)
 
         # temp location
         with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
