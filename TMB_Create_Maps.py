@@ -474,12 +474,12 @@ def create_all_name_maps(all_names, specific_names, point_locations,
     base_map = read_base_map("resources/world_map.txt")
     for name in all_names:
         namefile = name_to_filename(name)
-        place_list = sorted(list(binomial_point_locations(name)))
+        place_list = sorted(list(binomial_point_locations[name]))
         create_point_map_svg(namefile, place_list, point_locations, base_map, False)
         create_point_map_kml(namefile, place_list, point_locations)
     for name in specific_names:
         namefile = "sn_" + name
-        place_list = sorted(list(specific_point_locations(name)))
+        place_list = sorted(list(specific_point_locations[name]))
         create_point_map_svg(namefile, place_list, point_locations, base_map, False)
         create_point_map_kml(namefile, place_list, point_locations)
 
