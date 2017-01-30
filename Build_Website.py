@@ -1171,7 +1171,7 @@ def calculate_binomial_yearly_cnts(name, refdict, citelist):
 
 
 def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, name_table, species_name, logfile,
-                             outfile, do_print):
+                             outfile, do_print, location_set):
     """ create a page listing all citations using a specific binomial """
     # find citations for this name
     cites = []
@@ -1200,6 +1200,36 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
             create_chronology_chart_file(image_name,  miny, maxy, maxcnt, name_by_year)
     else:
         common_header_part1(outfile, name, "../")
+        if SHOW_NEW and len(location_set) > 0:
+            outfile.write("    <script type=\"text/javascript\"\n")
+            outfile.write("      src=\"http://maps.googleapis.com/maps/api/js?"
+                          "key=AIzaSyAaITaFdh_own-ULkURNKtyeh2ZR_cpR74&sensor=false\">\n")
+            outfile.write("    </script>\n")
+            outfile.write("    <script type=\"text/javascript\">\n")
+            outfile.write("      function initialize() {\n")
+            outfile.write("        var mapOptions = {\n")
+            outfile.write("          center: new google.maps.LatLng(0,0),\n")
+            outfile.write("          zoom: 1,\n")
+            outfile.write("          disableDefaultUI: true,\n")
+            outfile.write("          panControl: false,\n")
+            outfile.write("          zoomControl: true,\n")
+            outfile.write("          mapTypeControl: true,\n")
+            outfile.write("          scaleControl: false,\n")
+            outfile.write("          streetViewControl: false,\n")
+            outfile.write("          overviewMapControl: false,\n")
+            outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
+            outfile.write("        };\n")
+            # point map
+            outfile.write(
+                "       var point_map = new google.maps.Map(document.getElementById(\"sp_point_map_canvas\"),"
+                "mapOptions);\n")
+            outfile.write(
+                "        var point_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
+                pointmap_name("name_" + name) + ".kmz\",{suppressInfoWindows: false});\n")
+            outfile.write("        point_layer.setMap(point_map);\n")
+            outfile.write("      }\n")
+            outfile.write("    </script>\n")
+
         if maxcnt > 0:
             outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
             outfile.write("    <script type=\"text/javascript\">\n")
@@ -1229,6 +1259,15 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
     outfile.write("\n")
 
     if SHOW_NEW:
+        if len(location_set) > 0:
+            outfile.write("    <h3 class=\"nobookmark\">Locations Where the Name has Been Applied</h3>\n")
+            if do_print:
+                outfile.write("      <figure>\n")
+                outfile.write("        <img src=\"" + MAP_PATH + pointmap_name("name_" + name) +
+                              ".svg\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
+                outfile.write("      </figure>\n")
+            else:
+                outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
         if maxcnt > 0:
             write_chronology_chart_div(image_name, outfile, None, "Number of Uses of Name per Year", False, do_print,
                                        False)
@@ -1282,7 +1321,8 @@ def calculate_specific_locations(specific_name, binomial_names, binomial_locatio
     return locs
 
 
-def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cnts, logfile, outfile, do_print):
+def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cnts, logfile, outfile, do_print,
+                             location_set):
     """ create a page with the history of a specific name """
     miny = START_YEAR
     maxy = CURRENT_YEAR
@@ -1304,6 +1344,36 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
             create_chronology_chart_file(image_name,  miny, maxy, maxcnt, byears)
     else:
         common_header_part1(outfile, specific_name.name, "../")
+
+        if SHOW_NEW and len(location_set) > 0:
+            outfile.write("    <script type=\"text/javascript\"\n")
+            outfile.write("      src=\"http://maps.googleapis.com/maps/api/js?"
+                          "key=AIzaSyAaITaFdh_own-ULkURNKtyeh2ZR_cpR74&sensor=false\">\n")
+            outfile.write("    </script>\n")
+            outfile.write("    <script type=\"text/javascript\">\n")
+            outfile.write("      function initialize() {\n")
+            outfile.write("        var mapOptions = {\n")
+            outfile.write("          center: new google.maps.LatLng(0,0),\n")
+            outfile.write("          zoom: 1,\n")
+            outfile.write("          disableDefaultUI: true,\n")
+            outfile.write("          panControl: false,\n")
+            outfile.write("          zoomControl: true,\n")
+            outfile.write("          mapTypeControl: true,\n")
+            outfile.write("          scaleControl: false,\n")
+            outfile.write("          streetViewControl: false,\n")
+            outfile.write("          overviewMapControl: false,\n")
+            outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
+            outfile.write("        };\n")
+            # point map
+            outfile.write(
+                "       var point_map = new google.maps.Map(document.getElementById(\"sp_point_map_canvas\"),"
+                "mapOptions);\n")
+            outfile.write("        var point_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
+                          pointmap_name("sn_" + specific_name.name) + ".kmz\",{suppressInfoWindows: false});\n")
+            outfile.write("        point_layer.setMap(point_map);\n")
+            outfile.write("      }\n")
+            outfile.write("    </script>\n")
+
         if maxcnt > 0:
             outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
             outfile.write("    <script type=\"text/javascript\">\n")
@@ -1367,6 +1437,16 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
     outfile.write("\n")
 
     if SHOW_NEW:
+        if len(location_set) > 0:
+            outfile.write("    <h3 class=\"nobookmark\">Locations Where the Name has Been Applied</h3>\n")
+            if do_print:
+                outfile.write("      <figure>\n")
+                outfile.write("        <img src=\"" + MAP_PATH + pointmap_name("sn_" + specific_name.name) +
+                              ".svg\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
+                outfile.write("      </figure>\n")
+            else:
+                outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
+
         if maxcnt > 0:
             write_chronology_chart_div(image_name, outfile, None, "Number of Uses of Name per Year", False, do_print,
                                        False)
@@ -1975,7 +2055,8 @@ def calculate_name_index_data(refdict, citelist, specific_names):
 
 
 def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_table, species_refs, genus_cnts,
-                         binomial_usage_cnts_by_year, total_binomial_year_cnts, outfile, do_print, logfile):
+                         binomial_usage_cnts_by_year, total_binomial_year_cnts, outfile, do_print, logfile,
+                         binomial_locations, specific_locations):
     """ create an index of binomials and specific names """
     if do_print:
         start_page_division(outfile, "index_page")
@@ -2059,19 +2140,19 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
         namefile = name_to_filename(name)
         if do_print:
             write_binomial_name_page(name, namefile, binomial_usage_cnts_by_year[name], refdict, citelist, name_table,
-                                     sname, logfile, outfile, True)
+                                     sname, logfile, outfile, True, binomial_locations[name])
         else:
             with codecs.open(WEBOUT_PATH + "names/" + namefile + ".html", "w", "utf-8") as suboutfile:
                 write_binomial_name_page(name, namefile, binomial_usage_cnts_by_year[name], refdict, citelist,
-                                         name_table, sname, logfile, suboutfile, False)
+                                         name_table, sname, logfile, suboutfile, False, binomial_locations[name])
     for name in specific_names:
         if do_print:
             write_specific_name_page(name, unique_names, refdict, binomial_usage_cnts_by_year, logfile, outfile,
-                                     True)
+                                     True, specific_locations[name])
         else:
             with codecs.open(WEBOUT_PATH + "names/sn_" + name.name + ".html", "w", "utf-8") as suboutfile:
                 write_specific_name_page(name, unique_names, refdict, binomial_usage_cnts_by_year, logfile, suboutfile,
-                                         False)
+                                         False, specific_locations[name])
 
 
 def check_specific_names(citelist, specific_names, logfile):
@@ -4306,7 +4387,7 @@ def copy_support_files(logfile):
             report_error(logfile, "Missing file: resources/images/" + filename)
 
 
-def copy_map_files(species, logfile):
+def copy_map_files(species, all_names, specific_names, logfile):
     def copy_file(filename):
         try:
             shutil.copy2(filename, WEBOUT_PATH + "maps/")
@@ -4321,10 +4402,18 @@ def copy_map_files(species, logfile):
             copy_file(MAP_PATH + rangemap_name("u_" + s.species) + ".svg")
             copy_file(MAP_PATH + pointmap_name("u_" + s.species) + ".svg")
     # combined map
-    copy_file(MAP_PATH + rangemap_name("uca_all") +  ".kmz")
-    copy_file(MAP_PATH + pointmap_name("uca_all") +  ".kmz")
-    copy_file(MAP_PATH + rangemap_name("uca_all") +  ".svg")
-    copy_file(MAP_PATH + pointmap_name("uca_all") +  ".svg")
+    copy_file(MAP_PATH + rangemap_name("uca_all") + ".kmz")
+    copy_file(MAP_PATH + pointmap_name("uca_all") + ".kmz")
+    copy_file(MAP_PATH + rangemap_name("uca_all") + ".svg")
+    copy_file(MAP_PATH + pointmap_name("uca_all") + ".svg")
+    # binomial maps
+    for n in all_names:
+        copy_file(MAP_PATH + pointmap_name("name_") + name_to_filename(n) + ".kmz")
+        copy_file(MAP_PATH + pointmap_name("name_") + name_to_filename(n) + ".svg")
+    # specific name maps
+    for n in specific_names:
+        copy_file(MAP_PATH + pointmap_name("sn_") + n.name + ".kmz")
+        copy_file(MAP_PATH + pointmap_name("sn_") + n.name + ".svg")
 
 
 def print_cover():
@@ -4520,12 +4609,13 @@ def build_site(init_data):
             print("......Writing Names Info......")
             with codecs.open(WEBOUT_PATH + "names/index.html", "w", "utf-8") as outfile:
                 write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
-                                     binomial_name_cnts, total_binomial_year_cnts, outfile, False, logfile)
+                                     binomial_name_cnts, total_binomial_year_cnts, outfile, False, logfile,
+                                     binomial_point_locations, specific_point_locations)
             check_specific_names(citelist, specific_names, logfile)
             print("......Writing Species......")
             write_species_info_pages(species, references, specific_names, all_names, photos, videos, art, species_refs,
                                      refdict, binomial_name_cnts, specific_name_cnts, logfile, None, False)
-            copy_map_files(species, logfile)
+            copy_map_files(species, all_names, specific_names, logfile)
             with codecs.open(WEBOUT_PATH + SYST_URL, "w", "utf-8") as outfile:
                 write_systematics_overview(subgenera, species, refdict, outfile, False, logfile)
             with codecs.open(WEBOUT_PATH + COMMON_URL, "w", "utf-8") as outfile:
@@ -4566,7 +4656,8 @@ def build_site(init_data):
                                          printfile, True)
                 print("......Writing Name Pages......")
                 write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
-                                     binomial_name_cnts, total_binomial_year_cnts, printfile, True, logfile)
+                                     binomial_name_cnts, total_binomial_year_cnts, printfile, True, logfile,
+                                     binomial_point_locations, specific_point_locations)
                 print("......Writing Media Pages......")
                 write_photo_index(species, photos, True, printfile, logfile)
                 write_video_index(videos, True, printfile, logfile)
