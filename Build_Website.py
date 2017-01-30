@@ -12,6 +12,7 @@ import re
 import TMB_Import
 import TMB_Create_Maps
 from TMB_Error import report_error
+from TMB_Common import name_to_filename
 import TMB_Initialize
 # external dependencies
 import matplotlib.pyplot as mplpy
@@ -48,7 +49,7 @@ AUTHOR_PAREN = 1
 AUTHOR_NOPCOMMA = 2
 
 # this flag is to hide/display new materials still in progress from the general release
-SHOW_NEW = False
+SHOW_NEW = True
 
 randSeed = random.randint(0, 10000)
 
@@ -735,12 +736,35 @@ def match_num_ref(x, y):
         return y[:y.find(".")] == x
 
 
-def update_cite_list(citelist):
+def compute_applied_name_contexts(citelist):
+    """ function to gather list of primary contexts referred to by other citation entries  """
+    for i, cite in enumerate(citelist):
+        if (cite.context == "specimen") or (cite.context == "location"):
+            cite.applied_cites = {cite}
+        elif cite.context == "citation":
+            for j in range(i):  # only look at entries up to the current one
+                tmp = citelist[j]
+                if (tmp.cite_key == cite.application) and match_num_ref(tmp.name_key, cite.cite_n):
+                    if (tmp.context == "specimen") or (tmp.context == "location"):
+                        cite.applied_cites |= {tmp}
+        if len(cite.applied_cites) == 0:
+            cite.applied_cites = None
+
+        # for testing purposes only
+        # if cite.applied_cites is None:
+        #     print(cite.cite_key, cite.name_key, cite.context, "No application")
+        # else:
+        #     for c in cite.applied_cites:
+        #         print(cite.cite_key, cite.name_key, cite.context, c.cite_key, c.name_key, c.context)
+        # input()
+
+
+def compute_species_from_citation_linking(citelist):
     """ function to update correct species citations through cross-references to earlier works """
     for i, cite in enumerate(citelist):
         if cite.actual == "=":
             crossnames = {}
-            for j in range(i):
+            for j in range(i):  # only look at entries up to the current one
                 tmp = citelist[j]
                 if (tmp.cite_key == cite.application) and match_num_ref(tmp.name_key, cite.cite_n):
                     cname = tmp.name
@@ -814,22 +838,6 @@ def format_name_string(x):
         return "<em class=\"species\">" + x[:p] + "</em> " + x[p:p+3] + " <em class=\"species\">" + x[p+3:] + "</em>"
     else:
         return "<em class=\"species\">" + x + "</em>"
-
-
-def name_to_filename(x):
-    """ Convert a full species name into a valid file name """
-    x = x.replace(" ", "_")
-    x = x.replace("(", "")
-    x = x.replace(")", "")
-    x = x.replace(",", "")
-    x = x.replace(".", "")
-    x = x.replace("æ", "_ae_")
-    x = x.replace("ö", "_o_")
-    x = x.replace("œ", "_oe_")
-    x = x.replace("ç", "_c_")
-    x = x.replace("[", "_")
-    x = x.replace("]", "_")
-    return x
 
 
 def clean_specific_name(x):
@@ -1118,9 +1126,9 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
         common_html_footer(outfile, "../")
 
 
-def write_reference_pages(reflist, refdict, citelist, do_print, printfile, logfile):
+def write_reference_pages(reflist, refdict, citelist, do_print, printfile, logfile, name_table):
     """ control function to loop through creating a page for every reference """
-    name_table = create_name_table(citelist)
+    # name_table = create_name_table(citelist)
     # update_cite_list(citelist)  # moving this outside of write loop so as not to have it run twice
     for ref in reflist:
         if ref.cite_key != "<pending>":
@@ -1260,6 +1268,16 @@ def calculate_specific_name_yearly_cnts(specific_name, binomial_names, binomial_
                 if miny <= y <= maxy:
                     year_cnts[y] += cnts[y]
     return year_cnts
+
+
+def calculate_specific_locations(specific_name, binomial_names, binomial_locations):
+    locs = {}
+    for n in binomial_names:
+        sp_name = clean_specific_name(n)
+        tmpnamelist = specific_name.variations.split(";")
+        if (sp_name != "") and (sp_name in tmpnamelist):
+            locs |= binomial_locations[clean_name(n)]
+    return locs
 
 
 def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cnts, logfile, outfile, do_print):
@@ -1849,6 +1867,22 @@ def create_genus_chronology(genus_cnts, do_print, outfile):
         common_html_footer(outfile, "../")
 
 
+def calculate_binomial_locations(name, citelist):
+    # find locations this name is applied to
+    locs = set()
+    for c in citelist:
+        clean = clean_name(c.name)
+        if clean.lower() == name.lower():
+            if c.applied_cites is not None:
+                for a in c.applied_cites:
+                    p = a.application
+                    if (p != ".") and (p[0] != "[") and (p != "?"):
+                        if "[" in p:
+                            p = p[:p.find("[") - 1]
+                        locs |= {p}
+    return locs
+
+
 def clean_genus(genus):
     # fix alternate genus spellings when performing summaries
     if genus in {"Galasimus", "Gelasimes", "Gelasius", "Gelasmus", "Gelsimus", "Gelassimus", "Gelasima"}:
@@ -1908,14 +1942,24 @@ def calculate_name_index_data(refdict, citelist, specific_names):
                         gcnts[y] += 1
 
     binomial_usage_cnts_by_year = {}
+    binomial_location_applications = {}
     for name in unique_names:
         binomial_usage_cnts_by_year[name] = calculate_binomial_yearly_cnts(name, refdict, citelist)
+        binomial_location_applications[name] = calculate_binomial_locations(name, citelist)
+        # test
+        # print(name)
+        # for x in binomial_location_applications[name]:
+        #     print("  ", x)
+        # print()
 
     specific_year_cnts = {}
     specific_usage_cnts_by_year = {}
+    specific_location_applications = {}
     for name in specific_names:
         specific_usage_cnts_by_year[name.name] = calculate_specific_name_yearly_cnts(name, unique_names,
                                                                                      binomial_usage_cnts_by_year)
+        specific_location_applications[name] = calculate_specific_locations(name, unique_names,
+                                                                            binomial_location_applications)
         tmpkey = name.priority_source
         if tmpkey != ".":
             y = refdict[tmpkey].year()
@@ -1925,7 +1969,7 @@ def calculate_name_index_data(refdict, citelist, specific_names):
                 else:
                     specific_year_cnts[y] = 1
     return (unique_names, binomial_usage_cnts_by_year, specific_usage_cnts_by_year, genus_cnts,
-            total_binomial_year_cnts, name_table)
+            total_binomial_year_cnts, name_table, specific_location_applications, binomial_location_applications)
 
 
 def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_table, species_refs, genus_cnts,
@@ -2386,7 +2430,7 @@ def connect_refs_to_species(species, citelist):
     # for s in species:
     #     reflist = set()
     #     species_refs[s.species] = reflist
-    species_refs = {s.species:set() for s in species}
+    species_refs = {s.species: set() for s in species}
     # go through all citations
     for c in citelist:
         if c.actual in species_refs:
@@ -4433,12 +4477,14 @@ def build_site(init_data):
         print("...Reading Species...")
         species = TMB_Import.read_species_data(init_data.species_data_file)
         print("...Connecting References...")
-        update_cite_list(citelist)
+        compute_species_from_citation_linking(citelist)
+        compute_applied_name_contexts(citelist)
         species_refs = connect_refs_to_species(species, citelist)
         print("...Reading Species Names...")
         specific_names = TMB_Import.read_specific_names_data(init_data.specific_names_file)
         (all_names, binomial_name_cnts, specific_name_cnts, genus_cnts, total_binomial_year_cnts,
-         name_table) = calculate_name_index_data(refdict, citelist, specific_names)
+         name_table, specific_point_locations,
+         binomial_point_locations) = calculate_name_index_data(refdict, citelist, specific_names)
         common_name_data = TMB_Import.read_common_name_data(init_data.common_names_file)
         subgenera = TMB_Import.read_subgenera_data(init_data.subgenera_file)
         print("...Reading Photos and Videos...")
@@ -4451,14 +4497,16 @@ def build_site(init_data):
         print("...Creating Maps...")
         # write_all_locations(point_locations)
         if SHOW_NEW:
-            TMB_Create_Maps.create_all_maps(init_data, species, point_locations, citelist, logfile)
+            TMB_Create_Maps.create_all_species_maps(init_data, species, point_locations, citelist, logfile)
+            TMB_Create_Maps.create_all_name_maps(all_names, specific_names, point_locations,
+                                                 specific_point_locations, binomial_point_locations)
 
         # temp location
         with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
             write_location_pages(outfile, False, point_locations, location_dict)
 
         # output website version
-        if True:
+        if False:
             print("...Creating Web Version...")
             copy_support_files(logfile)
             print("......Writing References......")
@@ -4466,7 +4514,7 @@ def build_site(init_data):
                 write_reference_bibliography(references, False, outfile, logfile)
             with codecs.open(WEBOUT_PATH + REF_SUM_URL, "w", "utf-8") as outfile:
                 write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, False, outfile)
-            write_reference_pages(references, refdict, citelist, False, None, logfile)
+            write_reference_pages(references, refdict, citelist, False, None, logfile, name_table)
             print("......Writing Names Info......")
             with codecs.open(WEBOUT_PATH + "names/index.html", "w", "utf-8") as outfile:
                 write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
@@ -4524,7 +4572,7 @@ def build_site(init_data):
                 print("......Writing Reference Pages......")
                 write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, True, printfile)
                 write_reference_bibliography(references, True, printfile, logfile)
-                write_reference_pages(references, refdict, citelist, True, printfile, logfile)
+                write_reference_pages(references, refdict, citelist, True, printfile, logfile, name_table)
                 end_print(printfile)
     print("done")
 

@@ -12,9 +12,8 @@ completion of the code.
 import codecs
 import zipfile
 import matplotlib.pyplot as mplpy
-# import TMB_Initialize
 from TMB_Error import report_error
-# import TMB_Common_Maps
+from TMB_Common import name_to_filename
 
 TMP_PATH = "temp/"
 OUTPUT_PATH = TMP_PATH + "maps/"
@@ -456,7 +455,7 @@ def create_all_point_maps(species, point_locations, citelist, base_map, logfile)
     create_point_map_kml("uca", all_list, point_locations)
 
 
-def create_all_maps(init_data, species, point_locations, citelist, logfile):
+def create_all_species_maps(init_data, species, point_locations, citelist, logfile):
     # create range maps
     species_maps = read_raw(init_data.map_kml_file)
     base_map = read_base_map("resources/world_map.txt")
@@ -468,6 +467,21 @@ def create_all_maps(init_data, species, point_locations, citelist, logfile):
 
     # create point maps
     create_all_point_maps(species, point_locations, citelist, base_map, logfile)
+
+
+def create_all_name_maps(all_names, specific_names, point_locations,
+                         specific_point_locations, binomial_point_locations):
+    base_map = read_base_map("resources/world_map.txt")
+    for name in all_names:
+        namefile = name_to_filename(name)
+        place_list = sorted(list(binomial_point_locations(name)))
+        create_point_map_svg(namefile, place_list, point_locations, base_map, False)
+        create_point_map_kml(namefile, place_list, point_locations)
+    for name in specific_names:
+        namefile = "sn_" + name
+        place_list = sorted(list(specific_point_locations(name)))
+        create_point_map_svg(namefile, place_list, point_locations, base_map, False)
+        create_point_map_kml(namefile, place_list, point_locations)
 
 
 # def main():

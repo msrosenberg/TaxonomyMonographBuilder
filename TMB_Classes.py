@@ -130,6 +130,7 @@ class CitationClass:
         self.source = ""
         self.name_note = ""
         self.general_note = ""
+        self.applied_cites = set()
 
     def __lt__(self, x):
         if self.name == x.name:
