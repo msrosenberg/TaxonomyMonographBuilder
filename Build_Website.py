@@ -1263,7 +1263,7 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
             outfile.write("    <h3 class=\"nobookmark\">Locations Where the Name has Been Applied</h3>\n")
             if do_print:
                 outfile.write("      <figure>\n")
-                outfile.write("        <img src=\"" + MAP_PATH + pointmap_name("name_" + name) +
+                outfile.write("        <img src=\"" + MAP_PATH + pointmap_name("name_" + name_to_filename(name)) +
                               ".svg\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
                 outfile.write("      </figure>\n")
             else:
@@ -2193,11 +2193,11 @@ def write_geography_page(species, outfile, do_print):
     outfile.write("      <div class=\"map_section\">\n")
     if do_print:
         outfile.write("      <figure>\n")
-        outfile.write("        <img src=\"" + MAP_PATH + "uca_map.svg\" alt=\"Map\" "
+        outfile.write("        <img src=\"" + MAP_PATH + rangemap_name("uca_all") + ".svg\" alt=\"Map\" "
                       "title=\"Map of fiddler crab distribution\" />\n")
         outfile.write("      </figure>\n")
         outfile.write("      <figure>\n")
-        outfile.write("        <img src=\"" + MAP_PATH + "uca_point_map.svg\" alt=\"Point Map\" "
+        outfile.write("        <img src=\"" + MAP_PATH + pointmap_name("uca_all") + ".svg\" alt=\"Point Map\" "
                       "title=\"Point map of fiddler crab distribution\" />\n")
         outfile.write("      </figure>\n")
     else:
@@ -2205,11 +2205,11 @@ def write_geography_page(species, outfile, do_print):
         if SHOW_NEW:
             outfile.write("        <div id=\"point_map_canvas\"></div>\n")
         outfile.write("        <div class=\"map_download\">\n")
-        outfile.write("          <a href=\"maps/uca_map.svg\"><span class=\"fa fa-download\"></span> "
-                      "Download SVG line map of ranges.</a> \n")
+        outfile.write("          <a href=\"" + MAP_PATH + rangemap_name("uca_all") + ".svg\">"
+                      "<span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
         if SHOW_NEW:
-            outfile.write("          <a href=\"maps/uca_point_map.svg\"><span class=\"fa fa-download\"></span> "
-                          "Download SVG line map of point locations.</a>\n")
+            outfile.write("          <a href=\"" + MAP_PATH + pointmap_name("uca_all") + ".svg\">"
+                          "<span class=\"fa fa-download\"></span> Download SVG line map of point locations.</a>\n")
         outfile.write("        </div>\n")
     outfile.write("      </div>\n")
     outfile.write("      <p>\n")
@@ -2228,7 +2228,7 @@ def write_geography_page(species, outfile, do_print):
     for r in regions:
         outfile.write("\n")
         outfile.write("    <section class=\"spsection\">\n")
-        outfile.write("      <h2>" + r + "</h2>\n")
+        outfile.write("      <h2 class=\"nobookmark\">" + r + "</h2>\n")
         outfile.write("      <ul class=\"splist\">\n")
         for s in species:
             if s.region == r:
@@ -2776,18 +2776,19 @@ def write_species_page(species, references, specific_names, all_names, photos, v
     if not is_fossil:
         outfile.write("         <dd>\n")
         if do_print:
-            outfile.write("           <img src=\"" + MAP_PATH + "u_" + species.species + "_map.svg\" alt=\"Map\" />\n")
-            outfile.write("           <img src=\"" + MAP_PATH + "u_" + species.species + "_point_map.svg\" "
-                          "alt=\"Map\" />\n")
+            outfile.write("           <img src=\"" + MAP_PATH + rangemap_name("u_" + species.species) +
+                          ".svg\" alt=\"Map\" />\n")
+            outfile.write("           <img src=\"" + MAP_PATH + pointmap_name("u_" + species.species) +
+                          ".svg\" alt=\"Map\" />\n")
         else:
             outfile.write("           <div id=\"sp_range_map_canvas\"></div>\n")
             if SHOW_NEW:
                 outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
             outfile.write("           <div class=\"map_download\">\n")
-            outfile.write("             <a href=\"maps/u_" + species.species + "_map.svg\">"
-                          "<span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
+            outfile.write("             <a href=\"" + MAP_PATH + rangemap_name("u_" + species.species) +
+                          ".svg\"><span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
             if SHOW_NEW:
-                outfile.write("             <a href=\"maps/u_" + species.species + "_point_map.svg\">"
+                outfile.write("             <a href=\"" + MAP_PATH + pointmap_name("u_" + species.species) + ".svg\">"
                               "<span class=\"fa fa-download\"></span> Download SVG line map of point locations.</a>\n")
             outfile.write("           </div>\n")
         outfile.write("         </dd>\n")
