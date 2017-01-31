@@ -1240,7 +1240,7 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
             setup_chronology_chart(image_name, miny, maxy, maxcnt, name_by_year, outfile)
             outfile.write("      }\n")
             outfile.write("    </script>\n")
-        common_header_part2(outfile, "", False)
+        common_header_part2(outfile, "", True)
 
     outfile.write("    <header id=\"" + namefile + ".html\" class=\"tabular_page\">\n")
     outfile.write("      <h1 class=\"nobookmark\">" + format_name_string(name) + "</h1>\n")
@@ -1260,6 +1260,7 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
 
     if SHOW_NEW:
         if len(location_set) > 0:
+            outfile.write("    <div class=\"map_section\">\n")
             outfile.write("    <h3 class=\"nobookmark\">Locations Where the Name has Been Applied</h3>\n")
             if do_print:
                 outfile.write("      <figure>\n")
@@ -1268,6 +1269,7 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
                 outfile.write("      </figure>\n")
             else:
                 outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
+            outfile.write("    </div>\n")
         if maxcnt > 0:
             write_chronology_chart_div(image_name, outfile, None, "Number of Uses of Name per Year", False, do_print,
                                        False)
@@ -1384,7 +1386,7 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
             setup_chronology_chart(image_name, miny, maxy, maxcnt, byears, outfile)
             outfile.write("      }\n")
             outfile.write("    </script>\n")
-        common_header_part2(outfile, "", False)
+        common_header_part2(outfile, "", True)
 
     outfile.write("    <header id=\"sn_" + specific_name.name + ".html\" class=\"tabular_page\">\n")
     outfile.write("      <h1 class=\"nobookmark\">" + format_name_string(specific_name.name) + "</h1>\n")
@@ -1438,6 +1440,7 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
 
     if SHOW_NEW:
         if len(location_set) > 0:
+            outfile.write("    <div class=\"map_section\">\n")
             outfile.write("    <h3 class=\"nobookmark\">Locations Where the Name has Been Applied</h3>\n")
             if do_print:
                 outfile.write("      <figure>\n")
@@ -1446,6 +1449,7 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
                 outfile.write("      </figure>\n")
             else:
                 outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
+            outfile.write("    </div>\n")
 
         if maxcnt > 0:
             write_chronology_chart_div(image_name, outfile, None, "Number of Uses of Name per Year", False, do_print,
@@ -2205,10 +2209,10 @@ def write_geography_page(species, outfile, do_print):
         if SHOW_NEW:
             outfile.write("        <div id=\"point_map_canvas\"></div>\n")
         outfile.write("        <div class=\"map_download\">\n")
-        outfile.write("          <a href=\"" + MAP_PATH + rangemap_name("uca_all") + ".svg\">"
+        outfile.write("          <a href=\"maps/" + rangemap_name("uca_all") + ".svg\">"
                       "<span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
         if SHOW_NEW:
-            outfile.write("          <a href=\"" + MAP_PATH + pointmap_name("uca_all") + ".svg\">"
+            outfile.write("          <a href=\"maps/" + pointmap_name("uca_all") + ".svg\">"
                           "<span class=\"fa fa-download\"></span> Download SVG line map of point locations.</a>\n")
         outfile.write("        </div>\n")
     outfile.write("      </div>\n")
