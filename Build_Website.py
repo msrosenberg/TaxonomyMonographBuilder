@@ -4408,12 +4408,12 @@ def copy_map_files(species, all_names, specific_names, logfile):
     copy_file(MAP_PATH + pointmap_name("uca_all") + ".svg")
     # binomial maps
     for n in all_names:
-        copy_file(MAP_PATH + pointmap_name("name_") + name_to_filename(n) + ".kmz")
-        copy_file(MAP_PATH + pointmap_name("name_") + name_to_filename(n) + ".svg")
+        copy_file(MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".kmz")
+        # copy_file(MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".svg")
     # specific name maps
     for n in specific_names:
-        copy_file(MAP_PATH + pointmap_name("sn_") + n.name + ".kmz")
-        copy_file(MAP_PATH + pointmap_name("sn_") + n.name + ".svg")
+        copy_file(MAP_PATH + pointmap_name("sn_" + n.name) + ".kmz")
+        # copy_file(MAP_PATH + pointmap_name("sn_" + n.name) + ".svg")
 
 
 def print_cover():
@@ -4588,7 +4588,7 @@ def build_site(init_data):
         print("...Creating Maps...")
         # write_all_locations(point_locations)
         if SHOW_NEW:
-            # TMB_Create_Maps.create_all_species_maps(init_data, species, point_locations, citelist, logfile)
+            TMB_Create_Maps.create_all_species_maps(init_data, species, point_locations, citelist, logfile)
             TMB_Create_Maps.create_all_name_maps(all_names, specific_names, point_locations,
                                                  specific_point_locations, binomial_point_locations, logfile)
 
@@ -4597,7 +4597,7 @@ def build_site(init_data):
             write_location_pages(outfile, False, point_locations, location_dict)
 
         # output website version
-        if False:
+        if True:
             print("...Creating Web Version...")
             copy_support_files(logfile)
             print("......Writing References......")
@@ -4638,7 +4638,7 @@ def build_site(init_data):
             write_citation_page(refdict)
 
         # output print version
-        if False:
+        if True:
             print("...Creating Print Version...")
             with codecs.open("print.html", "w", "utf-8") as printfile:
                 start_print(printfile)
