@@ -4501,9 +4501,15 @@ def build_site(init_data):
         point_locations = TMB_Import.read_location_data(init_data.location_file)
         location_dict = create_location_hierarchy(point_locations, logfile)
         print("...Creating Maps...")
-        TMB_Create_Maps.create_all_species_maps(init_data, species, point_locations, citelist, logfile)
+        missing_point_set = set()
+        TMB_Create_Maps.create_all_species_maps(init_data, species, point_locations, citelist, missing_point_set)
         TMB_Create_Maps.create_all_name_maps(all_names, specific_names, point_locations,
-                                             specific_point_locations, binomial_point_locations, logfile)
+                                             specific_point_locations, binomial_point_locations, missing_point_set)
+        if len(missing_point_set) > 0:
+            missing_list = sorted(list(missing_point_set))
+            for m in missing_list:
+                report_error(logfile, "Missing point location: " + m)
+
 
         # temp location
         # with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
