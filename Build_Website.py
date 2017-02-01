@@ -51,7 +51,7 @@ AUTHOR_NOPCOMMA = 2
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = False
 
-randSeed = random.randint(0, 10000)
+# randSeed = random.randint(0, 10000)
 
 
 def remove_html(x):
@@ -4235,16 +4235,17 @@ def write_introduction(outfile, species, do_print):
         common_html_footer(outfile, "")
 
 
-def create_output_paths():
+def create_path_and_index(subdir):
+    if not os.path.exists(WEBOUT_PATH + subdir):
+        os.makedirs(WEBOUT_PATH + subdir)
+    create_blank_index(WEBOUT_PATH + subdir + "index.html")
+
+
+def create_web_output_paths():
     """
     create web output directories if they do not already exist
     add a blank index to each one
     """
-    def create_path_and_index(subdir):
-        if not os.path.exists(WEBOUT_PATH + subdir):
-            os.makedirs(WEBOUT_PATH + subdir)
-        create_blank_index(WEBOUT_PATH + subdir + "index.html")
-
     create_path_and_index("")
     create_path_and_index("photos/")
     create_path_and_index("video/")
@@ -4255,6 +4256,13 @@ def create_output_paths():
     create_path_and_index("maps/")
     create_path_and_index("images/")
     create_path_and_index("locations/")
+
+
+def create_temp_output_paths():
+    """
+    create web output directories if they do not already exist
+    add a blank index to each one
+    """
     # create path for temp files
     if not os.path.exists(TMP_PATH):
         os.makedirs(TMP_PATH)
@@ -4460,7 +4468,7 @@ def end_print(outfile):
 
 
 def build_site(init_data):
-    create_output_paths()
+    create_temp_output_paths()
     with codecs.open(init_data.error_log, "w", "utf-8") as logfile:
         # read data and do computation
         print("...Reading References...")
@@ -4498,11 +4506,12 @@ def build_site(init_data):
                                              specific_point_locations, binomial_point_locations, logfile)
 
         # temp location
-        with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
-            write_location_pages(outfile, False, point_locations, location_dict)
+        # with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
+        #     write_location_pages(outfile, False, point_locations, location_dict)
 
         # output website version
-        if True:
+        if False:
+            create_web_output_paths()
             print("...Creating Web Version...")
             copy_support_files(logfile)
             print("......Writing References......")
@@ -4543,7 +4552,7 @@ def build_site(init_data):
             write_citation_page(refdict)
 
         # output print version
-        if False:
+        if True:
             print("...Creating Print Version...")
             with codecs.open("print.html", "w", "utf-8") as printfile:
                 start_print(printfile)
