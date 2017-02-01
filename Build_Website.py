@@ -49,7 +49,7 @@ AUTHOR_PAREN = 1
 AUTHOR_NOPCOMMA = 2
 
 # this flag is to hide/display new materials still in progress from the general release
-SHOW_NEW = True
+SHOW_NEW = False
 
 randSeed = random.randint(0, 10000)
 
@@ -2691,10 +2691,10 @@ def write_species_page(species, references, specific_names, all_names, photos, v
             if SHOW_NEW:
                 outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
             outfile.write("           <div class=\"map_download\">\n")
-            outfile.write("             <a href=\"" + MAP_PATH + rangemap_name("u_" + species.species) +
+            outfile.write("             <a href=\"maps/" + rangemap_name("u_" + species.species) +
                           ".svg\"><span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
             if SHOW_NEW:
-                outfile.write("             <a href=\"" + MAP_PATH + pointmap_name("u_" + species.species) + ".svg\">"
+                outfile.write("             <a href=\"maps/" + pointmap_name("u_" + species.species) + ".svg\">"
                               "<span class=\"fa fa-download\"></span> Download SVG line map of point locations.</a>\n")
             outfile.write("           </div>\n")
         outfile.write("         </dd>\n")
@@ -4493,18 +4493,16 @@ def build_site(init_data):
         point_locations = TMB_Import.read_location_data(init_data.location_file)
         location_dict = create_location_hierarchy(point_locations, logfile)
         print("...Creating Maps...")
-        # write_all_locations(point_locations)
-        if SHOW_NEW:
-            TMB_Create_Maps.create_all_species_maps(init_data, species, point_locations, citelist, logfile)
-            TMB_Create_Maps.create_all_name_maps(all_names, specific_names, point_locations,
-                                                 specific_point_locations, binomial_point_locations, logfile)
+        TMB_Create_Maps.create_all_species_maps(init_data, species, point_locations, citelist, logfile)
+        TMB_Create_Maps.create_all_name_maps(all_names, specific_names, point_locations,
+                                             specific_point_locations, binomial_point_locations, logfile)
 
         # temp location
         with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
             write_location_pages(outfile, False, point_locations, location_dict)
 
         # output website version
-        if False:
+        if True:
             print("...Creating Web Version...")
             copy_support_files(logfile)
             print("......Writing References......")
