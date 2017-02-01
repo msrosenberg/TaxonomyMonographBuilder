@@ -373,11 +373,15 @@ def create_point_map_kml(title, place_list, point_locations):
         outfile.write("<?xml version=\"1.0\"?>\n")
         outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
         outfile.write(" <Document>\n")
-        outfile.write("  <Style id=\"species_observations\">\n")
-        # outfile.write("    <LineStyle>\n")
-        # outfile.write("      <color>FFFF55FF</color>\n")
-        # outfile.write("      <width>5</width>\n")
-        # outfile.write("    </LineStyle>\n")
+        outfile.write("  <Style id=\"good_location\">\n")
+        outfile.write("    <IconStyle>\n")
+        outfile.write("      <color>FF0000FF</color>\n")
+        outfile.write("    </IconStyle>\n")
+        outfile.write("  </Style>\n")
+        outfile.write("  <Style id=\"bad_location\">\n")
+        outfile.write("    <IconStyle>\n")
+        outfile.write("      <color>FFFF0000</color>\n")
+        outfile.write("    </IconStyle>\n")
         outfile.write("  </Style>\n")
         for p in place_list:
             pnt = point_locations[p]
@@ -385,7 +389,10 @@ def create_point_map_kml(title, place_list, point_locations):
             outfile.write("    <name>" + p + "</name>\n")
             outfile.write("    <description/>\n")
             outfile.write("    <styleUrl>\n")
-            outfile.write("      #species_observations\n")
+            if pnt.validity == "X":
+                outfile.write("      #bad_location\n")
+            else:
+                outfile.write("      #good_location\n")
             outfile.write("    </styleUrl>\n")
             outfile.write("    <Point>\n")
             outfile.write("     <coordinates>\n")
