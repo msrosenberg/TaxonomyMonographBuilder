@@ -2766,8 +2766,8 @@ def write_species_page(species, references, specific_names, all_names, photos, v
 
         tmpstr = "Synonyms, Alternate Spellings, &amp; Name Forms"
         if SHOW_NEW:
-            tmpstr += "(<a href=\"" + rel_link_prefix(do_print, "names/") + "synonyms_" + species.species + \
-                      ".html\">Chronology</a>n"
+            tmpstr += " (<a href=\"" + rel_link_prefix(do_print, "names/") + "synonyms_" + species.species + \
+                      ".html\">Chronology</a>)"
         outfile.write("       <dt>" + tmpstr + "</dt>\n")
         # outfile.write("       <dt>Synonyms, Alternate Spellings, &amp; Name Forms (<a href=\"" +
         #               rel_link_prefix(do_print, "names/") + "synonyms_" + species.species +
