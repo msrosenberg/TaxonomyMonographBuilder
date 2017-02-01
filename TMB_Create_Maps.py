@@ -399,17 +399,26 @@ def create_point_map_svg(title, place_list, point_locations, base_map, skip_axes
     minlon = 180
     lats = []
     lons = []
+    colors = []
+    edges = []
     for p in place_list:
         if p in point_locations:
             point = point_locations[p]
             lats.append(point.latitude)
             lons.append(point.longitude)
+            if point.validity == "X":
+                colors.append("blue")
+                edges.append("darkblue")
+            else:
+                colors.append("red")
+                edges.append("darkred")
             maxlon = max(maxlon, point.longitude)
             minlon = min(minlon, point.longitude)
             maxlat = max(maxlat, point.latitude)
             minlat = min(minlat, point.latitude)
 
-    faxes.scatter(lons, lats, s=20, color="red", edgecolors="darkred", alpha=1, zorder=2)
+    # faxes.scatter(lons, lats, s=20, color="red", edgecolors="darkred", alpha=1, zorder=2, clip_on=False)
+    faxes.scatter(lons, lats, s=20, color=colors, edgecolors=edges, alpha=1, zorder=2, clip_on=False)
     minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)

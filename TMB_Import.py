@@ -265,5 +265,6 @@ def read_location_data(filename):
             newloc.alternates = list(loc[5].split(";"))
         if loc[6] != ".":
             newloc.parent = loc[6]
+        newloc.validity = loc[7]
         locdict[newloc.name] = newloc
     return locdict

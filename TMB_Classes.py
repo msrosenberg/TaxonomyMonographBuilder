@@ -152,6 +152,7 @@ class LocationClass:
         self.notes = ""
         self.children = []
         self.alternates = []
+        self.validity = ""
 
     def n_children(self):
         return len(self.children)

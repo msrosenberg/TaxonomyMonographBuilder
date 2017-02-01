@@ -2368,104 +2368,6 @@ def write_location_pages(outfile, do_print, point_locations, location_dict):
         common_html_footer(outfile, "")
 
 
-# def create_point_map_kml(title, place_list, point_locations):
-#     with codecs.open(TMP_PATH + "doc.kml", "w", "utf-8") as outfile:
-#         outfile.write("<?xml version=\"1.0\"?>\n")
-#         outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
-#         outfile.write(" <Document>\n")
-#         outfile.write("  <Style id=\"species_observations\">\n")
-#         # outfile.write("    <LineStyle>\n")
-#         # outfile.write("      <color>FFFF55FF</color>\n")
-#         # outfile.write("      <width>5</width>\n")
-#         # outfile.write("    </LineStyle>\n")
-#         outfile.write("  </Style>\n")
-#         for p in place_list:
-#             pnt = point_locations[p]
-#             outfile.write("  <Placemark>\n")
-#             outfile.write("    <name>" + p + "</name>\n")
-#             outfile.write("    <description/>\n")
-#             outfile.write("    <styleUrl>\n")
-#             outfile.write("      #species_observations\n")
-#             outfile.write("    </styleUrl>\n")
-#             outfile.write("    <Point>\n")
-#             outfile.write("     <coordinates>\n")
-#             outfile.write("          " + str(pnt.longitude) + "," + str(pnt.latitude) + "\n")
-#             outfile.write("     </coordinates>\n")
-#             outfile.write("    </Point>\n")
-#             outfile.write("  </Placemark>\n")
-#         outfile.write(" </Document>\n")
-#         outfile.write("</kml>\n")
-#     with zipfile.ZipFile("media/maps/" + title + "_points.kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
-#         myzip.write(TMP_PATH + "doc.kml")
-#         myzip.close()
-#
-#
-# def create_point_map_svg(title, place_list, point_locations, base_map, skip_axes):
-#     fig, faxes = mplpy.subplots(figsize=[6.5, 3.25])
-#     TMB_Common_Maps.draw_base_map(faxes, base_map)
-#     for spine in faxes.spines:
-#         faxes.spines[spine].set_visible(False)
-#     maxlat = -90
-#     minlat = 90
-#     maxlon = -180
-#     minlon = 180
-#     lats = []
-#     lons = []
-#     for p in place_list:
-#         if p in point_locations:
-#             point = point_locations[p]
-#             lats.append(point.latitude)
-#             lons.append(point.longitude)
-#             maxlon = max(maxlon, point.longitude)
-#             minlon = min(minlon, point.longitude)
-#             maxlat = max(maxlat, point.latitude)
-#             minlat = min(minlat, point.latitude)
-#
-#     faxes.scatter(lons, lats, s=20, color="red", edgecolors="darkred", alpha=1, zorder=2)
-#     minlon, maxlon, minlat, maxlat = TMB_Common_Maps.adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
-#     mplpy.xlim(minlon, maxlon)
-#     mplpy.ylim(minlat, maxlat)
-#     if skip_axes:
-#         faxes.axes.get_yaxis().set_visible(False)
-#         faxes.axes.get_xaxis().set_visible(False)
-#     else:
-#         mplpy.xlabel("longitude")
-#         mplpy.ylabel("latitude")
-#     mplpy.rcParams["svg.fonttype"] = "none"
-#     mplpy.tight_layout()
-#     mplpy.savefig("media/maps/" + title + "_point_map.svg", format="svg")
-#     mplpy.close()
-#
-#
-# def create_point_map(species, point_locations, citelist, base_map, logfile):
-#     places = set()
-#     for c in citelist:
-#         if (c.actual == species) and ((c.context == "location") or
-#                                       (c.context == "specimen")):
-#             p = c.application
-#             if p[0] != "[":
-#                 if "[" in p:
-#                     p = p[:p.find("[")-1]
-#                 if p in point_locations:
-#                     places.add(p)
-#                 elif p != "?":
-#                     report_error(logfile, "Missing point location: " + p)
-#     place_list = sorted(list(places))
-#     create_point_map_svg("u_" + species, place_list, point_locations, base_map, False)
-#     create_point_map_kml("u_" + species, place_list, point_locations)
-#     return place_list
-#
-#
-# def create_all_point_maps(species, point_locations, citelist, base_map, logfile):
-#     all_places = set()
-#     for s in species:
-#         new_places = create_point_map(s.species, point_locations, citelist, base_map, logfile)
-#         all_places |= set(new_places)
-#     all_list = sorted(list(all_places))
-#     create_point_map_svg("uca", all_list, point_locations, base_map, True)
-#     create_point_map_kml("uca", all_list, point_locations)
-
-
 def write_common_names_pages(outfile, common_name_data, do_print):
     """ output common names to HTML """
     if do_print:
@@ -4594,15 +4496,15 @@ def build_site(init_data):
         # write_all_locations(point_locations)
         if SHOW_NEW:
             TMB_Create_Maps.create_all_species_maps(init_data, species, point_locations, citelist, logfile)
-            TMB_Create_Maps.create_all_name_maps(all_names, specific_names, point_locations,
-                                                 specific_point_locations, binomial_point_locations, logfile)
+            # TMB_Create_Maps.create_all_name_maps(all_names, specific_names, point_locations,
+            #                                     specific_point_locations, binomial_point_locations, logfile)
 
         # temp location
         with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
             write_location_pages(outfile, False, point_locations, location_dict)
 
         # output website version
-        if True:
+        if False:
             print("...Creating Web Version...")
             copy_support_files(logfile)
             print("......Writing References......")
@@ -4643,7 +4545,7 @@ def build_site(init_data):
             write_citation_page(refdict)
 
         # output print version
-        if True:
+        if False:
             print("...Creating Print Version...")
             with codecs.open("print.html", "w", "utf-8") as printfile:
                 start_print(printfile)
