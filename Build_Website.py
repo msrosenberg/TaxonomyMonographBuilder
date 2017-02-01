@@ -4496,8 +4496,8 @@ def build_site(init_data):
         # write_all_locations(point_locations)
         if SHOW_NEW:
             TMB_Create_Maps.create_all_species_maps(init_data, species, point_locations, citelist, logfile)
-            # TMB_Create_Maps.create_all_name_maps(all_names, specific_names, point_locations,
-            #                                     specific_point_locations, binomial_point_locations, logfile)
+            TMB_Create_Maps.create_all_name_maps(all_names, specific_names, point_locations,
+                                                 specific_point_locations, binomial_point_locations, logfile)
 
         # temp location
         with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:

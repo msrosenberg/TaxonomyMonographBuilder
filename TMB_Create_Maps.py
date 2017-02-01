@@ -12,6 +12,8 @@ completion of the code.
 import codecs
 import zipfile
 import matplotlib.pyplot as mplpy
+from matplotlib.collections import PatchCollection
+import matplotlib.patches as mplp
 from TMB_Error import report_error
 from TMB_Common import *
 
@@ -210,10 +212,20 @@ def read_base_map(filename):
 
 
 def draw_base_map(faxes, base_map):
+    # for polygon in base_map:
+    #     lons = [p.lon for p in polygon.points]
+    #     lats = [p.lat for p in polygon.points]
+    #     faxes.plot(lons, lats, "silver", linewidth=0.5, zorder=1)
+
+    poly_list = []
     for polygon in base_map:
-        lons = [p.lon for p in polygon.points]
-        lats = [p.lat for p in polygon.points]
-        faxes.plot(lons, lats, "silver", linewidth=0.5, zorder=1)
+        plist = []
+        for p in polygon.points:
+            plist.append([p.lon, p.lat])
+        newp = mplp.Polygon(plist, True)
+        poly_list.append(newp)
+    pc = PatchCollection(poly_list, alpha=0.2, facecolor="silver", edgecolor="darkgray", zorder=1)
+    faxes.add_collection(pc)
 
 
 def adjust_map_boundaries(minlon, maxlon, minlat, maxlat):
