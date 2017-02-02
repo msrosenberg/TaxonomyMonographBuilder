@@ -490,8 +490,8 @@ def create_all_point_maps(species, point_locations, species_plot_locations, base
         if s.status != "fossil":
             places = species_plot_locations[s]
             # new_places = create_point_map(s.species, point_locations, citelist, base_map, missing_set)
-            create_point_map_svg("u_" + species, places, point_locations, base_map, False)
-            create_point_map_kml("u_" + species, places, point_locations)
+            create_point_map_svg("u_" + s.species, places, point_locations, base_map, False)
+            create_point_map_kml("u_" + s.species, places, point_locations)
             all_places |= set(places)
     all_list = sorted(list(all_places))
     create_point_map_svg("uca_all", all_list, point_locations, base_map, True)
@@ -500,9 +500,10 @@ def create_all_point_maps(species, point_locations, species_plot_locations, base
 
 # def create_all_species_maps(init_data, species, point_locations, citelist, missing_set):
 def create_all_species_maps(init_data, species, point_locations, species_plot_locations):
+    base_map = read_base_map("resources/world_map.txt")
+
     # create range maps
     species_maps = read_raw(init_data.map_kml_file)
-    base_map = read_base_map("resources/world_map.txt")
     for m in species_maps:
         output_species_kml(m)
         write_single_species_map_figure(base_map, m)
@@ -510,7 +511,7 @@ def create_all_species_maps(init_data, species, point_locations, species_plot_lo
     write_all_species_map_figure(base_map, species_maps)
 
     # create point maps
-    #     create_all_point_maps(species, point_locations, citelist, base_map, missing_set)
+    # create_all_point_maps(species, point_locations, citelist, base_map, missing_set)
     create_all_point_maps(species, point_locations, species_plot_locations, base_map)
 
 
