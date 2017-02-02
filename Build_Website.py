@@ -2435,7 +2435,7 @@ def write_location_pages(outfile, do_print, point_locations, location_dict, loca
     full_list.sort()
     outfile.write("    <ul>\n")
     for p in full_list:
-        loc = point_locations[p]
+        loc = location_dict[p]
         outfile.write("   <li><a href=\"" + rel_link_prefix(do_print, loc.name) + ".html\">" + p + "</a></li>\n")
     outfile.write("    </ul>\n")
 
