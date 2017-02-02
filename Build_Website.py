@@ -2435,7 +2435,7 @@ def write_location_pages(outfile, do_print, point_locations, location_dict, loca
     full_list.sort()
     outfile.write("    <ul>\n")
     for p in full_list:
-        loc = point_locations[full_list[p]]
+        loc = point_locations[p]
         outfile.write("   <li><a href=\"" + rel_link_prefix(do_print, loc.name) + ".html\">" + p + "</a></li>\n")
     outfile.write("    </ul>\n")
 
@@ -4654,17 +4654,9 @@ def build_site(init_data):
                                                                                             binomial_point_locations,
                                                                                             point_locations,
                                                                                             citelist, logfile)
-
-        # TMB_Create_Maps.create_all_species_maps(init_data, species, point_locations, citelist, missing_point_set)
+        # TMB_Create_Maps.create_all_species_maps(init_data, species, point_locations, species_plot_locations)
         # TMB_Create_Maps.create_all_name_maps(all_names, specific_names, point_locations,
-        #                                      specific_point_locations, binomial_point_locations, missing_point_set)
-        TMB_Create_Maps.create_all_species_maps(init_data, species, point_locations, species_plot_locations)
-        TMB_Create_Maps.create_all_name_maps(all_names, specific_names, point_locations,
-                                             specific_plot_locations, binomial_plot_locations)
-        # if len(missing_point_set) > 0:
-        #     missing_list = sorted(list(missing_point_set))
-        #     for m in missing_list:
-        #         report_error(logfile, "Missing point location: " + m)
+        #                                      specific_plot_locations, binomial_plot_locations)
 
         # temp location
         with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
