@@ -4,7 +4,7 @@ Taxonomy Monograph Builder
 
 import codecs
 import datetime
-import random
+# import random
 import os
 import shutil
 import re
@@ -2296,9 +2296,84 @@ def create_location_hierarchy(point_locations, logfile):
 #         write_location(loc, point_locations, "")
 
 
-def write_location(outfile, loc, point_locations):
+def fetch_child_data(loc, location_dict):
+    locset = location_dict[loc]
+    if loc.n_children > 0:
+        for c in loc.children:
+            locset |= fetch_child_data(c, location_dict)
+    return locset
+
+
+def write_location_page(outfile, do_print, loc, point_locations, location_species, location_bi_names,
+                        location_sp_names):
+    """ output a page for an individual location """
+    if do_print:
+        start_page_division(outfile, "base_page")
+    else:
+        common_html_header(outfile, loc.trimmed_name, "../")
+    outfile.write("    <header id=\"" + loc.name + ".html\">\n")
+    outfile.write("      <h1 class=\"nobookmark\">" + loc.trimmed_name + "</h1>\n")
+    outfile.write("    </header>\n")
+    if loc.parent is not None:
+        p = point_locations[loc.parent]
+        outfile.write("    <h3>Contained Within</h3>\n")
+        outfile.write("      <p><a href=\"" + rel_link_prefix(do_print, p.name) + ".html\">" + p.trimmed_name +
+                      "</a></p>\n")
+    all_species = location_species[loc]
+    all_bi_names = location_bi_names[loc]
+    all_sp_names = location_sp_names[loc]
+    if loc.n_children() > 0:
+        outfile.write("    <h3>Contains</h3>\n")
+        outfile.write("    <ul>\n")
+        for c in loc.children:
+            outfile.write("    <li><a href=\"" + c.name + ".html\">" + c.trimmed_name + "</a></li>\n")
+            all_species |= fetch_child_data(c, location_species)
+            all_bi_names |= fetch_child_data(c, location_bi_names)
+            all_sp_names |= fetch_child_data(c, location_sp_names)
+        outfile.write("    </ul>\n")
+
+    if len(all_species) > 0:
+        outfile.write("    <h3>Recognized Species</h3>\n")
+        outfile.write("    <ul>\n")
+        for s in sorted(list(all_species)):
+            if s in location_species[loc]:
+                star = ""
+            else:
+                star = "*"
+            outfile.write("      <li>" + s.species + star + "</li>")
+        outfile.write("    </ul>\n")
+
+    if len(all_bi_names) > 0:
+        outfile.write("    <h3>Names used in this area</h3>\n")
+        outfile.write("    <ul>\n")
+        for s in sorted(list(all_bi_names)):
+            if s in location_bi_names[loc]:
+                star = ""
+            else:
+                star = "*"
+            outfile.write("      <li>" + s + star + "</li>")
+        outfile.write("    </ul>\n")
+
+    if len(all_sp_names) > 0:
+        outfile.write("    <h3>Specific names used in this area</h3>\n")
+        outfile.write("    <ul>\n")
+        for s in sorted(list(all_sp_names)):
+            if s in location_sp_names[loc]:
+                star = ""
+            else:
+                star = "*"
+            outfile.write("      <li>" + s.name + star + "</li>")
+        outfile.write("    </ul>\n")
+
+    if do_print:
+        end_page_division(outfile)
+    else:
+        common_html_footer(outfile, "")
+
+
+def write_location_index_entry(outfile, do_print, loc, point_locations):
     """ print a location and its child locations """
-    outfile.write("<li>" + loc.trimmed_name)
+    outfile.write("<li><a href=\"" + rel_link_prefix(do_print, loc.name) + ".html\">" + loc.trimmed_name + "</a>")
     if loc.n_children() > 0:
         child_list = []
         for child in loc.children:
@@ -2306,12 +2381,13 @@ def write_location(outfile, loc, point_locations):
         child_list.sort()
         outfile.write("\n <ul>\n")
         for child in child_list:
-            write_location(outfile, point_locations[child], point_locations)
+            write_location_index_entry(outfile, do_print, point_locations[child], point_locations)
         outfile.write(" </ul>\n")
     outfile.write("</li>\n")
 
 
-def write_location_pages(outfile, do_print, point_locations, location_dict):
+def write_location_pages(outfile, do_print, point_locations, location_dict, location_species, location_sp_names,
+                         location_bi_names):
     """ output observation location index to HTML """
     if do_print:
         start_page_division(outfile, "index_page")
@@ -2352,20 +2428,90 @@ def write_location_pages(outfile, do_print, point_locations, location_dict):
     outfile.write("    <ul>\n")
     for p in top_list:
         loc = point_locations[p]
-        write_location(outfile, loc, point_locations)
+        write_location_index_entry(outfile, do_print, loc, point_locations)
     outfile.write("    </ul>\n")
     outfile.write("    <h2 class=\"nobookmark\">Alphabetical List of All Location Names</h2>\n")
     full_list = list(location_dict.keys())
     full_list.sort()
     outfile.write("    <ul>\n")
     for p in full_list:
-        outfile.write("   <li>" + p + "</li>\n")
+        loc = point_locations[full_list[p]]
+        outfile.write("   <li><a href=\"" + rel_link_prefix(do_print, loc.name) + ".html\">" + p + "</a></li>\n")
     outfile.write("    </ul>\n")
 
     if do_print:
         end_page_division(outfile)
     else:
         common_html_footer(outfile, "")
+
+    for p in top_list:
+        loc = point_locations[p]
+        if do_print:
+            write_location_page(outfile, do_print, loc, point_locations, location_species, location_bi_names,
+                                location_sp_names)
+        else:
+            with codecs.open("", "w", "utf-8") as suboutfile:
+                write_location_page(suboutfile, do_print, loc, point_locations, location_species, location_bi_names,
+                                    location_sp_names)
+
+
+def match_names_to_locations(species, specific_point_locations, binomial_point_locations, point_locations, citelist,
+                             logfile):
+    species_plot_locations = {}
+    location_species = {x: set() for x in point_locations}
+    location_bi_names = {x: set() for x in point_locations}
+    location_sp_names = {x: set() for x in point_locations}
+    missing_set = set()
+    for s in species:
+        if s.status != "fossil":
+            places = set()
+            for c in citelist:
+                if (c.actual == s.species) and ((c.context == "location") or
+                                                (c.context == "specimen")):
+                    p = c.application
+                    if p[0] != "[":
+                        if "[" in p:
+                            p = p[:p.find("[") - 1]
+                        if p in point_locations:
+                            places.add(p)
+                            location_species[p] |= {s}
+                        elif p != "?":
+                            missing_set |= {p}
+            species_plot_locations[s] = sorted(list(places))
+        else:
+            species_plot_locations[s] = None
+
+    binomial_plot_locations = {}
+    for name in binomial_point_locations:
+        places = set()
+        point_set = binomial_point_locations[name]
+        for p in point_set:
+            if p in point_locations:
+                places |= {p}
+                location_bi_names[p] |= {name}
+            elif p != "?":
+                missing_set |= {p}
+        binomial_plot_locations[name] = sorted(list(places))
+
+    specific_plot_locations = {}
+    for name in specific_point_locations:
+        places = set()
+        point_set = specific_point_locations[name]
+        for p in point_set:
+            if p in point_locations:
+                places |= {p}
+                location_sp_names[p] |= {name}
+            elif p != "?":
+                missing_set |= {p}
+        specific_plot_locations[name] = sorted(list(places))
+
+    if len(missing_set) > 0:
+        missing_list = sorted(list(missing_set))
+        for m in missing_list:
+            report_error(logfile, "Missing point location: " + m)
+
+    return (species_plot_locations, binomial_plot_locations, specific_plot_locations,
+            location_species, location_sp_names, location_bi_names)
 
 
 def write_common_names_pages(outfile, common_name_data, do_print):
@@ -4498,22 +4644,32 @@ def build_site(init_data):
         videos = TMB_Import.read_video_data(init_data.video_file)
         art = TMB_Import.read_art_data(init_data.art_file)
         morphology = TMB_Import.read_morphology_data(init_data.morphology_file)
+        print("...Creating Maps...")
         point_locations = TMB_Import.read_location_data(init_data.location_file)
         location_dict = create_location_hierarchy(point_locations, logfile)
-        print("...Creating Maps...")
-        missing_point_set = set()
-        TMB_Create_Maps.create_all_species_maps(init_data, species, point_locations, citelist, missing_point_set)
-        TMB_Create_Maps.create_all_name_maps(all_names, specific_names, point_locations,
-                                             specific_point_locations, binomial_point_locations, missing_point_set)
-        if len(missing_point_set) > 0:
-            missing_list = sorted(list(missing_point_set))
-            for m in missing_list:
-                report_error(logfile, "Missing point location: " + m)
+        # missing_point_set = set()
+        (species_plot_locations, binomial_plot_locations, specific_plot_locations,
+         location_species, location_sp_names, location_bi_names) = match_names_to_locations(species,
+                                                                                            specific_point_locations,
+                                                                                            binomial_point_locations,
+                                                                                            point_locations,
+                                                                                            citelist, logfile)
 
+        # TMB_Create_Maps.create_all_species_maps(init_data, species, point_locations, citelist, missing_point_set)
+        # TMB_Create_Maps.create_all_name_maps(all_names, specific_names, point_locations,
+        #                                      specific_point_locations, binomial_point_locations, missing_point_set)
+        TMB_Create_Maps.create_all_species_maps(init_data, species, point_locations, species_plot_locations)
+        TMB_Create_Maps.create_all_name_maps(all_names, specific_names, point_locations,
+                                             specific_plot_locations, binomial_plot_locations)
+        # if len(missing_point_set) > 0:
+        #     missing_list = sorted(list(missing_point_set))
+        #     for m in missing_list:
+        #         report_error(logfile, "Missing point location: " + m)
 
         # temp location
-        # with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
-        #     write_location_pages(outfile, False, point_locations, location_dict)
+        with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
+            write_location_pages(outfile, False, point_locations, location_dict, location_species, location_sp_names,
+                                 location_bi_names)
 
         # output website version
         if False:
@@ -4558,7 +4714,7 @@ def build_site(init_data):
             write_citation_page(refdict)
 
         # output print version
-        if True:
+        if False:
             print("...Creating Print Version...")
             with codecs.open("print.html", "w", "utf-8") as printfile:
                 start_print(printfile)

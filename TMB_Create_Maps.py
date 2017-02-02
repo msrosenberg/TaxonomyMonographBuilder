@@ -453,38 +453,53 @@ def create_point_map_svg(title, place_list, point_locations, base_map, skip_axes
     mplpy.close()
 
 
-def create_point_map(species, point_locations, citelist, base_map, missing_set):
-    places = set()
-    for c in citelist:
-        if (c.actual == species) and ((c.context == "location") or
-                                      (c.context == "specimen")):
-            p = c.application
-            if p[0] != "[":
-                if "[" in p:
-                    p = p[:p.find("[")-1]
-                if p in point_locations:
-                    places.add(p)
-                elif p != "?":
-                    # report_error(logfile, "Missing point location: " + p)
-                    missing_set |= {p}
-    place_list = sorted(list(places))
-    create_point_map_svg("u_" + species, place_list, point_locations, base_map, False)
-    create_point_map_kml("u_" + species, place_list, point_locations)
-    return place_list
+# def create_point_map(species, point_locations, citelist, base_map, missing_set):
+#     places = set()
+#     for c in citelist:
+#         if (c.actual == species) and ((c.context == "location") or
+#                                       (c.context == "specimen")):
+#             p = c.application
+#             if p[0] != "[":
+#                 if "[" in p:
+#                     p = p[:p.find("[")-1]
+#                 if p in point_locations:
+#                     places.add(p)
+#                 elif p != "?":
+#                     # report_error(logfile, "Missing point location: " + p)
+#                     missing_set |= {p}
+#     place_list = sorted(list(places))
+#     create_point_map_svg("u_" + species, place_list, point_locations, base_map, False)
+#     create_point_map_kml("u_" + species, place_list, point_locations)
+#     return place_list
 
 
-def create_all_point_maps(species, point_locations, citelist, base_map, missing_set):
+# def create_all_point_maps(species, point_locations, citelist, base_map, missing_set):
+#     all_places = set()
+#     for s in species:
+#         if s.status != "fossil":
+#             new_places = create_point_map(s.species, point_locations, citelist, base_map, missing_set)
+#             all_places |= set(new_places)
+#     all_list = sorted(list(all_places))
+#     create_point_map_svg("uca_all", all_list, point_locations, base_map, True)
+#     create_point_map_kml("uca_all", all_list, point_locations)
+
+
+def create_all_point_maps(species, point_locations, species_plot_locations, base_map):
     all_places = set()
     for s in species:
         if s.status != "fossil":
-            new_places = create_point_map(s.species, point_locations, citelist, base_map, missing_set)
-            all_places |= set(new_places)
+            places = species_plot_locations[s]
+            # new_places = create_point_map(s.species, point_locations, citelist, base_map, missing_set)
+            create_point_map_svg("u_" + species, places, point_locations, base_map, False)
+            create_point_map_kml("u_" + species, places, point_locations)
+            all_places |= set(places)
     all_list = sorted(list(all_places))
     create_point_map_svg("uca_all", all_list, point_locations, base_map, True)
     create_point_map_kml("uca_all", all_list, point_locations)
 
 
-def create_all_species_maps(init_data, species, point_locations, citelist, missing_set):
+# def create_all_species_maps(init_data, species, point_locations, citelist, missing_set):
+def create_all_species_maps(init_data, species, point_locations, species_plot_locations):
     # create range maps
     species_maps = read_raw(init_data.map_kml_file)
     base_map = read_base_map("resources/world_map.txt")
@@ -495,31 +510,36 @@ def create_all_species_maps(init_data, species, point_locations, citelist, missi
     write_all_species_map_figure(base_map, species_maps)
 
     # create point maps
-    create_all_point_maps(species, point_locations, citelist, base_map, missing_set)
+    #     create_all_point_maps(species, point_locations, citelist, base_map, missing_set)
+    create_all_point_maps(species, point_locations, species_plot_locations, base_map)
 
 
-def check_points(point_set, point_locations, missing_set):
-    pset = set()
-    for p in point_set:
-        if p in point_locations:
-            pset |= {p}
-        elif p != "?":
-            # report_error(logfile, "Missing point location: " + p)
-            missing_set |= {p}
-    return sorted(list(pset))
+# def check_points(point_set, point_locations, missing_set):
+#     pset = set()
+#     for p in point_set:
+#         if p in point_locations:
+#             pset |= {p}
+#         elif p != "?":
+#             # report_error(logfile, "Missing point location: " + p)
+#             missing_set |= {p}
+#     return sorted(list(pset))
 
 
+# def create_all_name_maps(all_names, specific_names, point_locations,
+#                          specific_point_locations, binomial_point_locations, missing_set):
 def create_all_name_maps(all_names, specific_names, point_locations,
-                         specific_point_locations, binomial_point_locations, missing_set):
+                         specific_plot_locations, binomial_plot_locations):
     base_map = read_base_map("resources/world_map.txt")
     for name in all_names:
         namefile = "name_" + name_to_filename(name)
-        place_list = check_points(binomial_point_locations[name], point_locations, missing_set)
+        # place_list = check_points(binomial_point_locations[name], point_locations, missing_set)
+        place_list = binomial_plot_locations[name]
         create_point_map_svg(namefile, place_list, point_locations, base_map, False)
         create_point_map_kml(namefile, place_list, point_locations)
     for name in specific_names:
         namefile = "sn_" + name.name
-        place_list = check_points(specific_point_locations[name], point_locations, missing_set)
+        # place_list = check_points(specific_point_locations[name], point_locations, missing_set)
+        place_list = specific_plot_locations[name]
         create_point_map_svg(namefile, place_list, point_locations, base_map, False)
         create_point_map_kml(namefile, place_list, point_locations)
 
