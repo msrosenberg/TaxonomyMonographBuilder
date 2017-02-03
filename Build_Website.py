@@ -20,7 +20,7 @@ import matplotlib.pyplot as mplpy
 WEBOUT_PATH = "webout/"
 MEDIA_PATH = "media/"
 TMP_PATH = "temp/"
-MAP_PATH = TMP_PATH + "maps/"
+TMP_MAP_PATH = TMP_PATH + "maps/"
 
 SPECIES_URL = "uca_species.html"
 REF_URL = "uca_references.html"
@@ -1264,7 +1264,7 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
             outfile.write("    <h3 class=\"nobookmark\">Locations Where the Name has Been Applied</h3>\n")
             if do_print:
                 outfile.write("      <figure>\n")
-                outfile.write("        <img src=\"" + MAP_PATH + pointmap_name("name_" + name_to_filename(name)) +
+                outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(name)) +
                               ".svg\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
                 outfile.write("      </figure>\n")
             else:
@@ -1444,7 +1444,7 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
             outfile.write("    <h3 class=\"nobookmark\">Locations Where the Name has Been Applied</h3>\n")
             if do_print:
                 outfile.write("      <figure>\n")
-                outfile.write("        <img src=\"" + MAP_PATH + pointmap_name("sn_" + specific_name.name) +
+                outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("sn_" + specific_name.name) +
                               ".svg\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
                 outfile.write("      </figure>\n")
             else:
@@ -2197,11 +2197,11 @@ def write_geography_page(species, outfile, do_print):
     outfile.write("      <div class=\"map_section\">\n")
     if do_print:
         outfile.write("      <figure>\n")
-        outfile.write("        <img src=\"" + MAP_PATH + rangemap_name("uca_all") + ".svg\" alt=\"Map\" "
+        outfile.write("        <img src=\"" + TMP_MAP_PATH + rangemap_name("uca_all") + ".svg\" alt=\"Map\" "
                       "title=\"Map of fiddler crab distribution\" />\n")
         outfile.write("      </figure>\n")
         outfile.write("      <figure>\n")
-        outfile.write("        <img src=\"" + MAP_PATH + pointmap_name("uca_all") + ".svg\" alt=\"Point Map\" "
+        outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("uca_all") + ".svg\" alt=\"Point Map\" "
                       "title=\"Point map of fiddler crab distribution\" />\n")
         outfile.write("      </figure>\n")
     else:
@@ -2297,8 +2297,8 @@ def create_location_hierarchy(point_locations, logfile):
 
 
 def fetch_child_data(loc, location_dict):
-    locset = location_dict[loc]
-    if loc.n_children > 0:
+    locset = location_dict[loc.name]
+    if loc.n_children() > 0:
         for c in loc.children:
             locset |= fetch_child_data(c, location_dict)
     return locset
@@ -2311,32 +2311,37 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         start_page_division(outfile, "base_page")
     else:
         common_html_header(outfile, loc.trimmed_name, "../")
-    outfile.write("    <header id=\"" + loc.name + ".html\">\n")
+    outfile.write("    <header id=\"" + place_to_filename(loc.name) + ".html\">\n")
     outfile.write("      <h1 class=\"nobookmark\">" + loc.trimmed_name + "</h1>\n")
     outfile.write("    </header>\n")
+    if loc.n_alternates() > 0:
+        outfile.write("    <h3 class=\"nobookmark\">Also Known As</h3>\n")
+        outfile.write("    <p>" + ", ".join(loc.alternates) + "</p>\n")
+
     if loc.parent is not None:
         p = point_locations[loc.parent]
-        outfile.write("    <h3>Contained Within</h3>\n")
-        outfile.write("      <p><a href=\"" + rel_link_prefix(do_print, p.name) + ".html\">" + p.trimmed_name +
-                      "</a></p>\n")
-    all_species = location_species[loc]
-    all_bi_names = location_bi_names[loc]
-    all_sp_names = location_sp_names[loc]
+        outfile.write("    <h3 class=\"nobookmark\">Contained Within</h3>\n")
+        outfile.write("      <p><a href=\"" + rel_link_prefix(do_print, place_to_filename(p.name)) + ".html\">" +
+                      p.trimmed_name + "</a></p>\n")
+    all_species = location_species[loc.name]
+    all_bi_names = location_bi_names[loc.name]
+    all_sp_names = location_sp_names[loc.name]
     if loc.n_children() > 0:
-        outfile.write("    <h3>Contains</h3>\n")
+        outfile.write("    <h3 class=\"nobookmark\">Contains</h3>\n")
         outfile.write("    <ul>\n")
         for c in loc.children:
-            outfile.write("    <li><a href=\"" + c.name + ".html\">" + c.trimmed_name + "</a></li>\n")
+            outfile.write("    <li><a href=\"" + rel_link_prefix(do_print, place_to_filename(c.name)) + ".html\">" +
+                          c.trimmed_name + "</a></li>\n")
             all_species |= fetch_child_data(c, location_species)
             all_bi_names |= fetch_child_data(c, location_bi_names)
             all_sp_names |= fetch_child_data(c, location_sp_names)
         outfile.write("    </ul>\n")
 
     if len(all_species) > 0:
-        outfile.write("    <h3>Recognized Species</h3>\n")
+        outfile.write("    <h3 class=\"nobookmark\">Recognized Species</h3>\n")
         outfile.write("    <ul>\n")
         for s in sorted(list(all_species)):
-            if s in location_species[loc]:
+            if s in location_species[loc.name]:
                 star = ""
             else:
                 star = "*"
@@ -2344,10 +2349,10 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         outfile.write("    </ul>\n")
 
     if len(all_bi_names) > 0:
-        outfile.write("    <h3>Names used in this area</h3>\n")
+        outfile.write("    <h3 class=\"nobookmark\">Names used in this area</h3>\n")
         outfile.write("    <ul>\n")
         for s in sorted(list(all_bi_names)):
-            if s in location_bi_names[loc]:
+            if s in location_bi_names[loc.name]:
                 star = ""
             else:
                 star = "*"
@@ -2355,10 +2360,10 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         outfile.write("    </ul>\n")
 
     if len(all_sp_names) > 0:
-        outfile.write("    <h3>Specific names used in this area</h3>\n")
+        outfile.write("    <h3 class=\"nobookmark\">Specific names used in this area</h3>\n")
         outfile.write("    <ul>\n")
         for s in sorted(list(all_sp_names)):
-            if s in location_sp_names[loc]:
+            if s in location_sp_names[loc.name]:
                 star = ""
             else:
                 star = "*"
@@ -2373,7 +2378,8 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
 
 def write_location_index_entry(outfile, do_print, loc, point_locations):
     """ print a location and its child locations """
-    outfile.write("<li><a href=\"" + rel_link_prefix(do_print, loc.name) + ".html\">" + loc.trimmed_name + "</a>")
+    outfile.write("<li><a href=\"" + rel_link_prefix(do_print, place_to_filename(loc.name)) + ".html\">" +
+                  loc.trimmed_name + "</a>")
     if loc.n_children() > 0:
         child_list = []
         for child in loc.children:
@@ -2436,7 +2442,8 @@ def write_location_pages(outfile, do_print, point_locations, location_dict, loca
     outfile.write("    <ul>\n")
     for p in full_list:
         loc = location_dict[p]
-        outfile.write("   <li><a href=\"" + rel_link_prefix(do_print, loc.name) + ".html\">" + p + "</a></li>\n")
+        outfile.write("   <li><a href=\"" + rel_link_prefix(do_print, place_to_filename(loc.name)) + ".html\">" +
+                      p + "</a></li>\n")
     outfile.write("    </ul>\n")
 
     if do_print:
@@ -2450,7 +2457,8 @@ def write_location_pages(outfile, do_print, point_locations, location_dict, loca
             write_location_page(outfile, do_print, loc, point_locations, location_species, location_bi_names,
                                 location_sp_names)
         else:
-            with codecs.open("", "w", "utf-8") as suboutfile:
+            with codecs.open(WEBOUT_PATH + "locations/" + place_to_filename(loc.name) + ".html", "w",
+                             "utf-8") as suboutfile:
                 write_location_page(suboutfile, do_print, loc, point_locations, location_species, location_bi_names,
                                     location_sp_names)
 
@@ -2828,9 +2836,9 @@ def write_species_page(species, references, specific_names, all_names, photos, v
     if not is_fossil:
         outfile.write("         <dd>\n")
         if do_print:
-            outfile.write("           <img src=\"" + MAP_PATH + rangemap_name("u_" + species.species) +
+            outfile.write("           <img src=\"" + TMP_MAP_PATH + rangemap_name("u_" + species.species) +
                           ".svg\" alt=\"Map\" />\n")
-            outfile.write("           <img src=\"" + MAP_PATH + pointmap_name("u_" + species.species) +
+            outfile.write("           <img src=\"" + TMP_MAP_PATH + pointmap_name("u_" + species.species) +
                           ".svg\" alt=\"Map\" />\n")
         else:
             outfile.write("           <div id=\"sp_range_map_canvas\"></div>\n")
@@ -4412,8 +4420,8 @@ def create_temp_output_paths():
     # create path for temp files
     if not os.path.exists(TMP_PATH):
         os.makedirs(TMP_PATH)
-    if not os.path.exists(MAP_PATH):
-        os.makedirs(MAP_PATH)
+    if not os.path.exists(TMP_MAP_PATH):
+        os.makedirs(TMP_MAP_PATH)
 
 
 def copy_support_files(logfile):
@@ -4458,22 +4466,22 @@ def copy_map_files(species, all_names, specific_names, logfile):
     # individual species maps
     for s in species:
         if s.status != "fossil":
-            copy_file(MAP_PATH + rangemap_name("u_" + s.species) + ".kmz")
-            copy_file(MAP_PATH + pointmap_name("u_" + s.species) + ".kmz")
-            copy_file(MAP_PATH + rangemap_name("u_" + s.species) + ".svg")
-            copy_file(MAP_PATH + pointmap_name("u_" + s.species) + ".svg")
+            copy_file(TMP_MAP_PATH + rangemap_name("u_" + s.species) + ".kmz")
+            copy_file(TMP_MAP_PATH + pointmap_name("u_" + s.species) + ".kmz")
+            copy_file(TMP_MAP_PATH + rangemap_name("u_" + s.species) + ".svg")
+            copy_file(TMP_MAP_PATH + pointmap_name("u_" + s.species) + ".svg")
     # combined map
-    copy_file(MAP_PATH + rangemap_name("uca_all") + ".kmz")
-    copy_file(MAP_PATH + pointmap_name("uca_all") + ".kmz")
-    copy_file(MAP_PATH + rangemap_name("uca_all") + ".svg")
-    copy_file(MAP_PATH + pointmap_name("uca_all") + ".svg")
+    copy_file(TMP_MAP_PATH + rangemap_name("uca_all") + ".kmz")
+    copy_file(TMP_MAP_PATH + pointmap_name("uca_all") + ".kmz")
+    copy_file(TMP_MAP_PATH + rangemap_name("uca_all") + ".svg")
+    copy_file(TMP_MAP_PATH + pointmap_name("uca_all") + ".svg")
     # binomial maps
     for n in all_names:
-        copy_file(MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".kmz")
+        copy_file(TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".kmz")
         # copy_file(MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".svg")
     # specific name maps
     for n in specific_names:
-        copy_file(MAP_PATH + pointmap_name("sn_" + n.name) + ".kmz")
+        copy_file(TMP_MAP_PATH + pointmap_name("sn_" + n.name) + ".kmz")
         # copy_file(MAP_PATH + pointmap_name("sn_" + n.name) + ".svg")
 
 
@@ -4645,9 +4653,13 @@ def build_site(init_data):
         art = TMB_Import.read_art_data(init_data.art_file)
         morphology = TMB_Import.read_morphology_data(init_data.morphology_file)
         print("...Creating Maps...")
+        # a dict of locations, keys = full location names
         point_locations = TMB_Import.read_location_data(init_data.location_file)
+        # a dict of locations, keys = trimmed location names and aliases
         location_dict = create_location_hierarchy(point_locations, logfile)
-        # missing_point_set = set()
+        # location_species is a dict of sets of species objects, key = location full names
+        # location_sp_names is a dict of sets of specific name ojbets, key = location full names
+        # location_bi_names is a dict of sets of names (strings), keys = location full names
         (species_plot_locations, binomial_plot_locations, specific_plot_locations,
          location_species, location_sp_names, location_bi_names) = match_names_to_locations(species,
                                                                                             specific_point_locations,
