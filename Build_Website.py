@@ -2271,31 +2271,6 @@ def create_location_hierarchy(point_locations, logfile):
     return loc_dict
 
 
-# def write_location(loc, point_locations, indent):
-#     """ print a location and its child locations """
-#     print(indent + loc.trimmed_name)
-#     if loc.n_children() > 0:
-#         child_list = []
-#         for child in loc.children:
-#             child_list.append(child.name)
-#         child_list.sort()
-#         for child in child_list:
-#             write_location(point_locations[child], point_locations, indent + "  ")
-#
-#
-# def write_all_locations(point_locations):
-#     """ create a indented list of all point locations """
-#     top_list = []
-#     for p in point_locations:
-#         loc = point_locations[p]
-#         if loc.parent is None:
-#             top_list.append(loc.name)
-#     top_list.sort()
-#     for p in top_list:
-#         loc = point_locations[p]
-#         write_location(loc, point_locations, "")
-
-
 def fetch_child_data(loc, location_dict):
     locset = location_dict[loc.name]
     if loc.n_children() > 0:
@@ -2307,6 +2282,7 @@ def fetch_child_data(loc, location_dict):
 def write_location_page(outfile, do_print, loc, point_locations, location_species, location_bi_names,
                         location_sp_names):
     """ output a page for an individual location """
+    star_str = "*"
     if do_print:
         start_page_division(outfile, "base_page")
     else:
@@ -2320,8 +2296,8 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
 
     if loc.parent is not None:
         p = point_locations[loc.parent]
-        outfile.write("    <h3 class=\"nobookmark\">Contained Within</h3>\n")
-        outfile.write("      <p><a href=\"" + rel_link_prefix(do_print, place_to_filename(p.name)) + ".html\">" +
+        outfile.write("    <h3 class=\"nobookmark\">Included within</h3>\n")
+        outfile.write("      <p><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(p.name) + ".html\">" +
                       p.trimmed_name + "</a></p>\n")
     all_species = set()
     all_species |= location_species[loc.name]
@@ -2330,16 +2306,17 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
     all_sp_names = set()
     all_sp_names |= location_sp_names[loc.name]
     if loc.n_children() > 0:
-        outfile.write("    <h3 class=\"nobookmark\">Contains</h3>\n")
+        outfile.write("    <h3 class=\"nobookmark\">Includes Subareas</h3>\n")
         outfile.write("    <ul>\n")
         for c in loc.children:
-            outfile.write("    <li><a href=\"" + rel_link_prefix(do_print, place_to_filename(c.name)) + ".html\">" +
-                          c.trimmed_name + "</a></li>\n")
+            outfile.write("    <li><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(c.name) +
+                          ".html\">" + c.trimmed_name + "</a></li>\n")
             all_species |= fetch_child_data(c, location_species)
             all_bi_names |= fetch_child_data(c, location_bi_names)
             all_sp_names |= fetch_child_data(c, location_sp_names)
         outfile.write("    </ul>\n")
 
+    print_star = False
     if len(all_species) > 0:
         outfile.write("    <h3 class=\"nobookmark\">Recognized Species</h3>\n")
         outfile.write("    <ul>\n")
@@ -2347,8 +2324,9 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
             if s in location_species[loc.name]:
                 star = ""
             else:
-                star = "*"
-            outfile.write("      <li>" + s.species + star + "</li>\n")
+                star = star_str
+                print_star = True
+            outfile.write("      <li>" + create_species_link(s.species, s.status, "../", do_print) + star + "</li>\n")
         outfile.write("    </ul>\n")
 
     if len(all_bi_names) > 0:
@@ -2358,8 +2336,10 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
             if s in location_bi_names[loc.name]:
                 star = ""
             else:
-                star = "*"
-            outfile.write("      <li>" + s + star + "</li>\n")
+                star = star_str
+                print_star = True
+            outfile.write("      <li><a href=\"" + rel_link_prefix(do_print, "../names/") + name_to_filename(s) +
+                          ".html\">" + format_name_string(s) + "</a>" + star + "</li>\n")
         outfile.write("    </ul>\n")
 
     if len(all_sp_names) > 0:
@@ -2369,9 +2349,14 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
             if s in location_sp_names[loc.name]:
                 star = ""
             else:
-                star = "*"
-            outfile.write("      <li>" + s.name + star + "</li>\n")
+                star = star_str
+                print_star = True
+            outfile.write("      <li><a href=\"" + rel_link_prefix(do_print, "../names/") + "sn_" + s.name +
+                          ".html\">" + format_name_string(s.name) + "</a>" + star + "</li>\n")
         outfile.write("    </ul>\n")
+
+    if print_star:
+        outfile.write("    <p>Entries marked with " + star_str + " are inferred from subareas</p>\n")
 
     if do_print:
         end_page_division(outfile)
@@ -2392,7 +2377,7 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
 
 def write_location_index_entry(outfile, do_print, loc, point_locations):
     """ print a location and its child locations """
-    outfile.write("<li><a href=\"" + rel_link_prefix(do_print, place_to_filename(loc.name)) + ".html\">" +
+    outfile.write("<li><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(loc.name) + ".html\">" +
                   loc.trimmed_name + "</a>")
     if loc.n_children() > 0:
         child_list = []
@@ -2456,7 +2441,7 @@ def write_location_pages(outfile, do_print, point_locations, location_dict, loca
     outfile.write("    <ul>\n")
     for p in full_list:
         loc = location_dict[p]
-        outfile.write("   <li><a href=\"" + rel_link_prefix(do_print, place_to_filename(loc.name)) + ".html\">" +
+        outfile.write("   <li><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(loc.name) + ".html\">" +
                       p + "</a></li>\n")
     outfile.write("    </ul>\n")
 
