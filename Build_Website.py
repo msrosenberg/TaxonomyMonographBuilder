@@ -2281,24 +2281,47 @@ def fetch_child_data(loc, location_dict):
 
 def write_location_page(outfile, do_print, loc, point_locations, location_species, location_bi_names,
                         location_sp_names):
+    def format_latlon(lat, lon):
+        if lat < 0:
+            latdir = "S"
+        else:
+            latdir = "N"
+        if lon < 0:
+            londir = "W"
+        else:
+            londir = "E"
+        return "{:1.6f}&deg;{}, {:1.6f}&deg;{}".format(abs(lat), latdir, abs(lon), londir)
+
     """ output a page for an individual location """
-    star_str = "*"
+    star_str = "<sup>*</sup>"
     if do_print:
         start_page_division(outfile, "base_page")
     else:
         common_html_header(outfile, loc.trimmed_name, "../")
     outfile.write("    <header id=\"" + place_to_filename(loc.name) + ".html\">\n")
     outfile.write("      <h1 class=\"nobookmark\">" + loc.trimmed_name + "</h1>\n")
+    if not do_print:
+        outfile.write("      <nav>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("          <li><a href=\"index.html\"><span class=\"fa fa-list\"></span> Location "
+                      "Index</a></li>\n")
+        outfile.write("        </ul>\n")
+        outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
-    if loc.n_alternates() > 0:
-        outfile.write("    <h3 class=\"nobookmark\">Also Known As</h3>\n")
-        outfile.write("    <p>" + ", ".join(loc.alternates) + "</p>\n")
+    outfile.write("    <dl>\n")
 
+    if loc.n_alternates() > 0:
+        outfile.write("    <dt>Also Known As</dt>\n")
+        outfile.write("      <dd>" + ", ".join(loc.alternates) + "</dd>\n")
     if loc.parent is not None:
         p = point_locations[loc.parent]
-        outfile.write("    <h3 class=\"nobookmark\">Included within</h3>\n")
-        outfile.write("      <p><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(p.name) + ".html\">" +
-                      p.trimmed_name + "</a></p>\n")
+        outfile.write("    <dt>Included within</dt>\n")
+        outfile.write("      <dd><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(p.name) + ".html\">" +
+                      p.trimmed_name + "</a></dd>\n")
+    outfile.write("    <dt>Approximate Coordinates</dt>\n")
+    outfile.write("      <dd>" + format_latlon(loc.latitude, loc.longitude) + "</dd>\n")
+
+    outfile.write("    </dl>\n")
     all_species = set()
     all_species |= location_species[loc.name]
     all_bi_names = set()
@@ -2306,8 +2329,9 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
     all_sp_names = set()
     all_sp_names |= location_sp_names[loc.name]
     if loc.n_children() > 0:
+        outfile.write("  <section class=\"spsection\">\n")
         outfile.write("    <h3 class=\"nobookmark\">Includes Subareas</h3>\n")
-        outfile.write("    <ul>\n")
+        outfile.write("    <ul class=\"splist\">\n")
         for c in loc.children:
             outfile.write("    <li><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(c.name) +
                           ".html\">" + c.trimmed_name + "</a></li>\n")
@@ -2315,11 +2339,13 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
             all_bi_names |= fetch_child_data(c, location_bi_names)
             all_sp_names |= fetch_child_data(c, location_sp_names)
         outfile.write("    </ul>\n")
+        outfile.write("  </section>\n")
 
     print_star = False
     if len(all_species) > 0:
-        outfile.write("    <h3 class=\"nobookmark\">Recognized Species</h3>\n")
-        outfile.write("    <ul>\n")
+        outfile.write("  <section class=\"spsection\">\n")
+        outfile.write("    <h3 class=\"nobookmark\">Currently Recognized Species</h3>\n")
+        outfile.write("    <ul class=\"splist\">\n")
         for s in sorted(list(all_species)):
             if s in location_species[loc.name]:
                 star = ""
@@ -2328,10 +2354,12 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
                 print_star = True
             outfile.write("      <li>" + create_species_link(s.species, s.status, "../", do_print) + star + "</li>\n")
         outfile.write("    </ul>\n")
+        outfile.write("  </section>\n")
 
     if len(all_bi_names) > 0:
-        outfile.write("    <h3 class=\"nobookmark\">Names used in this area</h3>\n")
-        outfile.write("    <ul>\n")
+        outfile.write("  <section class=\"spsection\">\n")
+        outfile.write("    <h3 class=\"nobookmark\">Names Which Have Been Used in This Area</h3>\n")
+        outfile.write("    <ul class=\"splist\">\n")
         for s in sorted(list(all_bi_names)):
             if s in location_bi_names[loc.name]:
                 star = ""
@@ -2341,10 +2369,12 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
             outfile.write("      <li><a href=\"" + rel_link_prefix(do_print, "../names/") + name_to_filename(s) +
                           ".html\">" + format_name_string(s) + "</a>" + star + "</li>\n")
         outfile.write("    </ul>\n")
+        outfile.write("  </section>\n")
 
     if len(all_sp_names) > 0:
-        outfile.write("    <h3 class=\"nobookmark\">Specific names used in this area</h3>\n")
-        outfile.write("    <ul>\n")
+        outfile.write("  <section class=\"spsection\">\n")
+        outfile.write("    <h3 class=\"nobookmark\">Specific Names Which Have Been Used in This Area</h3>\n")
+        outfile.write("    <ul class=\"splist\">\n")
         for s in sorted(list(all_sp_names)):
             if s in location_sp_names[loc.name]:
                 star = ""
@@ -2354,6 +2384,7 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
             outfile.write("      <li><a href=\"" + rel_link_prefix(do_print, "../names/") + "sn_" + s.name +
                           ".html\">" + format_name_string(s.name) + "</a>" + star + "</li>\n")
         outfile.write("    </ul>\n")
+        outfile.write("  </section>\n")
 
     if print_star:
         outfile.write("    <p>Entries marked with " + star_str + " are inferred from subareas</p>\n")
@@ -2404,7 +2435,7 @@ def write_location_pages(outfile, do_print, point_locations, location_dict, loca
     outfile.write("\n")
     outfile.write("    <p>")
     outfile.write("      The following indices include all locations extracted from the literature in the database "
-                  "where fiddler crabs have been reported. The first list includes all modern names in a rough,"
+                  "where fiddler crabs have been reported. The first list includes all modern names in a rough, "
                   "hierarchical framework, mostly by country and subregions within country. Bodies of water which "
                   "cannot be associated with a single country are listed independently. The hierarchy is imperfect "
                   "because some observations were general enough to cross political or other structural boundaries.\n")
@@ -2418,32 +2449,41 @@ def write_location_pages(outfile, do_print, point_locations, location_dict, loca
                   "represent each locality, but occasionally an interior land point may have been chosen when no "
                   "single shore point made sense, for example, in the case of a record on an island.\n")
     outfile.write("    </p>")
+    outfile.write("    <p>")
+    outfile.write("    Species lists for each area are automatically generated from the database and take "
+                  "advantage of the hierarchical structure to fill in species for larger containing areas. These "
+                  "lists may be incomplete due to the imperfect nature of the hierachy; similarly, a listed species "
+                  "for a large area may only be found in a small part of the total region.\n")
+    outfile.write("    </p>")
     outfile.write("\n")
-    outfile.write("    <h2 class=\"nobookmark\">Hierarchical List of Modern Location Names</h2>\n")
+    outfile.write("  <div class=\"namecol\">\n")
+    outfile.write("    <h3 id=\"location_index_hier\" class=\"bookmark2\">Hierarchical List of Modern Location "
+                  "Names</h3>\n")
     top_list = []
-    # full_list = []
     for p in point_locations:
         loc = point_locations[p]
         if loc.parent is None:
             top_list.append(loc.name)
-        # full_list.append(loc.trimmed_name)
-        # for a in loc.alternates:
-        #     full_list.append(a)
     top_list.sort()
-    outfile.write("    <ul>\n")
+    outfile.write("    <ul class=\"namelist\">\n")
     for p in top_list:
         loc = point_locations[p]
         write_location_index_entry(outfile, do_print, loc, point_locations)
     outfile.write("    </ul>\n")
-    outfile.write("    <h2 class=\"nobookmark\">Alphabetical List of All Location Names</h2>\n")
+    outfile.write("  </div>\n")
+
+    outfile.write("  <div class=\"namecol pagebreak\">\n")
+    outfile.write("    <h3 id=\"location__index_alpha\" class=\"bookmark2\">Alphabetical List of All Location "
+                  "Names</h3>\n")
     full_list = list(location_dict.keys())
     full_list.sort()
-    outfile.write("    <ul>\n")
+    outfile.write("    <ul class=\"namelist\">\n")
     for p in full_list:
         loc = location_dict[p]
         outfile.write("   <li><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(loc.name) + ".html\">" +
                       p + "</a></li>\n")
     outfile.write("    </ul>\n")
+    outfile.write("  </div>\n")
 
     if do_print:
         end_page_division(outfile)
