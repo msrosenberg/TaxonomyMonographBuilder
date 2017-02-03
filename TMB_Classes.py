@@ -40,6 +40,9 @@ class SpecificNameClass:
         self.meaning = ""
         self.notes = ""
 
+    def __lt__(self, x):
+        return self.name < x.name
+
 
 class SubgenusClass:
     """ a class to hold subgenera """
@@ -114,6 +117,9 @@ class SpeciesClass:
         self.eolid = ""
         self.inatid = ""
         self.gbifid = ""
+
+    def __lt__(self, x):
+        return self.species < x.species
 
 
 class CitationClass:
