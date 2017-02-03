@@ -335,7 +335,7 @@ def write_single_species_map_figure(base_map, species_map):
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     mplpy.savefig(OUTPUT_PATH + rangemap_name("u_" + name) + ".svg", format="svg")
-    mplpy.close()
+    mplpy.close("all")
 
 
 def write_all_species_map_figure(base_map, species_maps):
@@ -365,7 +365,7 @@ def write_all_species_map_figure(base_map, species_maps):
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     mplpy.savefig(OUTPUT_PATH + rangemap_name("uca_all") + ".svg", format="svg")
-    mplpy.close()
+    mplpy.close("all")
 
 
 def create_point_map_kml(title, place_list, point_locations):
@@ -404,7 +404,7 @@ def create_point_map_kml(title, place_list, point_locations):
         outfile.write("</kml>\n")
     with zipfile.ZipFile(OUTPUT_PATH + pointmap_name(title) + ".kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
         myzip.write(TMP_PATH + "doc.kml")
-        myzip.close()
+        myzip.close("all")
 
 
 def create_point_map_svg(title, place_list, point_locations, base_map, skip_axes):
@@ -450,7 +450,7 @@ def create_point_map_svg(title, place_list, point_locations, base_map, skip_axes
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     mplpy.savefig(OUTPUT_PATH + pointmap_name(title) + ".svg", format="svg")
-    mplpy.close()
+    mplpy.close("all")
 
 
 # def create_point_map(species, point_locations, citelist, base_map, missing_set):

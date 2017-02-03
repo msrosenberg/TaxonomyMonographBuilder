@@ -340,7 +340,7 @@ def create_pie_chart_file(filename, data):
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     mplpy.savefig(TMP_PATH + filename)
-    mplpy.close()
+    mplpy.close("all")
 
 
 def create_bar_chart_file(filename, data, minx, maxx, y):
@@ -358,7 +358,7 @@ def create_bar_chart_file(filename, data, minx, maxx, y):
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     mplpy.savefig(TMP_PATH + filename)
-    mplpy.close()
+    mplpy.close("all")
 
 
 def create_stacked_bar_chart_file(filename, data, minx, maxx, cols):
@@ -377,7 +377,7 @@ def create_stacked_bar_chart_file(filename, data, minx, maxx, cols):
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     mplpy.savefig(TMP_PATH + filename)
-    mplpy.close()
+    mplpy.close("all")
 
 
 def create_qual_bar_chart_file(filename, label_list, data_dict):
@@ -397,7 +397,7 @@ def create_qual_bar_chart_file(filename, label_list, data_dict):
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     mplpy.savefig(TMP_PATH + filename)
-    mplpy.close()
+    mplpy.close("all")
 
 
 def create_line_chart_file(filename, data, minx, maxx, y):
@@ -415,7 +415,7 @@ def create_line_chart_file(filename, data, minx, maxx, y):
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     mplpy.savefig(TMP_PATH + filename, format="svg")
-    mplpy.close()
+    mplpy.close("all")
 
 
 def create_chronology_chart_file(filename, miny, maxy, maxcnt, yearly_data):
@@ -459,7 +459,7 @@ def create_chronology_chart_file(filename, miny, maxy, maxcnt, yearly_data):
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     mplpy.savefig(TMP_PATH + filename)
-    mplpy.close()
+    mplpy.close("all")
 
 
 def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, languages, do_print, outfile):
