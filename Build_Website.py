@@ -2323,9 +2323,12 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         outfile.write("    <h3 class=\"nobookmark\">Contained Within</h3>\n")
         outfile.write("      <p><a href=\"" + rel_link_prefix(do_print, place_to_filename(p.name)) + ".html\">" +
                       p.trimmed_name + "</a></p>\n")
-    all_species = location_species[loc.name]
-    all_bi_names = location_bi_names[loc.name]
-    all_sp_names = location_sp_names[loc.name]
+    all_species = set()
+    all_species |= location_species[loc.name]
+    all_bi_names = set()
+    all_bi_names |= location_bi_names[loc.name]
+    all_sp_names = set()
+    all_sp_names |= location_sp_names[loc.name]
     if loc.n_children() > 0:
         outfile.write("    <h3 class=\"nobookmark\">Contains</h3>\n")
         outfile.write("    <ul>\n")
@@ -2345,7 +2348,7 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
                 star = ""
             else:
                 star = "*"
-            outfile.write("      <li>" + s.species + star + "</li>")
+            outfile.write("      <li>" + s.species + star + "</li>\n")
         outfile.write("    </ul>\n")
 
     if len(all_bi_names) > 0:
@@ -2356,7 +2359,7 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
                 star = ""
             else:
                 star = "*"
-            outfile.write("      <li>" + s + star + "</li>")
+            outfile.write("      <li>" + s + star + "</li>\n")
         outfile.write("    </ul>\n")
 
     if len(all_sp_names) > 0:
@@ -2367,13 +2370,24 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
                 star = ""
             else:
                 star = "*"
-            outfile.write("      <li>" + s.name + star + "</li>")
+            outfile.write("      <li>" + s.name + star + "</li>\n")
         outfile.write("    </ul>\n")
 
     if do_print:
         end_page_division(outfile)
     else:
         common_html_footer(outfile, "")
+
+    if loc.n_children() > 0:
+        for c in loc.children:
+            if do_print:
+                write_location_page(outfile, do_print, c, point_locations, location_species, location_bi_names,
+                                    location_sp_names)
+            else:
+                with codecs.open(WEBOUT_PATH + "locations/" + place_to_filename(c.name) + ".html", "w",
+                                 "utf-8") as suboutfile:
+                    write_location_page(suboutfile, do_print, c, point_locations, location_species, location_bi_names,
+                                        location_sp_names)
 
 
 def write_location_index_entry(outfile, do_print, loc, point_locations):
