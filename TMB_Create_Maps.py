@@ -229,45 +229,23 @@ def draw_base_map(faxes, base_map):
 
 
 def adjust_map_boundaries(minlon, maxlon, minlat, maxlat):
-    # adjust ranges to keep map scale (2:1 ratio, lon to lat), with a 5 degree buffer
-    # lon_range = maxlon - minlon + 10
-    # lat_range = maxlat - minlat + 10
-    # if (lon_range >= 350) or (lat_range >= 170):
-    #     return -180, 180, -90, 90
-    # else:
-    #     if lon_range > 2 * lat_range:
-    #         d = lon_range - 2 * lat_range
-    #         minlat -= d/2
-    #         maxlat += d/2
-    #     else:
-    #         d = 2 * lat_range - lon_range
-    #         minlon -= d/2
-    #         maxlon += d/2
-    #     if maxlon > 175:
-    #         d = maxlon - 175
-    #         maxlon = 175
-    #         minlon -= d
-    #     if minlon < -175:
-    #         d = -175 - minlon
-    #         minlon = -175
-    #         maxlon += d
-    #     if maxlat > 85:
-    #         d = maxlat - 85
-    #         maxlat = 85
-    #         minlat -= d
-    #     if minlat < -85:
-    #         d = -85 - minlat
-    #         minlat = -85
-    #         maxlat += d
-    #     return minlon-5, maxlon+5, minlat-5, maxlat+5
-
-    # alternate approach
+    """
+    Adjust ranges to keep map scale (2:1 ratio, lon to lat), with a 5 degree buffer
+    Do not allow the boundaries to exceed 180/-180 in lon or 90/-90 in lat
+    Force small areas to have a minimum size of 30x15 degrees
+    """
     maxlon += 5
     minlon -= 5
     maxlat += 5
     minlat -= 5
     lon_range = maxlon - minlon
     lat_range = maxlat - minlat
+    if lon_range < 30:
+        maxlon += 15 - lon_range/2
+        minlon -= 15 - lon_range/2
+    if lat_range < 15:
+        maxlat += 7.5 - lat_range/2
+        minlat -= 7.5 - lat_range/2
     if lon_range > 2 * lat_range:
         d = lon_range - 2 * lat_range
         minlat -= d / 2
@@ -404,7 +382,7 @@ def create_point_map_kml(title, place_list, point_locations):
         outfile.write("</kml>\n")
     with zipfile.ZipFile(OUTPUT_PATH + pointmap_name(title) + ".kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
         myzip.write(TMP_PATH + "doc.kml")
-        myzip.close("all")
+        myzip.close()
 
 
 def create_point_map_svg(title, place_list, point_locations, base_map, skip_axes):
