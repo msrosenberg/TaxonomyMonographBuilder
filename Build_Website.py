@@ -1240,7 +1240,7 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
             setup_chronology_chart(image_name, miny, maxy, maxcnt, name_by_year, outfile)
             outfile.write("      }\n")
             outfile.write("    </script>\n")
-        common_header_part2(outfile, "", True)
+        common_header_part2(outfile, "../", True)
 
     outfile.write("    <header id=\"" + namefile + ".html\" class=\"tabular_page\">\n")
     outfile.write("      <h1 class=\"nobookmark\">" + format_name_string(name) + "</h1>\n")
@@ -1386,7 +1386,7 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
             setup_chronology_chart(image_name, miny, maxy, maxcnt, byears, outfile)
             outfile.write("      }\n")
             outfile.write("    </script>\n")
-        common_header_part2(outfile, "", True)
+        common_header_part2(outfile, "../", True)
 
     outfile.write("    <header id=\"sn_" + specific_name.name + ".html\" class=\"tabular_page\">\n")
     outfile.write("      <h1 class=\"nobookmark\">" + format_name_string(specific_name.name) + "</h1>\n")
@@ -2297,7 +2297,38 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
     if do_print:
         start_page_division(outfile, "base_page")
     else:
-        common_html_header(outfile, loc.trimmed_name, "../")
+        common_header_part1(outfile, loc.trimmed_name, "../")
+        outfile.write("    <script type=\"text/javascript\"\n")
+        outfile.write("      src=\"http://maps.googleapis.com/maps/api/js?"
+                      "key=AIzaSyAaITaFdh_own-ULkURNKtyeh2ZR_cpR74&sensor=false\">\n")
+        outfile.write("    </script>\n")
+        outfile.write("    <script type=\"text/javascript\">\n")
+        outfile.write("      function initialize() {\n")
+        outfile.write("        var mapOptions = {\n")
+        outfile.write("          center: new google.maps.LatLng(0,0),\n")
+        outfile.write("          zoom: 1,\n")
+        outfile.write("          disableDefaultUI: true,\n")
+        outfile.write("          panControl: false,\n")
+        outfile.write("          zoomControl: true,\n")
+        outfile.write("          mapTypeControl: true,\n")
+        outfile.write("          scaleControl: false,\n")
+        outfile.write("          streetViewControl: false,\n")
+        outfile.write("          overviewMapControl: false,\n")
+        outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
+        outfile.write("        };\n")
+        # point map
+        outfile.write(
+            "       var point_map = new google.maps.Map(document.getElementById(\"sp_point_map_canvas\"),"
+            "mapOptions);\n")
+        outfile.write(
+            "        var point_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
+            pointmap_name("location_" + place_to_filename(loc.name)) + ".kmz\",{suppressInfoWindows: false});\n")
+        outfile.write("        point_layer.setMap(point_map);\n")
+        outfile.write("      }\n")
+        outfile.write("    </script>\n")
+
+        common_header_part2(outfile, "../", True)
+
     outfile.write("    <header id=\"" + place_to_filename(loc.name) + ".html\">\n")
     outfile.write("      <h1 class=\"nobookmark\">" + loc.trimmed_name + "</h1>\n")
     if not do_print:
@@ -2320,6 +2351,16 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
                       p.trimmed_name + "</a></dd>\n")
     outfile.write("    <dt>Approximate Coordinates</dt>\n")
     outfile.write("      <dd>" + format_latlon(loc.latitude, loc.longitude) + "</dd>\n")
+
+    outfile.write("    <div class=\"map_section\">\n")
+    if do_print:
+        outfile.write("      <figure>\n")
+        outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("location_" + place_to_filename(loc.name)) +
+                      ".svg\" alt=\"" + loc.trimmed_name + "\" title=\"Map of " + loc.trimmed_name + "\" />\n")
+        outfile.write("      </figure>\n")
+    else:
+        outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
+    outfile.write("    </div>\n")
 
     outfile.write("    </dl>\n")
     all_species = set()
@@ -4708,11 +4749,6 @@ def build_site(init_data):
         TMB_Create_Maps.create_all_maps(init_data, point_locations, species, species_plot_locations, all_names,
                                         binomial_plot_locations, specific_names, specific_plot_locations)
 
-        # temp location
-        with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
-            write_location_index(outfile, False, point_locations, location_dict, location_species, location_sp_names,
-                                 location_bi_names)
-
         # output website version
         if False:
             create_web_output_paths()
@@ -4733,7 +4769,12 @@ def build_site(init_data):
             print("......Writing Species......")
             write_species_info_pages(species, references, specific_names, all_names, photos, videos, art, species_refs,
                                      refdict, binomial_name_cnts, specific_name_cnts, logfile, None, False)
+            print("......Writing Locations......")
             copy_map_files(species, all_names, specific_names, logfile)
+            with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
+                write_location_index(outfile, False, point_locations, location_dict, location_species,
+                                     location_sp_names, location_bi_names)
+            print("......Writing Misc......")
             with codecs.open(WEBOUT_PATH + SYST_URL, "w", "utf-8") as outfile:
                 write_systematics_overview(subgenera, species, refdict, outfile, False, logfile)
             with codecs.open(WEBOUT_PATH + COMMON_URL, "w", "utf-8") as outfile:
@@ -4756,7 +4797,7 @@ def build_site(init_data):
             write_citation_page(refdict)
 
         # output print version
-        if False:
+        if True:
             print("...Creating Print Version...")
             with codecs.open("print.html", "w", "utf-8") as printfile:
                 start_print(printfile)
@@ -4766,6 +4807,8 @@ def build_site(init_data):
                 write_systematics_overview(subgenera, species, refdict, printfile, True, logfile)
                 write_phylogeny_pages(printfile, True, refdict, logfile)
                 write_geography_page(species, printfile, True)
+                write_location_index(printfile, True, point_locations, location_dict, location_species,
+                                     location_sp_names, location_bi_names)
                 write_life_cycle_pages(printfile, True)
                 write_main_morphology_pages(morphology, printfile, True, logfile)
                 print("......Writing Species Pages......")
