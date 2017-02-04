@@ -2422,7 +2422,7 @@ def write_location_index_entry(outfile, do_print, loc, point_locations):
     outfile.write("</li>\n")
 
 
-def write_location_pages(outfile, do_print, point_locations, location_dict, location_species, location_sp_names,
+def write_location_index(outfile, do_print, point_locations, location_dict, location_species, location_sp_names,
                          location_bi_names):
     """ output observation location index to HTML """
     if do_print:
@@ -4710,7 +4710,7 @@ def build_site(init_data):
 
         # temp location
         with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
-            write_location_pages(outfile, False, point_locations, location_dict, location_species, location_sp_names,
+            write_location_index(outfile, False, point_locations, location_dict, location_species, location_sp_names,
                                  location_bi_names)
 
         # output website version
