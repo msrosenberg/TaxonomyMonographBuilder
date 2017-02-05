@@ -4666,7 +4666,7 @@ def print_copyright_page(outfile, refdict):
     outfile.write("       <a href=\"https://github.com/msrosenberg/TaxonomyMonographBuilder\">"
                   "https://github.com/msrosenberg/TaxonomyMonographBuilder</a>.\n")
     outfile.write("     </p>\n")
-    outfile.write("     <p>\n")
+    outfile.write("     <p class=\"copy_cite\">\n")
     outfile.write("       Please cite this document as:\n")
     outfile.write("     </p>\n")
     outfile.write("     <p>\n")
