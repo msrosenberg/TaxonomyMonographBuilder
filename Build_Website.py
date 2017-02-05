@@ -1166,8 +1166,6 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
 
 def write_reference_pages(reflist, refdict, citelist, do_print, printfile, logfile, name_table):
     """ control function to loop through creating a page for every reference """
-    # name_table = create_name_table(citelist)
-    # update_cite_list(citelist)  # moving this outside of write loop so as not to have it run twice
     for ref in reflist:
         if ref.cite_key != "<pending>":
             if do_print:
@@ -1259,12 +1257,12 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
             # outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
             # outfile.write("        };\n")
             # point map
-            outfile.write(
-                "       var point_map = new google.maps.Map(document.getElementById(\"sp_point_map_canvas\"),"
-                "mapOptions);\n")
-            outfile.write(
-                "        var point_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
-                pointmap_name("name_" + name) + ".kmz\",{suppressInfoWindows: false});\n")
+            # outfile.write(
+            #     "       var point_map = new google.maps.Map(document.getElementById(\"sp_point_map_canvas\"),"
+            #     "mapOptions);\n")
+            # outfile.write(
+            #     "        var point_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
+            #     pointmap_name("name_" + name) + ".kmz\",{suppressInfoWindows: false});\n")
             # outfile.write("        point_layer.setMap(point_map);\n")
             # outfile.write("      }\n")
             # outfile.write("    </script>\n")
@@ -4641,53 +4639,52 @@ def print_cover():
 def print_title_page(outfile):
     outfile.write("    <div id=\"title_page\">\n")
     outfile.write("     <p class=\"book_title\">Fiddler Crabs</p>\n")
-    outfile.write("     <p class=\"book_subtitle\">Fiddler Crabs</p>\n")
-    outfile.write("     <p>Michael S. Rosenberg</p>\n")
-    outfile.write("     <p><a href=\"http://www.fiddlercrab.info\">www.fiddlercrab.info</a></p>\n")
+    outfile.write("     <p class=\"book_subtitle\">A Comprehensive Compendium and Guide to the Fiddler Crabs of the "
+                  "World</p>\n")
+    outfile.write("     <p class=\"book_author\">Michael S. Rosenberg</p>\n")
+    outfile.write("     <figure class=\"title_image\"><img src=\"resources/images/stylifera75.png\" /></figure>\n")
+    outfile.write("     <p class=\"publisher\"><a href=\"http://www.fiddlercrab.info\">www.fiddlercrab.info</a></p>\n")
     outfile.write("    </div>\n")
     outfile.write("\n")
 
 
-def print_copyright_page(outfile):
+def print_copyright_page(outfile, refdict):
     outfile.write("    <div id=\"copyright_page\">\n")
     outfile.write("     <p>Copyright &copy; 2003&ndash;" + str(CURRENT_YEAR) +
                   " by Michael S. Rosenberg. All Rights Reserved</p>\n")
     outfile.write("     <p>Release: " + VERSION + "</p>\n")
     outfile.write("     <p><a href=\"http://www.fiddlercrab.info\">www.fiddlercrab.info</a></p>\n")
     outfile.write("     <p>\n")
-    outfile.write("       The data and code used to produce this document can be found on Github at "
-                  "<a href=\"https://github.com/msrosenberg/fiddlercrab.info\">"
-                  "https://github.com/msrosenberg/fiddlercrab.info</a> and "
-                  "<a href=\"https://github.com/msrosenberg/TaxonomyMonographBuilder\">"
+    outfile.write("       The data and code used to produce this document can be found on Github at")
+    outfile.write("     </p>\n")
+    outfile.write("     <p>\n")
+    outfile.write("       <a href=\"https://github.com/msrosenberg/fiddlercrab.info\">"
+                  "https://github.com/msrosenberg/fiddlercrab.info</a>\n")
+    outfile.write("     </p>\n")
+    outfile.write("     <p>and</p>\n")
+    outfile.write("     <p>\n")
+    outfile.write("       <a href=\"https://github.com/msrosenberg/TaxonomyMonographBuilder\">"
                   "https://github.com/msrosenberg/TaxonomyMonographBuilder</a>.\n")
     outfile.write("     </p>\n")
     outfile.write("     <p>\n")
-    outfile.write("       Please cite this document as:"
-                  "Rosenberg, M.S. (xxxx) www.fiddlercrab.info, release " + VERSION + ".\n")
+    outfile.write("       Please cite this document as:\n")
+    outfile.write("     </p>\n")
+    outfile.write("     <p>\n")
+    outfile.write("       Rosenberg, M.S. (" + str(CURRENT_YEAR) + ") www.fiddlercrab.info, v." + VERSION + ".\n")
     outfile.write("     </p>\n")
 
+    outfile.write("     <p>\n")
+    outfile.write("       Certain key elements of this work are described in:\n")
+    key_ref = "Rosenberg2014"  # citation describing the database
+    ref = refdict[key_ref]
+    outfile.write("      <div class=\"reference_list\">\n")
+    outfile.write("        <ul>\n")
+    outfile.write("          <li><a href=\"" + rel_link_prefix(True, "references/") + key_ref + ".html\">" +
+                  ref.formatted_html + "</a></li>\n")
+    outfile.write("        </ul>\n")
+    outfile.write("      </div>\n")
     outfile.write("    </div>\n")
     outfile.write("\n")
-    """
-    outfile.write("    <p>\n")
-    outfile.write("      Generally it is best to cite the primary literature, whenever possible. However, the "
-                  "following paper describes much of the data that is unique to this website:\n")
-    outfile.write("    </p>\n")
-    outfile.write("    <div class=\"reference_list\">\n")
-    outfile.write("      <ul>\n")
-    ref = refdict["Rosenberg2014"]  # citation describing the database
-    outfile.write("        <li><a href=\"references/Rosenberg2014.html\">" + ref.formatted_html + "</a></li>\n")
-    outfile.write("      </ul>\n")
-    outfile.write("    </div>\n")
-    outfile.write("    <ul class=\"fa-ul\">\n")
-    outfile.write("      <li><span class=\"fa-li fa fa-file-pdf-o\"></span>"
-                  "<a href=\"http://dx.plos.org/10.1371/journal.pone.0101704\">Read paper online at "
-                  "PLoS ONE</a></li>\n")
-    outfile.write("      <li><span class=\"fa-li fa fa-github\"></span>"
-                  "<a href=\"https://github.com/msrosenberg/fiddlercrab.info\">Website data repository on "
-                  "Github</a></li>\n")
-    outfile.write("    </ul>\n")
-    """
 
 
 def print_table_of_contents(outfile, species_list):
@@ -4741,10 +4738,10 @@ def print_table_of_contents(outfile, species_list):
     outfile.write("\n")
 
 
-def print_specific_pages(outfile, species):
+def print_specific_pages(outfile, species, refdict):
     # print_cover(outfile)
     print_title_page(outfile)
-    print_copyright_page(outfile)
+    print_copyright_page(outfile, refdict)
     print_table_of_contents(outfile, species)
 
 
@@ -4782,10 +4779,12 @@ def build_site(init_data):
         languages = summarize_languages(references)
         print("...Reading Species...")
         species = TMB_Import.read_species_data(init_data.species_data_file)
+
         print("...Connecting References...")
         compute_species_from_citation_linking(citelist)
         compute_applied_name_contexts(citelist)
         species_refs = connect_refs_to_species(species, citelist)
+
         print("...Reading Species Names...")
         specific_names = TMB_Import.read_specific_names_data(init_data.specific_names_file)
         (all_names, binomial_name_cnts, specific_name_cnts, genus_cnts, total_binomial_year_cnts,
@@ -4793,11 +4792,13 @@ def build_site(init_data):
          binomial_point_locations) = calculate_name_index_data(refdict, citelist, specific_names)
         common_name_data = TMB_Import.read_common_name_data(init_data.common_names_file)
         subgenera = TMB_Import.read_subgenera_data(init_data.subgenera_file)
+
         print("...Reading Photos and Videos...")
         photos = TMB_Import.read_photo_data(init_data.photo_file)
         videos = TMB_Import.read_video_data(init_data.video_file)
         art = TMB_Import.read_art_data(init_data.art_file)
         morphology = TMB_Import.read_morphology_data(init_data.morphology_file)
+
         print("...Creating Maps...")
         # a dict of locations, keys = full location names
         point_locations = TMB_Import.read_location_data(init_data.location_file)
@@ -4806,14 +4807,13 @@ def build_site(init_data):
         # location_species is a dict of sets of species objects, key = location full names
         # location_sp_names is a dict of sets of specific name ojbets, key = location full names
         # location_bi_names is a dict of sets of names (strings), keys = location full names
-        (species_plot_locations, binomial_plot_locations, specific_plot_locations,
-         location_species, location_sp_names, location_bi_names) = match_names_to_locations(species,
-                                                                                            specific_point_locations,
-                                                                                            binomial_point_locations,
-                                                                                            point_locations,
-                                                                                            citelist, logfile)
-        TMB_Create_Maps.create_all_maps(init_data, point_locations, species, species_plot_locations, all_names,
-                                        binomial_plot_locations, specific_names, specific_plot_locations)
+        (species_plot_locations, binomial_plot_locations,
+         specific_plot_locations, location_species,
+         location_sp_names, location_bi_names) = match_names_to_locations(species, specific_point_locations,
+                                                                          binomial_point_locations,
+                                                                          point_locations, citelist, logfile)
+        # TMB_Create_Maps.create_all_maps(init_data, point_locations, species, species_plot_locations, all_names,
+        #                                 binomial_plot_locations, specific_names, specific_plot_locations)
 
         # output website version
         if False:
@@ -4867,32 +4867,32 @@ def build_site(init_data):
             print("...Creating Print Version...")
             with codecs.open("print.html", "w", "utf-8") as printfile:
                 start_print(printfile)
-                print_specific_pages(printfile, species)
+                print_specific_pages(printfile, species, refdict)
                 write_introduction(printfile, species, True)
-                write_common_names_pages(printfile, replace_references(common_name_data, refdict, True, logfile), True)
-                write_systematics_overview(subgenera, species, refdict, printfile, True, logfile)
-                write_phylogeny_pages(printfile, True, refdict, logfile)
-                write_geography_page(species, printfile, True)
-                write_location_index(printfile, True, point_locations, location_dict, location_species,
-                                     location_sp_names, location_bi_names)
-                write_life_cycle_pages(printfile, True)
-                write_main_morphology_pages(morphology, printfile, True, logfile)
-                print("......Writing Species Pages......")
-                write_species_info_pages(species, references, specific_names, all_names, photos, videos, art,
-                                         species_refs, refdict, binomial_name_cnts, specific_name_cnts, logfile,
-                                         printfile, True)
-                print("......Writing Name Pages......")
-                write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
-                                     binomial_name_cnts, total_binomial_year_cnts, printfile, True, logfile,
-                                     binomial_point_locations, specific_point_locations)
-                print("......Writing Media Pages......")
-                write_photo_index(species, photos, True, printfile, logfile)
-                write_video_index(videos, True, printfile, logfile)
-                write_all_art_pages(art, True, printfile, logfile)
-                print("......Writing Reference Pages......")
-                write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, True, printfile)
-                write_reference_bibliography(references, True, printfile, logfile)
-                write_reference_pages(references, refdict, citelist, True, printfile, logfile, name_table)
+                # write_common_names_pages(printfile, replace_references(common_name_data, refdict, True, logfile), True)
+                # write_systematics_overview(subgenera, species, refdict, printfile, True, logfile)
+                # write_phylogeny_pages(printfile, True, refdict, logfile)
+                # write_geography_page(species, printfile, True)
+                # write_location_index(printfile, True, point_locations, location_dict, location_species,
+                #                      location_sp_names, location_bi_names)
+                # write_life_cycle_pages(printfile, True)
+                # write_main_morphology_pages(morphology, printfile, True, logfile)
+                # print("......Writing Species Pages......")
+                # write_species_info_pages(species, references, specific_names, all_names, photos, videos, art,
+                #                          species_refs, refdict, binomial_name_cnts, specific_name_cnts, logfile,
+                #                          printfile, True)
+                # print("......Writing Name Pages......")
+                # write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
+                #                      binomial_name_cnts, total_binomial_year_cnts, printfile, True, logfile,
+                #                      binomial_point_locations, specific_point_locations)
+                # print("......Writing Media Pages......")
+                # write_photo_index(species, photos, True, printfile, logfile)
+                # write_video_index(videos, True, printfile, logfile)
+                # write_all_art_pages(art, True, printfile, logfile)
+                # print("......Writing Reference Pages......")
+                # write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, True, printfile)
+                # write_reference_bibliography(references, True, printfile, logfile)
+                # write_reference_pages(references, refdict, citelist, True, printfile, logfile, name_table)
                 end_print(printfile)
     print("done")
 
