@@ -58,11 +58,8 @@ def remove_html(x):
     """ remove any stray html tags from string before using as title of html documemnt """
     regex = r"<.+?>"
     return re.sub(regex, "", x)
-    # x = x.replace("<em>", "")
-    # x = x.replace("</em>","")
 
 
-# -----End input code---- #
 def common_header_part1(outfile, title, indexpath):
     """ part 1 of the header for all html """
     outfile.write("<!DOCTYPE HTML>\n")
@@ -98,8 +95,6 @@ def common_header_part1(outfile, title, indexpath):
                   "Lora:400,700,400italic,700italic\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath + "uca_style.css\" />\n")
     outfile.write("    <script src=\"https://use.fontawesome.com/3669ad7c2b.js\"></script>\n")
-    # outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath +
-    #               "images/font-awesome/css/font-awesome.min.css\" />\n")
     outfile.write("    <link rel=\"author\" href=\"mailto:msr@asu.edu\" />\n")
 
 
@@ -116,9 +111,7 @@ def common_header_part2(outfile, indexpath, include_map):
     outfile.write("    </div>\n")
 
 
-def common_species_html_header(outfile, title, indexpath, species):
-    """ for species pages, insert the map scripts """
-    common_header_part1(outfile, title, indexpath)
+def start_google_map_header(outfile):
     outfile.write("    <script type=\"text/javascript\"\n")
     outfile.write("      src=\"http://maps.googleapis.com/maps/api/js?"
                   "key=AIzaSyAaITaFdh_own-ULkURNKtyeh2ZR_cpR74&sensor=false\">\n")
@@ -137,37 +130,89 @@ def common_species_html_header(outfile, title, indexpath, species):
     outfile.write("          overviewMapControl: false,\n")
     outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
     outfile.write("        };\n")
-    if species == "":
-        # range map
-        outfile.write("        var range_map = new google.maps.Map(document.getElementById(\"range_map_canvas\"),"
-                      "mapOptions);\n")
-        outfile.write("        var range_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
-                      rangemap_name("uca_all") + ".kmz\",{suppressInfoWindows: true});\n")
-        # point map
-        if SHOW_NEW:
-            outfile.write("        var point_map = new google.maps.Map(document.getElementById(\"point_map_canvas\"),"
-                          "mapOptions);\n")
-            outfile.write("        var point_layer = "
-                          "new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" + pointmap_name("uca_all") +
-                          ".kmz\",{suppressInfoWindows: false});\n")
-    else:
-        # range map
-        outfile.write("        var range_map = new google.maps.Map(document.getElementById(\"sp_range_map_canvas\"),"
-                      "mapOptions);\n")
-        outfile.write("        var range_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
-                      rangemap_name("u_" + species) + ".kmz\",{suppressInfoWindows: true});\n")
-        if SHOW_NEW:
-            # point map
-            outfile.write("       var point_map = new google.maps.Map(document.getElementById(\"sp_point_map_canvas\"),"
-                          "mapOptions);\n")
-            outfile.write("        var point_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
-                          pointmap_name("u_" + species) + ".kmz\",{suppressInfoWindows: false});\n")
-    outfile.write("        range_layer.setMap(range_map);\n")
-    if SHOW_NEW:
-        outfile.write("        point_layer.setMap(point_map);\n")
+
+
+def end_google_map_header(outfile):
     outfile.write("      }\n")
     outfile.write("    </script>\n")
-    common_header_part2(outfile, indexpath, True)
+
+
+def write_google_map_range_header(outfile, map_name):
+    outfile.write("        var range_map = new google.maps.Map(document.getElementById(\"range_map_canvas\"),"
+                  "mapOptions);\n")
+    outfile.write("        var range_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
+                  rangemap_name(map_name) + ".kmz\",{suppressInfoWindows: true});\n")
+    outfile.write("        range_layer.setMap(range_map);\n")
+
+
+def write_google_map_point_header(outfile, map_name):
+    outfile.write("        var point_map = new google.maps.Map(document.getElementById(\"point_map_canvas\"),"
+                  "mapOptions);\n")
+    outfile.write("        var point_layer = "
+                  "new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" + pointmap_name(map_name) +
+                  ".kmz\",{suppressInfoWindows: false});\n")
+    outfile.write("        point_layer.setMap(point_map);\n")
+
+
+# def common_species_html_header(outfile, title, indexpath, species):
+#     """ for species pages, insert the map scripts """
+#     common_header_part1(outfile, title, indexpath)
+#     # outfile.write("    <script type=\"text/javascript\"\n")
+#     # outfile.write("      src=\"http://maps.googleapis.com/maps/api/js?"
+#     #               "key=AIzaSyAaITaFdh_own-ULkURNKtyeh2ZR_cpR74&sensor=false\">\n")
+#     # outfile.write("    </script>\n")
+#     # outfile.write("    <script type=\"text/javascript\">\n")
+#     # outfile.write("      function initialize() {\n")
+#     # outfile.write("        var mapOptions = {\n")
+#     # outfile.write("          center: new google.maps.LatLng(0,0),\n")
+#     # outfile.write("          zoom: 1,\n")
+#     # outfile.write("          disableDefaultUI: true,\n")
+#     # outfile.write("          panControl: false,\n")
+#     # outfile.write("          zoomControl: true,\n")
+#     # outfile.write("          mapTypeControl: true,\n")
+#     # outfile.write("          scaleControl: false,\n")
+#     # outfile.write("          streetViewControl: false,\n")
+#     # outfile.write("          overviewMapControl: false,\n")
+#     # outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
+#     # outfile.write("        };\n")
+#     start_google_map_header(outfile)
+#     if species == "":
+#         # range map
+#         # outfile.write("        var range_map = new google.maps.Map(document.getElementById(\"range_map_canvas\"),"
+#         #               "mapOptions);\n")
+#         # outfile.write("        var range_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
+#         #               rangemap_name("uca_all") + ".kmz\",{suppressInfoWindows: true});\n")
+#         write_google_map_range_header(outfile, "uca_all")
+#
+#         # point map
+#         if SHOW_NEW:
+#             # outfile.write("        var point_map = new google.maps.Map(document.getElementById(\"point_map_canvas\"),"
+#             #               "mapOptions);\n")
+#             # outfile.write("        var point_layer = "
+#             #               "new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" + pointmap_name("uca_all") +
+#             #               ".kmz\",{suppressInfoWindows: false});\n")
+#             write_google_map_point_header(outfile, "uca_all")
+#     else:
+#         # range map
+#         # outfile.write("        var range_map = new google.maps.Map(document.getElementById(\"sp_range_map_canvas\"),"
+#         #               "mapOptions);\n")
+#         # outfile.write("        var range_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
+#         #               rangemap_name("u_" + species) + ".kmz\",{suppressInfoWindows: true});\n")
+#         write_google_map_range_header(outfile, "u_" + species)
+#         if SHOW_NEW:
+#             # point map
+#             # outfile.write("     var point_map = new google.maps.Map(document.getElementById(\"sp_point_map_canvas\"),"
+#             #               "mapOptions);\n")
+#             # outfile.write("        var point_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
+#             #               pointmap_name("u_" + species) + ".kmz\",{suppressInfoWindows: false});\n")
+#             write_google_map_point_header(outfile, "u_" + species)
+#     # outfile.write("        range_layer.setMap(range_map);\n")
+#     # if SHOW_NEW:
+#     #     outfile.write("        point_layer.setMap(point_map);\n")
+#     # outfile.write("      }\n")
+#     # outfile.write("    </script>\n")
+#     end_google_map_header(outfile)
+#     common_header_part2(outfile, indexpath, True)
 
 
 def common_html_header(outfile, title, indexpath):
@@ -301,15 +346,6 @@ def clean_reference_html(ref):
 def clean_references(references):
     for ref in references:
         ref.formatted_html = clean_reference_html(ref.formatted_html)
-
-
-# def chart_style():
-#     custom_style = pygal.style.DefaultStyle
-#     custom_style.background = "transparent"
-#     custom_style.plot_background = "transparent"
-#     custom_style.label_font_size = 15
-#     custom_style.major_label_font_size = 15
-#     return custom_style
 
 
 def create_pie_chart_file(filename, data):
@@ -1201,24 +1237,27 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
     else:
         common_header_part1(outfile, name, "../")
         if SHOW_NEW and len(location_set) > 0:
-            outfile.write("    <script type=\"text/javascript\"\n")
-            outfile.write("      src=\"http://maps.googleapis.com/maps/api/js?"
-                          "key=AIzaSyAaITaFdh_own-ULkURNKtyeh2ZR_cpR74&sensor=false\">\n")
-            outfile.write("    </script>\n")
-            outfile.write("    <script type=\"text/javascript\">\n")
-            outfile.write("      function initialize() {\n")
-            outfile.write("        var mapOptions = {\n")
-            outfile.write("          center: new google.maps.LatLng(0,0),\n")
-            outfile.write("          zoom: 1,\n")
-            outfile.write("          disableDefaultUI: true,\n")
-            outfile.write("          panControl: false,\n")
-            outfile.write("          zoomControl: true,\n")
-            outfile.write("          mapTypeControl: true,\n")
-            outfile.write("          scaleControl: false,\n")
-            outfile.write("          streetViewControl: false,\n")
-            outfile.write("          overviewMapControl: false,\n")
-            outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
-            outfile.write("        };\n")
+            start_google_map_header(outfile)
+            write_google_map_point_header(outfile, "name_" + name)
+            end_google_map_header(outfile)
+            # outfile.write("    <script type=\"text/javascript\"\n")
+            # outfile.write("      src=\"http://maps.googleapis.com/maps/api/js?"
+            #               "key=AIzaSyAaITaFdh_own-ULkURNKtyeh2ZR_cpR74&sensor=false\">\n")
+            # outfile.write("    </script>\n")
+            # outfile.write("    <script type=\"text/javascript\">\n")
+            # outfile.write("      function initialize() {\n")
+            # outfile.write("        var mapOptions = {\n")
+            # outfile.write("          center: new google.maps.LatLng(0,0),\n")
+            # outfile.write("          zoom: 1,\n")
+            # outfile.write("          disableDefaultUI: true,\n")
+            # outfile.write("          panControl: false,\n")
+            # outfile.write("          zoomControl: true,\n")
+            # outfile.write("          mapTypeControl: true,\n")
+            # outfile.write("          scaleControl: false,\n")
+            # outfile.write("          streetViewControl: false,\n")
+            # outfile.write("          overviewMapControl: false,\n")
+            # outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
+            # outfile.write("        };\n")
             # point map
             outfile.write(
                 "       var point_map = new google.maps.Map(document.getElementById(\"sp_point_map_canvas\"),"
@@ -1226,9 +1265,9 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
             outfile.write(
                 "        var point_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
                 pointmap_name("name_" + name) + ".kmz\",{suppressInfoWindows: false});\n")
-            outfile.write("        point_layer.setMap(point_map);\n")
-            outfile.write("      }\n")
-            outfile.write("    </script>\n")
+            # outfile.write("        point_layer.setMap(point_map);\n")
+            # outfile.write("      }\n")
+            # outfile.write("    </script>\n")
 
         if maxcnt > 0:
             outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
@@ -1268,7 +1307,8 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
                               ".svg\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
                 outfile.write("      </figure>\n")
             else:
-                outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
+                # outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
+                outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
             outfile.write("    </div>\n")
         if maxcnt > 0:
             write_chronology_chart_div(image_name, outfile, None, "Number of Uses of Name per Year", False, do_print,
@@ -1348,33 +1388,36 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
         common_header_part1(outfile, specific_name.name, "../")
 
         if SHOW_NEW and len(location_set) > 0:
-            outfile.write("    <script type=\"text/javascript\"\n")
-            outfile.write("      src=\"http://maps.googleapis.com/maps/api/js?"
-                          "key=AIzaSyAaITaFdh_own-ULkURNKtyeh2ZR_cpR74&sensor=false\">\n")
-            outfile.write("    </script>\n")
-            outfile.write("    <script type=\"text/javascript\">\n")
-            outfile.write("      function initialize() {\n")
-            outfile.write("        var mapOptions = {\n")
-            outfile.write("          center: new google.maps.LatLng(0,0),\n")
-            outfile.write("          zoom: 1,\n")
-            outfile.write("          disableDefaultUI: true,\n")
-            outfile.write("          panControl: false,\n")
-            outfile.write("          zoomControl: true,\n")
-            outfile.write("          mapTypeControl: true,\n")
-            outfile.write("          scaleControl: false,\n")
-            outfile.write("          streetViewControl: false,\n")
-            outfile.write("          overviewMapControl: false,\n")
-            outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
-            outfile.write("        };\n")
+            start_google_map_header(outfile)
+            write_google_map_point_header(outfile, "sn_" + specific_name.name)
+            end_google_map_header(outfile)
+            # outfile.write("    <script type=\"text/javascript\"\n")
+            # outfile.write("      src=\"http://maps.googleapis.com/maps/api/js?"
+            #               "key=AIzaSyAaITaFdh_own-ULkURNKtyeh2ZR_cpR74&sensor=false\">\n")
+            # outfile.write("    </script>\n")
+            # outfile.write("    <script type=\"text/javascript\">\n")
+            # outfile.write("      function initialize() {\n")
+            # outfile.write("        var mapOptions = {\n")
+            # outfile.write("          center: new google.maps.LatLng(0,0),\n")
+            # outfile.write("          zoom: 1,\n")
+            # outfile.write("          disableDefaultUI: true,\n")
+            # outfile.write("          panControl: false,\n")
+            # outfile.write("          zoomControl: true,\n")
+            # outfile.write("          mapTypeControl: true,\n")
+            # outfile.write("          scaleControl: false,\n")
+            # outfile.write("          streetViewControl: false,\n")
+            # outfile.write("          overviewMapControl: false,\n")
+            # outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
+            # outfile.write("        };\n")
             # point map
-            outfile.write(
-                "       var point_map = new google.maps.Map(document.getElementById(\"sp_point_map_canvas\"),"
-                "mapOptions);\n")
-            outfile.write("        var point_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
-                          pointmap_name("sn_" + specific_name.name) + ".kmz\",{suppressInfoWindows: false});\n")
-            outfile.write("        point_layer.setMap(point_map);\n")
-            outfile.write("      }\n")
-            outfile.write("    </script>\n")
+            # outfile.write(
+            #     "       var point_map = new google.maps.Map(document.getElementById(\"sp_point_map_canvas\"),"
+            #     "mapOptions);\n")
+            # outfile.write("        var point_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
+            #               pointmap_name("sn_" + specific_name.name) + ".kmz\",{suppressInfoWindows: false});\n")
+            # outfile.write("        point_layer.setMap(point_map);\n")
+            # outfile.write("      }\n")
+            # outfile.write("    </script>\n")
 
         if maxcnt > 0:
             outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
@@ -1448,7 +1491,8 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
                               ".svg\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
                 outfile.write("      </figure>\n")
             else:
-                outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
+                # outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
+                outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
             outfile.write("    </div>\n")
 
         if maxcnt > 0:
@@ -2188,7 +2232,15 @@ def write_geography_page(species, outfile, do_print):
     if do_print:
         start_page_division(outfile, "index_page")
     else:
-        common_species_html_header(outfile, "Fiddler Crab Geographic Ranges", "", "")
+        # common_species_html_header(outfile, "Fiddler Crab Geographic Ranges", "", "")
+        common_header_part1(outfile, "Fiddler Crab Geographic Ranges", "")
+        start_google_map_header(outfile)
+        write_google_map_range_header(outfile, "uca_all")
+        if SHOW_NEW:
+            write_google_map_point_header(outfile, "uca_all")
+        end_google_map_header(outfile)
+        common_header_part2(outfile, "", True)
+
     outfile.write("    <header id=\"" + MAP_URL + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Geographic Ranges</h1>\n")
     outfile.write("    </header>\n")
@@ -2298,34 +2350,37 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         start_page_division(outfile, "base_page")
     else:
         common_header_part1(outfile, loc.trimmed_name, "../")
-        outfile.write("    <script type=\"text/javascript\"\n")
-        outfile.write("      src=\"http://maps.googleapis.com/maps/api/js?"
-                      "key=AIzaSyAaITaFdh_own-ULkURNKtyeh2ZR_cpR74&sensor=false\">\n")
-        outfile.write("    </script>\n")
-        outfile.write("    <script type=\"text/javascript\">\n")
-        outfile.write("      function initialize() {\n")
-        outfile.write("        var mapOptions = {\n")
-        outfile.write("          center: new google.maps.LatLng(0,0),\n")
-        outfile.write("          zoom: 1,\n")
-        outfile.write("          disableDefaultUI: true,\n")
-        outfile.write("          panControl: false,\n")
-        outfile.write("          zoomControl: true,\n")
-        outfile.write("          mapTypeControl: true,\n")
-        outfile.write("          scaleControl: false,\n")
-        outfile.write("          streetViewControl: false,\n")
-        outfile.write("          overviewMapControl: false,\n")
-        outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
-        outfile.write("        };\n")
+        start_google_map_header(outfile)
+        write_google_map_point_header(outfile, "location_" + place_to_filename(loc.name))
+        end_google_map_header(outfile)
+        # outfile.write("    <script type=\"text/javascript\"\n")
+        # outfile.write("      src=\"http://maps.googleapis.com/maps/api/js?"
+        #               "key=AIzaSyAaITaFdh_own-ULkURNKtyeh2ZR_cpR74&sensor=false\">\n")
+        # outfile.write("    </script>\n")
+        # outfile.write("    <script type=\"text/javascript\">\n")
+        # outfile.write("      function initialize() {\n")
+        # outfile.write("        var mapOptions = {\n")
+        # outfile.write("          center: new google.maps.LatLng(0,0),\n")
+        # outfile.write("          zoom: 1,\n")
+        # outfile.write("          disableDefaultUI: true,\n")
+        # outfile.write("          panControl: false,\n")
+        # outfile.write("          zoomControl: true,\n")
+        # outfile.write("          mapTypeControl: true,\n")
+        # outfile.write("          scaleControl: false,\n")
+        # outfile.write("          streetViewControl: false,\n")
+        # outfile.write("          overviewMapControl: false,\n")
+        # outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
+        # outfile.write("        };\n")
         # point map
-        outfile.write(
-            "       var point_map = new google.maps.Map(document.getElementById(\"sp_point_map_canvas\"),"
-            "mapOptions);\n")
-        outfile.write(
-            "        var point_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
-            pointmap_name("location_" + place_to_filename(loc.name)) + ".kmz\",{suppressInfoWindows: false});\n")
-        outfile.write("        point_layer.setMap(point_map);\n")
-        outfile.write("      }\n")
-        outfile.write("    </script>\n")
+        # outfile.write(
+        #     "       var point_map = new google.maps.Map(document.getElementById(\"sp_point_map_canvas\"),"
+        #     "mapOptions);\n")
+        # outfile.write(
+        #     "        var point_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
+        #     pointmap_name("location_" + place_to_filename(loc.name)) + ".kmz\",{suppressInfoWindows: false});\n")
+        # outfile.write("        point_layer.setMap(point_map);\n")
+        # outfile.write("      }\n")
+        # outfile.write("    </script>\n")
 
         common_header_part2(outfile, "../", True)
 
@@ -2359,7 +2414,8 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
                       ".svg\" alt=\"" + loc.trimmed_name + "\" title=\"Map of " + loc.trimmed_name + "\" />\n")
         outfile.write("      </figure>\n")
     else:
-        outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
+        # outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
+        outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
     outfile.write("    </div>\n")
 
     outfile.write("    </dl>\n")
@@ -2514,7 +2570,7 @@ def write_location_index(outfile, do_print, point_locations, location_dict, loca
     outfile.write("  </div>\n")
 
     outfile.write("  <div class=\"namecol pagebreak\">\n")
-    outfile.write("    <h3 id=\"location__index_alpha\" class=\"bookmark2\">Alphabetical List of All Location "
+    outfile.write("    <h3 id=\"location_index_alpha\" class=\"bookmark2\">Alphabetical List of All Location "
                   "Names</h3>\n")
     full_list = list(location_dict.keys())
     full_list.sort()
@@ -2823,8 +2879,16 @@ def write_species_page(species, references, specific_names, all_names, photos, v
         if is_fossil:
             common_html_header(outfile, "Uca " + species.species + " / Fossil", "")
         else:
-            common_species_html_header(outfile, "Uca " + species.species + " / " + species.common, "",
-                                       species.species)
+            # common_species_html_header(outfile, "Uca " + species.species + " / " + species.common, "",
+            #                            species.species)
+            common_header_part1(outfile, "Uca " + species.species + " / " + species.common, "")
+            start_google_map_header(outfile)
+            write_google_map_range_header(outfile, "u_" + species.species)
+            if SHOW_NEW:
+                write_google_map_point_header(outfile, "u_" + species.species)
+            end_google_map_header(outfile)
+            common_header_part2(outfile, "", True)
+
     outfile.write("    <header id=\"u_" + species.species + ".html\">\n")
     if is_fossil:
         sc = FOSSIL_IMAGE
@@ -2921,9 +2985,11 @@ def write_species_page(species, references, specific_names, all_names, photos, v
             outfile.write("           <img src=\"" + TMP_MAP_PATH + pointmap_name("u_" + species.species) +
                           ".svg\" alt=\"Map\" />\n")
         else:
-            outfile.write("           <div id=\"sp_range_map_canvas\"></div>\n")
+            # outfile.write("           <div id=\"sp_range_map_canvas\"></div>\n")
+            outfile.write("           <div id=\"range_map_canvas\" class=\"sp_map\"></div>\n")
             if SHOW_NEW:
-                outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
+                # outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
+                outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
             outfile.write("           <div class=\"map_download\">\n")
             outfile.write("             <a href=\"maps/" + rangemap_name("u_" + species.species) +
                           ".svg\"><span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
