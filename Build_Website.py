@@ -4636,24 +4636,24 @@ def print_cover():
     # outfile.write("\n")
 
 
-def print_title_page(outfile):
+def print_title_page(outfile, init_data):
     outfile.write("    <div id=\"title_page\">\n")
-    outfile.write("     <p class=\"book_title\">Fiddler Crabs</p>\n")
-    outfile.write("     <p class=\"book_subtitle\">A Comprehensive Compendium and Guide to the Fiddler Crabs of the "
-                  "World</p>\n")
-    outfile.write("     <p class=\"book_author\">Michael S. Rosenberg</p>\n")
+    outfile.write("     <p class=\"book_title\">" + init_data.site_title + "</p>\n")
+    outfile.write("     <p class=\"book_subtitle\">" + init_data.site_subtitle + "</p>\n")
+    outfile.write("     <p class=\"book_author\">" + init_data.site_author + "</p>\n")
     outfile.write("     <figure class=\"title_image\"><img src=\"resources/images/stylifera75.png\" /></figure>\n")
-    outfile.write("     <p class=\"publisher\"><a href=\"http://www.fiddlercrab.info\">www.fiddlercrab.info</a></p>\n")
+    outfile.write("     <p class=\"book_address\"><a href=\"http://" + init_data.site_address + "\">" +
+                  init_data.site_address + "</a></p>\n")
     outfile.write("    </div>\n")
     outfile.write("\n")
 
 
-def print_copyright_page(outfile, refdict):
+def print_copyright_page(outfile, init_data, refdict):
     outfile.write("    <div id=\"copyright_page\">\n")
     outfile.write("     <p>Copyright &copy; 2003&ndash;" + str(CURRENT_YEAR) +
-                  " by Michael S. Rosenberg. All Rights Reserved</p>\n")
+                  " by " + init_data.site_author + ". All Rights Reserved</p>\n")
     outfile.write("     <p>Release: " + VERSION + "</p>\n")
-    outfile.write("     <p><a href=\"http://www.fiddlercrab.info\">www.fiddlercrab.info</a></p>\n")
+    outfile.write("     <p><a href=\"http://" + init_data.site_address + "\">" + init_data.site_address + "</a></p>\n")
     outfile.write("     <p>\n")
     outfile.write("       The data and code used to produce this document can be found on Github at")
     outfile.write("     </p>\n")
@@ -4701,7 +4701,11 @@ def print_table_of_contents(outfile, species_list):
     outfile.write("         </ul>\n")
     outfile.write("       </li>\n")
     outfile.write("       <li><a href=\"#" + TREE_URL + "\">Phylogeny</a></li>\n")
-    outfile.write("       <li><a href=\"#" + MAP_URL + "\">Geography</a></li>\n")
+    outfile.write("       <li><a href=\"#" + MAP_URL + "\">Geography</a>\n")
+    outfile.write("         <ul>\n")
+    outfile.write("           <li><a href=\"#location_index\">\">Location Index</a></li>\n")
+    outfile.write("         </ul>\n")
+    outfile.write("       </li>\n")
     outfile.write("       <li><a href=\"#" + LIFECYCLE_URL + "\">Life Cycle</a></li>\n")
     outfile.write("       <li><a href=\"#" + MORPH_URL + "\">Morphology</a></li>\n")
     outfile.write("       <li><a href=\"#" + SPECIES_URL + "\">Species</a>\n")
@@ -4738,10 +4742,10 @@ def print_table_of_contents(outfile, species_list):
     outfile.write("\n")
 
 
-def write_print_only_pages(outfile, species, refdict):
+def write_print_only_pages(outfile, init_data, species, refdict):
     # print_cover(outfile)
-    print_title_page(outfile)
-    print_copyright_page(outfile, refdict)
+    print_title_page(outfile, init_data)
+    print_copyright_page(outfile, init_data, refdict)
     print_table_of_contents(outfile, species)
 
 
@@ -4867,11 +4871,11 @@ def build_site(init_data):
             print("...Creating Print Version...")
             with codecs.open("print.html", "w", "utf-8") as printfile:
                 start_print(printfile)
-                write_print_only_pages(printfile, species, refdict)
+                write_print_only_pages(printfile, init_data, species, refdict)
                 write_introduction(printfile, species, True)
-                # write_common_names_pages(printfile, replace_references(common_name_data, refdict, True, logfile), True)
-                # write_systematics_overview(subgenera, species, refdict, printfile, True, logfile)
-                # write_phylogeny_pages(printfile, True, refdict, logfile)
+                write_common_names_pages(printfile, replace_references(common_name_data, refdict, True, logfile), True)
+                write_systematics_overview(subgenera, species, refdict, printfile, True, logfile)
+                write_phylogeny_pages(printfile, True, refdict, logfile)
                 # write_geography_page(species, printfile, True)
                 # write_location_index(printfile, True, point_locations, location_dict, location_species,
                 #                      location_sp_names, location_bi_names)

@@ -22,6 +22,10 @@ class InitializationData:
         self.map_kml_file = "data/Fiddler Crabs.kml"
         self.location_file = "data/location_data.txt"
         self.error_log = "errorlog.txt"
+        self.site_title = "Fiddler Crabs"
+        self.site_subtitle = "A Comprehensive Compendium and Guide to the Fiddler Crabs of the World"
+        self.site_author = "Michael S. Rosenberg"
+        self.site_address = "www.fiddlercrab.info"
 
 
 def initialize():
