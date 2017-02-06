@@ -154,6 +154,19 @@ def write_google_map_point_header(outfile, map_name):
     outfile.write("        point_layer.setMap(point_map);\n")
 
 
+def start_google_chart_header(outfile):
+    outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
+    outfile.write("    <script type=\"text/javascript\">\n")
+    outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
+    outfile.write("      google.setOnLoadCallback(drawChart);\n")
+    outfile.write("      function drawChart() {\n")
+
+
+def end_google_chart_header(outfile):
+    outfile.write("      }\n")
+    outfile.write("    </script>\n")
+
+
 def common_html_header(outfile, title, indexpath):
     common_header_part1(outfile, title, indexpath)
     common_header_part2(outfile, indexpath, False)
@@ -442,11 +455,12 @@ def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, langua
         start_page_division(outfile, "")
     else:
         common_header_part1(outfile, "Fiddler Crab Reference Summary", "")
-        outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
-        outfile.write("    <script type=\"text/javascript\">\n")
-        outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
-        outfile.write("      google.setOnLoadCallback(drawChart);\n")
-        outfile.write("      function drawChart() {\n")
+        start_google_chart_header(outfile)
+        # outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
+        # outfile.write("    <script type=\"text/javascript\">\n")
+        # outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
+        # outfile.write("      google.setOnLoadCallback(drawChart);\n")
+        # outfile.write("      function drawChart() {\n")
         outfile.write("        var data1 = google.visualization.arrayToDataTable([\n")
         outfile.write("          ['Year', 'Cumulative Publications'],\n")
         for y in year_data:
@@ -547,8 +561,9 @@ def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, langua
         outfile.write("        var chart6 = new google.visualization.PieChart"
                       "(document.getElementById('chart6_div'));\n")
         outfile.write("        chart6.draw(data6, options6);\n")
-        outfile.write("      }\n")
-        outfile.write("    </script>\n")
+        # outfile.write("      }\n")
+        # outfile.write("    </script>\n")
+        end_google_chart_header(outfile)
         common_header_part2(outfile, "", False)
 
     outfile.write("    <header id=\"" + REF_SUM_URL + "\">\n")
@@ -1216,15 +1231,17 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
             end_google_map_header(outfile)
 
         if maxcnt > 0:
-            outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
-            outfile.write("    <script type=\"text/javascript\">\n")
-            outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
-            outfile.write("      google.setOnLoadCallback(drawChart);\n")
-            outfile.write("      function drawChart() {\n")
+            start_google_chart_header(outfile)
+            # outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
+            # outfile.write("    <script type=\"text/javascript\">\n")
+            # outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
+            # outfile.write("      google.setOnLoadCallback(drawChart);\n")
+            # outfile.write("      function drawChart() {\n")
             image_name = 0
             setup_chronology_chart(image_name, miny, maxy, maxcnt, name_by_year, outfile)
-            outfile.write("      }\n")
-            outfile.write("    </script>\n")
+            end_google_chart_header(outfile)
+            # outfile.write("      }\n")
+            # outfile.write("    </script>\n")
         common_header_part2(outfile, "../", True)
 
     outfile.write("    <header id=\"" + namefile + ".html\" class=\"tabular_page\">\n")
@@ -1340,15 +1357,17 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
             end_google_map_header(outfile)
 
         if maxcnt > 0:
-            outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
-            outfile.write("    <script type=\"text/javascript\">\n")
-            outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
-            outfile.write("      google.setOnLoadCallback(drawChart);\n")
-            outfile.write("      function drawChart() {\n")
+            start_google_chart_header(outfile)
+            # outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
+            # outfile.write("    <script type=\"text/javascript\">\n")
+            # outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
+            # outfile.write("      google.setOnLoadCallback(drawChart);\n")
+            # outfile.write("      function drawChart() {\n")
             image_name = 0
             setup_chronology_chart(image_name, miny, maxy, maxcnt, byears, outfile)
-            outfile.write("      }\n")
-            outfile.write("    </script>\n")
+            end_google_chart_header(outfile)
+            # outfile.write("      }\n")
+            # outfile.write("    </script>\n")
         common_header_part2(outfile, "../", True)
 
     outfile.write("    <header id=\"sn_" + specific_name.name + ".html\" class=\"tabular_page\">\n")
@@ -1576,11 +1595,12 @@ def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, s
             create_chronology_chart_file(image_name, miny, maxy, maxcnt, binomial_name_counts[clean_name(name)])
     else:
         common_header_part1(outfile, species, "../")
-        outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
-        outfile.write("    <script type=\"text/javascript\">\n")
-        outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
-        outfile.write("      google.setOnLoadCallback(drawChart);\n")
-        outfile.write("      function drawChart() {\n")
+        start_google_chart_header(outfile)
+        # outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
+        # outfile.write("    <script type=\"text/javascript\">\n")
+        # outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
+        # outfile.write("      google.setOnLoadCallback(drawChart);\n")
+        # outfile.write("      function drawChart() {\n")
         image_name = 0
         setup_chronology_chart(image_name, miny, maxy, maxcnt, total_cnts, outfile)
         adjust = 1
@@ -1589,8 +1609,9 @@ def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, s
         adjust += len(specific_synlist)
         for i, name in enumerate(bi_order):
             setup_chronology_chart(i + adjust, miny, maxy, bmaxcnt, binomial_name_counts[clean_name(name)], outfile)
-        outfile.write("      }\n")
-        outfile.write("    </script>\n")
+        end_google_chart_header(outfile)
+        # outfile.write("      }\n")
+        # outfile.write("    </script>\n")
         common_header_part2(outfile, "", False)
 
     outfile.write("    <header>\n")
@@ -1679,11 +1700,12 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
         start_page_division(outfile, "base_page")
     else:
         common_header_part1(outfile, "Fiddler Crab Name Summary", "../")
-        outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
-        outfile.write("    <script type=\"text/javascript\">\n")
-        outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
-        outfile.write("      google.setOnLoadCallback(drawChart);\n")
-        outfile.write("      function drawChart() {\n")
+        start_google_chart_header(outfile)
+        # outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
+        # outfile.write("    <script type=\"text/javascript\">\n")
+        # outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
+        # outfile.write("      google.setOnLoadCallback(drawChart);\n")
+        # outfile.write("      function drawChart() {\n")
         outfile.write("        var data1 = google.visualization.arrayToDataTable([\n")
         outfile.write("          ['Year', 'Cumulative Unique Binomial/Compound Names'],\n")
         for y in byears:
@@ -1757,8 +1779,9 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
         outfile.write("        var chart5 = new google.visualization.ColumnChart(document.getElementById"
                       "('namechart5_div'));\n")
         outfile.write("        chart5.draw(data5, options5);\n")
-        outfile.write("      }\n")
-        outfile.write("    </script>\n")
+        end_google_chart_header(outfile)
+        # outfile.write("      }\n")
+        # outfile.write("    </script>\n")
         common_header_part2(outfile, "", False)
 
     outfile.write("    <header>\n")
@@ -1866,17 +1889,19 @@ def create_genus_chronology(genus_cnts, do_print, outfile):
             create_chronology_chart_file(filename, miny, maxy, maxcnt, genus_cnts[name])
     else:
         common_header_part1(outfile, "Uca", "../")
-        outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
-        outfile.write("    <script type=\"text/javascript\">\n")
-        outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
-        outfile.write("      google.setOnLoadCallback(drawChart);\n")
-        outfile.write("      function drawChart() {\n")
+        start_google_chart_header(outfile)
+        # outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
+        # outfile.write("    <script type=\"text/javascript\">\n")
+        # outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
+        # outfile.write("      google.setOnLoadCallback(drawChart);\n")
+        # outfile.write("      function drawChart() {\n")
         setup_chronology_chart(0, miny, maxy, maxcnt, total_cnts, outfile)
         adjust = 1
         for i, name in enumerate(order):
             setup_chronology_chart(i + adjust, miny, maxy, maxcnt, genus_cnts[name], outfile)
-        outfile.write("      }\n")
-        outfile.write("    </script>\n")
+        end_google_chart_header(outfile)
+        # outfile.write("      }\n")
+        # outfile.write("    </script>\n")
         common_header_part2(outfile, "", False)
 
     outfile.write("    <header>\n")
