@@ -4703,7 +4703,7 @@ def print_table_of_contents(outfile, species_list):
     outfile.write("       <li><a href=\"#" + TREE_URL + "\">Phylogeny</a></li>\n")
     outfile.write("       <li><a href=\"#" + MAP_URL + "\">Geography</a>\n")
     outfile.write("         <ul>\n")
-    outfile.write("           <li><a href=\"#location_index\">\">Location Index</a></li>\n")
+    outfile.write("           <li><a href=\"#location_index\">Location Index</a></li>\n")
     outfile.write("         </ul>\n")
     outfile.write("       </li>\n")
     outfile.write("       <li><a href=\"#" + LIFECYCLE_URL + "\">Life Cycle</a></li>\n")
