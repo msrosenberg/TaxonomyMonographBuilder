@@ -49,7 +49,7 @@ AUTHOR_PAREN = 1
 AUTHOR_NOPCOMMA = 2
 
 # this flag is to hide/display new materials still in progress from the general release
-SHOW_NEW = False
+SHOW_NEW = True
 
 # randSeed = random.randint(0, 10000)
 
@@ -798,6 +798,13 @@ def create_location_link(location, display_name, path, do_print):
             display_name + "</a>")
 
 
+def strip_location_subtext(x):
+    """ remove information in []'s from a location string """
+    if "[" in x:
+        x = x[:x.find("[") - 1]
+    return x
+
+
 def format_name_string(x):
     """ properly emphasize species names, but not non-name signifiers """
     # get rid of [#] when present
@@ -862,7 +869,22 @@ def clean_specific_name(x):
             return x.lower()
 
 
-def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, refdict, name_table, logfile, do_print):
+def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, refdict, name_table, point_locations,
+                      logfile, do_print):
+    """ create output name table """
+    def create_location_sublink(x):
+        """ create a link to location pages, preserving [] info when applicable """
+        tmpname = strip_location_subtext(x)
+        if tmpname in point_locations:
+            loc = point_locations[tmpname]
+            tmpstr = create_location_link(loc, tmpname, "../locations/", do_print)
+            if tmpname != x:
+                tmpstr += x[x.find("[")-1:]
+        else:
+            tmpstr = x
+        return tmpstr
+
+    # ---main part of loop---
     first_name = True
     ncols = 5
     if notecnt > 0:
@@ -909,7 +931,12 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
             outfile.write("      <td>&nbsp;</td>\n")
         # applies to...
         if n.context == "location":
-            outfile.write("      <td><span class=\"fa fa-map-marker\"></span> location: " + n.application + "</td>\n")
+            if SHOW_NEW:
+                outstr = create_location_sublink(n.application)
+                outfile.write("      <td><span class=\"fa fa-map-marker\"></span> location: " + outstr + "</td>\n")
+            else:
+                outfile.write("      <td><span class=\"fa fa-map-marker\"></span> location: " + n.application +
+                              "</td>\n")
         elif n.context == "citation":
             if n.application in refdict:
                 crossref = refdict[n.application]
@@ -957,8 +984,12 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
             if n.application == "?":
                 outfile.write("      <td><span class=\"fa fa-flask\"></span> specimen: unknown locality</td>\n")
             else:
-                outfile.write("      <td><span class=\"fa fa-flask\"></span> specimen: " + n.application +
-                              "</td>\n")
+                if SHOW_NEW:
+                    outstr = create_location_sublink(n.application)
+                    outfile.write("      <td><span class=\"fa fa-flask\"></span> specimen: " + outstr + "</td>\n")
+                else:
+                    outfile.write("      <td><span class=\"fa fa-flask\"></span> specimen: " + n.application +
+                                  "</td>\n")
         elif n.context == "unpublished":
             outfile.write("      <td>unpublished name <em class=\"species\">" +
                           n.application + "</em></td>\n")
@@ -1017,7 +1048,7 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
     outfile.write("    </table>\n")
 
 
-def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, logfile):
+def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, point_locations, logfile):
     if do_print:
         start_page_division(outfile, "ref_page")
     else:
@@ -1077,7 +1108,7 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
             outfile.write("        <th class=\"notes_col\">Note(s)</th>\n")
         outfile.write("      </tr>\n")
         names.sort()
-        output_name_table(False, outfile, names, uniquenames, notecnt, comcnt, refdict, name_table,
+        output_name_table(False, outfile, names, uniquenames, notecnt, comcnt, refdict, name_table, point_locations,
                           logfile, do_print)
     else:
         outfile.write("    <p>\n")
@@ -1108,15 +1139,16 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
         common_html_footer(outfile, "../")
 
 
-def write_reference_pages(reflist, refdict, citelist, do_print, printfile, logfile, name_table):
+def write_reference_pages(reflist, refdict, citelist, do_print, printfile, logfile, name_table, point_locations):
     """ control function to loop through creating a page for every reference """
     for ref in reflist:
         if ref.cite_key != "<pending>":
             if do_print:
-                write_reference_page(printfile, do_print, ref, citelist, refdict, name_table, logfile)
+                write_reference_page(printfile, do_print, ref, citelist, refdict, name_table, point_locations, logfile)
             else:
                 with codecs.open(WEBOUT_PATH + "references/" + ref.cite_key + ".html", "w", "utf-8") as outfile:
-                    write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, logfile)
+                    write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, point_locations,
+                                         logfile)
 
 
 def clean_name(x):
@@ -1149,7 +1181,7 @@ def calculate_binomial_yearly_cnts(name, refdict, citelist):
 
 
 def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, name_table, species_name, logfile,
-                             outfile, do_print, location_set):
+                             outfile, do_print, location_set, point_locations):
     """ create a page listing all citations using a specific binomial """
     # find citations for this name
     cites = []
@@ -1243,7 +1275,8 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
     if notecnt > 0:
         outfile.write("        <th class=\"notes_col\">Note(s)</th>\n")
     outfile.write("      </tr>\n")
-    output_name_table(True, outfile, cites, uniquecites, notecnt, comcnt, refdict, name_table, logfile, do_print)
+    output_name_table(True, outfile, cites, uniquecites, notecnt, comcnt, refdict, name_table, point_locations, logfile,
+                      do_print)
     outfile.write("    <p>\n")
     outfile.write("    </p>\n")
     if do_print:
@@ -1894,9 +1927,10 @@ def calculate_binomial_locations(name, citelist):
                 for a in c.applied_cites:
                     p = a.application
                     if (p != ".") and (p[0] != "[") and (p != "?"):
-                        if "[" in p:
-                            p = p[:p.find("[") - 1]
-                        locs |= {p}
+                        # if "[" in p:
+                        #     p = p[:p.find("[") - 1]
+                        # locs |= {p}
+                        locs |= {strip_location_subtext(p)}
     return locs
 
 
@@ -1991,7 +2025,7 @@ def calculate_name_index_data(refdict, citelist, specific_names):
 
 def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_table, species_refs, genus_cnts,
                          binomial_usage_cnts_by_year, total_binomial_year_cnts, outfile, do_print, logfile,
-                         binomial_locations, specific_locations):
+                         binomial_locations, specific_locations, point_locations):
     """ create an index of binomials and specific names """
     if do_print:
         start_page_division(outfile, "index_page")
@@ -2075,11 +2109,12 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
         namefile = name_to_filename(name)
         if do_print:
             write_binomial_name_page(name, namefile, binomial_usage_cnts_by_year[name], refdict, citelist, name_table,
-                                     sname, logfile, outfile, True, binomial_locations[name])
+                                     sname, logfile, outfile, True, binomial_locations[name], point_locations)
         else:
             with codecs.open(WEBOUT_PATH + "names/" + namefile + ".html", "w", "utf-8") as suboutfile:
                 write_binomial_name_page(name, namefile, binomial_usage_cnts_by_year[name], refdict, citelist,
-                                         name_table, sname, logfile, suboutfile, False, binomial_locations[name])
+                                         name_table, sname, logfile, suboutfile, False, binomial_locations[name],
+                                         point_locations)
     for name in specific_names:
         if do_print:
             write_specific_name_page(name, unique_names, refdict, binomial_usage_cnts_by_year, logfile, outfile,
@@ -2477,8 +2512,9 @@ def match_names_to_locations(species, specific_point_locations, binomial_point_l
                                                 (c.context == "specimen")):
                     p = c.application
                     if p[0] != "[":
-                        if "[" in p:
-                            p = p[:p.find("[") - 1]
+                        p = strip_location_subtext(p)
+                        # if "[" in p:
+                        #     p = p[:p.find("[") - 1]
                         if p in point_locations:
                             places.add(p)
                             location_species[p] |= {s}
@@ -4697,12 +4733,12 @@ def build_site(init_data):
                 write_reference_bibliography(references, False, outfile, logfile)
             with codecs.open(WEBOUT_PATH + REF_SUM_URL, "w", "utf-8") as outfile:
                 write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, False, outfile)
-            write_reference_pages(references, refdict, citelist, False, None, logfile, name_table)
+            write_reference_pages(references, refdict, citelist, False, None, logfile, name_table, point_locations)
             print("......Writing Names Info......")
             with codecs.open(WEBOUT_PATH + "names/index.html", "w", "utf-8") as outfile:
                 write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
                                      binomial_name_cnts, total_binomial_year_cnts, outfile, False, logfile,
-                                     binomial_point_locations, specific_point_locations)
+                                     binomial_point_locations, specific_point_locations, point_locations)
             check_specific_names(citelist, specific_names, logfile)
             print("......Writing Species......")
             write_species_info_pages(species, references, specific_names, all_names, photos, videos, art, species_refs,
@@ -4735,7 +4771,7 @@ def build_site(init_data):
             write_citation_page(refdict)
 
         # output print version
-        if True:
+        if False:
             print("...Creating Print Version...")
             with codecs.open("print.html", "w", "utf-8") as printfile:
                 start_print(printfile)
@@ -4744,27 +4780,28 @@ def build_site(init_data):
                 write_common_names_pages(printfile, replace_references(common_name_data, refdict, True, logfile), True)
                 write_systematics_overview(subgenera, species, refdict, printfile, True, logfile)
                 write_phylogeny_pages(printfile, True, refdict, logfile)
-                # write_geography_page(species, printfile, True)
-                # write_location_index(printfile, True, point_locations, location_dict, location_species,
-                #                      location_sp_names, location_bi_names)
-                # write_life_cycle_pages(printfile, True)
-                # write_main_morphology_pages(morphology, printfile, True, logfile)
-                # print("......Writing Species Pages......")
-                # write_species_info_pages(species, references, specific_names, all_names, photos, videos, art,
-                #                          species_refs, refdict, binomial_name_cnts, specific_name_cnts, logfile,
-                #                          printfile, True)
-                # print("......Writing Name Pages......")
-                # write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
-                #                      binomial_name_cnts, total_binomial_year_cnts, printfile, True, logfile,
-                #                      binomial_point_locations, specific_point_locations)
-                # print("......Writing Media Pages......")
-                # write_photo_index(species, photos, True, printfile, logfile)
-                # write_video_index(videos, True, printfile, logfile)
-                # write_all_art_pages(art, True, printfile, logfile)
-                # print("......Writing Reference Pages......")
-                # write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, True, printfile)
-                # write_reference_bibliography(references, True, printfile, logfile)
-                # write_reference_pages(references, refdict, citelist, True, printfile, logfile, name_table)
+                write_geography_page(species, printfile, True)
+                write_location_index(printfile, True, point_locations, location_dict, location_species,
+                                     location_sp_names, location_bi_names)
+                write_life_cycle_pages(printfile, True)
+                write_main_morphology_pages(morphology, printfile, True, logfile)
+                print("......Writing Species Pages......")
+                write_species_info_pages(species, references, specific_names, all_names, photos, videos, art,
+                                         species_refs, refdict, binomial_name_cnts, specific_name_cnts, logfile,
+                                         printfile, True)
+                print("......Writing Name Pages......")
+                write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
+                                     binomial_name_cnts, total_binomial_year_cnts, printfile, True, logfile,
+                                     binomial_point_locations, specific_point_locations, point_locations)
+                print("......Writing Media Pages......")
+                write_photo_index(species, photos, True, printfile, logfile)
+                write_video_index(videos, True, printfile, logfile)
+                write_all_art_pages(art, True, printfile, logfile)
+                print("......Writing Reference Pages......")
+                write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, True, printfile)
+                write_reference_bibliography(references, True, printfile, logfile)
+                write_reference_pages(references, refdict, citelist, True, printfile, logfile, name_table,
+                                      point_locations)
                 end_print(printfile)
     print("done")
 
