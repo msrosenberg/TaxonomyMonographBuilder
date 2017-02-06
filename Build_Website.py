@@ -4738,7 +4738,7 @@ def print_table_of_contents(outfile, species_list):
     outfile.write("\n")
 
 
-def print_specific_pages(outfile, species, refdict):
+def write_print_only_pages(outfile, species, refdict):
     # print_cover(outfile)
     print_title_page(outfile)
     print_copyright_page(outfile, refdict)
@@ -4867,7 +4867,7 @@ def build_site(init_data):
             print("...Creating Print Version...")
             with codecs.open("print.html", "w", "utf-8") as printfile:
                 start_print(printfile)
-                print_specific_pages(printfile, species, refdict)
+                write_print_only_pages(printfile, species, refdict)
                 write_introduction(printfile, species, True)
                 # write_common_names_pages(printfile, replace_references(common_name_data, refdict, True, logfile), True)
                 # write_systematics_overview(subgenera, species, refdict, printfile, True, logfile)
