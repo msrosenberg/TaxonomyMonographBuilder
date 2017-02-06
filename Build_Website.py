@@ -154,67 +154,6 @@ def write_google_map_point_header(outfile, map_name):
     outfile.write("        point_layer.setMap(point_map);\n")
 
 
-# def common_species_html_header(outfile, title, indexpath, species):
-#     """ for species pages, insert the map scripts """
-#     common_header_part1(outfile, title, indexpath)
-#     # outfile.write("    <script type=\"text/javascript\"\n")
-#     # outfile.write("      src=\"http://maps.googleapis.com/maps/api/js?"
-#     #               "key=AIzaSyAaITaFdh_own-ULkURNKtyeh2ZR_cpR74&sensor=false\">\n")
-#     # outfile.write("    </script>\n")
-#     # outfile.write("    <script type=\"text/javascript\">\n")
-#     # outfile.write("      function initialize() {\n")
-#     # outfile.write("        var mapOptions = {\n")
-#     # outfile.write("          center: new google.maps.LatLng(0,0),\n")
-#     # outfile.write("          zoom: 1,\n")
-#     # outfile.write("          disableDefaultUI: true,\n")
-#     # outfile.write("          panControl: false,\n")
-#     # outfile.write("          zoomControl: true,\n")
-#     # outfile.write("          mapTypeControl: true,\n")
-#     # outfile.write("          scaleControl: false,\n")
-#     # outfile.write("          streetViewControl: false,\n")
-#     # outfile.write("          overviewMapControl: false,\n")
-#     # outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
-#     # outfile.write("        };\n")
-#     start_google_map_header(outfile)
-#     if species == "":
-#         # range map
-#         # outfile.write("        var range_map = new google.maps.Map(document.getElementById(\"range_map_canvas\"),"
-#         #               "mapOptions);\n")
-#         # outfile.write("        var range_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
-#         #               rangemap_name("uca_all") + ".kmz\",{suppressInfoWindows: true});\n")
-#         write_google_map_range_header(outfile, "uca_all")
-#
-#         # point map
-#         if SHOW_NEW:
-#             # outfile.write("        var point_map = new google.maps.Map(document.getElementById(\"point_map_canvas\"),"
-#             #               "mapOptions);\n")
-#             # outfile.write("        var point_layer = "
-#             #               "new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" + pointmap_name("uca_all") +
-#             #               ".kmz\",{suppressInfoWindows: false});\n")
-#             write_google_map_point_header(outfile, "uca_all")
-#     else:
-#         # range map
-#         # outfile.write("        var range_map = new google.maps.Map(document.getElementById(\"sp_range_map_canvas\"),"
-#         #               "mapOptions);\n")
-#         # outfile.write("        var range_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
-#         #               rangemap_name("u_" + species) + ".kmz\",{suppressInfoWindows: true});\n")
-#         write_google_map_range_header(outfile, "u_" + species)
-#         if SHOW_NEW:
-#             # point map
-#             # outfile.write("     var point_map = new google.maps.Map(document.getElementById(\"sp_point_map_canvas\"),"
-#             #               "mapOptions);\n")
-#             # outfile.write("        var point_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
-#             #               pointmap_name("u_" + species) + ".kmz\",{suppressInfoWindows: false});\n")
-#             write_google_map_point_header(outfile, "u_" + species)
-#     # outfile.write("        range_layer.setMap(range_map);\n")
-#     # if SHOW_NEW:
-#     #     outfile.write("        point_layer.setMap(point_map);\n")
-#     # outfile.write("      }\n")
-#     # outfile.write("    </script>\n")
-#     end_google_map_header(outfile)
-#     common_header_part2(outfile, indexpath, True)
-
-
 def common_html_header(outfile, title, indexpath):
     common_header_part1(outfile, title, indexpath)
     common_header_part2(outfile, indexpath, False)
@@ -854,6 +793,11 @@ def create_species_link(species, status, path, do_print):
             species + "</em>" + sc + "</a>")
 
 
+def create_location_link(location, display_name, path, do_print):
+    return ("<a href=\"" + rel_link_prefix(do_print, path) + place_to_filename(location.name) + ".html\">" +
+            display_name + "</a>")
+
+
 def format_name_string(x):
     """ properly emphasize species names, but not non-name signifiers """
     # get rid of [#] when present
@@ -1238,34 +1182,6 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
             start_google_map_header(outfile)
             write_google_map_point_header(outfile, "name_" + name)
             end_google_map_header(outfile)
-            # outfile.write("    <script type=\"text/javascript\"\n")
-            # outfile.write("      src=\"http://maps.googleapis.com/maps/api/js?"
-            #               "key=AIzaSyAaITaFdh_own-ULkURNKtyeh2ZR_cpR74&sensor=false\">\n")
-            # outfile.write("    </script>\n")
-            # outfile.write("    <script type=\"text/javascript\">\n")
-            # outfile.write("      function initialize() {\n")
-            # outfile.write("        var mapOptions = {\n")
-            # outfile.write("          center: new google.maps.LatLng(0,0),\n")
-            # outfile.write("          zoom: 1,\n")
-            # outfile.write("          disableDefaultUI: true,\n")
-            # outfile.write("          panControl: false,\n")
-            # outfile.write("          zoomControl: true,\n")
-            # outfile.write("          mapTypeControl: true,\n")
-            # outfile.write("          scaleControl: false,\n")
-            # outfile.write("          streetViewControl: false,\n")
-            # outfile.write("          overviewMapControl: false,\n")
-            # outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
-            # outfile.write("        };\n")
-            # point map
-            # outfile.write(
-            #     "       var point_map = new google.maps.Map(document.getElementById(\"sp_point_map_canvas\"),"
-            #     "mapOptions);\n")
-            # outfile.write(
-            #     "        var point_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
-            #     pointmap_name("name_" + name) + ".kmz\",{suppressInfoWindows: false});\n")
-            # outfile.write("        point_layer.setMap(point_map);\n")
-            # outfile.write("      }\n")
-            # outfile.write("    </script>\n")
 
         if maxcnt > 0:
             outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
@@ -1389,33 +1305,6 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
             start_google_map_header(outfile)
             write_google_map_point_header(outfile, "sn_" + specific_name.name)
             end_google_map_header(outfile)
-            # outfile.write("    <script type=\"text/javascript\"\n")
-            # outfile.write("      src=\"http://maps.googleapis.com/maps/api/js?"
-            #               "key=AIzaSyAaITaFdh_own-ULkURNKtyeh2ZR_cpR74&sensor=false\">\n")
-            # outfile.write("    </script>\n")
-            # outfile.write("    <script type=\"text/javascript\">\n")
-            # outfile.write("      function initialize() {\n")
-            # outfile.write("        var mapOptions = {\n")
-            # outfile.write("          center: new google.maps.LatLng(0,0),\n")
-            # outfile.write("          zoom: 1,\n")
-            # outfile.write("          disableDefaultUI: true,\n")
-            # outfile.write("          panControl: false,\n")
-            # outfile.write("          zoomControl: true,\n")
-            # outfile.write("          mapTypeControl: true,\n")
-            # outfile.write("          scaleControl: false,\n")
-            # outfile.write("          streetViewControl: false,\n")
-            # outfile.write("          overviewMapControl: false,\n")
-            # outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
-            # outfile.write("        };\n")
-            # point map
-            # outfile.write(
-            #     "       var point_map = new google.maps.Map(document.getElementById(\"sp_point_map_canvas\"),"
-            #     "mapOptions);\n")
-            # outfile.write("        var point_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
-            #               pointmap_name("sn_" + specific_name.name) + ".kmz\",{suppressInfoWindows: false});\n")
-            # outfile.write("        point_layer.setMap(point_map);\n")
-            # outfile.write("      }\n")
-            # outfile.write("    </script>\n")
 
         if maxcnt > 0:
             outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
@@ -2331,7 +2220,9 @@ def fetch_child_data(loc, location_dict):
 
 def write_location_page(outfile, do_print, loc, point_locations, location_species, location_bi_names,
                         location_sp_names):
+    """ output a page for an individual location """
     def format_latlon(lat, lon):
+        """ format a lat,lon pair for printing """
         if lat < 0:
             latdir = "S"
         else:
@@ -2342,7 +2233,6 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
             londir = "E"
         return "{:1.6f}&deg;{}, {:1.6f}&deg;{}".format(abs(lat), latdir, abs(lon), londir)
 
-    """ output a page for an individual location """
     star_str = "<sup>*</sup>"
     if do_print:
         start_page_division(outfile, "base_page")
@@ -2351,35 +2241,6 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         start_google_map_header(outfile)
         write_google_map_point_header(outfile, "location_" + place_to_filename(loc.name))
         end_google_map_header(outfile)
-        # outfile.write("    <script type=\"text/javascript\"\n")
-        # outfile.write("      src=\"http://maps.googleapis.com/maps/api/js?"
-        #               "key=AIzaSyAaITaFdh_own-ULkURNKtyeh2ZR_cpR74&sensor=false\">\n")
-        # outfile.write("    </script>\n")
-        # outfile.write("    <script type=\"text/javascript\">\n")
-        # outfile.write("      function initialize() {\n")
-        # outfile.write("        var mapOptions = {\n")
-        # outfile.write("          center: new google.maps.LatLng(0,0),\n")
-        # outfile.write("          zoom: 1,\n")
-        # outfile.write("          disableDefaultUI: true,\n")
-        # outfile.write("          panControl: false,\n")
-        # outfile.write("          zoomControl: true,\n")
-        # outfile.write("          mapTypeControl: true,\n")
-        # outfile.write("          scaleControl: false,\n")
-        # outfile.write("          streetViewControl: false,\n")
-        # outfile.write("          overviewMapControl: false,\n")
-        # outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
-        # outfile.write("        };\n")
-        # point map
-        # outfile.write(
-        #     "       var point_map = new google.maps.Map(document.getElementById(\"sp_point_map_canvas\"),"
-        #     "mapOptions);\n")
-        # outfile.write(
-        #     "        var point_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
-        #     pointmap_name("location_" + place_to_filename(loc.name)) + ".kmz\",{suppressInfoWindows: false});\n")
-        # outfile.write("        point_layer.setMap(point_map);\n")
-        # outfile.write("      }\n")
-        # outfile.write("    </script>\n")
-
         common_header_part2(outfile, "../", True)
 
     outfile.write("    <header id=\"" + place_to_filename(loc.name) + ".html\">\n")
@@ -2400,8 +2261,9 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
     if loc.parent is not None:
         p = point_locations[loc.parent]
         outfile.write("    <dt>Included within</dt>\n")
-        outfile.write("      <dd><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(p.name) + ".html\">" +
-                      p.trimmed_name + "</a></dd>\n")
+        # outfile.write("      <dd><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(p.name) + ".html\">"
+        #               + p.trimmed_name + "</a></dd>\n")
+        outfile.write("      <dd>" + create_location_link(p, p.trimmed_name, "", do_print) + "</dd>\n")
     outfile.write("    <dt>Approximate Coordinates</dt>\n")
     outfile.write("      <dd>" + format_latlon(loc.latitude, loc.longitude) + "</dd>\n")
 
@@ -2428,8 +2290,9 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         outfile.write("    <h3 class=\"nobookmark\">Includes Subareas</h3>\n")
         outfile.write("    <ul class=\"splist\">\n")
         for c in loc.children:
-            outfile.write("    <li><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(c.name) +
-                          ".html\">" + c.trimmed_name + "</a></li>\n")
+            # outfile.write("    <li><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(c.name) +
+            #               ".html\">" + c.trimmed_name + "</a></li>\n")
+            outfile.write("    <li>" + create_location_link(c, c.trimmed_name, "", do_print) + "</li>\n")
             all_species |= fetch_child_data(c, location_species)
             all_bi_names |= fetch_child_data(c, location_bi_names)
             all_sp_names |= fetch_child_data(c, location_sp_names)
@@ -2503,8 +2366,9 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
 
 def write_location_index_entry(outfile, do_print, loc, point_locations):
     """ print a location and its child locations """
-    outfile.write("<li><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(loc.name) + ".html\">" +
-                  loc.trimmed_name + "</a>")
+    # outfile.write("<li><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(loc.name) + ".html\">" +
+    #               loc.trimmed_name + "</a>")
+    outfile.write("<li>" + create_location_link(loc, loc.trimmed_name, "", do_print))
     if loc.n_children() > 0:
         child_list = []
         for child in loc.children:
@@ -2575,8 +2439,9 @@ def write_location_index(outfile, do_print, point_locations, location_dict, loca
     outfile.write("    <ul class=\"namelist\">\n")
     for p in full_list:
         loc = location_dict[p]
-        outfile.write("   <li><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(loc.name) + ".html\">" +
-                      p + "</a></li>\n")
+        # outfile.write("   <li><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(loc.name) + ".html\">" +
+        #               p + "</a></li>\n")
+        outfile.write("   <li>" + create_location_link(loc, p, "", do_print) + "</li>\n")
     outfile.write("    </ul>\n")
     outfile.write("  </div>\n")
 
