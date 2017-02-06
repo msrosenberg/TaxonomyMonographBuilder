@@ -4600,7 +4600,7 @@ def copy_support_files(logfile):
             report_error(logfile, "Missing file: resources/images/" + filename)
 
 
-def copy_map_files(species, all_names, specific_names, logfile):
+def copy_map_files(species, all_names, specific_names, point_locations, logfile):
     def copy_file(filename):
         try:
             shutil.copy2(filename, WEBOUT_PATH + "maps/")
@@ -4627,6 +4627,9 @@ def copy_map_files(species, all_names, specific_names, logfile):
     for n in specific_names:
         copy_file(TMP_MAP_PATH + pointmap_name("sn_" + n.name) + ".kmz")
         # copy_file(MAP_PATH + pointmap_name("sn_" + n.name) + ".svg")
+    # point location maps
+    for p in point_locations:
+        copy_file(TMP_MAP_PATH + pointmap_name("location_" + place_to_filename(p)) + ".kmz")
 
 
 def print_cover():
@@ -4820,7 +4823,7 @@ def build_site(init_data):
         #                                 binomial_plot_locations, specific_names, specific_plot_locations)
 
         # output website version
-        if False:
+        if True:
             create_web_output_paths()
             print("...Creating Web Version...")
             copy_support_files(logfile)
@@ -4840,7 +4843,7 @@ def build_site(init_data):
             write_species_info_pages(species, references, specific_names, all_names, photos, videos, art, species_refs,
                                      refdict, binomial_name_cnts, specific_name_cnts, logfile, None, False)
             print("......Writing Locations......")
-            copy_map_files(species, all_names, specific_names, logfile)
+            copy_map_files(species, all_names, specific_names, point_locations, logfile)
             with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
                 write_location_index(outfile, False, point_locations, location_dict, location_species,
                                      location_sp_names, location_bi_names)
