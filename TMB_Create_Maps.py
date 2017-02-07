@@ -445,11 +445,11 @@ def create_all_point_maps(species, point_locations, species_plot_locations, base
     for s in species:
         if s.status != "fossil":
             places = species_plot_locations[s]
-            create_point_map_svg("u_" + s.species, places, point_locations, base_map, False)
+            create_point_map_svg("u_" + s.species, places, point_locations, base_map, False, False)
             create_point_map_kml("u_" + s.species, places, point_locations)
             all_places |= set(places)
     all_list = sorted(list(all_places))
-    create_point_map_svg("uca_all", all_list, point_locations, base_map, True)
+    create_point_map_svg("uca_all", all_list, point_locations, base_map, True, False)
     create_point_map_kml("uca_all", all_list, point_locations)
 
 
@@ -491,9 +491,12 @@ def create_all_location_maps(base_map, point_locations):
 def create_all_maps(init_data, point_locations, species, species_plot_locations, all_names, binomial_plot_locations,
                     specific_names, specific_plot_locations):
     base_map = read_base_map("resources/world_map.txt")
+    print("......Creating Species Maps......")
     create_all_species_maps(base_map, init_data, species, point_locations, species_plot_locations)
+    print("......Creating Name Maps......")
     create_all_name_maps(base_map, all_names, specific_names, point_locations, specific_plot_locations,
                          binomial_plot_locations)
+    print("......Creating Location Maps......")
     create_all_location_maps(base_map, point_locations)
 
 
