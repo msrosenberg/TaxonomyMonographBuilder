@@ -425,10 +425,7 @@ def create_point_map_svg(title, place_list, point_locations, base_map, skip_axes
                 maxlon = point.ne_lon
                 minlat = point.sw_lat
                 maxlat = point.ne_lat
-            else:
-                minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
-    else:
-        minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
+    minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)
     if skip_axes:
