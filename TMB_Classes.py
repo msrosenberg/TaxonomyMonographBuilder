@@ -159,6 +159,10 @@ class LocationClass:
         self.children = []
         self.alternates = []
         self.validity = ""
+        self.ne_lat = None
+        self.ne_lon = None
+        self.sw_lat = None
+        self.sw_lon = None
 
     def n_children(self):
         return len(self.children)

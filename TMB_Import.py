@@ -266,5 +266,11 @@ def read_location_data(filename):
         if loc[6] != ".":
             newloc.parent = loc[6]
         newloc.validity = loc[7]
+        if loc[8] != ".":
+            newloc.ne_lat = float(loc[8])
+            newloc.ne_lon = float(loc[9])
+            newloc.sw_lat = float(loc[10])
+            newloc.sw_lon = float(loc[11])
+
         locdict[newloc.name] = newloc
     return locdict

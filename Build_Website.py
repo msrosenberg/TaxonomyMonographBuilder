@@ -145,13 +145,27 @@ def write_google_map_range_header(outfile, map_name):
     outfile.write("        range_layer.setMap(range_map);\n")
 
 
-def write_google_map_point_header(outfile, map_name):
+def write_google_map_point_header(outfile, map_name, location):
+    do_bounds = False
+    preserve = ""
+    if location is not None:
+        if location.sw_lon is not None:
+            do_bounds = True
+            preserve = ", preserveViewport: true"
+
     outfile.write("        var point_map = new google.maps.Map(document.getElementById(\"point_map_canvas\"),"
                   "mapOptions);\n")
     outfile.write("        var point_layer = "
                   "new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" + pointmap_name(map_name) +
-                  ".kmz\",{suppressInfoWindows: false});\n")
+                  ".kmz\",{suppressInfoWindows: false" + preserve + "});\n")
     outfile.write("        point_layer.setMap(point_map);\n")
+    if do_bounds:
+        outfile.write("        var necorner = new google.maps.LatLng(" +
+                      str(location.ne_lat) + ", " + str(location.ne_lon) + ");\n")
+        outfile.write("        var swcorner = new google.maps.LatLng(" +
+                      str(location.sw_lat) + ", " + str(location.sw_lon) + ");\n")
+        outfile.write("        var bounds = new google.maps.LatLngBounds(swcorner, necorner);\n")
+        outfile.write("        point_map.fitBounds(bounds);\n")
 
 
 def start_google_chart_header(outfile):
@@ -1227,7 +1241,7 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
         common_header_part1(outfile, name, "../")
         if SHOW_NEW and len(location_set) > 0:
             start_google_map_header(outfile)
-            write_google_map_point_header(outfile, "name_" + name)
+            write_google_map_point_header(outfile, "name_" + name, None)
             end_google_map_header(outfile)
 
         if maxcnt > 0:
@@ -1353,7 +1367,7 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
 
         if SHOW_NEW and len(location_set) > 0:
             start_google_map_header(outfile)
-            write_google_map_point_header(outfile, "sn_" + specific_name.name)
+            write_google_map_point_header(outfile, "sn_" + specific_name.name, None)
             end_google_map_header(outfile)
 
         if maxcnt > 0:
@@ -2184,7 +2198,7 @@ def write_geography_page(species, outfile, do_print):
         start_google_map_header(outfile)
         write_google_map_range_header(outfile, "uca_all")
         if SHOW_NEW:
-            write_google_map_point_header(outfile, "uca_all")
+            write_google_map_point_header(outfile, "uca_all", None)
         end_google_map_header(outfile)
         common_header_part2(outfile, "", True)
 
@@ -2299,7 +2313,7 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
     else:
         common_header_part1(outfile, loc.trimmed_name, "../")
         start_google_map_header(outfile)
-        write_google_map_point_header(outfile, "location_" + place_to_filename(loc.name))
+        write_google_map_point_header(outfile, "location_" + place_to_filename(loc.name), loc)
         end_google_map_header(outfile)
         common_header_part2(outfile, "../", True)
 
@@ -2809,7 +2823,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
             start_google_map_header(outfile)
             write_google_map_range_header(outfile, "u_" + species.species)
             if SHOW_NEW:
-                write_google_map_point_header(outfile, "u_" + species.species)
+                write_google_map_point_header(outfile, "u_" + species.species, None)
             end_google_map_header(outfile)
             common_header_part2(outfile, "", True)
 

@@ -385,7 +385,7 @@ def create_point_map_kml(title, place_list, point_locations):
         myzip.close()
 
 
-def create_point_map_svg(title, place_list, point_locations, base_map, skip_axes):
+def create_point_map_svg(title, place_list, point_locations, base_map, skip_axes, set_bounds):
     fig, faxes = mplpy.subplots(figsize=[6.5, 3.25])
     draw_base_map(faxes, base_map)
     for spine in faxes.spines:
@@ -416,7 +416,19 @@ def create_point_map_svg(title, place_list, point_locations, base_map, skip_axes
 
     # faxes.scatter(lons, lats, s=20, color="red", edgecolors="darkred", alpha=1, zorder=2, clip_on=False)
     faxes.scatter(lons, lats, s=20, color=colors, edgecolors=edges, alpha=1, zorder=2, clip_on=False)
-    minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
+    if set_bounds:
+        p = place_list[0]
+        if p in point_locations:
+            point = point_locations[p]
+            if point.sw_lon is not None:
+                minlon = point.sw_lon
+                maxlon = point.ne_lon
+                minlat = point.sw_lat
+                maxlat = point.ne_lat
+            else:
+                minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
+    else:
+        minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)
     if skip_axes:
@@ -462,12 +474,12 @@ def create_all_name_maps(base_map, all_names, specific_names, point_locations,
     for name in all_names:
         namefile = "name_" + name_to_filename(name)
         place_list = binomial_plot_locations[name]
-        create_point_map_svg(namefile, place_list, point_locations, base_map, False)
+        create_point_map_svg(namefile, place_list, point_locations, base_map, False, False)
         create_point_map_kml(namefile, place_list, point_locations)
     for name in specific_names:
         namefile = "sn_" + name.name
         place_list = specific_plot_locations[name]
-        create_point_map_svg(namefile, place_list, point_locations, base_map, False)
+        create_point_map_svg(namefile, place_list, point_locations, base_map, False, False)
         create_point_map_kml(namefile, place_list, point_locations)
 
 
@@ -475,7 +487,7 @@ def create_all_location_maps(base_map, point_locations):
     for loc in point_locations:
         place_list = [loc]
         namefile = "location_" + place_to_filename(loc)
-        create_point_map_svg(namefile, place_list, point_locations, base_map, False)
+        create_point_map_svg(namefile, place_list, point_locations, base_map, False, True)
         create_point_map_kml(namefile, place_list, point_locations)
 
 
