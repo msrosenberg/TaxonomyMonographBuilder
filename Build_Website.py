@@ -4759,8 +4759,8 @@ def build_site(init_data):
          location_sp_names, location_bi_names) = match_names_to_locations(species, specific_point_locations,
                                                                           binomial_point_locations,
                                                                           point_locations, citelist, logfile)
-        # TMB_Create_Maps.create_all_maps(init_data, point_locations, species, species_plot_locations, all_names,
-        #                                 binomial_plot_locations, specific_names, specific_plot_locations)
+        TMB_Create_Maps.create_all_maps(init_data, point_locations, species, species_plot_locations, all_names,
+                                        binomial_plot_locations, specific_names, specific_plot_locations)
 
         # output website version
         if True:
@@ -4787,16 +4787,17 @@ def build_site(init_data):
             with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
                 write_location_index(outfile, False, point_locations, location_dict, location_species,
                                      location_sp_names, location_bi_names)
-            print("......Writing Misc......")
-            with codecs.open(WEBOUT_PATH + SYST_URL, "w", "utf-8") as outfile:
-                write_systematics_overview(subgenera, species, refdict, outfile, False, logfile)
-            with codecs.open(WEBOUT_PATH + COMMON_URL, "w", "utf-8") as outfile:
-                write_common_names_pages(outfile, replace_references(common_name_data, refdict, False, logfile), False)
+            print("......Writing Media Pages......")
             with codecs.open(WEBOUT_PATH + PHOTO_URL, "w", "utf-8") as outfile:
                 write_photo_index(species, photos, False, outfile, logfile)
             write_all_art_pages(art, False, None, logfile)
             with codecs.open(WEBOUT_PATH + VIDEO_URL, "w", "utf-8") as outfile:
                 write_video_index(videos, False, outfile, logfile)
+            print("......Writing Misc......")
+            with codecs.open(WEBOUT_PATH + SYST_URL, "w", "utf-8") as outfile:
+                write_systematics_overview(subgenera, species, refdict, outfile, False, logfile)
+            with codecs.open(WEBOUT_PATH + COMMON_URL, "w", "utf-8") as outfile:
+                write_common_names_pages(outfile, replace_references(common_name_data, refdict, False, logfile), False)
             with codecs.open(WEBOUT_PATH + MAP_URL, "w", "utf-8") as outfile:
                 write_geography_page(species, outfile, False)
             with codecs.open(WEBOUT_PATH + LIFECYCLE_URL, "w", "utf-8") as outfile:
