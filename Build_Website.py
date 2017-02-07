@@ -828,7 +828,10 @@ def create_location_link(location, display_name, path, do_print):
 
 
 def strip_location_subtext(x):
-    """ remove information in []'s from a location string """
+    """ remove extra information from a location string """
+    # remove <!> indicator from locations
+    x = x.replace("<!>", "").strip()
+    # remove information in []'s from a location string
     if "[" in x:
         x = x[:x.find("[") - 1]
     return x
@@ -2539,6 +2542,7 @@ def write_location_index(outfile, do_print, point_locations, location_dict, loca
 def match_names_to_locations(species, specific_point_locations, binomial_point_locations, point_locations, citelist,
                              logfile):
     species_plot_locations = {}
+    invalid_species_locations = {}
     location_species = {x: set() for x in point_locations}
     location_bi_names = {x: set() for x in point_locations}
     location_sp_names = {x: set() for x in point_locations}
@@ -2546,22 +2550,25 @@ def match_names_to_locations(species, specific_point_locations, binomial_point_l
     for s in species:
         if s.status != "fossil":
             places = set()
+            invalid_places = set()
             for c in citelist:
                 if (c.actual == s.species) and ((c.context == "location") or
                                                 (c.context == "specimen")):
                     p = c.application
                     if p[0] != "[":
                         p = strip_location_subtext(p)
-                        # if "[" in p:
-                        #     p = p[:p.find("[") - 1]
                         if p in point_locations:
                             places.add(p)
                             location_species[p] |= {s}
+                            if "<!>" in c.application:
+                                invalid_places.add(p)
                         elif p != "?":
                             missing_set |= {p}
             species_plot_locations[s] = sorted(list(places))
+            invalid_species_locations[s] = invalid_places
         else:
             species_plot_locations[s] = None
+            invalid_species_locations[s] = None
 
     binomial_plot_locations = {}
     for name in binomial_point_locations:
@@ -2592,7 +2599,7 @@ def match_names_to_locations(species, specific_point_locations, binomial_point_l
         for m in missing_list:
             report_error(logfile, "Missing point location: " + m)
 
-    return (species_plot_locations, binomial_plot_locations, specific_plot_locations,
+    return (species_plot_locations, invalid_species_locations, binomial_plot_locations, specific_plot_locations,
             location_species, location_sp_names, location_bi_names)
 
 
@@ -4754,16 +4761,17 @@ def build_site(init_data):
         # location_species is a dict of sets of species objects, key = location full names
         # location_sp_names is a dict of sets of specific name ojbets, key = location full names
         # location_bi_names is a dict of sets of names (strings), keys = location full names
-        (species_plot_locations, binomial_plot_locations,
+        (species_plot_locations, invalid_species_locations, binomial_plot_locations,
          specific_plot_locations, location_species,
          location_sp_names, location_bi_names) = match_names_to_locations(species, specific_point_locations,
                                                                           binomial_point_locations,
                                                                           point_locations, citelist, logfile)
-        TMB_Create_Maps.create_all_maps(init_data, point_locations, species, species_plot_locations, all_names,
-                                        binomial_plot_locations, specific_names, specific_plot_locations)
+        TMB_Create_Maps.create_all_maps(init_data, point_locations, species, species_plot_locations,
+                                        invalid_species_locations, all_names, binomial_plot_locations, specific_names,
+                                        specific_plot_locations)
 
         # output website version
-        if True:
+        if False:
             create_web_output_paths()
             print("...Creating Web Version...")
             copy_support_files(logfile)
