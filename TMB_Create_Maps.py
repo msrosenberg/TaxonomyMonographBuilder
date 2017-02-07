@@ -369,7 +369,7 @@ def create_point_map_kml(title, place_list, point_locations, invalid_places):
             pnt = point_locations[p]
             is_invalid = False
             if invalid_places is not None:
-                if pnt in invalid_places:
+                if p in invalid_places:
                     is_invalid = True
             if pnt.validity == "X":
                 is_invalid = True
