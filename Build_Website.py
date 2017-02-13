@@ -4400,7 +4400,7 @@ def write_citation_page(refdict):
                       "PLoS ONE</a></li>\n")
         outfile.write("      <li><span class=\"fa-li fa fa-github\"></span>"
                       "<a href=\"https://github.com/msrosenberg/fiddlercrab.info\">Website data repository on "
-                      "Github</a></li>\n")
+                      "GitHub</a></li>\n")
         outfile.write("    </ul>\n")
         common_html_footer(outfile, "")
 
@@ -4501,7 +4501,7 @@ def write_introduction(outfile, species, do_print):
         outfile.write("      <li><span class=\"fa-li fa fa-pencil\"></span>"
                       "<a href=\"" + CITE_URL + "\">Citation info for this website</a></li>\n")
         outfile.write("      <li><span class=\"fa-li fa fa-github\"></span>"
-                      "<a href=\"https://github.com/msrosenberg/fiddlercrab.info\">Website data on Github</a></li>\n")
+                      "<a href=\"https://github.com/msrosenberg/fiddlercrab.info\">Website data on GitHub</a></li>\n")
         outfile.write("    </ul>\n")
         common_html_footer(outfile, "")
 
@@ -4631,7 +4631,7 @@ def print_copyright_page(outfile, init_data, refdict):
     outfile.write("     <p>Release: " + VERSION + "</p>\n")
     outfile.write("     <p><a href=\"http://" + init_data.site_address + "\">" + init_data.site_address + "</a></p>\n")
     outfile.write("     <p>\n")
-    outfile.write("       The data and code used to produce this document can be found on Github at")
+    outfile.write("       The data and code used to produce this document can be found on GitHub at")
     outfile.write("     </p>\n")
     outfile.write("     <p>\n")
     outfile.write("       <a href=\"https://github.com/msrosenberg/fiddlercrab.info\">"
