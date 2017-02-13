@@ -319,18 +319,19 @@ def clean_references(references):
 def format_language(x):
     language_replace_list = [
         [" and ", " &amp; "],
-        ["German", "<span class=\"flag-icon flag-icon-de\"></span>German"],
-        ["Spanish", "<span class=\"flag-icon flag-icon-es\"></span>Spanish"],
-        ["Russian", "<span class=\"flag-icon flag-icon-ru\"></span>Russian"],
-        ["French", "<span class=\"flag-icon flag-icon-fr\"></span>French"],
-        ["Portuguese", "<span class=\"flag-icon flag-icon-pt\"></span>Portuguese"],
-        ["Danish", "<span class=\"flag-icon flag-icon-dk\"></span>Danish"],
-        ["Dutch", "<span class=\"flag-icon flag-icon-nl\"></span>Dutch"],
-        ["Japanese", "<span class=\"flag-icon flag-icon-jp\"></span>Japanese"],
-        ["Chinese", "<span class=\"flag-icon flag-icon-cn\"></span>Chinese"],
-        ["English", "<span class=\"flag-icon flag-icon-us\"></span>English"],
-        ["Thai", "<span class=\"flag-icon flag-icon-th\"></span>Thai"],
-        ["Italian", "<span class=\"flag-icon flag-icon-it\"></span>Italian"]
+        ["German", "<span class=\"flag-icon flag-icon-de\"></span> German"],
+        ["Spanish", "<span class=\"flag-icon flag-icon-es\"></span> Spanish"],
+        ["Russian", "<span class=\"flag-icon flag-icon-ru\"></span> Russian"],
+        ["French", "<span class=\"flag-icon flag-icon-fr\"></span> French"],
+        ["Portuguese", "<span class=\"flag-icon flag-icon-pt\"></span> Portuguese"],
+        ["Danish", "<span class=\"flag-icon flag-icon-dk\"></span> Danish"],
+        ["Dutch", "<span class=\"flag-icon flag-icon-nl\"></span> Dutch"],
+        ["Japanese", "<span class=\"flag-icon flag-icon-jp\"></span> Japanese"],
+        ["Chinese", "<span class=\"flag-icon flag-icon-cn\"></span> Chinese"],
+        ["English", "<span class=\"flag-icon flag-icon-us\"></span> English"],
+        ["Thai", "<span class=\"flag-icon flag-icon-th\"></span> Thai"],
+        ["Latin", "<span class=\"flag-icon flag-icon-va\"></span> Latin"],
+        ["Italian", "<span class=\"flag-icon flag-icon-it\"></span> Italian"]
     ]
     for r in language_replace_list:
         x = x.replace(r[0], r[1])
