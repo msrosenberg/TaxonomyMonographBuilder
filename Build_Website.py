@@ -97,7 +97,7 @@ def common_header_part1(outfile, title, indexpath):
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath + "uca_style.css\" />\n")
     outfile.write("    <script src=\"https://use.fontawesome.com/3669ad7c2b.js\"></script>\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath +
-                  "images/flag-icon-css-master/css/flag-icon.min.css\" />\n")
+                  "images/flag-icon-css/css/flag-icon.min.css\" />\n")
     outfile.write("    <link rel=\"author\" href=\"mailto:msr@asu.edu\" />\n")
 
 
@@ -1902,7 +1902,7 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
     else:
         outfile.write("    <div id=\"spname_chart_div\" class=\"name_chart\"></div>\n")
 
-    outfile.write("    <h3 class=\"nobookmark\">Number of References Referring to Accepted Species</h3>\n")
+    outfile.write("    <h3 class=\"nobookmark pagebreak\">Number of References Referring to Accepted Species</h3>\n")
     c = 0
     for i in range(ngraph):
         c += 1
@@ -1910,7 +1910,7 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
             filename = "refs_per_species_bar" + str(c) + ".svg"
             sublist = tmpslist[i*per_graph:(i+1)*per_graph]
             ref_cnts[""] = 0
-            for i in range(len(sublist), per_graph):
+            for j in range(len(sublist), per_graph):
                 sublist.append("")
             create_qual_bar_chart_file(filename, sublist, ref_cnts, maxcnt)
             outfile.write("    <figure class=\"graph\">\n")
@@ -4767,6 +4767,8 @@ def start_print(outfile):
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/uca_style.css\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/print.css\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/images/font-awesome/css/font-awesome.min.css\" />\n")
+    outfile.write("    <link rel=\"stylesheet\" href=\"resources/images/flag-icon-css/css/flag-icon.min.css\" />\n")
+
     outfile.write("  </head>\n")
     outfile.write("\n")
     outfile.write("  <body>\n")
@@ -4825,9 +4827,9 @@ def build_site(init_data):
          location_sp_names, location_bi_names) = match_names_to_locations(species, specific_point_locations,
                                                                           binomial_point_locations,
                                                                           point_locations, citelist, logfile)
-        TMB_Create_Maps.create_all_maps(init_data, point_locations, species, species_plot_locations,
-                                        invalid_species_locations, all_names, binomial_plot_locations, specific_names,
-                                        specific_plot_locations)
+        # TMB_Create_Maps.create_all_maps(init_data, point_locations, species, species_plot_locations,
+        #                                 invalid_species_locations, all_names, binomial_plot_locations, specific_names,
+        #                                 specific_plot_locations)
 
         # output website version
         if False:
