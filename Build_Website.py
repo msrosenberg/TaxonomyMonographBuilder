@@ -8,6 +8,7 @@ import datetime
 import os
 import shutil
 import re
+import math
 # local dependencies
 import TMB_Import
 import TMB_Create_Maps
@@ -1714,6 +1715,9 @@ def match_specific_name(name, specific_names):
 
 
 def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do_print, outfile):
+    per_graph = 60
+    ngraph = math.ceil(len(species_refs) / per_graph)
+
     miny = START_YEAR
     maxy = CURRENT_YEAR
     byears = []
@@ -1744,87 +1748,94 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
     else:
         common_header_part1(outfile, "Fiddler Crab Name Summary", "../")
         start_google_chart_header(outfile)
-        # outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
-        # outfile.write("    <script type=\"text/javascript\">\n")
-        # outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
-        # outfile.write("      google.setOnLoadCallback(drawChart);\n")
-        # outfile.write("      function drawChart() {\n")
-        outfile.write("        var data1 = google.visualization.arrayToDataTable([\n")
+        outfile.write("        var cumulative_biname_data = google.visualization.arrayToDataTable([\n")
         outfile.write("          ['Year', 'Cumulative Unique Binomial/Compound Names'],\n")
         for y in byears:
             outfile.write("          ['" + str(y[0]) + "', " + str(y[2]) + "],\n")
         outfile.write("        ]);\n")
         outfile.write("\n")
-        outfile.write("        var data2 = google.visualization.arrayToDataTable([\n")
+        outfile.write("        var biname_data = google.visualization.arrayToDataTable([\n")
         outfile.write("          ['Year', 'New Unique Binomial/Compound Names'],\n")
         for y in byears:
             outfile.write("          ['" + str(y[0]) + "', " + str(y[1]) + "],\n")
         outfile.write("        ]);\n")
         outfile.write("\n")
-        outfile.write("        var data3 = google.visualization.arrayToDataTable([\n")
+        outfile.write("        var cumulative_spname_data = google.visualization.arrayToDataTable([\n")
         outfile.write("          ['Year', 'Cumulative Unique Specific Names'],\n")
         for y in syears:
             outfile.write("          ['" + str(y[0]) + "', " + str(y[2]) + "],\n")
         outfile.write("        ]);\n")
         outfile.write("\n")
-        outfile.write("        var data4 = google.visualization.arrayToDataTable([\n")
+        outfile.write("        var spname_data = google.visualization.arrayToDataTable([\n")
         outfile.write("          ['Year', 'New Unique Specific Names'],\n")
         for y in syears:
             outfile.write("          ['" + str(y[0]) + "', " + str(y[1]) + "],\n")
         outfile.write("        ]);\n")
         outfile.write("\n")
-        outfile.write("        var data5 = google.visualization.arrayToDataTable([\n")
-        outfile.write("          ['Species', 'Referring References'],\n")
-        for s in tmpslist:
-            outfile.write("          ['" + s + "', " + str(ref_cnts[s]) + "],\n")
-        outfile.write("        ]);\n")
+        c = 0
+        maxcnt = 0
+        for g in range(ngraph):
+            c += 1
+            outfile.write("        var spcnt_data" + str(c) + " = google.visualization.arrayToDataTable([\n")
+            outfile.write("          ['Species', 'Referring References'],\n")
+            start = g*per_graph
+            end = start + per_graph
+            if end > len(tmpslist):
+                nblank = end - len(tmpslist)
+                end = len(tmpslist)
+            else:
+                nblank = 0
+            for i in range(start, end):
+                s = tmpslist[i]
+                outfile.write("          ['" + s + "', " + str(ref_cnts[s]) + "],\n")
+                maxcnt = max(maxcnt, ref_cnts[s])
+            for i in range(nblank):
+                outfile.write("          ['" "', 0],\n")
+            outfile.write("        ]);\n")
+
         outfile.write("\n")
-        outfile.write("        var options1 = {\n")
-        outfile.write("          title: \"Cumulative Unique Binomial/Compound Names by Year\", \n")
-        outfile.write("          legend: { position: 'none' }\n")
-        outfile.write("        };\n")
-        outfile.write("\n")
-        outfile.write("        var options2 = {\n")
-        outfile.write("          title: \"Unique Binomial/Compound Names by Year\", \n")
+        outfile.write("        var line_name_options = {\n")
         outfile.write("          legend: { position: 'none' },\n")
-        outfile.write("          bar: { groupWidth: '80%' }\n")
+        outfile.write("          chartArea: { height: '75%', top: 10 }\n")
         outfile.write("        };\n")
         outfile.write("\n")
-        outfile.write("        var options3 = {\n")
-        outfile.write("          title: \"Cumulative Unique Specific Names by Year\", \n")
-        outfile.write("          legend: { position: 'none' }\n")
-        outfile.write("        };\n")
-        outfile.write("\n")
-        outfile.write("        var options4 = {\n")
-        outfile.write("          title: \"Unique Specific Names by Year\", \n")
+        outfile.write("        var bar_name_options = {\n")
         outfile.write("          legend: { position: 'none' },\n")
-        outfile.write("          bar: { groupWidth: '80%' }\n")
+        outfile.write("          bar: { groupWidth: '80%' },\n")
+        outfile.write("          chartArea: { height: '75%', top: 10 }\n")
         outfile.write("        };\n")
         outfile.write("\n")
-        outfile.write("        var options5 = {\n")
-        outfile.write("          title: \"Number of References Referring to Accepted Species\", \n")
+        outfile.write("        var spcnt_options = {\n")
         outfile.write("          legend: { position: 'none' },\n")
-        outfile.write("          bar: { groupWidth: '80%' }\n")
+        outfile.write("          vAxis: { maxValue: " + str(maxcnt) + ", minValue: 0 },\n")
+        outfile.write("          hAxis: { slantedTextAngle: 90,\n")
+        outfile.write("                   textStyle: { italic: true, fontSize: 12 }},\n")
+        outfile.write("          bar: { groupWidth: '80%' },\n")
+        outfile.write("          chartArea: { height: '50%', top: 10 }\n")
         outfile.write("        };\n")
         outfile.write("\n")
-        outfile.write("        var chart1 = new google.visualization.LineChart(document.getElementById"
-                      "('namechart1_div'));\n")
-        outfile.write("        chart1.draw(data1, options1);\n")
-        outfile.write("        var chart2 = new google.visualization.ColumnChart(document.getElementById"
-                      "('namechart2_div'));\n")
-        outfile.write("        chart2.draw(data2, options2);\n")
-        outfile.write("        var chart3 = new google.visualization.LineChart(document.getElementById"
-                      "('namechart3_div'));\n")
-        outfile.write("        chart3.draw(data3, options3);\n")
-        outfile.write("        var chart4 = new google.visualization.ColumnChart(document.getElementById"
-                      "('namechart4_div'));\n")
-        outfile.write("        chart4.draw(data4, options4);\n")
-        outfile.write("        var chart5 = new google.visualization.ColumnChart(document.getElementById"
-                      "('namechart5_div'));\n")
-        outfile.write("        chart5.draw(data5, options5);\n")
+        outfile.write("        var cumulative_biname_chart = new google.visualization.LineChart(document.getElementById"
+                      "('cumulative_biname_chart_div'));\n")
+        outfile.write("        cumulative_biname_chart.draw(cumulative_biname_data, line_name_options);\n")
+        outfile.write("        var biname_chart = new google.visualization.ColumnChart(document.getElementById"
+                      "('biname_chart_div'));\n")
+        outfile.write("        biname_chart.draw(biname_data, bar_name_options);\n")
+        outfile.write("        var cumulative_spname_chart = new google.visualization.LineChart(document.getElementById"
+                      "('cumulative_spname_chart_div'));\n")
+        outfile.write("        cumulative_spname_chart.draw(cumulative_spname_data, line_name_options);\n")
+        outfile.write("        var spname_chart = new google.visualization.ColumnChart(document.getElementById"
+                      "('spname_chart_div'));\n")
+        outfile.write("        spname_chart.draw(spname_data, bar_name_options);\n")
+        c = 0
+        for g in range(ngraph):
+            c += 1
+            j = str(c)
+            outfile.write("        var spcnt_chart" + j + " = "
+                          "new google.visualization.ColumnChart(document.getElementById"
+                          "('spcnt_chart" + j + "_div'));\n")
+            outfile.write("        spcnt_chart" + j + ".draw(spcnt_data" + j + ", spcnt_options);\n")
+
         end_google_chart_header(outfile)
-        # outfile.write("      }\n")
-        # outfile.write("    </script>\n")
         common_header_part2(outfile, "", False)
 
     outfile.write("    <header>\n")
@@ -1846,49 +1857,63 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
                   "\">references whose citation data is already included in the database</a>.\n")
     outfile.write("    </p>\n")
 
+    outfile.write("    <h3 class=\"nobookmark\">Cumulative Unique Binomial/Compound Names by Year</h3>\n")
     if do_print:
         filename = "cumulative_binames_line.svg"
         create_line_chart_file(filename, byears, START_YEAR, CURRENT_YEAR, 2)
-        outfile.write("    <h3 class=\"nobookmark\">Cumulative Unique Binomial/Compound Names by Year</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"line_chart\" />\n")
         outfile.write("    </figure>\n")
+    else:
+        outfile.write("    <div id=\"cumulative_biname_chart_div\" class=\"name_chart\"></div>\n")
 
+    outfile.write("    <h3 class=\"nobookmark\">Unique Binomial/Compound Names by Year</h3>\n")
+    if do_print:
         filename = "binames_per_year.svg_bar.svg"
         create_bar_chart_file(filename, byears, START_YEAR, CURRENT_YEAR, 1)
         outfile.write("    <h3 class=\"nobookmark\">Unique Binomial/Compound Names by Year</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
         outfile.write("    </figure>\n")
+    else:
+        outfile.write("    <div id=\"biname_chart_div\" class=\"name_chart\"></div>\n")
 
+    outfile.write("    <h3 class=\"nobookmark\">Cumulative Unique Specific Names by Year</h3>\n")
+    if do_print:
         filename = "cumulative_spnames_line.svg"
         create_line_chart_file(filename, syears, 1758, CURRENT_YEAR, 2)
-        outfile.write("    <h3 class=\"nobookmark\">Cumulative Unique Specific Names by Year</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"line_chart\" />\n")
         outfile.write("    </figure>\n")
+    else:
+        outfile.write("    <div id=\"cumulative_spname_chart_div\" class=\"name_chart\"></div>\n")
 
+    outfile.write("    <h3 class=\"nobookmark\">Unique Specific Names by Year</h3>\n")
+    if do_print:
         filename = "spnames_per_year_bar.svg"
         create_bar_chart_file(filename, syears, 1758, CURRENT_YEAR, 1)
-        outfile.write("    <h3 class=\"nobookmark\">Unique Specific Names by Year</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
         outfile.write("    </figure>\n")
+    else:
+        outfile.write("    <div id=\"spname_chart_div\" class=\"name_chart\"></div>\n")
 
+    outfile.write("    <h3 class=\"nobookmark\">Number of References Referring to Accepted Species</h3>\n")
+    if do_print:
         filename = "refs_per_species_bar.svg"
         create_qual_bar_chart_file(filename, tmpslist, ref_cnts)
-        outfile.write("    <h3 class=\"nobookmark\">Number of References Referring to Accepted Species</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
         outfile.write("    </figure>\n")
+    else:
+        c = 0
+        for i in range(ngraph):
+            c += 1
+            outfile.write("    <div id=\"spcnt_chart" + str(c) + "_div\" class=\"name_bar_chart\"></div>\n")
 
+    if do_print:
         end_page_division(outfile)
     else:
-        outfile.write("    <div id=\"namechart1_div\"></div>\n")
-        outfile.write("    <div id=\"namechart2_div\"></div>\n")
-        outfile.write("    <div id=\"namechart3_div\"></div>\n")
-        outfile.write("    <div id=\"namechart4_div\"></div>\n")
-        outfile.write("    <div id=\"namechart5_div\"></div>\n")
         common_html_footer(outfile, "../")
 
 
