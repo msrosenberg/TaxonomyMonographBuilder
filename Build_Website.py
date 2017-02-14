@@ -407,20 +407,21 @@ def create_stacked_bar_chart_file(filename, data, minx, maxx, cols):
     mplpy.close("all")
 
 
-def create_qual_bar_chart_file(filename, label_list, data_dict):
+def create_qual_bar_chart_file(filename, label_list, data_dict, max_value):
     x_list = [x for x in range(len(label_list))]
     y_list = [data_dict[x] for x in label_list]
     fig, faxes = mplpy.subplots(figsize=[6.5, 3])
     faxes.bar(x_list, y_list, color="blue", edgecolor="darkblue")
     mplpy.xticks(rotation="vertical", style="italic")
-    tick_list = x_list[::4]
-    tick_labels = label_list[::4]
-    faxes.set_xticks(tick_list)
-    faxes.set_xticklabels(tick_labels)
-    # faxes.set_xticks(x_list)
-    # faxes.set_xticklabels(label_list)
+    # tick_list = x_list[::4]
+    # tick_labels = label_list[::4]
+    # faxes.set_xticks(tick_list)
+    # faxes.set_xticklabels(tick_labels)
+    faxes.set_xticks(x_list)
+    faxes.set_xticklabels(label_list)
     faxes.spines["right"].set_visible(False)
     faxes.spines["top"].set_visible(False)
+    mplpy.ylim(0, max_value)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     mplpy.savefig(TMP_PATH + filename)
@@ -1715,7 +1716,10 @@ def match_specific_name(name, specific_names):
 
 
 def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do_print, outfile):
-    per_graph = 60
+    if do_print:
+        per_graph = 40
+    else:
+        per_graph = 60
     ngraph = math.ceil(len(species_refs) / per_graph)
 
     miny = START_YEAR
@@ -1742,6 +1746,9 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
     tmpslist = list(species_refs.keys())
     tmpslist.sort()
     ref_cnts = {s: len(species_refs[s]) for s in tmpslist}
+    maxcnt = 0
+    for s in ref_cnts:
+        maxcnt = max(maxcnt, ref_cnts[s])
 
     if do_print:
         start_page_division(outfile, "base_page")
@@ -1773,7 +1780,6 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
         outfile.write("        ]);\n")
         outfile.write("\n")
         c = 0
-        maxcnt = 0
         for g in range(ngraph):
             c += 1
             outfile.write("        var spcnt_data" + str(c) + " = google.visualization.arrayToDataTable([\n")
@@ -1788,7 +1794,6 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
             for i in range(start, end):
                 s = tmpslist[i]
                 outfile.write("          ['" + s + "', " + str(ref_cnts[s]) + "],\n")
-                maxcnt = max(maxcnt, ref_cnts[s])
             for i in range(nblank):
                 outfile.write("          ['" "', 0],\n")
             outfile.write("        ]);\n")
@@ -1871,7 +1876,6 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
     if do_print:
         filename = "binames_per_year.svg_bar.svg"
         create_bar_chart_file(filename, byears, START_YEAR, CURRENT_YEAR, 1)
-        outfile.write("    <h3 class=\"nobookmark\">Unique Binomial/Compound Names by Year</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
         outfile.write("    </figure>\n")
@@ -1899,16 +1903,20 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
         outfile.write("    <div id=\"spname_chart_div\" class=\"name_chart\"></div>\n")
 
     outfile.write("    <h3 class=\"nobookmark\">Number of References Referring to Accepted Species</h3>\n")
-    if do_print:
-        filename = "refs_per_species_bar.svg"
-        create_qual_bar_chart_file(filename, tmpslist, ref_cnts)
-        outfile.write("    <figure class=\"graph\">\n")
-        outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
-        outfile.write("    </figure>\n")
-    else:
-        c = 0
-        for i in range(ngraph):
-            c += 1
+    c = 0
+    for i in range(ngraph):
+        c += 1
+        if do_print:
+            filename = "refs_per_species_bar" + str(c) + ".svg"
+            sublist = tmpslist[i*per_graph:(i+1)*per_graph]
+            ref_cnts[""] = 0
+            for i in range(len(sublist), per_graph):
+                sublist.append("")
+            create_qual_bar_chart_file(filename, sublist, ref_cnts, maxcnt)
+            outfile.write("    <figure class=\"graph\">\n")
+            outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
+            outfile.write("    </figure>\n")
+        else:
             outfile.write("    <div id=\"spcnt_chart" + str(c) + "_div\" class=\"name_bar_chart\"></div>\n")
 
     if do_print:
@@ -4822,7 +4830,7 @@ def build_site(init_data):
                                         specific_plot_locations)
 
         # output website version
-        if True:
+        if False:
             create_web_output_paths()
             print("...Creating Web Version...")
             copy_support_files(logfile)
@@ -4870,7 +4878,7 @@ def build_site(init_data):
             write_citation_page(refdict)
 
         # output print version
-        if False:
+        if True:
             print("...Creating Print Version...")
             with codecs.open("print.html", "w", "utf-8") as printfile:
                 start_print(printfile)
