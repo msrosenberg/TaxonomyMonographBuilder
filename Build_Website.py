@@ -410,7 +410,7 @@ def create_stacked_bar_chart_file(filename, data, minx, maxx, cols):
 def create_qual_bar_chart_file(filename, label_list, data_dict, max_value):
     x_list = [x for x in range(len(label_list))]
     y_list = [data_dict[x] for x in label_list]
-    fig, faxes = mplpy.subplots(figsize=[6.5, 3])
+    fig, faxes = mplpy.subplots(figsize=[6.5, 2.5])
     faxes.bar(x_list, y_list, color="blue", edgecolor="darkblue")
     mplpy.xticks(rotation="vertical", style="italic")
     # tick_list = x_list[::4]
@@ -1966,18 +1966,11 @@ def create_genus_chronology(genus_cnts, do_print, outfile):
     else:
         common_header_part1(outfile, "Uca", "../")
         start_google_chart_header(outfile)
-        # outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
-        # outfile.write("    <script type=\"text/javascript\">\n")
-        # outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
-        # outfile.write("      google.setOnLoadCallback(drawChart);\n")
-        # outfile.write("      function drawChart() {\n")
         setup_chronology_chart(0, miny, maxy, maxcnt, total_cnts, outfile)
         adjust = 1
         for i, name in enumerate(order):
             setup_chronology_chart(i + adjust, miny, maxy, maxcnt, genus_cnts[name], outfile)
         end_google_chart_header(outfile)
-        # outfile.write("      }\n")
-        # outfile.write("    </script>\n")
         common_header_part2(outfile, "", False)
 
     outfile.write("    <header>\n")
@@ -4827,9 +4820,9 @@ def build_site(init_data):
          location_sp_names, location_bi_names) = match_names_to_locations(species, specific_point_locations,
                                                                           binomial_point_locations,
                                                                           point_locations, citelist, logfile)
-        # TMB_Create_Maps.create_all_maps(init_data, point_locations, species, species_plot_locations,
-        #                                 invalid_species_locations, all_names, binomial_plot_locations, specific_names,
-        #                                 specific_plot_locations)
+        TMB_Create_Maps.create_all_maps(init_data, point_locations, species, species_plot_locations,
+                                        invalid_species_locations, all_names, binomial_plot_locations, specific_names,
+                                        specific_plot_locations)
 
         # output website version
         if False:
