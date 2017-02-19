@@ -189,16 +189,16 @@ def output_all_kml(crabs):
         myzip.close()
 
 
-def read_base_map(filename):
+def read_base_map(mainfile, islandfile):
     polygon_list = []
-    with open(filename, "r") as infile:
+    with open(mainfile, "r") as infile:
         line = infile.readline()
         while line != "":
             if line.startswith("Polygon"):
                 data = line.strip().split("\t")
                 new_polygon = Polygon()
                 polygon_list.append(new_polygon)
-                n = abs(int(data[1]))  # wtf??? why is one of the # of points negative?
+                n = abs(int(data[1]))
                 new_point = Point(lat=float(data[3]), lon=float(data[2]))
                 new_polygon.points.append(new_point)
                 for i in range(n-1):
@@ -208,15 +208,31 @@ def read_base_map(filename):
                     new_polygon.points.append(new_point)
             else:
                 line = infile.readline()
+    if islandfile is not None:
+        with open(islandfile, "r") as infile:
+            line = infile.readline()
+            while line != "":
+                if line.startswith("Polygon"):
+                    data = line.strip().split("\t")
+                    new_polygon = Polygon()
+                    polygon_list.append(new_polygon)
+                    n = abs(int(data[1]))
+                    new_point = Point(lat=float(data[3]), lon=float(data[2]))
+                    new_polygon.points.append(new_point)
+                    for i in range(n - 1):
+                        line = infile.readline()
+                        data = line.strip().split("\t")
+                        new_point = Point(lat=float(data[1]), lon=float(data[0]))
+                        new_polygon.points.append(new_point)
+                else:
+                    line = infile.readline()
     return polygon_list
 
 
 def draw_base_map(faxes, base_map):
-    # for polygon in base_map:
-    #     lons = [p.lon for p in polygon.points]
-    #     lats = [p.lat for p in polygon.points]
-    #     faxes.plot(lons, lats, "silver", linewidth=0.5, zorder=1)
-
+    """
+    Draw the background map of countries and islands
+    """
     poly_list = []
     for polygon in base_map:
         plist = []
@@ -508,7 +524,7 @@ def create_all_location_maps(base_map, point_locations):
 
 def create_all_maps(init_data, point_locations, species, species_plot_locations, invalid_species_locations, all_names,
                     binomial_plot_locations, specific_names, specific_plot_locations):
-    base_map = read_base_map("resources/world_map.txt")
+    base_map = read_base_map("resources/ne_10m_admin_0_countries", "resources/ne_10m_minor_islands")
     print("......Creating Species Maps......")
     create_all_species_maps(base_map, init_data, species, point_locations, species_plot_locations,
                             invalid_species_locations)
