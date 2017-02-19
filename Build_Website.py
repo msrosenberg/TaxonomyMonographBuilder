@@ -4631,11 +4631,15 @@ def copy_map_files(species, all_names, specific_names, point_locations, logfile)
         copy_file(TMP_MAP_PATH + pointmap_name("location_" + place_to_filename(p)) + ".kmz")
 
 
-def print_cover():
-    pass
-    # outfile.write("    <div id=\"cover_page\">\n")
-    # outfile.write("    <div>\n")
-    # outfile.write("\n")
+def print_cover(outfile, init_data):
+    outfile.write("    <div id=\"cover_page\">\n")
+    for i in range(1, 21):
+        outfile.write("      <img id=\"cover_img" + str(i) + "\" class=\"cover_img\" "
+                      "src=\"media/cover images/cover" + str(i) + ".jpg\" />\n")
+    outfile.write("      <p class=\"cover_title\">" + init_data.site_title + "</p>\n")
+    outfile.write("      <p class=\"cover_author\">" + init_data.site_author + "</p>\n")
+    outfile.write("    </div>\n")
+    outfile.write("\n")
 
 
 def print_title_page(outfile, init_data):
@@ -4745,7 +4749,7 @@ def print_table_of_contents(outfile, species_list):
 
 
 def write_print_only_pages(outfile, init_data, species, refdict):
-    # print_cover(outfile)
+    print_cover(outfile, init_data)
     print_title_page(outfile, init_data)
     print_copyright_page(outfile, init_data, refdict)
     print_table_of_contents(outfile, species)
