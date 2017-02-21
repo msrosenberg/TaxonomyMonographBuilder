@@ -4633,7 +4633,7 @@ def copy_map_files(species, all_names, specific_names, point_locations, logfile)
 
 def print_cover(outfile, init_data):
     outfile.write("    <div id=\"cover_page\">\n")
-    for i in range(1, 21):
+    for i in range(1, 29):
         outfile.write("      <img id=\"cover_img" + str(i) + "\" class=\"cover_img\" "
                       "src=\"media/cover images/cover" + str(i) + ".jpg\" />\n")
     outfile.write("      <p class=\"cover_title\">" + init_data.site_title + "</p>\n")
@@ -4644,6 +4644,7 @@ def print_cover(outfile, init_data):
 
 def print_title_page(outfile, init_data):
     outfile.write("    <div id=\"title_page\">\n")
+    # outfile.write("     <img class=\"title_sketch\" src=\"media/cover images/title_sketch.svg\" />\n")
     outfile.write("     <p class=\"book_title\">" + init_data.site_title + "</p>\n")
     outfile.write("     <p class=\"book_subtitle\">" + init_data.site_subtitle + "</p>\n")
     outfile.write("     <p class=\"book_author\">" + init_data.site_author + "</p>\n")
