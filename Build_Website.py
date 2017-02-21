@@ -3132,11 +3132,13 @@ def write_species_page(species, references, specific_names, all_names, photos, v
     else:
         outfile.write("      <h2 id=\"references\" class=\"nobookmark\"><span class=\"fa fa-book\"></span> "
                       "References</h2>\n")
+    outfile.write("      <p>\n")
     reflist = []
     for ref in references:
         if ref.cite_key in sprefs:
             reflist.append(format_reference_cite(ref, do_print, AUTHOR_PAREN, logfile))
     outfile.write(", \n".join(reflist))
+    outfile.write("      </p>\n")
     # outfile.write("      <div class=\"reference_list\">\n")
     # outfile.write("        <ul>\n")
     # for ref in references:
@@ -4835,7 +4837,7 @@ def build_site(init_data):
                                         specific_plot_locations)
 
         # output website version
-        if False:
+        if True:
             create_web_output_paths()
             print("...Creating Web Version...")
             copy_support_files(logfile)
@@ -4883,7 +4885,7 @@ def build_site(init_data):
             write_citation_page(refdict)
 
         # output print version
-        if True:
+        if False:
             print("...Creating Print Version...")
             with codecs.open("print.html", "w", "utf-8") as printfile:
                 start_print(printfile)
