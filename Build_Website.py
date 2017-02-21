@@ -3132,13 +3132,18 @@ def write_species_page(species, references, specific_names, all_names, photos, v
     else:
         outfile.write("      <h2 id=\"references\" class=\"nobookmark\"><span class=\"fa fa-book\"></span> "
                       "References</h2>\n")
-    outfile.write("      <div class=\"reference_list\">\n")
-    outfile.write("        <ul>\n")
+    reflist = []
     for ref in references:
         if ref.cite_key in sprefs:
-            outfile.write("          <li>" + format_reference_full(ref, do_print, logfile) + "</li>\n")
-    outfile.write("        </ul>\n")
-    outfile.write("      </div>\n")
+            reflist.append(format_reference_cite(ref, do_print, AUTHOR_PAREN, logfile))
+    outfile.write(", \n".join(reflist))
+    # outfile.write("      <div class=\"reference_list\">\n")
+    # outfile.write("        <ul>\n")
+    # for ref in references:
+    #     if ref.cite_key in sprefs:
+    #         outfile.write("          <li>" + format_reference_full(ref, do_print, logfile) + "</li>\n")
+    # outfile.write("        </ul>\n")
+    # outfile.write("      </div>\n")
     outfile.write("    </section>\n")
     if do_print:
         end_page_division(outfile)
