@@ -50,7 +50,7 @@ AUTHOR_PAREN = 1
 AUTHOR_NOPCOMMA = 2
 
 # this flag is to hide/display new materials still in progress from the general release
-SHOW_NEW = True
+SHOW_NEW = False
 
 # randSeed = random.randint(0, 10000)
 
@@ -1315,7 +1315,6 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
                               ".svg\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
                 outfile.write("      </figure>\n")
             else:
-                # outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
                 outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
             outfile.write("    </div>\n")
         if maxcnt > 0:
@@ -4625,17 +4624,19 @@ def copy_map_files(species, all_names, specific_names, point_locations, logfile)
     copy_file(TMP_MAP_PATH + pointmap_name("uca_all") + ".kmz")
     copy_file(TMP_MAP_PATH + rangemap_name("uca_all") + ".svg")
     copy_file(TMP_MAP_PATH + pointmap_name("uca_all") + ".svg")
-    # binomial maps
-    for n in all_names:
-        copy_file(TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".kmz")
-        # copy_file(MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".svg")
-    # specific name maps
-    for n in specific_names:
-        copy_file(TMP_MAP_PATH + pointmap_name("sn_" + n.name) + ".kmz")
-        # copy_file(MAP_PATH + pointmap_name("sn_" + n.name) + ".svg")
-    # point location maps
-    for p in point_locations:
-        copy_file(TMP_MAP_PATH + pointmap_name("location_" + place_to_filename(p)) + ".kmz")
+
+    if SHOW_NEW:
+        # binomial maps
+        for n in all_names:
+            copy_file(TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".kmz")
+            # copy_file(MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".svg")
+        # specific name maps
+        for n in specific_names:
+            copy_file(TMP_MAP_PATH + pointmap_name("sn_" + n.name) + ".kmz")
+            # copy_file(MAP_PATH + pointmap_name("sn_" + n.name) + ".svg")
+        # point location maps
+        for p in point_locations:
+            copy_file(TMP_MAP_PATH + pointmap_name("location_" + place_to_filename(p)) + ".kmz")
 
 
 def print_cover(outfile, init_data):
@@ -4773,7 +4774,6 @@ def start_print(outfile):
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/print.css\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/images/font-awesome/css/font-awesome.min.css\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/images/flag-icon-css/css/flag-icon.min.css\" />\n")
-
     outfile.write("  </head>\n")
     outfile.write("\n")
     outfile.write("  <body>\n")
@@ -4807,6 +4807,7 @@ def build_site(init_data):
 
         print("...Reading Species Names...")
         specific_names = TMB_Import.read_specific_names_data(init_data.specific_names_file)
+        check_specific_names(citelist, specific_names, logfile)
         (all_names, binomial_name_cnts, specific_name_cnts, genus_cnts, total_binomial_year_cnts,
          name_table, specific_point_locations,
          binomial_point_locations) = calculate_name_index_data(refdict, citelist, specific_names)
@@ -4834,7 +4835,7 @@ def build_site(init_data):
                                                                           point_locations, citelist, logfile)
         TMB_Create_Maps.create_all_maps(init_data, point_locations, species, species_plot_locations,
                                         invalid_species_locations, all_names, binomial_plot_locations, specific_names,
-                                        specific_plot_locations)
+                                        specific_plot_locations, SHOW_NEW)
 
         # output website version
         if True:
@@ -4852,7 +4853,6 @@ def build_site(init_data):
                 write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
                                      binomial_name_cnts, total_binomial_year_cnts, outfile, False, logfile,
                                      binomial_point_locations, specific_point_locations, point_locations)
-            check_specific_names(citelist, specific_names, logfile)
             print("......Writing Species......")
             write_species_info_pages(species, references, specific_names, all_names, photos, videos, art, species_refs,
                                      refdict, binomial_name_cnts, specific_name_cnts, logfile, None, False)
@@ -4885,7 +4885,7 @@ def build_site(init_data):
             write_citation_page(refdict)
 
         # output print version
-        if False:
+        if True:
             print("...Creating Print Version...")
             with codecs.open("print.html", "w", "utf-8") as printfile:
                 start_print(printfile)

@@ -1,6 +1,7 @@
 fiddlercrab.info/
 __pycache__/
 .idea/
+private/
 
 # Windows image file caches
 Thumbs.db

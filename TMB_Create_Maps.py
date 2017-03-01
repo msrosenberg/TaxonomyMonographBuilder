@@ -35,7 +35,7 @@ class Polygon:
         return len(self.points)
 
 
-def read_placemark(infile):
+def read_kml_placemark(infile):
     namestr = infile.readline().strip()  # read name
     line = infile.readline().strip()
     while (not line.startswith("<LineString>") and not line.startswith("<Polygon>") and
@@ -61,45 +61,45 @@ def read_placemark(infile):
         return [namestr, False, coords]
 
 
-def read_crab(infile, namestr):
+def read_species_from_kml(infile, namestr):
     line = infile.readline().strip()
     crabplaces = []
     while not line.startswith("</Folder>"):
         if line.startswith("<Placemark>"):
-            newplace = read_placemark(infile)
+            newplace = read_kml_placemark(infile)
             crabplaces.append(newplace)
         line = infile.readline().strip()
     return [namestr, crabplaces]
 
 
-def read_folder(infile):
+def read_kml_folder(infile):
     line = infile.readline().strip()
     crab = None
     while not line.startswith("</Folder>"):
         if line.startswith("<name>Uca"):
-            crab = read_crab(infile, line)
+            crab = read_species_from_kml(infile, line)
             line = "</Folder>"
         else:
             line = infile.readline().strip()
     return crab
 
 
-def read_raw(filename):
+def read_raw_kml(filename):
     maplist = []
     with open(filename, "r") as infile:
         line = infile.readline()
         while line != "":
             line = line.strip()
             if line.startswith("<Folder>"):
-                new_map = read_folder(infile)
+                new_map = read_kml_folder(infile)
                 maplist.append(new_map)
             line = infile.readline()
     return maplist
 
 
-def output_species_kml(crab):
-    name = crab[0]
-    locs = crab[1]
+def write_species_range_map_kml(species_map):
+    name = species_map[0]
+    locs = species_map[1]
     name = name[name.find("Uca")+4:name.find("</")]
     with open(__TMP_PATH__ + "doc.kml", "w") as outfile:
         outfile.write("<?xml version=\"1.0\"?>\n")
@@ -141,13 +141,13 @@ def output_species_kml(crab):
         myzip.close()
 
 
-def output_all_kml(crabs):
+def write_all_range_map_kml(species_maps):
     with open(__TMP_PATH__ + "doc.kml", "w") as outfile:
         outfile.write("<?xml version=\"1.0\"?>\n")
         outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
         outfile.write(" <Document>\n")
-        for crab in crabs:
-            name = crab[0]
+        for species in species_maps:
+            name = species[0]
             name = name[name.find("Uca")+4:name.find("</")]
             outfile.write("  <Style id=\"" + name + "\">\n")
             outfile.write("    <LineStyle>\n")
@@ -155,9 +155,9 @@ def output_all_kml(crabs):
             outfile.write("      <width>5</width>\n")
             outfile.write("    </LineStyle>\n")
             outfile.write("  </Style>\n")
-        for crab in crabs:
-            name = crab[0]
-            locs = crab[1]
+        for species in species_maps:
+            name = species[0]
+            locs = species[1]
             name = name[name.find("Uca")+4:name.find("</")]
             outfile.write("  <Placemark>\n")
             outfile.write("    <name>Uca " + name + "</name>\n")
@@ -229,7 +229,7 @@ def read_base_map(mainfile, islandfile):
     return polygon_list
 
 
-def draw_base_map(faxes, base_map):
+def draw_base_svg_map(faxes, base_map):
     """
     Draw the background map of countries and islands
     """
@@ -244,7 +244,7 @@ def draw_base_map(faxes, base_map):
     faxes.add_collection(pc)
 
 
-def adjust_map_boundaries(minlon, maxlon, minlat, maxlat):
+def adjust_svg_map_boundaries(minlon, maxlon, minlat, maxlat):
     """
     Adjust ranges to keep map scale (2:1 ratio, lon to lat), with a 5 degree buffer
     Do not allow the boundaries to exceed 180/-180 in lon or 90/-90 in lat
@@ -284,7 +284,7 @@ def adjust_map_boundaries(minlon, maxlon, minlat, maxlat):
         return minlon, maxlon, minlat, maxlat
 
 
-def add_line_to_map(faxes, points, minlon, maxlon, minlat, maxlat, lw, a):
+def add_line_to_svg_map(faxes, points, minlon, maxlon, minlat, maxlat, lw, a):
     lons = []
     lats = []
     points = points.split(" ")
@@ -302,9 +302,9 @@ def add_line_to_map(faxes, points, minlon, maxlon, minlat, maxlat, lw, a):
     return minlon, maxlon, minlat, maxlat
 
 
-def write_single_species_map_figure(base_map, species_map):
+def write_species_range_map_svg(base_map, species_map):
     fig, faxes = mplpy.subplots(figsize=[6.5, 3.25])
-    draw_base_map(faxes, base_map)
+    draw_base_svg_map(faxes, base_map)
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
     maxlat = -90
@@ -317,11 +317,11 @@ def write_single_species_map_figure(base_map, species_map):
     for loc in locs:
         if loc[1]:
             for x in loc[2]:
-                minlon, maxlon, minlat, maxlat = add_line_to_map(faxes, x, minlon, maxlon, minlat, maxlat, 1, 1)
+                minlon, maxlon, minlat, maxlat = add_line_to_svg_map(faxes, x, minlon, maxlon, minlat, maxlat, 1, 1)
         else:
-            minlon, maxlon, minlat, maxlat = add_line_to_map(faxes, loc[2], minlon, maxlon, minlat, maxlat, 1, 1)
+            minlon, maxlon, minlat, maxlat = add_line_to_svg_map(faxes, loc[2], minlon, maxlon, minlat, maxlat, 1, 1)
 
-    minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
+    minlon, maxlon, minlat, maxlat = adjust_svg_map_boundaries(minlon, maxlon, minlat, maxlat)
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)
     mplpy.xlabel("longitude")
@@ -332,9 +332,9 @@ def write_single_species_map_figure(base_map, species_map):
     mplpy.close("all")
 
 
-def write_all_species_map_figure(base_map, species_maps):
+def write_all_range_map_svg(base_map, species_maps):
     fig, faxes = mplpy.subplots(figsize=[6.5, 3.25])
-    draw_base_map(faxes, base_map)
+    draw_base_svg_map(faxes, base_map)
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
     maxlat = -90
@@ -346,9 +346,9 @@ def write_all_species_map_figure(base_map, species_maps):
         for loc in locs:
             if loc[1]:
                 for x in loc[2]:
-                    minlon, maxlon, minlat, maxlat = add_line_to_map(faxes, x, minlon, maxlon, minlat, maxlat, 2, 0.1)
+                    minlon, maxlon, minlat, maxlat = add_line_to_svg_map(faxes, x, minlon, maxlon, minlat, maxlat, 2, 0.1)
             else:
-                minlon, maxlon, minlat, maxlat = add_line_to_map(faxes, loc[2], minlon, maxlon, minlat, maxlat, 2, 0.1)
+                minlon, maxlon, minlat, maxlat = add_line_to_svg_map(faxes, loc[2], minlon, maxlon, minlat, maxlat, 2, 0.1)
 
     mplpy.xlim(-180, 180)
     mplpy.ylim(-90, 90)
@@ -362,7 +362,7 @@ def write_all_species_map_figure(base_map, species_maps):
     mplpy.close("all")
 
 
-def create_point_map_kml(title, place_list, point_locations, invalid_places):
+def write_point_map_kml(title, place_list, point_locations, invalid_places):
     with codecs.open(__TMP_PATH__ + "doc.kml", "w", "utf-8") as outfile:
         outfile.write("<?xml version=\"1.0\"?>\n")
         outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
@@ -411,9 +411,9 @@ def create_point_map_kml(title, place_list, point_locations, invalid_places):
         myzip.close()
 
 
-def create_point_map_svg(title, place_list, point_locations, invalid_places, base_map, skip_axes, set_bounds):
+def write_point_map_svg(title, place_list, point_locations, invalid_places, base_map, skip_axes, set_bounds):
     fig, faxes = mplpy.subplots(figsize=[6.5, 3.25])
-    draw_base_map(faxes, base_map)
+    draw_base_svg_map(faxes, base_map)
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
     maxlat = -90
@@ -457,7 +457,7 @@ def create_point_map_svg(title, place_list, point_locations, invalid_places, bas
                 maxlon = point.ne_lon
                 minlat = point.sw_lat
                 maxlat = point.ne_lat
-    minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
+    minlon, maxlon, minlat, maxlat = adjust_svg_map_boundaries(minlon, maxlon, minlat, maxlat)
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)
     if skip_axes:
@@ -478,23 +478,23 @@ def create_all_point_maps(species, point_locations, species_plot_locations, inva
         if s.status != "fossil":
             places = species_plot_locations[s]
             invalid_places = invalid_species_locations[s]
-            create_point_map_svg("u_" + s.species, places, point_locations, invalid_places, base_map, False, False)
-            create_point_map_kml("u_" + s.species, places, point_locations, invalid_places)
+            write_point_map_svg("u_" + s.species, places, point_locations, invalid_places, base_map, False, False)
+            write_point_map_kml("u_" + s.species, places, point_locations, invalid_places)
             all_places |= set(places)
     all_list = sorted(list(all_places))
-    create_point_map_svg("uca_all", all_list, point_locations, None, base_map, True, False)
-    create_point_map_kml("uca_all", all_list, point_locations, None)
+    write_point_map_svg("uca_all", all_list, point_locations, None, base_map, True, False)
+    write_point_map_kml("uca_all", all_list, point_locations, None)
 
 
 def create_all_species_maps(base_map, init_data, species, point_locations, species_plot_locations,
                             invalid_species_locations):
     # create range maps
-    species_maps = read_raw(init_data.map_kml_file)
+    species_maps = read_raw_kml(init_data.map_kml_file)
     for m in species_maps:
-        output_species_kml(m)
-        write_single_species_map_figure(base_map, m)
-    output_all_kml(species_maps)
-    write_all_species_map_figure(base_map, species_maps)
+        write_species_range_map_kml(m)
+        write_species_range_map_svg(base_map, m)
+    write_all_range_map_kml(species_maps)
+    write_all_range_map_svg(base_map, species_maps)
 
     # create point maps
     create_all_point_maps(species, point_locations, species_plot_locations, invalid_species_locations, base_map)
@@ -505,34 +505,35 @@ def create_all_name_maps(base_map, all_names, specific_names, point_locations,
     for name in all_names:
         namefile = "name_" + name_to_filename(name)
         place_list = binomial_plot_locations[name]
-        create_point_map_svg(namefile, place_list, point_locations, None, base_map, False, False)
-        create_point_map_kml(namefile, place_list, point_locations, None)
+        write_point_map_svg(namefile, place_list, point_locations, None, base_map, False, False)
+        write_point_map_kml(namefile, place_list, point_locations, None)
     for name in specific_names:
         namefile = "sn_" + name.name
         place_list = specific_plot_locations[name]
-        create_point_map_svg(namefile, place_list, point_locations, None, base_map, False, False)
-        create_point_map_kml(namefile, place_list, point_locations, None)
+        write_point_map_svg(namefile, place_list, point_locations, None, base_map, False, False)
+        write_point_map_kml(namefile, place_list, point_locations, None)
 
 
 def create_all_location_maps(base_map, point_locations):
     for loc in point_locations:
         place_list = [loc]
         namefile = "location_" + place_to_filename(loc)
-        create_point_map_svg(namefile, place_list, point_locations, None, base_map, False, True)
-        create_point_map_kml(namefile, place_list, point_locations, None)
+        write_point_map_svg(namefile, place_list, point_locations, None, base_map, False, True)
+        write_point_map_kml(namefile, place_list, point_locations, None)
 
 
 def create_all_maps(init_data, point_locations, species, species_plot_locations, invalid_species_locations, all_names,
-                    binomial_plot_locations, specific_names, specific_plot_locations):
+                    binomial_plot_locations, specific_names, specific_plot_locations, show_new):
     base_map = read_base_map("resources/ne_10m_admin_0_countries", "resources/ne_10m_minor_islands")
     print("......Creating Species Maps......")
     create_all_species_maps(base_map, init_data, species, point_locations, species_plot_locations,
                             invalid_species_locations)
-    print("......Creating Name Maps......")
-    create_all_name_maps(base_map, all_names, specific_names, point_locations, specific_plot_locations,
-                         binomial_plot_locations)
-    print("......Creating Location Maps......")
-    create_all_location_maps(base_map, point_locations)
+    if show_new:
+        print("......Creating Name Maps......")
+        create_all_name_maps(base_map, all_names, specific_names, point_locations, specific_plot_locations,
+                             binomial_plot_locations)
+        print("......Creating Location Maps......")
+        create_all_location_maps(base_map, point_locations)
 
 
 # def main():
