@@ -524,7 +524,7 @@ def create_all_location_maps(base_map, point_locations):
 
 def create_all_maps(init_data, point_locations, species, species_plot_locations, invalid_species_locations, all_names,
                     binomial_plot_locations, specific_names, specific_plot_locations, show_new):
-    base_map = read_base_map("resources/ne_10m_admin_0_countries", "resources/ne_10m_minor_islands")
+    base_map = read_base_map("resources/ne_10m_admin_0_countries.txt", "resources/ne_10m_minor_islands.txt")
     print("......Creating Species Maps......")
     create_all_species_maps(base_map, init_data, species, point_locations, species_plot_locations,
                             invalid_species_locations)
