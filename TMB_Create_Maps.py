@@ -346,9 +346,11 @@ def write_all_range_map_svg(base_map, species_maps):
         for loc in locs:
             if loc[1]:
                 for x in loc[2]:
-                    minlon, maxlon, minlat, maxlat = add_line_to_svg_map(faxes, x, minlon, maxlon, minlat, maxlat, 2, 0.1)
+                    minlon, maxlon, minlat, maxlat = add_line_to_svg_map(faxes, x, minlon, maxlon, minlat, maxlat,
+                                                                         2, 0.1)
             else:
-                minlon, maxlon, minlat, maxlat = add_line_to_svg_map(faxes, loc[2], minlon, maxlon, minlat, maxlat, 2, 0.1)
+                minlon, maxlon, minlat, maxlat = add_line_to_svg_map(faxes, loc[2], minlon, maxlon, minlat, maxlat,
+                                                                     2, 0.1)
 
     mplpy.xlim(-180, 180)
     mplpy.ylim(-90, 90)
@@ -524,7 +526,8 @@ def create_all_location_maps(base_map, point_locations):
 
 def create_all_maps(init_data, point_locations, species, species_plot_locations, invalid_species_locations, all_names,
                     binomial_plot_locations, specific_names, specific_plot_locations, show_new):
-    base_map = read_base_map("resources/ne_10m_admin_0_countries.txt", "resources/ne_10m_minor_islands.txt")
+    # base_map = read_base_map("resources/ne_10m_admin_0_countries.txt", "resources/ne_10m_minor_islands.txt")
+    base_map = read_base_map("resources/ne_50m_admin_0_countries.txt", None)
     print("......Creating Species Maps......")
     create_all_species_maps(base_map, init_data, species, point_locations, species_plot_locations,
                             invalid_species_locations)
