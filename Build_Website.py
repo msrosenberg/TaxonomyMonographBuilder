@@ -50,7 +50,7 @@ AUTHOR_PAREN = 1
 AUTHOR_NOPCOMMA = 2
 
 # this flag is to hide/display new materials still in progress from the general release
-SHOW_NEW = False
+SHOW_NEW = True
 
 # randSeed = random.randint(0, 10000)
 
@@ -448,37 +448,45 @@ def create_line_chart_file(filename, data, minx, maxx, y):
 
 def create_chronology_chart_file(filename, miny, maxy, maxcnt, yearly_data):
     y_list = []
+
     for y in range(miny, maxy + 1):
-        if yearly_data[y] != 0:
-            y_list.append(yearly_data[y])
-        else:
-            do_null = True
-            if miny < y < maxy:
-                if (yearly_data[y + 1] != 0) or (yearly_data[y - 1] != 0):
-                    do_null = False
-            elif y > miny:
-                if yearly_data[y-1] != 0:
-                    do_null = False
-            elif y < maxy:
-                if yearly_data[y+1] != 0:
-                    do_null = False
-            if do_null:
-                y_list.append(None)
-            else:
-                y_list.append(0)
-    y2_list = []
-    for x in y_list:
-        if x is None:
-            y2_list.append(None)
-        else:
-            y2_list.append(-x)
+        y_list.append(float(yearly_data[y]))
+    # for y in range(miny, maxy + 1):
+    #     if yearly_data[y] != 0:
+    #         y_list.append(yearly_data[y])
+    #     else:
+    #         do_null = True
+    #         if miny < y < maxy:
+    #             if (yearly_data[y + 1] != 0) or (yearly_data[y - 1] != 0):
+    #                 do_null = False
+    #         elif y > miny:
+    #             if yearly_data[y-1] != 0:
+    #                 do_null = False
+    #         elif y < maxy:
+    #             if yearly_data[y+1] != 0:
+    #                 do_null = False
+    #         if do_null:
+    #             y_list.append(None)
+    #         else:
+    #             y_list.append(0)
+    # y2_list = []
+    # for x in y_list:
+    #     if x is None:
+    #         y2_list.append(None)
+    #     else:
+    #         y2_list.append(-x)
+
+    # print(filename)
+    # print(y_list)
+    # print(y2_list)
 
     x = [y for y in range(miny, maxy+1)]
     fig, faxes = mplpy.subplots(figsize=[6.5, 1.5])
     mplpy.ylim(-maxcnt, maxcnt)
     mplpy.xlim(miny, maxy)
-    faxes.fill(x, y_list, "black")
-    faxes.fill(x, y2_list, "black")
+    # faxes.fill(x, y_list, "black")
+    # faxes.fill(x, y2_list, "black")
+    faxes.stackplot(x, y_list, baseline="sym", colors=["black"])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
     cur_axes = mplpy.gca()
@@ -4838,7 +4846,7 @@ def build_site(init_data):
                                         specific_plot_locations, SHOW_NEW)
 
         # output website version
-        if True:
+        if False:
             create_web_output_paths()
             print("...Creating Web Version...")
             copy_support_files(logfile)
