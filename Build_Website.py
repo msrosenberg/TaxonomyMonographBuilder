@@ -4895,8 +4895,9 @@ def build_site(init_data):
                 write_systematics_overview(subgenera, species, refdict, printfile, True, logfile)
                 write_phylogeny_pages(printfile, True, refdict, logfile)
                 write_geography_page(species, printfile, True)
-                write_location_index(printfile, True, point_locations, location_dict, location_species,
-                                     location_sp_names, location_bi_names)
+                if SHOW_NEW:
+                    write_location_index(printfile, True, point_locations, location_dict, location_species,
+                                         location_sp_names, location_bi_names)
                 write_life_cycle_pages(printfile, True)
                 write_main_morphology_pages(morphology, printfile, True, logfile)
                 print("......Writing Species Pages......")
