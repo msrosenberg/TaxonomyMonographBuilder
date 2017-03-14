@@ -50,7 +50,7 @@ AUTHOR_PAREN = 1
 AUTHOR_NOPCOMMA = 2
 
 # this flag is to hide/display new materials still in progress from the general release
-SHOW_NEW = True
+SHOW_NEW = False
 
 # randSeed = random.randint(0, 10000)
 
@@ -110,7 +110,9 @@ def common_header_part2(outfile, indexpath, include_map):
     else:
         outfile.write("  <body>\n")
     outfile.write("    <div id=\"home\">\n")
-    outfile.write("      <a href=\"" + indexpath + "index.html\">Fiddler Crabs</a>\n")
+    outfile.write("      <a href=\"" + indexpath + "index.html\" class=\"home-title\">Fiddler Crabs</a>\n")
+    outfile.write("      <a href=\"" + indexpath + "index.html\" class=\"home-link\"><span class =\"fa fa-home\"></span> Home</a>\n")
+    outfile.write("      <a href=\"" + indexpath + "blog\" class=\"home-link\"><span class =\"fa fa-pencil\"></span> Blog</a>\n")
     outfile.write("    </div>\n")
 
 
@@ -4848,7 +4850,7 @@ def build_site(init_data):
                                         specific_plot_locations, SHOW_NEW)
 
         # output website version
-        if False:
+        if True:
             create_web_output_paths()
             print("...Creating Web Version...")
             copy_support_files(logfile)
