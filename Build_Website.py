@@ -4540,8 +4540,8 @@ def write_introduction(outfile, species, do_print):
         outfile.write("    </ul>\n")
         outfile.write("    <h2>Miscellania</h2>\n")
         outfile.write("    <ul class=\"fa-ul\">\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-wordpress\"></span>"
-                      "<a href=\"blog\">Fiddler Crab Blog</a></li>\n")
+        # outfile.write("      <li><span class=\"fa-li fa fa-wordpress\"></span>"
+        #               "<a href=\"blog\">Fiddler Crab Blog</a></li>\n")
         outfile.write("      <li><span class=\"fa-li fa fa-pencil\"></span>"
                       "<a href=\"" + CITE_URL + "\">Citation info for this website</a></li>\n")
         outfile.write("      <li><span class=\"fa-li fa fa-github\"></span>"
