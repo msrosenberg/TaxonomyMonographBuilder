@@ -541,35 +541,6 @@ def create_all_maps(init_data, point_locations, species, species_plot_locations,
 
 def main():
     pass
-    # testing purposes only
-    base_map = read_base_map("fiddlercrab.info/private/ne_110m_admin_0_countries.txt", None)
-    species_maps = read_raw_kml("fiddlercrab.info/data/Fiddler Crabs.kml")
-    for species_map in species_maps:
-        name = species_map[0]
-        name = name[name.find("Uca") + 4:name.find("</")]
-        if name == "osa":
-            fig, faxes = mplpy.subplots(figsize=[6.5, 3.25])
-            draw_base_svg_map(faxes, base_map)
-            for spine in faxes.spines:
-                faxes.spines[spine].set_visible(False)
-            maxlat = -90
-            minlat = 90
-            maxlon = -180
-            minlon = 180
-            locs = species_map[1]
-            # for loc in locs:
-            #     if loc[1]:
-            #         for x in loc[2]:
-            #             minlon, maxlon, minlat, maxlat = add_line_to_svg_map(faxes, x, minlon, maxlon, minlat, maxlat, 1, 1)
-            #     else:
-            #         minlon, maxlon, minlat, maxlat = add_line_to_svg_map(faxes, loc[2], minlon, maxlon, minlat, maxlat, 1, 1)
-            # minlon, maxlon, minlat, maxlat = adjust_svg_map_boundaries(minlon, maxlon, minlat, maxlat)
-            mplpy.xlim(-83.529310, -83.035635)
-            mplpy.ylim(8.340084, 8.795134)
-            mplpy.rcParams["svg.fonttype"] = "none"
-            mplpy.tight_layout()
-            mplpy.savefig("map110.png", format="png")
-            mplpy.close("all")
 
 
 if __name__ == "__main__":
