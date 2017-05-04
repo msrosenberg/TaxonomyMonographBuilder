@@ -1001,12 +1001,8 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
             outfile.write("      <td>&nbsp;</td>\n")
         # applies to...
         if n.context == "location":
-            if SHOW_NEW:
-                outstr = create_location_sublink(n.application)
-                outfile.write("      <td><span class=\"fa fa-map-marker\"></span> location: " + outstr + "</td>\n")
-            else:
-                outfile.write("      <td><span class=\"fa fa-map-marker\"></span> location: " + n.application +
-                              "</td>\n")
+            outstr = create_location_sublink(n.application)
+            outfile.write("      <td><span class=\"fa fa-map-marker\"></span> location: " + outstr + "</td>\n")
         elif n.context == "citation":
             if n.application in refdict:
                 crossref = refdict[n.application]
@@ -1054,12 +1050,8 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
             if n.application == "?":
                 outfile.write("      <td><span class=\"fa fa-flask\"></span> specimen: unknown locality</td>\n")
             else:
-                if SHOW_NEW:
-                    outstr = create_location_sublink(n.application)
-                    outfile.write("      <td><span class=\"fa fa-flask\"></span> specimen: " + outstr + "</td>\n")
-                else:
-                    outfile.write("      <td><span class=\"fa fa-flask\"></span> specimen: " + n.application +
-                                  "</td>\n")
+                outstr = create_location_sublink(n.application)
+                outfile.write("      <td><span class=\"fa fa-flask\"></span> specimen: " + outstr + "</td>\n")
         elif n.context == "unpublished":
             outfile.write("      <td>unpublished name <em class=\"species\">" +
                           n.application + "</em></td>\n")
@@ -1282,7 +1274,7 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
             create_chronology_chart_file(image_name,  miny, maxy, maxcnt, name_by_year)
     else:
         common_header_part1(outfile, name, "../")
-        if SHOW_NEW and len(location_set) > 0:
+        if len(location_set) > 0:
             start_google_map_header(outfile)
             write_google_map_point_header(outfile, "name_" + name, None)
             end_google_map_header(outfile)
@@ -1317,22 +1309,21 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
     outfile.write("    </header>\n")
     outfile.write("\n")
 
-    if SHOW_NEW:
-        if len(location_set) > 0:
-            outfile.write("    <div class=\"map_section\">\n")
-            outfile.write("    <h3 class=\"nobookmark\">Locations Where the Name has Been Applied</h3>\n")
-            if do_print:
-                outfile.write("      <figure>\n")
-                outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(name)) +
-                              ".svg\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
-                outfile.write("      </figure>\n")
-            else:
-                outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
-            outfile.write("    </div>\n")
-        if maxcnt > 0:
-            write_chronology_chart_div(image_name, outfile, None, "Number of Uses of Name per Year", False, do_print,
-                                       False)
-            outfile.write("\n")
+    if len(location_set) > 0:
+        outfile.write("    <div class=\"map_section\">\n")
+        outfile.write("    <h3 class=\"nobookmark\">Locations Where the Name has Been Applied</h3>\n")
+        if do_print:
+            outfile.write("      <figure>\n")
+            outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(name)) +
+                          ".svg\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
+            outfile.write("      </figure>\n")
+        else:
+            outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
+        outfile.write("    </div>\n")
+    if maxcnt > 0:
+        write_chronology_chart_div(image_name, outfile, None, "Number of Uses of Name per Year", False, do_print,
+                                   False)
+        outfile.write("\n")
 
     # write name table
     outfile.write("    <h3 class=\"nobookmark\">Publications Using this Name</h3>\n")
@@ -1407,7 +1398,7 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
     else:
         common_header_part1(outfile, specific_name.name, "../")
 
-        if SHOW_NEW and len(location_set) > 0:
+        if len(location_set) > 0:
             start_google_map_header(outfile)
             write_google_map_point_header(outfile, "sn_" + specific_name.name, None)
             end_google_map_header(outfile)
@@ -1476,24 +1467,23 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
     outfile.write("    </section>\n")
     outfile.write("\n")
 
-    if SHOW_NEW:
-        if len(location_set) > 0:
-            outfile.write("    <div class=\"map_section\">\n")
-            outfile.write("    <h3 class=\"nobookmark\">Locations Where the Name has Been Applied</h3>\n")
-            if do_print:
-                outfile.write("      <figure>\n")
-                outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("sn_" + specific_name.name) +
-                              ".svg\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
-                outfile.write("      </figure>\n")
-            else:
-                # outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
-                outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
-            outfile.write("    </div>\n")
+    if len(location_set) > 0:
+        outfile.write("    <div class=\"map_section\">\n")
+        outfile.write("    <h3 class=\"nobookmark\">Locations Where the Name has Been Applied</h3>\n")
+        if do_print:
+            outfile.write("      <figure>\n")
+            outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("sn_" + specific_name.name) +
+                          ".svg\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
+            outfile.write("      </figure>\n")
+        else:
+            # outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
+            outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
+        outfile.write("    </div>\n")
 
-        if maxcnt > 0:
-            write_chronology_chart_div(image_name, outfile, None, "Number of Uses of Name per Year", False, do_print,
-                                       False)
-            outfile.write("\n")
+    if maxcnt > 0:
+        write_chronology_chart_div(image_name, outfile, None, "Number of Uses of Name per Year", False, do_print,
+                                   False)
+        outfile.write("\n")
 
     if specific_name.notes != ".":
         outfile.write("    <section class=\"spsection\" style=\"clear: both\">\n")
@@ -2262,8 +2252,7 @@ def write_geography_page(species, outfile, do_print):
         common_header_part1(outfile, "Fiddler Crab Geographic Ranges", "")
         start_google_map_header(outfile)
         write_google_map_range_header(outfile, "uca_all")
-        if SHOW_NEW:
-            write_google_map_point_header(outfile, "uca_all", None)
+        write_google_map_point_header(outfile, "uca_all", None)
         end_google_map_header(outfile)
         common_header_part2(outfile, "", True)
 
@@ -2284,22 +2273,19 @@ def write_geography_page(species, outfile, do_print):
         outfile.write("      </figure>\n")
     else:
         outfile.write("        <div id=\"range_map_canvas\"></div>\n")
-        if SHOW_NEW:
-            outfile.write("        <div id=\"point_map_canvas\"></div>\n")
+        outfile.write("        <div id=\"point_map_canvas\"></div>\n")
         outfile.write("        <div class=\"map_download\">\n")
         outfile.write("          <a href=\"maps/" + rangemap_name("uca_all") + ".svg\">"
                       "<span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
-        if SHOW_NEW:
-            outfile.write("          <a href=\"maps/" + pointmap_name("uca_all") + ".svg\">"
-                          "<span class=\"fa fa-download\"></span> Download SVG line map of point locations.</a>\n")
+        outfile.write("          <a href=\"maps/" + pointmap_name("uca_all") + ".svg\">"
+                      "<span class=\"fa fa-download\"></span> Download SVG line map of point locations.</a>\n")
         outfile.write("        </div>\n")
     outfile.write("      </div>\n")
     outfile.write("      <p>\n")
     outfile.write("        The first map shows the approximate density of species richness, with denser color "
                   "where more species are found. ")
-    if SHOW_NEW:
-        outfile.write("The second map shows approximate point locations where fiddler crabs "
-                      "have been recorded in the scientific record.")
+    outfile.write("The second map shows approximate point locations where fiddler crabs "
+                  "have been recorded in the scientific record.")
     outfile.write("\n      </p>\n")
     outfile.write("      <p>\n")
     outfile.write("        Specific ranges for a species or name can be found on its associated pages. "
@@ -2891,8 +2877,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
             common_header_part1(outfile, "Uca " + species.species + " / " + species.common, "")
             start_google_map_header(outfile)
             write_google_map_range_header(outfile, "u_" + species.species)
-            if SHOW_NEW:
-                write_google_map_point_header(outfile, "u_" + species.species, None)
+            write_google_map_point_header(outfile, "u_" + species.species, None)
             end_google_map_header(outfile)
             common_header_part2(outfile, "", True)
 
@@ -2993,15 +2978,12 @@ def write_species_page(species, references, specific_names, all_names, photos, v
         else:
             # outfile.write("           <div id=\"sp_range_map_canvas\"></div>\n")
             outfile.write("           <div id=\"range_map_canvas\" class=\"sp_map\"></div>\n")
-            if SHOW_NEW:
-                # outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
-                outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
+            outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
             outfile.write("           <div class=\"map_download\">\n")
             outfile.write("             <a href=\"maps/" + rangemap_name("u_" + species.species) +
                           ".svg\"><span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
-            if SHOW_NEW:
-                outfile.write("             <a href=\"maps/" + pointmap_name("u_" + species.species) + ".svg\">"
-                              "<span class=\"fa fa-download\"></span> Download SVG line map of point locations.</a>\n")
+            outfile.write("             <a href=\"maps/" + pointmap_name("u_" + species.species) + ".svg\">"
+                          "<span class=\"fa fa-download\"></span> Download SVG line map of point locations.</a>\n")
             outfile.write("           </div>\n")
         outfile.write("         </dd>\n")
         outfile.write("         <dd class=\"map_data\">\n")
@@ -4637,18 +4619,17 @@ def copy_map_files(species, all_names, specific_names, point_locations, logfile)
     copy_file(TMP_MAP_PATH + rangemap_name("uca_all") + ".svg")
     copy_file(TMP_MAP_PATH + pointmap_name("uca_all") + ".svg")
 
-    if SHOW_NEW:
-        # binomial maps
-        for n in all_names:
-            copy_file(TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".kmz")
-            # copy_file(MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".svg")
-        # specific name maps
-        for n in specific_names:
-            copy_file(TMP_MAP_PATH + pointmap_name("sn_" + n.name) + ".kmz")
-            # copy_file(MAP_PATH + pointmap_name("sn_" + n.name) + ".svg")
-        # point location maps
-        for p in point_locations:
-            copy_file(TMP_MAP_PATH + pointmap_name("location_" + place_to_filename(p)) + ".kmz")
+    # binomial maps
+    for n in all_names:
+        copy_file(TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".kmz")
+        # copy_file(MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".svg")
+    # specific name maps
+    for n in specific_names:
+        copy_file(TMP_MAP_PATH + pointmap_name("sn_" + n.name) + ".kmz")
+        # copy_file(MAP_PATH + pointmap_name("sn_" + n.name) + ".svg")
+    # point location maps
+    for p in point_locations:
+        copy_file(TMP_MAP_PATH + pointmap_name("location_" + place_to_filename(p)) + ".kmz")
 
 
 def print_cover(outfile, init_data):
@@ -4847,7 +4828,7 @@ def build_site(init_data):
                                                                           point_locations, citelist, logfile)
         TMB_Create_Maps.create_all_maps(init_data, point_locations, species, species_plot_locations,
                                         invalid_species_locations, all_names, binomial_plot_locations, specific_names,
-                                        specific_plot_locations, SHOW_NEW)
+                                        specific_plot_locations)
 
         # output website version
         if True:
@@ -4907,9 +4888,8 @@ def build_site(init_data):
                 write_systematics_overview(subgenera, species, refdict, printfile, True, logfile)
                 write_phylogeny_pages(printfile, True, refdict, logfile)
                 write_geography_page(species, printfile, True)
-                if SHOW_NEW:
-                    write_location_index(printfile, True, point_locations, location_dict, location_species,
-                                         location_sp_names, location_bi_names)
+                write_location_index(printfile, True, point_locations, location_dict, location_species,
+                                     location_sp_names, location_bi_names)
                 write_life_cycle_pages(printfile, True)
                 write_main_morphology_pages(morphology, printfile, True, logfile)
                 print("......Writing Species Pages......")
