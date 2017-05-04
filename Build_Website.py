@@ -17,6 +17,8 @@ from TMB_Common import *
 import TMB_Initialize
 # external dependencies
 import matplotlib.pyplot as mplpy
+from wordcloud import WordCloud, STOPWORDS
+
 
 WEBOUT_PATH = "webout/"
 MEDIA_PATH = "media/"
@@ -1511,6 +1513,23 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
         common_html_footer(outfile, "../")
 
 
+def create_word_cloud_image(text):
+    # add special stopwords
+    stopwords = set(STOPWORDS)
+    stopwords.add("spp")
+    stopwords.add("sp")
+    stopwords.add("gruppe")
+    stopwords.add("spec")
+    stopwords.add("nov")
+    stopwords.add("subsp")
+    stopwords.add("forme")
+    stopwords.add("var")
+    # generate wordcloud image
+    wordcloud = WordCloud(width=2000, height=1500, background_color="white", stopwords=stopwords,
+                          max_words=1000, normalize_plurals=False, collocations=False).generate(text.lower())
+    wordcloud.to_file(TMP_PATH + "name_word_cloud.png")
+
+
 def setup_chronology_chart(n, miny, maxy, maxcnt, yearly_data, outfile):
     nstr = str(n)
     outfile.write("        var data" + nstr + " = google.visualization.arrayToDataTable([\n")
@@ -1920,6 +1939,14 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
         else:
             outfile.write("    <div id=\"spcnt_chart" + str(c) + "_div\" class=\"name_bar_chart\"></div>\n")
 
+    outfile.write("    <h3 class=\"nobookmark pagebreak\">Word Cloud of Names in Literature</h3>\n")
+    outfile.write("    <figure class=\"graph\">\n")
+    if do_print:
+        outfile.write("      <img src=\"" + TMP_PATH + "name_word_cloud.png\" class=\"word_cloud\" />\n")
+    else:
+        outfile.write("      <img src=\"../images/name_word_cloud.png\" class=\"word_cloud\" />\n")
+    outfile.write("    </figure>\n")
+
     if do_print:
         end_page_division(outfile)
     else:
@@ -2051,7 +2078,9 @@ def calculate_name_index_data(refdict, citelist, specific_names):
     unique_names = list()
     nameset = set()
     total_binomial_year_cnts = {}
+    word_cloud_str = ""
     for c in citelist:
+        word_cloud_str += " " + c.name
         if c.name != ".":
             clean = clean_name(c.name)
             if not clean.lower() in nameset:
@@ -2115,7 +2144,8 @@ def calculate_name_index_data(refdict, citelist, specific_names):
                 else:
                     specific_year_cnts[y] = 1
     return (unique_names, binomial_usage_cnts_by_year, specific_usage_cnts_by_year, genus_cnts,
-            total_binomial_year_cnts, name_table, specific_location_applications, binomial_location_applications)
+            total_binomial_year_cnts, name_table, specific_location_applications, binomial_location_applications,
+            word_cloud_str)
 
 
 def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_table, species_refs, genus_cnts,
@@ -4597,6 +4627,10 @@ def copy_support_files(logfile):
             shutil.copy2("resources/images/" + filename, WEBOUT_PATH + "images/")
         except FileNotFoundError:
             report_error(logfile, "Missing file: resources/images/" + filename)
+    try:
+        shutil.copy2(TMP_PATH + "name_word_cloud.png", WEBOUT_PATH + "images/")
+    except FileNotFoundError:
+        report_error(logfile, "Missing file: name_word_cloud.png")
 
 
 def copy_map_files(species, all_names, specific_names, point_locations, logfile):
@@ -4802,10 +4836,11 @@ def build_site(init_data):
         specific_names = TMB_Import.read_specific_names_data(init_data.specific_names_file)
         check_specific_names(citelist, specific_names, logfile)
         (all_names, binomial_name_cnts, specific_name_cnts, genus_cnts, total_binomial_year_cnts,
-         name_table, specific_point_locations,
-         binomial_point_locations) = calculate_name_index_data(refdict, citelist, specific_names)
+         name_table, specific_point_locations, binomial_point_locations,
+         word_cloud_str) = calculate_name_index_data(refdict, citelist, specific_names)
         common_name_data = TMB_Import.read_common_name_data(init_data.common_names_file)
         subgenera = TMB_Import.read_subgenera_data(init_data.subgenera_file)
+        create_word_cloud_image(word_cloud_str)
 
         print("...Reading Photos and Videos...")
         photos = TMB_Import.read_photo_data(init_data.photo_file)
