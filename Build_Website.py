@@ -1731,7 +1731,7 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
         per_graph = 40
     else:
         per_graph = 60
-    ngraph = math.ceil(len(species_refs) / per_graph)
+    ngraph = int(math.ceil(len(species_refs) / per_graph))
 
     miny = START_YEAR
     maxy = CURRENT_YEAR
@@ -2145,9 +2145,8 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
                       "\"><span class=\"fa fa-line-chart\"></span> Name Summary</a></li>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + SPECIES_URL +
                       "\"><span class=\"fa fa-check-circle\"></span> Accepted Species</a></li>\n")
-        if SHOW_NEW:
-            outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") +
-                          "synonyms_uca.html\">Synonyms of <em class=\"species\">Uca</em></a></li>\n")
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") +
+                      "synonyms_uca.html\">Synonyms of <em class=\"species\">Uca</em></a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -2973,9 +2972,8 @@ def write_species_page(species, references, specific_names, all_names, photos, v
                          format_name_string(n) + "</a>")
 
         tmpstr = "Synonyms, Alternate Spellings, &amp; Name Forms"
-        if SHOW_NEW:
-            tmpstr += " (<a href=\"" + rel_link_prefix(do_print, "names/") + "synonyms_" + species.species + \
-                      ".html\">Chronology</a>)"
+        tmpstr += " (<a href=\"" + rel_link_prefix(do_print, "names/") + "synonyms_" + species.species + \
+                  ".html\">Chronology</a>)"
         outfile.write("       <dt>" + tmpstr + "</dt>\n")
         # outfile.write("       <dt>Synonyms, Alternate Spellings, &amp; Name Forms (<a href=\"" +
         #               rel_link_prefix(do_print, "names/") + "synonyms_" + species.species +
