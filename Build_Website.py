@@ -17,7 +17,8 @@ from TMB_Common import *
 import TMB_Initialize
 # external dependencies
 import matplotlib.pyplot as mplpy
-from wordcloud import WordCloud, STOPWORDS
+from wordcloud import WordCloud
+# from wordcloud import WordCloud, STOPWORDS
 # import numpy as np
 # from PIL import Image
 
@@ -1198,7 +1199,7 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
         for x in cs:
             cl.append(x)
         cl.sort()
-        outfile.write("     " + "\n, ".join(cl) + "\n")
+        outfile.write("     " + ", ".join(cl) + "\n")
         outfile.write("    </p>\n")
 
     if do_print:
