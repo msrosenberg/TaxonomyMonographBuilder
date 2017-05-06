@@ -2311,7 +2311,6 @@ def write_geography_page(species, outfile, do_print):
     if do_print:
         start_page_division(outfile, "index_page")
     else:
-        # common_species_html_header(outfile, "Fiddler Crab Geographic Ranges", "", "")
         common_header_part1(outfile, "Fiddler Crab Geographic Ranges", "")
         start_google_map_header(outfile)
         write_google_map_range_header(outfile, "uca_all")
@@ -2321,6 +2320,13 @@ def write_geography_page(species, outfile, do_print):
 
     outfile.write("    <header id=\"" + MAP_URL + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Geographic Ranges</h1>\n")
+    if not do_print:
+        outfile.write("      <nav>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("          <li><a href=\"index.html\"><span class=\"fa fa-list\"></span> Location "
+                      "Index</a></li>\n")
+        outfile.write("        </ul>\n")
+        outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
     outfile.write("\n")
     outfile.write("    <section class=\"topspsection\">\n")
@@ -2347,8 +2353,14 @@ def write_geography_page(species, outfile, do_print):
     outfile.write("      <p>\n")
     outfile.write("        The first map shows the approximate density of species richness, with denser color "
                   "where more species are found. ")
+    if do_print:
+        index_page = "#location_index.html"
+    else:
+        index_page = "locations/index.html"
     outfile.write("The second map shows approximate point locations where fiddler crabs "
-                  "have been recorded in the scientific record.")
+                  "have been recorded in the scientific record. Red markers indicate points where fiddler crabs are "
+                  "found; blue indicate false location records. See the <a href=\"" + index_page +
+                  "\">location index</a> for a full list of all point locations.")
     outfile.write("\n      </p>\n")
     outfile.write("      <p>\n")
     outfile.write("        Specific ranges for a species or name can be found on its associated pages. "
@@ -2578,6 +2590,13 @@ def write_location_index(outfile, do_print, point_locations, location_dict, loca
         common_html_header(outfile, "Fiddler Crab Observation Locations", "../")
     outfile.write("    <header id=\"location_index\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Location Index</h1>\n")
+    if not do_print:
+        outfile.write("      <nav>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("          <li><a href=\"../" + MAP_URL + "\"><span class=\"fa fa-map-o\"></span> Range "
+                      "Maps</a></li>\n")
+        outfile.write("        </ul>\n")
+        outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
     outfile.write("\n")
     outfile.write("    <p>")
