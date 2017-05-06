@@ -2323,7 +2323,7 @@ def write_geography_page(species, outfile, do_print):
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"index.html\"><span class=\"fa fa-list\"></span> Location "
+        outfile.write("          <li><a href=\"locations\index.html\"><span class=\"fa fa-list\"></span> Location "
                       "Index</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
@@ -4580,7 +4580,7 @@ def write_introduction(outfile, species, do_print):
         outfile.write("      <li><span class=\"fa-li fa fa-comments-o\"></span><a href=\"" + COMMON_URL +
                       "\">Common Names</a></li>\n")
         outfile.write("      <li><span class=\"fa-li fa fa-map-o\"></span><a href=\"" + MAP_URL +
-                      "\">Geographic Ranges</a></li>\n")
+                      "\">Geographic Ranges and Locations</a></li>\n")
         outfile.write("      <li><span class=\"fa-li fa fa-refresh\"></span><a href=\"" + LIFECYCLE_URL +
                       "\">Life Cycle</a></li>\n")
         outfile.write("      <li><span class=\"fa-li fa fa-heart-o\"></span><a href=\"" + MORPH_URL +
@@ -4639,8 +4639,7 @@ def create_web_output_paths():
 
 def create_temp_output_paths():
     """
-    create web output directories if they do not already exist
-    add a blank index to each one
+    create temporary output directories if they do not already exist
     """
     # create path for temp files
     if not os.path.exists(TMP_PATH):
@@ -4650,6 +4649,10 @@ def create_temp_output_paths():
 
 
 def copy_support_files(logfile):
+    """
+    copy a variety of resource and output files into the correct web output directories
+    this includes icons, supporting images, and css files
+    """
     filelist = {"favicon128.png",
                 "favicon96.png",
                 "favicon72.png",
@@ -4689,6 +4692,9 @@ def copy_support_files(logfile):
 
 
 def copy_map_files(species, all_names, specific_names, point_locations, logfile):
+    """
+    copy all created map files (kmz and svg) from temp directory to web output directory
+    """
     def copy_file(filename):
         try:
             shutil.copy2(filename, WEBOUT_PATH + "maps/")
@@ -4711,17 +4717,20 @@ def copy_map_files(species, all_names, specific_names, point_locations, logfile)
     # binomial maps
     for n in all_names:
         copy_file(TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".kmz")
-        # copy_file(MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".svg")
+        copy_file(TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".svg")
     # specific name maps
     for n in specific_names:
         copy_file(TMP_MAP_PATH + pointmap_name("sn_" + n.name) + ".kmz")
-        # copy_file(MAP_PATH + pointmap_name("sn_" + n.name) + ".svg")
+        copy_file(TMP_MAP_PATH + pointmap_name("sn_" + n.name) + ".svg")
     # point location maps
     for p in point_locations:
         copy_file(TMP_MAP_PATH + pointmap_name("location_" + place_to_filename(p)) + ".kmz")
 
 
 def print_cover(outfile, init_data):
+    """
+    create cover for monographic print output
+    """
     outfile.write("    <div id=\"cover_page\">\n")
     for i in range(1, 29):
         outfile.write("      <img id=\"cover_img" + str(i) + "\" class=\"cover_img\" "
@@ -4733,8 +4742,10 @@ def print_cover(outfile, init_data):
 
 
 def print_title_page(outfile, init_data):
+    """
+    create title page for monographic print output
+    """
     outfile.write("    <div id=\"title_page\">\n")
-    # outfile.write("     <img class=\"title_sketch\" src=\"media/cover images/title_sketch.svg\" />\n")
     outfile.write("     <p class=\"book_title\">" + init_data.site_title + "</p>\n")
     outfile.write("     <p class=\"book_subtitle\">" + init_data.site_subtitle + "</p>\n")
     outfile.write("     <p class=\"book_author\">" + init_data.site_author + "</p>\n")
@@ -4746,6 +4757,9 @@ def print_title_page(outfile, init_data):
 
 
 def print_copyright_page(outfile, init_data, refdict):
+    """
+    create copyright page for monographic print output
+    """
     outfile.write("    <div id=\"copyright_page\">\n")
     outfile.write("     <p>Copyright &copy; 2003&ndash;" + str(CURRENT_YEAR) +
                   " by " + init_data.site_author + ". All Rights Reserved</p>\n")
@@ -4785,6 +4799,9 @@ def print_copyright_page(outfile, init_data, refdict):
 
 
 def print_table_of_contents(outfile, species_list):
+    """
+    create Table of Contents for monographic print output
+    """
     outfile.write("    <div id=\"table_of_contents\">\n")
     outfile.write("     <h1 class=\"bookmark1\">Table of Contents</h1>\n")
     outfile.write("     <ul>\n")
@@ -4840,6 +4857,9 @@ def print_table_of_contents(outfile, species_list):
 
 
 def write_print_only_pages(outfile, init_data, species, refdict):
+    """
+    create starting pages that are unique to print output
+    """
     print_cover(outfile, init_data)
     print_title_page(outfile, init_data)
     print_copyright_page(outfile, init_data, refdict)
@@ -4847,6 +4867,9 @@ def write_print_only_pages(outfile, init_data, species, refdict):
 
 
 def start_print(outfile):
+    """
+    start html file for print monographic output
+    """
     outfile.write("<!DOCTYPE HTML>\n")
     outfile.write("<html lang=\"en\">\n")
     outfile.write("  <head>\n")
@@ -4862,6 +4885,9 @@ def start_print(outfile):
 
 
 def end_print(outfile):
+    """
+    end html file for print monographic output
+    """
     outfile.write("  </body>\n")
     outfile.write("</html>\n")
 
@@ -4945,6 +4971,8 @@ def build_site(init_data):
             with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
                 write_location_index(outfile, False, point_locations, location_dict, location_species,
                                      location_sp_names, location_bi_names)
+            with codecs.open(WEBOUT_PATH + MAP_URL, "w", "utf-8") as outfile:
+                write_geography_page(species, outfile, False)
             print("......Writing Media Pages......")
             with codecs.open(WEBOUT_PATH + PHOTO_URL, "w", "utf-8") as outfile:
                 write_photo_index(species, photos, False, outfile, logfile)
@@ -4956,8 +4984,6 @@ def build_site(init_data):
                 write_systematics_overview(subgenera, species, refdict, outfile, False, logfile)
             with codecs.open(WEBOUT_PATH + COMMON_URL, "w", "utf-8") as outfile:
                 write_common_names_pages(outfile, replace_references(common_name_data, refdict, False, logfile), False)
-            with codecs.open(WEBOUT_PATH + MAP_URL, "w", "utf-8") as outfile:
-                write_geography_page(species, outfile, False)
             with codecs.open(WEBOUT_PATH + LIFECYCLE_URL, "w", "utf-8") as outfile:
                 write_life_cycle_pages(outfile, False)
             with codecs.open(WEBOUT_PATH + TREE_URL, "w", "utf-8") as outfile:
