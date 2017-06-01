@@ -55,7 +55,8 @@ AUTHOR_PAREN = 1
 AUTHOR_NOPCOMMA = 2
 
 # this flag is to hide/display new materials still in progress from the general release
-SHOW_NEW = False
+SHOW_NEW = True
+DRAW_MAPS = False
 
 # randSeed = random.randint(0, 10000)
 
@@ -4943,9 +4944,10 @@ def build_site(init_data):
          location_sp_names, location_bi_names) = match_names_to_locations(species, specific_point_locations,
                                                                           binomial_point_locations,
                                                                           point_locations, citelist, logfile)
-        TMB_Create_Maps.create_all_maps(init_data, point_locations, species, species_plot_locations,
-                                        invalid_species_locations, all_names, binomial_plot_locations, specific_names,
-                                        specific_plot_locations)
+        if DRAW_MAPS:
+            TMB_Create_Maps.create_all_maps(init_data, point_locations, species, species_plot_locations,
+                                            invalid_species_locations, all_names, binomial_plot_locations,
+                                            specific_names, specific_plot_locations)
 
         # output website version
         if True:
