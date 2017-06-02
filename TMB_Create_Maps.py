@@ -454,7 +454,12 @@ def write_point_map_svg(title, place_list, point_locations, invalid_places, base
         p = place_list[0]
         if p in point_locations:
             point = point_locations[p]
-            if point.sw_lon is not None:
+            if point.sw_lon is None:
+                minlon = point.longitude - 15
+                maxlon = point.longitude + 15
+                minlat = point.latitude - 7.5
+                maxlat = point.latitude + 7.5
+            else:
                 minlon = point.sw_lon
                 maxlon = point.ne_lon
                 minlat = point.sw_lat
