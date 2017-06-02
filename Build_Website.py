@@ -2084,7 +2084,9 @@ def create_genus_chronology(genus_cnts, do_print, outfile):
 
 
 def calculate_binomial_locations(name, citelist):
-    # find locations this name is applied to
+    """
+    find all locations this name is applied to
+    """
     locs = set()
     for c in citelist:
         clean = clean_name(c.name)
@@ -2093,15 +2095,14 @@ def calculate_binomial_locations(name, citelist):
                 for a in c.applied_cites:
                     p = a.application
                     if (p != ".") and (p[0] != "[") and (p != "?"):
-                        # if "[" in p:
-                        #     p = p[:p.find("[") - 1]
-                        # locs |= {p}
                         locs |= {strip_location_subtext(p)}
     return locs
 
 
 def clean_genus(genus):
-    # fix alternate genus spellings when performing summaries
+    """
+    fix and match alternate genus spellings when performing summaries
+    """
     if genus in {"Galasimus", "Gelasimes", "Gelasius", "Gelasmus", "Gelsimus", "Gelassimus", "Gelasima"}:
         return "Gelasimus"
     elif genus in {"Uka", "Uça"}:
@@ -2430,9 +2431,14 @@ def fetch_child_data(loc, location_dict):
 
 def write_location_page(outfile, do_print, loc, point_locations, location_species, location_bi_names,
                         location_sp_names):
-    """ output a page for an individual location """
+    """
+    write the output page for an individual location
+    """
+
     def format_latlon(lat, lon):
-        """ format a lat,lon pair for printing """
+        """
+        subfunction to format a lat,lon pair for printing
+        """
         if lat < 0:
             latdir = "S"
         else:
@@ -2443,6 +2449,7 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
             londir = "E"
         return "{:1.6f}&deg;{}, {:1.6f}&deg;{}".format(abs(lat), latdir, abs(lon), londir)
 
+    # main function code
     star_str = "<sup>*</sup>"
     if do_print:
         start_page_division(outfile, "base_page")
@@ -2570,7 +2577,9 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
 
 
 def write_location_index_entry(outfile, do_print, loc, point_locations):
-    """ print a location and its child locations """
+    """
+    print a location and all of its child locations
+    """
     outfile.write("<li>" + create_location_link(loc, loc.trimmed_name, "", do_print))
     if loc.n_children() > 0:
         child_list = []
@@ -2779,8 +2788,10 @@ def write_common_names_pages(outfile, common_name_data, do_print):
 
 
 def connect_refs_to_species(species, citelist):
-    """ create list of references for each species """
-    # create dictionary with empty reference lists
+    """
+    create a list of references for each species
+    """
+    # create a dictionary with empty reference lists
     species_refs = {s.species: set() for s in species}
     # go through all citations
     for c in citelist:
@@ -2792,7 +2803,9 @@ def connect_refs_to_species(species, citelist):
 
 
 def write_species_list(specieslist, outfile, do_print):
-    """ output species index HTML """
+    """
+    create an index of all valid species
+    """
     if do_print:
         start_page_division(outfile, "index_page")
         link_str = "#name_index"
@@ -2826,7 +2839,9 @@ def write_species_list(specieslist, outfile, do_print):
 
 
 def write_species_photo_page(outfile, fname, species, common_name, caption, pn, pspecies, do_print):
-    """ create page for a specific photo """
+    """
+    create a page for a specific photo
+    """
     if ";" in pspecies:
         spname = pspecies.replace(";", "_")
         ptitle = "Uca " + pspecies.replace(";", " & Uca ")
@@ -2875,24 +2890,22 @@ def write_species_photo_page(outfile, fname, species, common_name, caption, pn, 
         common_html_footer(outfile, "../")
 
 
-# def write_species_video_page(fname, species, common_name, video, vn):
 def write_species_video_page(fname, video, vn):
-    """ create page for a specific video """
+    """
+    create a page for a specific video
+    """
     with codecs.open(fname, "w", "utf-8") as outfile:
         if ";" in video.species:
             spname = video.species.replace(";", "_")
             vtitle = "Uca " + video.species.replace(";", " & Uca ")
             is_multi = True
         else:
-            # spname = species
             spname = video.species
             vtitle = "Uca " + video.species
             is_multi = False
         common_html_header(outfile, vtitle + " Video", "../")
         outfile.write("    <header>\n")
         outfile.write("      <h1 class=\"nobookmark\"><em class=\"species\">" + vtitle + "</em> Video</h1>\n")
-        # if not is_multi:
-        #     outfile.write("      <h2>" + common_name + "</h2>\n")
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
         if is_multi:
@@ -2936,7 +2949,9 @@ def write_species_video_page(fname, video, vn):
 
 def write_species_page(species, references, specific_names, all_names, photos, videos, artlist, sprefs, refdict,
                        binomial_name_counts, specific_name_cnts, logfile, outfile, do_print):
-    """ create the master page for a species """
+    """
+    create the master page for a valid species
+    """
     if do_print:
         media_path = MEDIA_PATH
     else:
@@ -3050,7 +3065,6 @@ def write_species_page(species, references, specific_names, all_names, photos, v
             outfile.write("           <img src=\"" + TMP_MAP_PATH + pointmap_name("u_" + species.species) +
                           ".svg\" alt=\"Map\" />\n")
         else:
-            # outfile.write("           <div id=\"sp_range_map_canvas\"></div>\n")
             outfile.write("           <div id=\"range_map_canvas\" class=\"sp_map\"></div>\n")
             outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
             outfile.write("           <div class=\"map_download\">\n")
@@ -3219,7 +3233,9 @@ def write_species_page(species, references, specific_names, all_names, photos, v
 
 
 def write_photo_index(specieslist, photos, do_print, outfile, logfile):
-    """ create the photos index page """
+    """
+    create an index of all photos
+    """
     if do_print:
         start_page_division(outfile, "index_page")
         media_path = MEDIA_PATH
@@ -3303,7 +3319,9 @@ def write_photo_index(specieslist, photos, do_print, outfile, logfile):
 
 
 def write_video_index(videos, do_print, outfile, logfile):
-    """ create the videos page """
+    """
+    create an index of all videos
+    """
     sectitle = ("Feeding", "Male Waving and Other Displays", "Female Display", "Fighting", "Mating", "Miscellaneous")
     secshort = ("Feeding", "Male Display", "Female Display", "Fighting", "Mating", "Miscellaneous")
     secanchor = ("video_feeding", "video_display", "video_female", "video_fighting", "video_mating", "video_misc")
@@ -3371,7 +3389,6 @@ def write_video_index(videos, do_print, outfile, logfile):
             else:
                 spname = video.species
             vfname = WEBOUT_PATH + "video/video_u_" + spname + format(vn, "0>2") + ".html"
-            # write_species_video_page(vfname, species.species, species.common, video, vn)
             write_species_video_page(vfname, video, vn)
             # copy video to web output directory
             tmp_name = "video/U_" + spname + format(vn, "0>2") + "." + video.format.lower()
@@ -3382,7 +3399,9 @@ def write_video_index(videos, do_print, outfile, logfile):
 
 
 def write_specific_art_page(outfile, art, backurl, backtext, do_print):
-    """ create the individual page for each piece of art """
+    """
+    create a page for a piece of art
+    """
     ptitle = art.title + " (" + art.author + " " + art.year + ")"
     if do_print:
         start_page_division(outfile, "art_page")
@@ -3421,7 +3440,9 @@ def write_specific_art_page(outfile, art, backurl, backtext, do_print):
 
 
 def write_art_science_pages(artlist, do_print, outfile):
-    """ create the art science index """
+    """
+    create an index for all scientific art
+    """
     if do_print:
         start_page_division(outfile, "index_page")
         media_path = MEDIA_PATH
@@ -3478,7 +3499,9 @@ def write_art_science_pages(artlist, do_print, outfile):
 
 
 def write_art_stamps_pages(artlist, do_print, outfile):
-    """ create the art stamps index """
+    """
+    create an index for all stamps
+    """
     if do_print:
         start_page_division(outfile, "index_page")
         media_path = MEDIA_PATH
@@ -3534,7 +3557,9 @@ def write_art_stamps_pages(artlist, do_print, outfile):
 
     
 def write_art_crafts_pages(artlist, do_print, outfile):
-    """ create the art craft index """
+    """
+    create an index for all crafts
+    """
     if do_print:
         start_page_division(outfile, "index_page")
         media_path = MEDIA_PATH
@@ -3595,7 +3620,9 @@ def write_art_crafts_pages(artlist, do_print, outfile):
 
 
 def write_all_art_pages(artlist, do_print, outfile, logfile):
-    """ create the art pages """
+    """
+    create all art pages
+    """
     if do_print:
         write_art_science_pages(artlist, do_print, outfile)
         write_art_stamps_pages(artlist, do_print, outfile)
@@ -3622,7 +3649,9 @@ def write_all_art_pages(artlist, do_print, outfile, logfile):
 
 def write_species_info_pages(specieslist, references, specific_names, all_names, photos, videos, art, species_refs,
                              refdict, binomial_name_cnts, specific_name_cnts, logfile, outfile, do_print):
-    """ output species list and individual species pages """
+    """
+    create the species index and all individual species pages
+    """
     if do_print:
         write_species_list(specieslist, outfile, True)
     else:
