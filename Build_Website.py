@@ -1680,11 +1680,6 @@ def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, s
     else:
         common_header_part1(outfile, species, "../")
         start_google_chart_header(outfile)
-        # outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
-        # outfile.write("    <script type=\"text/javascript\">\n")
-        # outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
-        # outfile.write("      google.setOnLoadCallback(drawChart);\n")
-        # outfile.write("      function drawChart() {\n")
         image_name = 0
         setup_chronology_chart(image_name, miny, maxy, maxcnt, total_cnts, outfile)
         adjust = 1
@@ -1694,8 +1689,6 @@ def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, s
         for i, name in enumerate(bi_order):
             setup_chronology_chart(i + adjust, miny, maxy, bmaxcnt, binomial_name_counts[clean_name(name)], outfile)
         end_google_chart_header(outfile)
-        # outfile.write("      }\n")
-        # outfile.write("    </script>\n")
         common_header_part2(outfile, "", False)
 
     outfile.write("    <header>\n")
@@ -2111,9 +2104,7 @@ def calculate_name_index_data(refdict, citelist, specific_names):
     unique_names = list()
     nameset = set()
     total_binomial_year_cnts = {}
-    # word_cloud_str = ""
     for c in citelist:
-        # word_cloud_str += " " + c.name
         if c.name != ".":
             clean = clean_name(c.name)
             if not clean.lower() in nameset:
@@ -2218,10 +2209,10 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
                   "spellings and inclusive binomials are included on the linked page, as well as general "
                   "information on the status of each specific name.\n")
     outfile.write("    </p>\n")
+
     outfile.write("    <div class=\"namecol\">\n")
     outfile.write("      <h3 id=\"binomials\" class=\"bookmark2\">Binomials (and other Compound Names)</h3>\n")
     outfile.write("      <ul class=\"namelist\">\n")
-    # outfile.write("\n")
     for name in unique_names:
         namefile = name_to_filename(name)
         outfile.write("        <li><a href=\"" + rel_link_prefix(do_print, "") + namefile + ".html\">" +
@@ -2232,7 +2223,7 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
     outfile.write("    <div class=\"namecol pagebreak\">\n")
     outfile.write("      <h3 id=\"specificnames\" class=\"bookmark2\">Specific Names</h3>\n")
     outfile.write("      <ul class=\"spnamelist\">\n")
-    # outfile.write("\n")
+
     specific_year_cnts = {}
     for name in specific_names:
         outfile.write("        <li><a href=\"" + rel_link_prefix(do_print, "") + "sn_" + name.name + ".html\">" +
@@ -2462,8 +2453,6 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
     if loc.parent is not None:
         p = point_locations[loc.parent]
         outfile.write("    <dt>Included within</dt>\n")
-        # outfile.write("      <dd><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(p.name) + ".html\">"
-        #               + p.trimmed_name + "</a></dd>\n")
         outfile.write("      <dd>" + create_location_link(p, p.trimmed_name, "", do_print) + "</dd>\n")
     outfile.write("    <dt>Approximate Coordinates</dt>\n")
     outfile.write("      <dd>" + format_latlon(loc.latitude, loc.longitude) + "</dd>\n")
@@ -2475,7 +2464,6 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
                       ".svg\" alt=\"" + loc.trimmed_name + "\" title=\"Map of " + loc.trimmed_name + "\" />\n")
         outfile.write("      </figure>\n")
     else:
-        # outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
         outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
     outfile.write("    </div>\n")
 
@@ -2491,8 +2479,6 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         outfile.write("    <h3 class=\"nobookmark\">Includes Subareas</h3>\n")
         outfile.write("    <ul class=\"splist\">\n")
         for c in loc.children:
-            # outfile.write("    <li><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(c.name) +
-            #               ".html\">" + c.trimmed_name + "</a></li>\n")
             outfile.write("    <li>" + create_location_link(c, c.trimmed_name, "", do_print) + "</li>\n")
             all_species |= fetch_child_data(c, location_species)
             all_bi_names |= fetch_child_data(c, location_bi_names)
@@ -2567,8 +2553,6 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
 
 def write_location_index_entry(outfile, do_print, loc, point_locations):
     """ print a location and its child locations """
-    # outfile.write("<li><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(loc.name) + ".html\">" +
-    #               loc.trimmed_name + "</a>")
     outfile.write("<li>" + create_location_link(loc, loc.trimmed_name, "", do_print))
     if loc.n_children() > 0:
         child_list = []
@@ -2647,8 +2631,6 @@ def write_location_index(outfile, do_print, point_locations, location_dict, loca
     outfile.write("    <ul class=\"namelist\">\n")
     for p in full_list:
         loc = location_dict[p]
-        # outfile.write("   <li><a href=\"" + rel_link_prefix(do_print, "") + place_to_filename(loc.name) + ".html\">" +
-        #               p + "</a></li>\n")
         outfile.write("   <li>" + create_location_link(loc, p, "", do_print) + "</li>\n")
     outfile.write("    </ul>\n")
     outfile.write("  </div>\n")
@@ -2781,10 +2763,6 @@ def write_common_names_pages(outfile, common_name_data, do_print):
 def connect_refs_to_species(species, citelist):
     """ create list of references for each species """
     # create dictionary with empty reference lists
-    # species_refs = {}
-    # for s in species:
-    #     reflist = set()
-    #     species_refs[s.species] = reflist
     species_refs = {s.species: set() for s in species}
     # go through all citations
     for c in citelist:
@@ -2955,8 +2933,6 @@ def write_species_page(species, references, specific_names, all_names, photos, v
         if is_fossil:
             common_html_header(outfile, "Uca " + species.species + " / Fossil", "")
         else:
-            # common_species_html_header(outfile, "Uca " + species.species + " / " + species.common, "",
-            #                            species.species)
             common_header_part1(outfile, "Uca " + species.species + " / " + species.common, "")
             start_google_map_header(outfile)
             write_google_map_range_header(outfile, "u_" + species.species)
@@ -3043,9 +3019,6 @@ def write_species_page(species, references, specific_names, all_names, photos, v
         tmpstr += " (<a href=\"" + rel_link_prefix(do_print, "names/") + "synonyms_" + species.species + \
                   ".html\">Chronology</a>)"
         outfile.write("       <dt>" + tmpstr + "</dt>\n")
-        # outfile.write("       <dt>Synonyms, Alternate Spellings, &amp; Name Forms (<a href=\"" +
-        #               rel_link_prefix(do_print, "names/") + "synonyms_" + species.species +
-        #               ".html\">Chronology</a>)</dt>\n")
         outfile.write("         <dd><em class=\"species\">" + ", ".join(llist) + "</em></dd>\n")
 
     # Geographic Range
@@ -3115,7 +3088,6 @@ def write_species_page(species, references, specific_names, all_names, photos, v
             pn = int(photo.n)
             if ";" in photo.species:
                 nl = photo.species.replace(";", "_")
-                # pfname = WEBOUT_PATH + "photos/u_" + nl + format(pn, "0>2") + ".html"
                 pfname = "photo_u_" + nl + format(pn, "0>2") + ".html"
                 tname = nl
             else:
@@ -3185,7 +3157,6 @@ def write_species_page(species, references, specific_names, all_names, photos, v
         for art in artlist:
             slist = art.species.split(";")
             if species.species in slist:
-                # pfname = "art/" + art.image + ".html"
                 outfile.write("      <figure class=\"sppic\">\n")
                 outfile.write("        <a href=\"" + rel_link_prefix(do_print, "art/") + art.image +
                               ".html\"><img class=\"thumbnail\" src=\"" + media_path + "art/" + art.image +
@@ -3213,13 +3184,6 @@ def write_species_page(species, references, specific_names, all_names, photos, v
             reflist.append(format_reference_cite(ref, do_print, AUTHOR_PAREN, logfile))
     outfile.write(", \n".join(reflist))
     outfile.write("      </p>\n")
-    # outfile.write("      <div class=\"reference_list\">\n")
-    # outfile.write("        <ul>\n")
-    # for ref in references:
-    #     if ref.cite_key in sprefs:
-    #         outfile.write("          <li>" + format_reference_full(ref, do_print, logfile) + "</li>\n")
-    # outfile.write("        </ul>\n")
-    # outfile.write("      </div>\n")
     outfile.write("    </section>\n")
     if do_print:
         end_page_division(outfile)
@@ -3271,7 +3235,6 @@ def write_photo_index(specieslist, photos, do_print, outfile, logfile):
                     spname = photo.species.replace(";", "_")
                 else:
                     spname = photo.species
-                # pfname = "photos/u_" + spname + format(pn, "0>2") + ".html"
                 pfname = "photo_u_" + spname + format(pn, "0>2") + ".html"
                 outfile.write("      <figure class=\"sppic\">\n")
                 outfile.write("        <a href=\"" + rel_link_prefix(do_print, "photos/") + pfname +
@@ -3301,10 +3264,8 @@ def write_photo_index(specieslist, photos, do_print, outfile, logfile):
                     spname = photo.species.replace(";", "_")
                 else:
                     spname = photo.species
-                # pfname = "photos/u_" + spname + format(pn, "0>2") + ".html"
                 pfname = "photo_u_" + spname + format(pn, "0>2") + ".html"
                 if do_print:
-                    # if species[0] in "ab":
                     write_species_photo_page(outfile, pfname, species, sp.common, photo.caption, pn,
                                              photo.species, True)
                 else:
@@ -3414,11 +3375,6 @@ def write_specific_art_page(outfile, art, backurl, backtext, do_print):
     outfile.write("    <header id=\"" + art.image + ".html\">\n")
     outfile.write("      <h1 class=\"nobookmark\"><em class=\"species\">" + art.title + "</em></h1>\n")
     outfile.write("      <h2 class=\"nobookmark\">" + art.author + " (" + art.year + ")</h2>\n")
-    # if do_print and (art.cite_key != "n/a"):
-    #     outfile.write("      <h2 class=\"nobookmark\">" + format_reference_cite(refdict[art.cite_key], do_print,
-    #                                                                             AUTHOR_OUT, logfile) + "</h2>\n")
-    # else:
-    #     outfile.write("      <h2 class=\"nobookmark\">" + art.author + " (" + art.year + ")</h2>\n")
     if (art.species != "n/a") or (art.cite_key != "n/a") or (not do_print):
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
@@ -3481,7 +3437,6 @@ def write_art_science_pages(artlist, do_print, outfile):
             if art.art_type == "science":
                 artist = art.author + " (" + art.year + ")"
                 if artist == a:
-                    # pfname = "art/" + art.image + ".html"
                     outfile.write("      <figure class=\"sppic\">\n")
                     outfile.write("        <a href=\"" + rel_link_prefix(do_print, "art/") + art.image +
                                   ".html\"><img class=\"thumbnail\" src=\"" + media_path + "art/" +
@@ -3539,7 +3494,6 @@ def write_art_stamps_pages(artlist, do_print, outfile):
         for art in artlist:
             if art.art_type == "stamp":
                 if art.author == a:
-                    # pfname = "art/" + art.image + ".html"
                     outfile.write("      <figure class=\"sppic\">\n")
                     outfile.write("        <a href=\"" + rel_link_prefix(do_print, "art/") + art.image +
                                   ".html\"><img class=\"thumbnail\" src=\"" + media_path + "art/" +
@@ -4605,8 +4559,6 @@ def write_introduction(outfile, species, do_print):
         outfile.write("    </ul>\n")
         outfile.write("    <h2>Miscellania</h2>\n")
         outfile.write("    <ul class=\"fa-ul\">\n")
-        # outfile.write("      <li><span class=\"fa-li fa fa-wordpress\"></span>"
-        #               "<a href=\"blog\">Fiddler Crab Blog</a></li>\n")
         outfile.write("      <li><span class=\"fa-li fa fa-pencil\"></span>"
                       "<a href=\"" + CITE_URL + "\">Citation info for this website</a></li>\n")
         outfile.write("      <li><span class=\"fa-li fa fa-github\"></span>"
