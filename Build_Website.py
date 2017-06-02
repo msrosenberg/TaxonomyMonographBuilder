@@ -18,9 +18,6 @@ import TMB_Initialize
 # external dependencies
 import matplotlib.pyplot as mplpy
 from wordcloud import WordCloud
-# from wordcloud import WordCloud, STOPWORDS
-# import numpy as np
-# from PIL import Image
 
 
 WEBOUT_PATH = "webout/"
@@ -56,19 +53,24 @@ AUTHOR_NOPCOMMA = 2
 
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
+# this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
 DRAW_MAPS = False
 
 # randSeed = random.randint(0, 10000)
 
 
 def remove_html(x):
-    """ remove any stray html tags from string before using as title of html documemnt """
+    """
+    remove any stray html tags from string before using as title of html document
+    """
     regex = r"<.+?>"
     return re.sub(regex, "", x)
 
 
 def common_header_part1(outfile, title, indexpath):
-    """ part 1 of the header for all html """
+    """
+    part 1 of the common header for all webout html files
+    """
     outfile.write("<!DOCTYPE HTML>\n")
     outfile.write("<html lang=\"en\">\n")
     outfile.write("  <head>\n")
@@ -108,7 +110,9 @@ def common_header_part1(outfile, title, indexpath):
 
 
 def common_header_part2(outfile, indexpath, include_map):
-    """ part 2 of the header for all html """
+    """
+    part 2 of the common header for all webout html files
+    """
     outfile.write("  </head>\n")
     outfile.write("\n")
     if include_map:
@@ -125,6 +129,9 @@ def common_header_part2(outfile, indexpath, include_map):
 
 
 def start_google_map_header(outfile):
+    """
+    start of common header entries for webout html files which contain Google maps elements
+    """
     outfile.write("    <script type=\"text/javascript\"\n")
     outfile.write("      src=\"http://maps.googleapis.com/maps/api/js?"
                   "key=AIzaSyAaITaFdh_own-ULkURNKtyeh2ZR_cpR74&sensor=false\">\n")
@@ -146,11 +153,17 @@ def start_google_map_header(outfile):
 
 
 def end_google_map_header(outfile):
+    """
+    end of common header entries for webout html files which contain Google maps elements
+    """
     outfile.write("      }\n")
     outfile.write("    </script>\n")
 
 
 def write_google_map_range_header(outfile, map_name):
+    """
+    common header entries for webout html files which contain Google maps elements - range map version
+    """
     outfile.write("        var range_map = new google.maps.Map(document.getElementById(\"range_map_canvas\"),"
                   "mapOptions);\n")
     outfile.write("        var range_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
@@ -159,6 +172,9 @@ def write_google_map_range_header(outfile, map_name):
 
 
 def write_google_map_point_header(outfile, map_name, location):
+    """
+    common header entries for webout html files which contain Google maps elements - point map version
+    """
     do_bounds = False
     preserve = ""
     if location is not None:
@@ -182,6 +198,9 @@ def write_google_map_point_header(outfile, map_name, location):
 
 
 def start_google_chart_header(outfile):
+    """
+    start of common header entries for webout html files which contain Google chart elements
+    """
     outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
     outfile.write("    <script type=\"text/javascript\">\n")
     outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
@@ -190,16 +209,25 @@ def start_google_chart_header(outfile):
 
 
 def end_google_chart_header(outfile):
+    """
+    end of common header entries for webout html files which contain Google maps elements - range map version
+    """
     outfile.write("      }\n")
     outfile.write("    </script>\n")
 
 
 def common_html_header(outfile, title, indexpath):
+    """
+    write common header for webout html files without special scripts
+    """
     common_header_part1(outfile, title, indexpath)
     common_header_part2(outfile, indexpath, False)
 
 
 def common_html_footer(outfile, indexpath):
+    """
+    common footer and closing elements for all webout html files
+    """
     outfile.write("\n")
     outfile.write("    <footer>\n")
     outfile.write("       <figure id=\"footmap\"><script type=\"text/javascript\" "
@@ -218,14 +246,23 @@ def common_html_footer(outfile, indexpath):
 
 
 def start_page_division(outfile, page_class):
+    """
+    write start page information for print output
+    """
     outfile.write("  <div class=\"" + page_class + "\">\n")
 
 
 def end_page_division(outfile):
+    """
+    write end page information for print output
+    """
     outfile.write("  </div>\n")
 
 
 def create_blank_index(fname):
+    """
+    create a blank index.html file for webout directories to prevent browsers from listing containing files
+    """
     with open(fname, "w") as outfile:
         outfile.write("<!DOCTYPE HTML>\n")
         outfile.write("<html lang=\"en\">\n")
@@ -309,7 +346,10 @@ def replace_references(in_list, refdict, do_print, logfile):
 
 
 def clean_reference_html(ref):
-    """ add slightly better formatting to html formatted references """
+    """
+    add slightly better formatting to html formatted references
+      in particular, replace hyphens with n-dashes for commonly seen ranges
+    """
     # replace hyphens with an n-dash in page ranges
     sstr = r"((?:Pp\. |:)[\d]+)(-)([\d]+)"
     ref = re.sub(sstr, r"\1&ndash;\3", ref)
@@ -328,6 +368,10 @@ def clean_references(references):
 
 
 def format_language(x):
+    """
+    beautify language listings for references by adding flag icons for each language and replacing the word
+    'and' with an ampersand
+    """
     language_replace_list = [
         [" and ", " &amp; "],
         ["German", "<span class=\"flag-icon flag-icon-de\"></span> German"],
@@ -514,11 +558,6 @@ def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, langua
     else:
         common_header_part1(outfile, "Fiddler Crab Reference Summary", "")
         start_google_chart_header(outfile)
-        # outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
-        # outfile.write("    <script type=\"text/javascript\">\n")
-        # outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
-        # outfile.write("      google.setOnLoadCallback(drawChart);\n")
-        # outfile.write("      function drawChart() {\n")
         outfile.write("        var data1 = google.visualization.arrayToDataTable([\n")
         outfile.write("          ['Year', 'Cumulative Publications'],\n")
         for y in year_data:
@@ -619,8 +658,6 @@ def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, langua
         outfile.write("        var chart6 = new google.visualization.PieChart"
                       "(document.getElementById('chart6_div'));\n")
         outfile.write("        chart6.draw(data6, options6);\n")
-        # outfile.write("      }\n")
-        # outfile.write("    </script>\n")
         end_google_chart_header(outfile)
         common_header_part2(outfile, "", False)
 
@@ -872,7 +909,9 @@ def create_location_link(location, display_name, path, do_print):
 
 
 def strip_location_subtext(x):
-    """ remove extra information from a location string """
+    """
+    remove extra information from a location string when present
+    """
     # remove <!> indicator from locations
     x = x.replace("<!>", "").strip()
     # remove information in []'s from a location string
@@ -882,14 +921,16 @@ def strip_location_subtext(x):
 
 
 def format_name_string(x):
-    """ properly emphasize species names, but not non-name signifiers """
+    """
+    properly emphasize species names, but not non-name signifiers
+    """
     # get rid of [#] when present
     if "{" in x:
         x = x[:x.find("{")-1]
     if "var." in x.lower():
         p = x.lower().find("var.")
         return "<em class=\"species\">" + x[:p] + "</em> " + x[p:p+4] + " <em class=\"species\">" + x[p+4:] + "</em>"
-    elif " var " in x.lower():
+    elif " var " in x.lower():  # need the spaces around var, because some names have the letters var in them
         p = x.lower().find(" var ")
         return "<em class=\"species\">" + x[:p] + "</em> " + x[p:p+4] + " <em class=\"species\">" + x[p+4:] + "</em>"
     elif "subsp." in x.lower():
@@ -908,10 +949,10 @@ def format_name_string(x):
 def clean_specific_name(x):
     """
     function to extract the specific names from binomials
-
-    this is a list of terms that are not actual species names or specific names that have never been part of
-    a fiddler genus
     """
+
+    # this is a list of terms that are not actual species names or specific names that have never been part of
+    # a fiddler genus
     skip_list = ("sp.",
                  "spp.",
                  "var.",
@@ -1210,7 +1251,9 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
 
 
 def write_reference_pages(reflist, refdict, citelist, do_print, printfile, logfile, name_table, point_locations):
-    """ control function to loop through creating a page for every reference """
+    """
+    control function to loop through creating a page for every reference
+    """
     for ref in reflist:
         if ref.cite_key != "<pending>":
             if do_print:
@@ -1222,7 +1265,9 @@ def write_reference_pages(reflist, refdict, citelist, do_print, printfile, logfi
 
 
 def clean_name(x):
-    """ function to clean up names so that variation such as punctuation does not prevent a match """
+    """
+    function to clean up names so that variation such as punctuation does not prevent a match
+    """
     x = x.replace(", var.", " var.")
     if "{" in x:
         x = x[:x.find("{")-1]
@@ -1254,7 +1299,9 @@ def calculate_binomial_yearly_cnts(name, refdict, citelist):
 
 def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, name_table, species_name, logfile,
                              outfile, do_print, location_set, point_locations):
-    """ create a page listing all citations using a specific binomial """
+    """
+    create a page listing all citations using, and other information about, a specific binomial or compound name
+    """
     # find citations for this name
     cites = []
     for c in citelist:
@@ -1289,16 +1336,9 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
 
         if maxcnt > 0:
             start_google_chart_header(outfile)
-            # outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
-            # outfile.write("    <script type=\"text/javascript\">\n")
-            # outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
-            # outfile.write("      google.setOnLoadCallback(drawChart);\n")
-            # outfile.write("      function drawChart() {\n")
             image_name = 0
             setup_chronology_chart(image_name, miny, maxy, maxcnt, name_by_year, outfile)
             end_google_chart_header(outfile)
-            # outfile.write("      }\n")
-            # outfile.write("    </script>\n")
         common_header_part2(outfile, "../", True)
 
     outfile.write("    <header id=\"" + namefile + ".html\" class=\"tabular_page\">\n")
@@ -1415,16 +1455,9 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
 
         if maxcnt > 0:
             start_google_chart_header(outfile)
-            # outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
-            # outfile.write("    <script type=\"text/javascript\">\n")
-            # outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
-            # outfile.write("      google.setOnLoadCallback(drawChart);\n")
-            # outfile.write("      function drawChart() {\n")
             image_name = 0
             setup_chronology_chart(image_name, miny, maxy, maxcnt, byears, outfile)
             end_google_chart_header(outfile)
-            # outfile.write("      }\n")
-            # outfile.write("    </script>\n")
         common_header_part2(outfile, "../", True)
 
     outfile.write("    <header id=\"sn_" + specific_name.name + ".html\" class=\"tabular_page\">\n")
@@ -1521,28 +1554,13 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
         common_html_footer(outfile, "../")
 
 
-# def create_word_cloud_image(text):
-#     # add special stopwords
-#     stopwords = set(STOPWORDS)
-#     stopwords.add("spp")
-#     stopwords.add("sp")
-#     stopwords.add("gruppe")
-#     stopwords.add("spec")
-#     stopwords.add("nov")
-#     stopwords.add("subsp")
-#     stopwords.add("forme")
-#     stopwords.add("var")
-#     # generate wordcloud image
-#     wordcloud = WordCloud(width=2000, height=1500, background_color="white", stopwords=stopwords,
-#                           max_words=1000, normalize_plurals=False, collocations=False).generate(text.lower())
-#     wordcloud.to_file(TMP_PATH + "name_word_cloud.png")
-
 def create_word_cloud_image(binomial_cnts, specific_cnts):
     # fiddler_mask = np.array(Image.open("private/silhouette.png"))
     # generate wordcloud image from binomials
     wordcloud = WordCloud(width=2000, height=1500, background_color="white", max_words=1000,  normalize_plurals=False,
                           collocations=False).generate_from_frequencies(binomial_cnts)
     wordcloud.to_file(TMP_PATH + "binomial_word_cloud.png")
+
     # generate wordcloud image from specific names
     wordcloud = WordCloud(width=2000, height=1500, background_color="white", max_words=1000,  normalize_plurals=False,
                           collocations=False).generate_from_frequencies(specific_cnts)
