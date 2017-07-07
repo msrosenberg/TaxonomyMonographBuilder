@@ -241,6 +241,7 @@ def draw_base_svg_map(faxes, base_map):
         newp = mplp.Polygon(plist, True)
         poly_list.append(newp)
     pc = PatchCollection(poly_list, alpha=0.2, facecolor="silver", edgecolor="darkgray", zorder=1)
+    # pc = PatchCollection(poly_list, alpha=0.2, facecolor="white", edgecolor="darkgray", zorder=1)
     faxes.add_collection(pc)
 
 
@@ -465,6 +466,11 @@ def write_point_map_svg(title, place_list, point_locations, invalid_places, base
                 minlat = point.sw_lat
                 maxlat = point.ne_lat
     minlon, maxlon, minlat, maxlat = adjust_svg_map_boundaries(minlon, maxlon, minlat, maxlat)
+    # uncomment to force full world map
+    # maxlat = 90
+    # minlat = -90
+    # maxlon = 180
+    # minlon = -180
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)
     if skip_axes:
@@ -545,6 +551,9 @@ def create_all_maps(init_data, point_locations, species, species_plot_locations,
 
 def main():
     pass
+    # temp code to produce a blank map
+    # base_map = read_base_map("fiddlercrab.info/private/ne_50m_land.txt", None)
+    # write_point_map_svg("blank", [], [], None, base_map, True, False)
 
 
 if __name__ == "__main__":

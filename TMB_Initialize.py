@@ -8,6 +8,8 @@ import os
 class InitializationData:
     def __init__(self):
         self.main_path = "fiddlercrab.info"
+
+        # input file names and paths
         self.reference_ciation_file = "data/references_cites.txt"
         self.reference_file = "data/references.html"
         self.citation_info_file = "data/citeinfo.txt"
@@ -21,11 +23,18 @@ class InitializationData:
         self.morphology_file = "data/morphology.txt"
         self.map_kml_file = "data/Fiddler Crabs.kml"
         self.location_file = "data/location_data.txt"
+
         self.error_log = "errorlog.txt"
+
+        # site information
         self.site_title = "Fiddler Crabs"
         self.site_subtitle = "A Comprehensive Compendium and Guide to the Fiddler Crabs of the World"
         self.site_author = "Michael S. Rosenberg"
         self.site_address = "www.fiddlercrab.info"
+        self.site_http = "http://"  # this leaves open the option of quick switching to https
+
+    def site_url(self):
+        return self.site_http + self.site_address
 
 
 def initialize():

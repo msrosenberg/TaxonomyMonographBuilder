@@ -46,6 +46,7 @@ FOSSIL_IMAGE = " <span class=\"fossil-img\">&#9760;</span>"
 START_YEAR = 1758
 CURRENT_YEAR = datetime.date.today().year
 VERSION = datetime.datetime.now().strftime("%Y.%m.%d.%H.%M")
+INIT_DATA = None
 
 AUTHOR_NOPAREN = 0
 AUTHOR_PAREN = 1
@@ -166,7 +167,9 @@ def write_google_map_range_header(outfile, map_name):
     """
     outfile.write("        var range_map = new google.maps.Map(document.getElementById(\"range_map_canvas\"),"
                   "mapOptions);\n")
-    outfile.write("        var range_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
+    # outfile.write("        var range_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
+    #               rangemap_name(map_name) + ".kmz\",{suppressInfoWindows: true});\n")
+    outfile.write("        var range_layer = new google.maps.KmlLayer(\"" + INIT_DATA.site_url() + "/maps/" +
                   rangemap_name(map_name) + ".kmz\",{suppressInfoWindows: true});\n")
     outfile.write("        range_layer.setMap(range_map);\n")
 
@@ -184,8 +187,11 @@ def write_google_map_point_header(outfile, map_name, location):
 
     outfile.write("        var point_map = new google.maps.Map(document.getElementById(\"point_map_canvas\"),"
                   "mapOptions);\n")
+    # outfile.write("        var point_layer = "
+    #               "new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" + pointmap_name(map_name) +
+    #               ".kmz\",{suppressInfoWindows: false" + preserve + "});\n")
     outfile.write("        var point_layer = "
-                  "new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" + pointmap_name(map_name) +
+                  "new google.maps.KmlLayer(\"" + INIT_DATA.site_url() + "/maps/" + pointmap_name(map_name) +
                   ".kmz\",{suppressInfoWindows: false" + preserve + "});\n")
     outfile.write("        point_layer.setMap(point_map);\n")
     if do_bounds:
@@ -285,7 +291,8 @@ def rel_link_prefix(do_print, prefix):
 
 def abs_link_prefix(do_absolute):
     if do_absolute:
-        return "http://www.fiddlercrab.info/"
+        # return "http://www.fiddlercrab.info/"
+        return INIT_DATA.site_url() + "/"
     else:
         return ""
 
@@ -3160,10 +3167,13 @@ def write_species_page(species, references, specific_names, all_names, photos, v
                 if video_n == 1:
                     if do_print:
                         outfile.write("    <p>\n")
+                        # outfile.write("      Videos are available on the web at "
+                        #               "<a href=\"http://www.fiddlercrab.info/uca_videos.html\">"
+                        #               "http://www.fiddlercrab.info/uca_videos.html</a> or by following the embedded "
+                        #               "links.")
                         outfile.write("      Videos are available on the web at "
-                                      "<a href=\"http://www.fiddlercrab.info/uca_videos.html\">"
-                                      "http://www.fiddlercrab.info/uca_videos.html</a> or by following the embedded "
-                                      "links.")
+                                      "<a href=\"" + INIT_DATA.site_url() + "/uca_videos.html\">" +
+                                      INIT_DATA.site_url() + "/uca_videos.html</a> or by following the embedded links.")
                         outfile.write("    </p>\n")
                     outfile.write("      <dl class=\"vidlist\">\n")
                 outfile.write("            <dt><a class=\"vidlink\" href=\"" + abs_link_prefix(do_print) + vfname +
@@ -3342,9 +3352,12 @@ def write_video_index(videos, do_print, outfile, logfile):
     outfile.write("\n")
     if do_print:
         outfile.write("    <p>\n")
-        outfile.write("      Videos are available on the web at "
-                      "<a href=\"http://www.fiddlercrab.info/uca_videos.html\">"
-                      "http://www.fiddlercrab.info/uca_videos.html</a> or by following the embedded links.")
+        # outfile.write("      Videos are available on the web at "
+        #               "<a href=\"http://www.fiddlercrab.info/uca_videos.html\">"
+        #               "http://www.fiddlercrab.info/uca_videos.html</a> or by following the embedded links.")
+        outfile.write("      Videos are available on the web at <a href=\"" + INIT_DATA.site_url() +
+                      "/uca_videos.html\">" + INIT_DATA.site_url() +
+                      "/uca_videos.html</a> or by following the embedded links.")
         outfile.write("    </p>\n")
     outfile.write("    <p>\n")
     if do_print:
@@ -4641,7 +4654,6 @@ def create_temp_output_paths():
     """
     create temporary output directories if they do not already exist
     """
-    # create path for temp files
     if not os.path.exists(TMP_PATH):
         os.makedirs(TMP_PATH)
     if not os.path.exists(TMP_MAP_PATH):
@@ -4727,7 +4739,8 @@ def copy_map_files(species, all_names, specific_names, point_locations, logfile)
         copy_file(TMP_MAP_PATH + pointmap_name("location_" + place_to_filename(p)) + ".kmz")
 
 
-def print_cover(outfile, init_data):
+# def print_cover(outfile, init_data):
+def print_cover(outfile):
     """
     create cover for monographic print output
     """
@@ -4735,36 +4748,38 @@ def print_cover(outfile, init_data):
     for i in range(1, 29):
         outfile.write("      <img id=\"cover_img" + str(i) + "\" class=\"cover_img\" "
                       "src=\"media/cover images/cover" + str(i) + ".jpg\" />\n")
-    outfile.write("      <p class=\"cover_title\">" + init_data.site_title + "</p>\n")
-    outfile.write("      <p class=\"cover_author\">" + init_data.site_author + "</p>\n")
+    outfile.write("      <p class=\"cover_title\">" + INIT_DATA.site_title + "</p>\n")
+    outfile.write("      <p class=\"cover_author\">" + INIT_DATA.site_author + "</p>\n")
     outfile.write("    </div>\n")
     outfile.write("\n")
 
 
-def print_title_page(outfile, init_data):
+# def print_title_page(outfile, init_data):
+def print_title_page(outfile):
     """
     create title page for monographic print output
     """
     outfile.write("    <div id=\"title_page\">\n")
-    outfile.write("     <p class=\"book_title\">" + init_data.site_title + "</p>\n")
-    outfile.write("     <p class=\"book_subtitle\">" + init_data.site_subtitle + "</p>\n")
-    outfile.write("     <p class=\"book_author\">" + init_data.site_author + "</p>\n")
+    outfile.write("     <p class=\"book_title\">" + INIT_DATA.site_title + "</p>\n")
+    outfile.write("     <p class=\"book_subtitle\">" + INIT_DATA.site_subtitle + "</p>\n")
+    outfile.write("     <p class=\"book_author\">" + INIT_DATA.site_author + "</p>\n")
     outfile.write("     <figure class=\"title_image\"><img src=\"resources/images/stylifera75.png\" /></figure>\n")
-    outfile.write("     <p class=\"book_address\"><a href=\"http://" + init_data.site_address + "\">" +
-                  init_data.site_address + "</a></p>\n")
+    outfile.write("     <p class=\"book_address\"><a href=\"" + INIT_DATA.site_url() + "\">" +
+                  INIT_DATA.site_address + "</a></p>\n")
     outfile.write("    </div>\n")
     outfile.write("\n")
 
 
-def print_copyright_page(outfile, init_data, refdict):
+# def print_copyright_page(outfile, init_data, refdict):
+def print_copyright_page(outfile, refdict):
     """
     create copyright page for monographic print output
     """
     outfile.write("    <div id=\"copyright_page\">\n")
     outfile.write("     <p>Copyright &copy; 2003&ndash;" + str(CURRENT_YEAR) +
-                  " by " + init_data.site_author + ". All Rights Reserved</p>\n")
+                  " by " + INIT_DATA.site_author + ". All Rights Reserved</p>\n")
     outfile.write("     <p>Release: " + VERSION + "</p>\n")
-    outfile.write("     <p><a href=\"http://" + init_data.site_address + "\">" + init_data.site_address + "</a></p>\n")
+    outfile.write("     <p><a href=\"" + INIT_DATA.site_url() + "\">" + INIT_DATA.site_address + "</a></p>\n")
     outfile.write("     <p>\n")
     outfile.write("       The data and code used to produce this document can be found on GitHub at")
     outfile.write("     </p>\n")
@@ -4856,13 +4871,17 @@ def print_table_of_contents(outfile, species_list):
     outfile.write("\n")
 
 
-def write_print_only_pages(outfile, init_data, species, refdict):
+# def write_print_only_pages(outfile, init_data, species, refdict):
+def write_print_only_pages(outfile, species, refdict):
     """
     create starting pages that are unique to print output
     """
-    print_cover(outfile, init_data)
-    print_title_page(outfile, init_data)
-    print_copyright_page(outfile, init_data, refdict)
+    # print_cover(outfile, init_data)
+    # print_title_page(outfile, init_data)
+    # print_copyright_page(outfile, init_data, refdict)
+    print_cover(outfile)
+    print_title_page(outfile)
+    print_copyright_page(outfile, refdict)
     print_table_of_contents(outfile, species)
 
 
@@ -4892,21 +4911,22 @@ def end_print(outfile):
     outfile.write("</html>\n")
 
 
-def build_site(init_data):
+# def build_site(init_data):
+def build_site():
     create_temp_output_paths()
-    with codecs.open(init_data.error_log, "w", "utf-8") as logfile:
+    with codecs.open(INIT_DATA.error_log, "w", "utf-8") as logfile:
         # read data and do computation
         print("...Reading References...")
         (references, refdict, citelist,
-         yeardict, citecount) = TMB_Import.read_reference_data(init_data.reference_ciation_file,
-                                                               init_data.reference_file,
-                                                               init_data.citation_info_file,
+         yeardict, citecount) = TMB_Import.read_reference_data(INIT_DATA.reference_ciation_file,
+                                                               INIT_DATA.reference_file,
+                                                               INIT_DATA.citation_info_file,
                                                                logfile)
         clean_references(references)
         yeardat, yeardat1900 = summarize_year(yeardict)
         languages = summarize_languages(references)
         print("...Reading Species...")
-        species = TMB_Import.read_species_data(init_data.species_data_file)
+        species = TMB_Import.read_species_data(INIT_DATA.species_data_file)
 
         print("...Connecting References...")
         compute_species_from_citation_linking(citelist)
@@ -4914,25 +4934,25 @@ def build_site(init_data):
         species_refs = connect_refs_to_species(species, citelist)
 
         print("...Reading Species Names...")
-        specific_names = TMB_Import.read_specific_names_data(init_data.specific_names_file)
+        specific_names = TMB_Import.read_specific_names_data(INIT_DATA.specific_names_file)
         check_specific_names(citelist, specific_names, logfile)
         (all_names, binomial_name_cnts, specific_name_cnts, genus_cnts, total_binomial_year_cnts,
          name_table, specific_point_locations, binomial_point_locations, binomial_usage_cnts,
          specific_usage_cnts) = calculate_name_index_data(refdict, citelist, specific_names)
-        common_name_data = TMB_Import.read_common_name_data(init_data.common_names_file)
-        subgenera = TMB_Import.read_subgenera_data(init_data.subgenera_file)
+        common_name_data = TMB_Import.read_common_name_data(INIT_DATA.common_names_file)
+        subgenera = TMB_Import.read_subgenera_data(INIT_DATA.subgenera_file)
         # create_word_cloud_image(word_cloud_str)
         create_word_cloud_image(binomial_usage_cnts, specific_usage_cnts)
 
         print("...Reading Photos and Videos...")
-        photos = TMB_Import.read_photo_data(init_data.photo_file)
-        videos = TMB_Import.read_video_data(init_data.video_file)
-        art = TMB_Import.read_art_data(init_data.art_file)
-        morphology = TMB_Import.read_morphology_data(init_data.morphology_file)
+        photos = TMB_Import.read_photo_data(INIT_DATA.photo_file)
+        videos = TMB_Import.read_video_data(INIT_DATA.video_file)
+        art = TMB_Import.read_art_data(INIT_DATA.art_file)
+        morphology = TMB_Import.read_morphology_data(INIT_DATA.morphology_file)
 
         print("...Creating Maps...")
         # a dict of locations, keys = full location names
-        point_locations = TMB_Import.read_location_data(init_data.location_file)
+        point_locations = TMB_Import.read_location_data(INIT_DATA.location_file)
         # a dict of locations, keys = trimmed location names and aliases
         location_dict = create_location_hierarchy(point_locations, logfile)
         # location_species is a dict of sets of species objects, key = location full names
@@ -4944,7 +4964,7 @@ def build_site(init_data):
                                                                           binomial_point_locations,
                                                                           point_locations, citelist, logfile)
         if DRAW_MAPS:
-            TMB_Create_Maps.create_all_maps(init_data, point_locations, species, species_plot_locations,
+            TMB_Create_Maps.create_all_maps(INIT_DATA, point_locations, species, species_plot_locations,
                                             invalid_species_locations, all_names, binomial_plot_locations,
                                             specific_names, specific_plot_locations)
 
@@ -4967,8 +4987,9 @@ def build_site(init_data):
             print("......Writing Species......")
             write_species_info_pages(species, references, specific_names, all_names, photos, videos, art, species_refs,
                                      refdict, binomial_name_cnts, specific_name_cnts, logfile, None, False)
-            print("......Writing Locations......")
+            print("......Copying Maps......")
             copy_map_files(species, all_names, specific_names, point_locations, logfile)
+            print("......Writing Locations......")
             with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
                 write_location_index(outfile, False, point_locations, location_dict, location_species,
                                      location_sp_names, location_bi_names)
@@ -5000,7 +5021,8 @@ def build_site(init_data):
             print("...Creating Print Version...")
             with codecs.open("print.html", "w", "utf-8") as printfile:
                 start_print(printfile)
-                write_print_only_pages(printfile, init_data, species, refdict)
+                # write_print_only_pages(printfile, init_data, species, refdict)
+                write_print_only_pages(printfile, species, refdict)
                 write_introduction(printfile, species, True)
                 write_common_names_pages(printfile, replace_references(common_name_data, refdict, True, logfile), True)
                 write_systematics_overview(subgenera, species, refdict, printfile, True, logfile)
@@ -5033,9 +5055,11 @@ def build_site(init_data):
 
 def main():
     # will eventually need to put options here for choosing different paths, etc.
-    init_data = TMB_Initialize.initialize()
+    global INIT_DATA
+    INIT_DATA = TMB_Initialize.initialize()
     # will need to read options from file
-    build_site(init_data)
+    # build_site(init_data)
+    build_site()
 
 
 if __name__ == "__main__":
