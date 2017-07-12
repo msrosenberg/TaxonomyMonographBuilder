@@ -271,6 +271,10 @@ def read_location_data(filename):
             newloc.ne_lon = float(loc[9])
             newloc.sw_lat = float(loc[10])
             newloc.sw_lon = float(loc[11])
-
+        else:  # set deafult boundaries if they are not loaded
+            newloc.ne_lat = newloc.latitude + 7.5
+            newloc.ne_lon = newloc.longitude + 15
+            newloc.sw_lat = newloc.latitude - 7.5
+            newloc.sw_lon = newloc.longitude - 15
         locdict[newloc.name] = newloc
     return locdict
