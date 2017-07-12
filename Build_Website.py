@@ -55,7 +55,7 @@ AUTHOR_NOPCOMMA = 2
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = False
+DRAW_MAPS = True
 
 # randSeed = random.randint(0, 10000)
 

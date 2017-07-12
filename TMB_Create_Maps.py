@@ -365,7 +365,7 @@ def write_all_range_map_svg(base_map, species_maps):
     mplpy.close("all")
 
 
-def write_point_map_kml(title, place_list, point_locations, invalid_places):
+def write_point_map_kml(title, place_list, point_locations, invalid_places, init_data):
     with codecs.open(__TMP_PATH__ + "doc.kml", "w", "utf-8") as outfile:
         outfile.write("<?xml version=\"1.0\"?>\n")
         outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
@@ -394,7 +394,8 @@ def write_point_map_kml(title, place_list, point_locations, invalid_places):
                 is_invalid = True
             outfile.write("  <Placemark>\n")
             outfile.write("    <name>" + p + "</name>\n")
-            outfile.write("    <description> </description>\n")
+            outfile.write("    <description>" + init_data.site_url() + "/locations/" + place_to_filename(p) +
+                          ".html</description>\n")
             outfile.write("    <styleUrl>\n")
             if is_invalid:
                 outfile.write("      #bad_location\n")
@@ -485,18 +486,19 @@ def write_point_map_svg(title, place_list, point_locations, invalid_places, base
     mplpy.close("all")
 
 
-def create_all_point_maps(species, point_locations, species_plot_locations, invalid_species_locations, base_map):
+def create_all_point_maps(species, point_locations, species_plot_locations, invalid_species_locations, base_map,
+                          init_data):
     all_places = set()
     for s in species:
         if s.status != "fossil":
             places = species_plot_locations[s]
             invalid_places = invalid_species_locations[s]
             write_point_map_svg("u_" + s.species, places, point_locations, invalid_places, base_map, False, False)
-            write_point_map_kml("u_" + s.species, places, point_locations, invalid_places)
+            write_point_map_kml("u_" + s.species, places, point_locations, invalid_places, init_data)
             all_places |= set(places)
     all_list = sorted(list(all_places))
     write_point_map_svg("uca_all", all_list, point_locations, None, base_map, True, False)
-    write_point_map_kml("uca_all", all_list, point_locations, None)
+    write_point_map_kml("uca_all", all_list, point_locations, None, init_data)
 
 
 def create_all_species_maps(base_map, init_data, species, point_locations, species_plot_locations,
@@ -510,29 +512,30 @@ def create_all_species_maps(base_map, init_data, species, point_locations, speci
     write_all_range_map_svg(base_map, species_maps)
 
     # create point maps
-    create_all_point_maps(species, point_locations, species_plot_locations, invalid_species_locations, base_map)
+    create_all_point_maps(species, point_locations, species_plot_locations, invalid_species_locations, base_map,
+                          init_data)
 
 
-def create_all_name_maps(base_map, all_names, specific_names, point_locations,
-                         specific_plot_locations, binomial_plot_locations):
+def create_all_name_maps(base_map, all_names, specific_names, point_locations, specific_plot_locations,
+                         binomial_plot_locations, init_data):
     for name in all_names:
         namefile = "name_" + name_to_filename(name)
         place_list = binomial_plot_locations[name]
         write_point_map_svg(namefile, place_list, point_locations, None, base_map, False, False)
-        write_point_map_kml(namefile, place_list, point_locations, None)
+        write_point_map_kml(namefile, place_list, point_locations, None, init_data)
     for name in specific_names:
         namefile = "sn_" + name.name
         place_list = specific_plot_locations[name]
         write_point_map_svg(namefile, place_list, point_locations, None, base_map, False, False)
-        write_point_map_kml(namefile, place_list, point_locations, None)
+        write_point_map_kml(namefile, place_list, point_locations, None, init_data)
 
 
-def create_all_location_maps(base_map, point_locations):
+def create_all_location_maps(base_map, point_locations, init_data):
     for loc in point_locations:
         place_list = [loc]
         namefile = "location_" + place_to_filename(loc)
         write_point_map_svg(namefile, place_list, point_locations, None, base_map, False, True)
-        write_point_map_kml(namefile, place_list, point_locations, None)
+        write_point_map_kml(namefile, place_list, point_locations, None, init_data)
 
 
 def create_all_maps(init_data, point_locations, species, species_plot_locations, invalid_species_locations, all_names,
@@ -544,9 +547,9 @@ def create_all_maps(init_data, point_locations, species, species_plot_locations,
                             invalid_species_locations)
     print("......Creating Name Maps......")
     create_all_name_maps(base_map, all_names, specific_names, point_locations, specific_plot_locations,
-                         binomial_plot_locations)
+                         binomial_plot_locations, init_data)
     print("......Creating Location Maps......")
-    create_all_location_maps(base_map, point_locations)
+    create_all_location_maps(base_map, point_locations, init_data)
 
 
 def main():
