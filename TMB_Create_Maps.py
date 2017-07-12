@@ -394,7 +394,7 @@ def write_point_map_kml(title, place_list, point_locations, invalid_places):
                 is_invalid = True
             outfile.write("  <Placemark>\n")
             outfile.write("    <name>" + p + "</name>\n")
-            outfile.write("    <description/>\n")
+            outfile.write("    <description> </description>\n")
             outfile.write("    <styleUrl>\n")
             if is_invalid:
                 outfile.write("      #bad_location\n")
