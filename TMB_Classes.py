@@ -163,6 +163,7 @@ class LocationClass:
         self.ne_lon = None
         self.sw_lat = None
         self.sw_lon = None
+        self.unknown = False
 
     def n_children(self):
         return len(self.children)

@@ -911,8 +911,12 @@ def create_species_link(species, status, path, do_print):
 
 
 def create_location_link(location, display_name, path, do_print):
+    if location.unknown:
+        suffix = "<sup>†</sup>"
+    else:
+        suffix = ""
     return ("<a href=\"" + rel_link_prefix(do_print, path) + place_to_filename(location.name) + ".html\">" +
-            display_name + "</a>")
+            display_name + suffix + "</a>")
 
 
 def strip_location_subtext(x):
@@ -2462,9 +2466,10 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         start_page_division(outfile, "base_page")
     else:
         common_header_part1(outfile, loc.trimmed_name, "../")
-        start_google_map_header(outfile)
-        write_google_map_point_header(outfile, "location_" + place_to_filename(loc.name), loc)
-        end_google_map_header(outfile)
+        if not loc.unknown:
+            start_google_map_header(outfile)
+            write_google_map_point_header(outfile, "location_" + place_to_filename(loc.name), loc)
+            end_google_map_header(outfile)
         common_header_part2(outfile, "../", True)
 
     outfile.write("    <header id=\"" + place_to_filename(loc.name) + ".html\">\n")
@@ -2486,19 +2491,23 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         p = point_locations[loc.parent]
         outfile.write("    <dt>Included within</dt>\n")
         outfile.write("      <dd>" + create_location_link(p, p.trimmed_name, "", do_print) + "</dd>\n")
-    outfile.write("    <dt>Approximate Coordinates</dt>\n")
-    outfile.write("      <dd>" + format_latlon(loc.latitude, loc.longitude) + "</dd>\n")
-
-    outfile.write("    <div class=\"map_section\">\n")
-    if do_print:
-        outfile.write("      <figure>\n")
-        outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("location_" + place_to_filename(loc.name)) +
-                      ".svg\" alt=\"" + loc.trimmed_name + "\" title=\"Map of " + loc.trimmed_name + "\" />\n")
-        outfile.write("      </figure>\n")
+    if loc.unknown:
+        outfile.write("    <dt>Location Could not be Identified</dt>\n")
+        outfile.write("      <dd>" + loc.notes + "</dd>\n")
     else:
-        outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
-    outfile.write("    </div>\n")
+        outfile.write("    <dt>Approximate Coordinates</dt>\n")
+        outfile.write("      <dd>" + format_latlon(loc.latitude, loc.longitude) + "</dd>\n")
 
+        outfile.write("    <div class=\"map_section\">\n")
+        if do_print:
+            outfile.write("      <figure>\n")
+            outfile.write("        <img src=\"" + TMP_MAP_PATH +
+                          pointmap_name("location_" + place_to_filename(loc.name)) + ".svg\" alt=\"" +
+                          loc.trimmed_name + "\" title=\"Map of " + loc.trimmed_name + "\" />\n")
+            outfile.write("      </figure>\n")
+        else:
+            outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
+        outfile.write("    </div>\n")
     outfile.write("    </dl>\n")
     all_species = set()
     all_species |= location_species[loc.name]
@@ -2618,28 +2627,32 @@ def write_location_index(outfile, do_print, point_locations, location_dict, loca
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
     outfile.write("\n")
-    outfile.write("    <p>")
+    outfile.write("    <p>\n")
     outfile.write("      The following indices include all locations extracted from the literature in the database "
                   "where fiddler crabs have been reported. The first list includes all modern names in a rough, "
                   "hierarchical framework, mostly by country and subregions within country. Bodies of water which "
                   "cannot be associated with a single country are listed independently. The hierarchy is imperfect "
                   "because some observations were general enough to cross political or other structural boundaries.\n")
-    outfile.write("    </p>")
-    outfile.write("    <p>")
+    outfile.write("    </p>\n")
+    outfile.write("    <p>\n")
     outfile.write("      The second list is strictly alphabetical and includes archaic and older place names.\n")
-    outfile.write("    </p>")
-    outfile.write("    <p>")
+    outfile.write("    </p>\n")
+    outfile.write("    <p>\n")
     outfile.write("    Each location is expressed as a single pair of coordinates, so all plotted points "
                   "should only be viewed as an approximate location. Generally, a point on the shore was chosen to "
                   "represent each locality, but occasionally an interior land point may have been chosen when no "
                   "single shore point made sense, for example, in the case of a record on an island.\n")
-    outfile.write("    </p>")
-    outfile.write("    <p>")
+    outfile.write("    </p>\n")
+    outfile.write("    <p>\n")
     outfile.write("    Species lists for each area are automatically generated from the database and take "
                   "advantage of the hierarchical structure to fill in species for larger containing areas. These "
                   "lists may be incomplete due to the imperfect nature of the hierachy; similarly, a listed species "
                   "for a large area may only be found in a small part of the total region.\n")
-    outfile.write("    </p>")
+    outfile.write("    </p>\n")
+    outfile.write("    <p>\n")
+    outfile.write("    Locations marked by † represent place names from the literature which could not be "
+                  "identified or associated with a modern name or place.\n")
+    outfile.write("    </p>\n")
     outfile.write("\n")
     outfile.write("  <div class=\"namecol\">\n")
     outfile.write("    <h3 id=\"location_index_hier\" class=\"bookmark2\">Hierarchical List of Modern Location "
@@ -4736,7 +4749,8 @@ def copy_map_files(species, all_names, specific_names, point_locations, logfile)
         copy_file(TMP_MAP_PATH + pointmap_name("sn_" + n.name) + ".svg")
     # point location maps
     for p in point_locations:
-        copy_file(TMP_MAP_PATH + pointmap_name("location_" + place_to_filename(p)) + ".kmz")
+        if not point_locations[p].unknown:
+            copy_file(TMP_MAP_PATH + pointmap_name("location_" + place_to_filename(p)) + ".kmz")
 
 
 # def print_cover(outfile, init_data):

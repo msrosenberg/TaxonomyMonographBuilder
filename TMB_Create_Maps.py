@@ -384,30 +384,31 @@ def write_point_map_kml(title, place_list, point_locations, invalid_places, init
         outfile.write("      </Icon >\n")
         outfile.write("    </IconStyle>\n")
         outfile.write("  </Style>\n")
-        for p in place_list:
-            pnt = point_locations[p]
-            is_invalid = False
-            if invalid_places is not None:
-                if p in invalid_places:
+        for place in place_list:
+            pnt = point_locations[place]
+            if not pnt.unknown:
+                is_invalid = False
+                if invalid_places is not None:
+                    if place in invalid_places:
+                        is_invalid = True
+                if pnt.validity == "X":
                     is_invalid = True
-            if pnt.validity == "X":
-                is_invalid = True
-            outfile.write("  <Placemark>\n")
-            outfile.write("    <name>" + unicode_to_html_encoding(p) + "</name>\n")
-            outfile.write("    <description>" + init_data.site_url() + "/locations/" + place_to_filename(p) +
-                          ".html</description>\n")
-            outfile.write("    <styleUrl>\n")
-            if is_invalid:
-                outfile.write("      #bad_location\n")
-            else:
-                outfile.write("      #good_location\n")
-            outfile.write("    </styleUrl>\n")
-            outfile.write("    <Point>\n")
-            outfile.write("     <coordinates>\n")
-            outfile.write("          " + str(pnt.longitude) + "," + str(pnt.latitude) + "\n")
-            outfile.write("     </coordinates>\n")
-            outfile.write("    </Point>\n")
-            outfile.write("  </Placemark>\n")
+                outfile.write("  <Placemark>\n")
+                outfile.write("    <name>" + unicode_to_html_encoding(place) + "</name>\n")
+                outfile.write("    <description>" + init_data.site_url() + "/locations/" + place_to_filename(place) +
+                              ".html</description>\n")
+                outfile.write("    <styleUrl>\n")
+                if is_invalid:
+                    outfile.write("      #bad_location\n")
+                else:
+                    outfile.write("      #good_location\n")
+                outfile.write("    </styleUrl>\n")
+                outfile.write("    <Point>\n")
+                outfile.write("     <coordinates>\n")
+                outfile.write("          " + str(pnt.longitude) + "," + str(pnt.latitude) + "\n")
+                outfile.write("     </coordinates>\n")
+                outfile.write("    </Point>\n")
+                outfile.write("  </Placemark>\n")
         outfile.write(" </Document>\n")
         outfile.write("</kml>\n")
     with zipfile.ZipFile(__OUTPUT_PATH__ + pointmap_name(title) + ".kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
@@ -428,34 +429,35 @@ def write_point_map_svg(title, place_list, point_locations, invalid_places, base
     lons = []
     colors = []
     edges = []
-    for p in place_list:
-        if p in point_locations:
-            point = point_locations[p]
-            is_invalid = False
-            if invalid_places is not None:
-                if p in invalid_places:
+    for place in place_list:
+        if place in point_locations:
+            point = point_locations[place]
+            if not point.unknown:
+                is_invalid = False
+                if invalid_places is not None:
+                    if place in invalid_places:
+                        is_invalid = True
+                if point.validity == "X":
                     is_invalid = True
-            if point.validity == "X":
-                is_invalid = True
-            lats.append(point.latitude)
-            lons.append(point.longitude)
-            if is_invalid:
-                colors.append("blue")
-                edges.append("darkblue")
-            else:
-                colors.append("red")
-                edges.append("darkred")
-            maxlon = max(maxlon, point.longitude)
-            minlon = min(minlon, point.longitude)
-            maxlat = max(maxlat, point.latitude)
-            minlat = min(minlat, point.latitude)
+                lats.append(point.latitude)
+                lons.append(point.longitude)
+                if is_invalid:
+                    colors.append("blue")
+                    edges.append("darkblue")
+                else:
+                    colors.append("red")
+                    edges.append("darkred")
+                maxlon = max(maxlon, point.longitude)
+                minlon = min(minlon, point.longitude)
+                maxlat = max(maxlat, point.latitude)
+                minlat = min(minlat, point.latitude)
 
     # faxes.scatter(lons, lats, s=20, color="red", edgecolors="darkred", alpha=1, zorder=2, clip_on=False)
     faxes.scatter(lons, lats, s=20, color=colors, edgecolors=edges, alpha=1, zorder=2, clip_on=False)
     if set_bounds:
-        p = place_list[0]
-        if p in point_locations:
-            point = point_locations[p]
+        place = place_list[0]
+        if place in point_locations:
+            point = point_locations[place]
             if point.sw_lon is None:
                 minlon = point.longitude - 15
                 maxlon = point.longitude + 15
@@ -532,10 +534,12 @@ def create_all_name_maps(base_map, all_names, specific_names, point_locations, s
 
 def create_all_location_maps(base_map, point_locations, init_data):
     for loc in point_locations:
-        place_list = [loc]
-        namefile = "location_" + place_to_filename(loc)
-        write_point_map_svg(namefile, place_list, point_locations, None, base_map, False, True)
-        write_point_map_kml(namefile, place_list, point_locations, None, init_data)
+        point = point_locations[loc]
+        if not point.unknown:
+            place_list = [loc]
+            namefile = "location_" + place_to_filename(loc)
+            write_point_map_svg(namefile, place_list, point_locations, None, base_map, False, True)
+            write_point_map_kml(namefile, place_list, point_locations, None, init_data)
 
 
 def create_all_maps(init_data, point_locations, species, species_plot_locations, invalid_species_locations, all_names,

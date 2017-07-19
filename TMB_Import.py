@@ -257,8 +257,11 @@ def read_location_data(filename):
     for loc in tmplist:
         newloc = TMB_Classes.LocationClass()
         newloc.name = loc[0]
-        newloc.latitude = float(loc[1])
-        newloc.longitude = float(loc[2])
+        try:
+            newloc.latitude = float(loc[1])
+            newloc.longitude = float(loc[2])
+        except ValueError:
+            newloc.unknown = True
         newloc.notes = loc[3]
         newloc.trimmed_name = loc[4]
         if loc[5] != ".":
