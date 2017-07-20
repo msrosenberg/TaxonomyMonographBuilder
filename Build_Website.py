@@ -70,7 +70,7 @@ def remove_html(x):
     return re.sub(regex, "", x)
 
 
-def common_header_part1(outfile, title, indexpath):
+def common_header_part1(outfile, title, indexpath=""):
     """
     part 1 of the common header for all webout html files
     """
@@ -224,11 +224,11 @@ def end_google_chart_header(outfile):
     outfile.write("    </script>\n")
 
 
-def common_html_header(outfile, title, indexpath):
+def common_html_header(outfile, title, indexpath=""):
     """
     write common header for webout html files without special scripts
     """
-    common_header_part1(outfile, title, indexpath)
+    common_header_part1(outfile, title, indexpath=indexpath)
     common_header_part2(outfile, indexpath, False)
 
 
@@ -565,7 +565,7 @@ def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, langua
     if do_print:
         start_page_division(outfile, "")
     else:
-        common_header_part1(outfile, "Fiddler Crab Reference Summary", "")
+        common_header_part1(outfile, "Fiddler Crab Reference Summary")
         start_google_chart_header(outfile)
         outfile.write("        var data1 = google.visualization.arrayToDataTable([\n")
         outfile.write("          ['Year', 'Cumulative Publications'],\n")
@@ -756,7 +756,7 @@ def write_reference_bibliography(reflist, do_print, outfile, logfile):
     if do_print:
         start_page_division(outfile, "index_page")
     else:
-        common_html_header(outfile, "Fiddler Crab Publications", "")
+        common_html_header(outfile, "Fiddler Crab Publications")
     outfile.write("    <header id=\"" + REF_URL + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Full Reference List</h1>\n")
     if not do_print:
@@ -1174,7 +1174,7 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
     if do_print:
         start_page_division(outfile, "ref_page")
     else:
-        common_html_header(outfile, ref.citation, "../")
+        common_html_header(outfile, ref.citation, indexpath="../")
     outfile.write("    <header id=\"" + ref.cite_key + ".html\">\n")
     if not do_print:
         outfile.write("      <h1 class=\"nobookmark\">" + ref.citation + "</h1>\n")
@@ -1341,7 +1341,7 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
             image_name = name_to_filename(name) + "_chronology.svg"
             create_chronology_chart_file(image_name,  miny, maxy, maxcnt, name_by_year)
     else:
-        common_header_part1(outfile, name, "../")
+        common_header_part1(outfile, name, indexpath="../")
         if len(location_set) > 0:
             start_google_map_header(outfile)
             write_google_map_point_header(outfile, "name_" + name, None)
@@ -1459,7 +1459,7 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
             image_name = name_to_filename(specific_name.name) + "_chronology.svg"
             create_chronology_chart_file(image_name,  miny, maxy, maxcnt, byears)
     else:
-        common_header_part1(outfile, specific_name.name, "../")
+        common_header_part1(outfile, specific_name.name, indexpath="../")
 
         if len(location_set) > 0:
             start_google_map_header(outfile)
@@ -1709,7 +1709,7 @@ def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, s
             image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
             create_chronology_chart_file(image_name, miny, maxy, maxcnt, binomial_name_counts[clean_name(name)])
     else:
-        common_header_part1(outfile, species, "../")
+        common_header_part1(outfile, species, indexpath="../")
         start_google_chart_header(outfile)
         image_name = 0
         setup_chronology_chart(image_name, miny, maxy, maxcnt, total_cnts, outfile)
@@ -1816,7 +1816,7 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
     if do_print:
         start_page_division(outfile, "base_page")
     else:
-        common_header_part1(outfile, "Fiddler Crab Name Summary", "../")
+        common_header_part1(outfile, "Fiddler Crab Name Summary", indexpath="../")
         start_google_chart_header(outfile)
         outfile.write("        var cumulative_biname_data = google.visualization.arrayToDataTable([\n")
         outfile.write("          ['Year', 'Cumulative Unique Binomial/Compound Names'],\n")
@@ -2049,7 +2049,7 @@ def create_genus_chronology(genus_cnts, do_print, outfile):
             filename = "Genus_" + name + "_chronology.svg"
             create_chronology_chart_file(filename, miny, maxy, maxcnt, genus_cnts[name])
     else:
-        common_header_part1(outfile, "Uca", "../")
+        common_header_part1(outfile, "Uca", indexpath="../")
         start_google_chart_header(outfile)
         setup_chronology_chart(0, miny, maxy, maxcnt, total_cnts, outfile)
         adjust = 1
@@ -2212,7 +2212,7 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
     if do_print:
         start_page_division(outfile, "index_page")
     else:
-        common_html_header(outfile, "Name Index", "../")
+        common_html_header(outfile, "Name Index", indexpath="../")
     outfile.write("    <header id=\"name_index\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Name Index</h1>\n")
     if not do_print:
@@ -2335,7 +2335,7 @@ def write_geography_page(species, outfile, do_print):
     if do_print:
         start_page_division(outfile, "index_page")
     else:
-        common_header_part1(outfile, "Fiddler Crab Geographic Ranges", "")
+        common_header_part1(outfile, "Fiddler Crab Geographic Ranges")
         start_google_map_header(outfile)
         write_google_map_range_header(outfile, "uca_all")
         write_google_map_point_header(outfile, "uca_all", None)
@@ -2474,7 +2474,7 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
     if do_print:
         start_page_division(outfile, "base_page")
     else:
-        common_header_part1(outfile, loc.trimmed_name, "../")
+        common_header_part1(outfile, loc.trimmed_name, indexpath="../")
         if not loc.unknown:
             start_google_map_header(outfile)
             write_google_map_point_header(outfile, "location_" + place_to_filename(loc.name), loc)
@@ -2639,7 +2639,7 @@ def write_location_index(outfile, do_print, point_locations, location_dict, loca
     if do_print:
         start_page_division(outfile, "index_page")
     else:
-        common_html_header(outfile, "Fiddler Crab Observation Locations", "../")
+        common_html_header(outfile, "Fiddler Crab Observation Locations", indexpath="../")
     outfile.write("    <header id=\"location_index\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Location Index</h1>\n")
     if not do_print:
@@ -2811,7 +2811,7 @@ def write_common_names_pages(outfile, common_name_data, do_print):
     if do_print:
         start_page_division(outfile, "base_page")
     else:
-        common_html_header(outfile, "Common Names of Fiddler Crabs", "")
+        common_html_header(outfile, "Common Names of Fiddler Crabs")
     outfile.write("    <header id=\"" + COMMON_URL + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Common Names of Fiddler Crabs</h1>\n")
     outfile.write("    </header>\n")
@@ -2873,7 +2873,7 @@ def write_species_list(specieslist, outfile, do_print):
         start_page_division(outfile, "index_page")
         link_str = "#name_index"
     else:
-        common_html_header(outfile, "Fiddler Crab Species", "")
+        common_html_header(outfile, "Fiddler Crab Species")
         link_str = "names/"
     outfile.write("    <header id=\"" + SPECIES_URL + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Species</h1>\n")
@@ -2917,7 +2917,7 @@ def write_species_photo_page(outfile, fname, species, common_name, caption, pn, 
         start_page_division(outfile, "photo_page")
         media_path = MEDIA_PATH + "photos/"
     else:
-        common_html_header(outfile, ptitle + " Photo", "../")
+        common_html_header(outfile, ptitle + " Photo", indexpath="../")
         media_path = ""
     outfile.write("    <header id=\"" + fname + "\">\n")
     outfile.write("      <h1 class=\"nobookmark\"><em class=\"species\">" + ptitle + "</em> Photo</h1>\n")
@@ -2966,7 +2966,7 @@ def write_species_video_page(fname, video, vn):
             spname = video.species
             vtitle = "Uca " + video.species
             is_multi = False
-        common_html_header(outfile, vtitle + " Video", "../")
+        common_html_header(outfile, vtitle + " Video", indexpath="../")
         outfile.write("    <header>\n")
         outfile.write("      <h1 class=\"nobookmark\"><em class=\"species\">" + vtitle + "</em> Video</h1>\n")
         outfile.write("      <nav>\n")
@@ -3068,9 +3068,9 @@ def write_species_page(species, references, specific_names, all_names, photos, v
         start_page_division(outfile, "species_page")
     else:
         if is_fossil:
-            common_html_header(outfile, "Uca " + species.species + " / Fossil", "")
+            common_html_header(outfile, "Uca " + species.species + " / Fossil")
         else:
-            common_header_part1(outfile, "Uca " + species.species + " / " + species.common, "")
+            common_header_part1(outfile, "Uca " + species.species + " / " + species.common)
             start_google_map_header(outfile)
             write_google_map_range_header(outfile, "u_" + species.species)
             write_google_map_point_header(outfile, "u_" + species.species, None)
@@ -3348,7 +3348,7 @@ def write_photo_index(specieslist, photos, do_print, outfile, logfile):
         start_page_division(outfile, "index_page")
         media_path = MEDIA_PATH
     else:
-        common_html_header(outfile, "Fiddler Crab Photos", "")
+        common_html_header(outfile, "Fiddler Crab Photos")
         media_path = ""
     outfile.write("    <header id=\"" + PHOTO_URL + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Photo Index</h1>\n")
@@ -3436,7 +3436,7 @@ def write_video_index(videos, do_print, outfile, logfile):
     if do_print:
         start_page_division(outfile, "index_page")
     else:
-        common_html_header(outfile, "Fiddler Crab Videos", "")
+        common_html_header(outfile, "Fiddler Crab Videos")
     outfile.write("    <header id=\"" + VIDEO_URL + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Video Index</h1>\n")
     if not do_print:
@@ -3518,7 +3518,7 @@ def write_specific_art_page(outfile, art, backurl, backtext, do_print):
         start_page_division(outfile, "art_page")
         media_path = MEDIA_PATH + "art/"
     else:
-        common_html_header(outfile, ptitle, "../")
+        common_html_header(outfile, ptitle, indexpath="../")
         media_path = ""
     outfile.write("    <header id=\"" + art.image + ".html\">\n")
     outfile.write("      <h1 class=\"nobookmark\"><em class=\"species\">" + art.title + "</em></h1>\n")
@@ -3558,7 +3558,7 @@ def write_art_science_pages(artlist, do_print, outfile):
         start_page_division(outfile, "index_page")
         media_path = MEDIA_PATH
     else:
-        common_html_header(outfile, "Fiddler Crab Art - Scientific", "")
+        common_html_header(outfile, "Fiddler Crab Art - Scientific")
         media_path = ""
     outfile.write("    <header id=\"" + ART_SCI_URL + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Scientific Drawings</h1>\n")
@@ -3617,7 +3617,7 @@ def write_art_stamps_pages(artlist, do_print, outfile):
         start_page_division(outfile, "index_page")
         media_path = MEDIA_PATH
     else:
-        common_html_header(outfile, "Fiddler Crab Stamps", "")
+        common_html_header(outfile, "Fiddler Crab Stamps")
         media_path = ""
     outfile.write("    <header id=\"" + ART_STAMP_URL + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Postage Stamps</h1>\n")
@@ -3675,7 +3675,7 @@ def write_art_crafts_pages(artlist, do_print, outfile):
         start_page_division(outfile, "index_page")
         media_path = MEDIA_PATH
     else:
-        common_html_header(outfile, "Fiddler Crab Crafts", "")
+        common_html_header(outfile, "Fiddler Crab Crafts")
         media_path = ""
     outfile.write("    <header id=\"" + ART_CRAFT_URL + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Arts &amp; Crafts</h1>\n")
@@ -3785,7 +3785,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
         start_page_division(outfile, "base_page")
         media_path = MEDIA_PATH
     else:
-        common_html_header(outfile, "Fiddler Crab Systematics", "")
+        common_html_header(outfile, "Fiddler Crab Systematics")
         media_path = ""
     outfile.write("    <header id=\"" + SYST_URL + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Systematics</h1>\n")
@@ -4227,7 +4227,7 @@ def write_life_cycle_pages(outfile, do_print):
         start_page_division(outfile, "base_page")
         media_path = MEDIA_PATH
     else:
-        common_html_header(outfile, "Fiddler Crab Life Cycle", "")
+        common_html_header(outfile, "Fiddler Crab Life Cycle")
         media_path = ""
 
     outfile.write("    <header id=\"" + LIFECYCLE_URL + "\">\n")
@@ -4340,7 +4340,7 @@ def write_phylogeny_pages(outfile, do_print, refdict, logfile):
         start_page_division(outfile, "base_page")
         media_path = "resources/"
     else:
-        common_html_header(outfile, "Fiddler Crab Phylogeny", "")
+        common_html_header(outfile, "Fiddler Crab Phylogeny")
         media_path = ""
         # copy trees to webout directory
         for tree in treelist:
@@ -4410,7 +4410,7 @@ def write_morphology_page(morph, morphlist, do_print, outfile, logfile):
         start_page_division(outfile, "morph_page")
         media_path = MEDIA_PATH + "morphology/"
     else:
-        common_html_header(outfile, "Fiddler Crab Morphology: " + morph.character + p, "../")
+        common_html_header(outfile, "Fiddler Crab Morphology: " + morph.character + p, indexpath="../")
         media_path = ""
     outfile.write("    <header id=\"" + morphology_link(morph.parent, morph.character) + ".html" + "\">\n")
     if do_print:
@@ -4482,7 +4482,7 @@ def write_morphology_index(morphlist, do_print, outfile):
     if do_print:
         start_page_division(outfile, "index_page")
     else:
-        common_html_header(outfile, "Morphology Index", "../")
+        common_html_header(outfile, "Morphology Index", indexpath="../")
     outfile.write("    <header id=\"morphology_index.html\">\n")
     outfile.write("      <h1 class=\"bookmark2\">Morphology Index</h1>\n")
     if not do_print:
@@ -4530,7 +4530,7 @@ def write_main_morphology_pages(morphology, outfile, do_print, logfile):
         start_page_division(outfile, "base_page")
         media_path = MEDIA_PATH
     else:
-        common_html_header(outfile, "Fiddler Crab Morphology", "")
+        common_html_header(outfile, "Fiddler Crab Morphology")
         media_path = ""
     outfile.write("    <header id=\"" + MORPH_URL + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Morphology</h1>\n")
@@ -4598,7 +4598,7 @@ def write_main_morphology_pages(morphology, outfile, do_print, logfile):
 def write_citation_page(refdict):
     """ create page with site citation info """
     with codecs.open(WEBOUT_PATH + CITE_URL, "w", "utf-8") as outfile:
-        common_html_header(outfile, "Fiddler Crab Website Citation", "")
+        common_html_header(outfile, "Fiddler Crab Website Citation")
         outfile.write("    <header id=\"" + CITE_URL + "\">\n")
         outfile.write("      <h1>Citation Info</h1>\n")
         outfile.write("    </header>\n")
@@ -4632,7 +4632,7 @@ def write_introduction(outfile, species, do_print):
         outfile.write("      <h1 class=\"bookmark1\">Introduction</h1>\n")
         outfile.write("    </header>\n")
     else:
-        common_html_header(outfile, "Fiddler Crabs (Genus Uca)", "")
+        common_html_header(outfile, "Fiddler Crabs (Genus Uca)")
     outfile.write("    <p>\n")
     scnt = 0
     for s in species:
