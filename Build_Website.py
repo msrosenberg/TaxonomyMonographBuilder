@@ -903,7 +903,7 @@ def compute_species_from_citation_linking(citelist):
                     cite.name_note = "in part; " + cite.name_note
 
 
-def create_species_link(species, status, path, do_print):
+def create_species_link(species, do_print, status="", path=""):
     if status == "fossil":
         sc = FOSSIL_IMAGE
     else:
@@ -1498,7 +1498,7 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
             outfile.write("          <dd><em class=\"species\">" +
                           specific_name.synonym[1:] + "</em></dd>\n")
         else:
-            outfile.write("          <dd>" + create_species_link(specific_name.synonym, "", "../", do_print) +
+            outfile.write("          <dd>" + create_species_link(specific_name.synonym, do_print, path="../") +
                           "</dd>\n")
     outfile.write("        <dt>Original Usage</dt>\n")
     outfile.write("          <dd>" + format_name_string(specific_name.original_binomial) + "</dd>\n")
@@ -2401,7 +2401,7 @@ def write_geography_page(species, outfile, do_print):
             if s.region == r:
                 if s.status != "fossil":
                     outfile.write("        <li>" +
-                                  create_species_link(s.species, "", "", do_print) +
+                                  create_species_link(s.species, do_print) +
                                   "</li>\n")
         outfile.write("      </ul>\n")
         outfile.write("    </section>\n")
@@ -2552,7 +2552,8 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
             else:
                 suffix = STAR
                 print_star = True
-            outfile.write("      <li>" + create_species_link(s.species, s.status, "../", do_print) + suffix + "</li>\n")
+            outfile.write("      <li>" + create_species_link(s.species, do_print, status=s.status, path="../") +
+                          suffix + "</li>\n")
         outfile.write("    </ul>\n")
         outfile.write("  </section>\n")
 
@@ -2893,7 +2894,7 @@ def write_species_list(specieslist, outfile, do_print):
     outfile.write("\n")
     outfile.write("    <ul class=\"splist\">\n")
     for species in specieslist:
-        outfile.write("      <li>" + create_species_link(species.species, species.status, "", do_print) + "</li>\n")
+        outfile.write("      <li>" + create_species_link(species.species, do_print, status=species.status) + "</li>\n")
     outfile.write("    </ul>\n")
     if do_print:
         end_page_division(outfile)
@@ -3366,7 +3367,7 @@ def write_photo_index(specieslist, photos, do_print, outfile, logfile):
         species = sp.species
         status = sp.status
         outfile.write("    <section class=\"photosection\">\n")
-        outfile.write("      <h2 class=\"nobookmark\">" + create_species_link(species, status, "", do_print) +
+        outfile.write("      <h2 class=\"nobookmark\">" + create_species_link(species, do_print, status=status) +
                       "</h2>\n")
         photo_n = 0
         for photo in photos:
@@ -3964,12 +3965,12 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
                       format_reference_cite(refdict[subgen.author], do_print, AUTHOR_NOPCOMMA, logfile) + "</h3>\n")
         outfile.write("      <dl>\n")
         outfile.write("        <dt>Type</dt>\n")
-        outfile.write("        <dd>" + create_species_link(subgen.type_species, "", "", do_print) + "</dd>\n")
+        outfile.write("        <dd>" + create_species_link(subgen.type_species, do_print) + "</dd>\n")
         outfile.write("        <dt>All Species</dt>\n")
         splist = []
         for s in specieslist:
             if s.subgenus == subgen.subgenus:
-                splist.append(create_species_link(s.species, s.status, "", do_print))
+                splist.append(create_species_link(s.species, do_print, status=s.status))
         outfile.write("        <dd>" + ", ".join(splist) + "</dd>\n")
         outfile.write("      </dl>\n")
         outfile.write("      <p>\n")
@@ -4939,7 +4940,7 @@ def print_table_of_contents(outfile, species_list):
     outfile.write("       <li><a href=\"#" + SPECIES_URL + "\">Species</a>\n")
     outfile.write("         <ul>\n")
     for species in species_list:
-        outfile.write("           <li>" + create_species_link(species.species, "", "", True) + "</li>\n")
+        outfile.write("           <li>" + create_species_link(species.species, True) + "</li>\n")
     outfile.write("         </ul>\n")
     outfile.write("       </li>\n")
 
