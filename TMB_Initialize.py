@@ -5,6 +5,9 @@ Initialization of Paths and File Names
 import os
 
 
+INIT_DATA = None
+
+
 class InitializationData:
     def __init__(self):
         self.main_path = "fiddlercrab.info"
@@ -38,6 +41,6 @@ class InitializationData:
 
 
 def initialize():
-    init_data = InitializationData()
-    os.chdir(init_data.main_path)
-    return init_data
+    global INIT_DATA
+    INIT_DATA = InitializationData()
+    os.chdir(INIT_DATA.main_path)
