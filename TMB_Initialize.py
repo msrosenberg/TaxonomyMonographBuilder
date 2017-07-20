@@ -3,6 +3,7 @@ Initialization of Paths and File Names
 """
 
 import os
+import datetime
 
 
 INIT_DATA = None
@@ -53,6 +54,7 @@ class InitializationData:
         self.morph_url = "uca_morphology.html"
         self.cite_url = "citation.html"
         self.name_sum_url = "name_graphs.html"
+        self.version = datetime.datetime.now().strftime("%Y.%m.%d.%H.%M")
 
     def site_url(self):
         return self.site_http + self.site_address

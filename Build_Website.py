@@ -33,7 +33,6 @@ STAR = "<sup>*</sup>"
 DAGGER = "<sup>†</sup>"
 START_YEAR = 1758
 CURRENT_YEAR = datetime.date.today().year
-VERSION = datetime.datetime.now().strftime("%Y.%m.%d.%H.%M")
 
 AUTHOR_NOPAREN = 0      # Smith 1970
 AUTHOR_PAREN = 1        # Smith (1970)
@@ -235,8 +234,8 @@ def common_html_footer(outfile, indexpath=""):
     outfile.write("       <p id=\"contact\">Questions or comments about the site? Contact "
                   "<a href=\"mailto:msr@asu.edu\"><span class=\"fa fa-envelope-o\"></span> "
                   "Dr. Michael S. Rosenberg</a></p>\n")
-    outfile.write("       <p id=\"copyright\">Release: " + VERSION + " &mdash; Copyright &copy; 2003&ndash;" +
-                  str(CURRENT_YEAR) + " All Rights Reserved</p>\n")
+    outfile.write("       <p id=\"copyright\">Release: " + init_data().version +
+                  " &mdash; Copyright &copy; 2003&ndash;" + str(CURRENT_YEAR) + " All Rights Reserved</p>\n")
     outfile.write("    </footer>\n")
     outfile.write("  </body>\n")
     outfile.write("</html>\n")
@@ -4865,7 +4864,7 @@ def print_copyright_page(outfile, refdict):
     outfile.write("    <div id=\"copyright_page\">\n")
     outfile.write("     <p>Copyright &copy; 2003&ndash;" + str(CURRENT_YEAR) +
                   " by " + init_data().site_author + ". All Rights Reserved</p>\n")
-    outfile.write("     <p>Release: " + VERSION + "</p>\n")
+    outfile.write("     <p>Release: " + init_data().version + "</p>\n")
     outfile.write("     <p><a href=\"" + init_data().site_url() + "\">" + init_data().site_address + "</a></p>\n")
     outfile.write("     <p>\n")
     outfile.write("       The data and code used to produce this document can be found on GitHub at")
@@ -4883,7 +4882,8 @@ def print_copyright_page(outfile, refdict):
     outfile.write("       Please cite this document as:\n")
     outfile.write("     </p>\n")
     outfile.write("     <p>\n")
-    outfile.write("       Rosenberg, M.S. (" + str(CURRENT_YEAR) + ") www.fiddlercrab.info, v." + VERSION + ".\n")
+    outfile.write("       Rosenberg, M.S. (" + str(CURRENT_YEAR) + ") www.fiddlercrab.info, v." + init_data().version +
+                  ".\n")
     outfile.write("     </p>\n")
 
     outfile.write("     <p>\n")
