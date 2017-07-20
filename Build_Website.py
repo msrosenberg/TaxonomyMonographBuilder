@@ -237,7 +237,7 @@ def common_html_header(outfile, title, indexpath=""):
     common_header_part2(outfile, indexpath=indexpath)
 
 
-def common_html_footer(outfile, indexpath):
+def common_html_footer(outfile, indexpath=""):
     """
     common footer and closing elements for all webout html files
     """
@@ -754,7 +754,7 @@ def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, langua
         # outfile.write("    <div id=\"chart3_div\"></div>\n")
         outfile.write("    <div id=\"chart5_div\"></div>\n")
         outfile.write("    <div id=\"chart_div\"></div>\n")
-        common_html_footer(outfile, "")
+        common_html_footer(outfile)
 
 
 def write_reference_bibliography(reflist, do_print, outfile):
@@ -807,7 +807,7 @@ def write_reference_bibliography(reflist, do_print, outfile):
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "")
+        common_html_footer(outfile)
 
 
 def create_name_table(citelist):
@@ -1263,7 +1263,7 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "../")
+        common_html_footer(outfile, indexpath="../")
 
 
 def write_reference_pages(reflist, refdict, citelist, do_print, printfile, name_table, point_locations):
@@ -1409,7 +1409,7 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "../")
+        common_html_footer(outfile, indexpath="../")
 
 
 def calculate_specific_name_yearly_cnts(specific_name, binomial_names, binomial_cnts):
@@ -1566,7 +1566,7 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "../")
+        common_html_footer(outfile, indexpath="../")
 
 
 def create_word_cloud_image(binomial_cnts, specific_cnts):
@@ -1763,7 +1763,7 @@ def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, s
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "../")
+        common_html_footer(outfile, indexpath="../")
 
 
 def match_specific_name(name, specific_names):
@@ -2009,7 +2009,7 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "../")
+        common_html_footer(outfile, indexpath="../")
 
 
 def extract_genus(name):
@@ -2095,7 +2095,7 @@ def create_genus_chronology(genus_cnts, do_print, outfile):
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "../")
+        common_html_footer(outfile, indexpath="../")
 
 
 def calculate_binomial_locations(name, citelist):
@@ -2275,7 +2275,7 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "../")
+        common_html_footer(outfile, indexpath="../")
 
     if do_print:
         create_name_summary(total_binomial_year_cnts, specific_year_cnts, species_refs, do_print, outfile)
@@ -2410,7 +2410,7 @@ def write_geography_page(species, outfile, do_print):
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "")
+        common_html_footer(outfile)
 
 
 def create_location_hierarchy(point_locations):
@@ -2604,7 +2604,7 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "")
+        common_html_footer(outfile)
 
     if loc.n_children() > 0:
         for c in loc.children:
@@ -2711,7 +2711,7 @@ def write_location_index(outfile, do_print, point_locations, location_dict, loca
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "")
+        common_html_footer(outfile)
 
     for p in top_list:
         loc = point_locations[p]
@@ -2848,7 +2848,7 @@ def write_common_names_pages(outfile, common_name_data, do_print):
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "")
+        common_html_footer(outfile)
 
 
 def connect_refs_to_species(species, citelist):
@@ -2899,7 +2899,7 @@ def write_species_list(specieslist, outfile, do_print):
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "")
+        common_html_footer(outfile)
 
 
 def write_species_photo_page(outfile, fname, species, common_name, caption, pn, pspecies, do_print):
@@ -2951,7 +2951,7 @@ def write_species_photo_page(outfile, fname, species, common_name, caption, pn, 
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "../")
+        common_html_footer(outfile, indexpath="../")
 
 
 def write_species_video_page(fname, video, vn):
@@ -3008,7 +3008,7 @@ def write_species_video_page(fname, video, vn):
             outfile.write("      <dt>Notes</dt>\n")
             outfile.write("        <dd>" + video.notes + "</dd>\n")
         outfile.write("    </dl>\n")
-        common_html_footer(outfile, "../")
+        common_html_footer(outfile, indexpath="../")
 
 
 def write_annotated_reference_list(outfile, do_print, references, all_citations, dir_citations,
@@ -3329,7 +3329,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "")
+        common_html_footer(outfile)
 
     if len(binomial_synlist) > 0:
         if do_print:
@@ -3394,7 +3394,7 @@ def write_photo_index(specieslist, photos, do_print, outfile):
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "")
+        common_html_footer(outfile)
 
     # output individual photo pages
     for sp in specieslist:
@@ -3493,7 +3493,7 @@ def write_video_index(videos, do_print, outfile):
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "")
+        common_html_footer(outfile)
         for video in videos:
             vn = int(video.n)
             if ";" in video.species:
@@ -3548,7 +3548,7 @@ def write_specific_art_page(outfile, art, backurl, backtext, do_print):
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "../")
+        common_html_footer(outfile, indexpath="../")
 
 
 def write_art_science_pages(artlist, do_print, outfile):
@@ -3597,7 +3597,7 @@ def write_art_science_pages(artlist, do_print, outfile):
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "")
+        common_html_footer(outfile)
     for a in artsource:
         for art in artlist:
             if art.art_type == "science":
@@ -3656,7 +3656,7 @@ def write_art_stamps_pages(artlist, do_print, outfile):
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "")
+        common_html_footer(outfile)
     for a in artsource:
         for art in artlist:
             if art.art_type == "stamp":
@@ -3719,7 +3719,7 @@ def write_art_crafts_pages(artlist, do_print, outfile):
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "")
+        common_html_footer(outfile)
     for a in artsource:
         for art in artlist:
             if art.art_type == "origami":
@@ -4176,7 +4176,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "")
+        common_html_footer(outfile)
 
 
 def summarize_year(yeardict):
@@ -4330,7 +4330,7 @@ def write_life_cycle_pages(outfile, do_print):
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "")
+        common_html_footer(outfile)
 
 
 def write_phylogeny_pages(outfile, do_print, refdict):
@@ -4382,7 +4382,7 @@ def write_phylogeny_pages(outfile, do_print, refdict):
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "")
+        common_html_footer(outfile)
 
 
 def morphology_link(parent, character):
@@ -4474,7 +4474,7 @@ def write_morphology_page(morph, morphlist, do_print, outfile):
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "../")
+        common_html_footer(outfile, indexpath="../")
 
 
 def write_morphology_index(morphlist, do_print, outfile):
@@ -4521,7 +4521,7 @@ def write_morphology_index(morphlist, do_print, outfile):
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile, "../")
+        common_html_footer(outfile, indexpath="../")
 
 
 def write_main_morphology_pages(morphology, outfile, do_print):
@@ -4586,7 +4586,7 @@ def write_main_morphology_pages(morphology, outfile, do_print):
         for m in morphology:
             write_morphology_page(m, morphology, do_print, outfile)
     else:
-        common_html_footer(outfile, "")
+        common_html_footer(outfile)
         for m in morphology:
             with codecs.open(WEBOUT_PATH + "morphology/" + morphology_link(m.parent, m.character) + ".html",
                              "w", "utf-8") as suboutfile:
@@ -4621,7 +4621,7 @@ def write_citation_page(refdict):
                       "<a href=\"https://github.com/msrosenberg/fiddlercrab.info\">Website data repository on "
                       "GitHub</a></li>\n")
         outfile.write("    </ul>\n")
-        common_html_footer(outfile, "")
+        common_html_footer(outfile)
 
 
 def write_introduction(outfile, species, do_print):
@@ -4722,7 +4722,7 @@ def write_introduction(outfile, species, do_print):
         outfile.write("      <li><span class=\"fa-li fa fa-github\"></span>"
                       "<a href=\"https://github.com/msrosenberg/fiddlercrab.info\">Website data on GitHub</a></li>\n")
         outfile.write("    </ul>\n")
-        common_html_footer(outfile, "")
+        common_html_footer(outfile)
 
 
 def create_path_and_index(subdir):
