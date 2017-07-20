@@ -912,7 +912,7 @@ def create_species_link(species, do_print, status="", path=""):
             species + "</em>" + sc + "</a>")
 
 
-def create_location_link(location, display_name, path, do_print, mark_unknown=False):
+def create_location_link(location, display_name, do_print, path="", mark_unknown=False):
     if mark_unknown and location.unknown:
         suffix = DAGGER
     else:
@@ -1007,7 +1007,7 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
         tmpname = strip_location_subtext(x)
         if tmpname in point_locations:
             loc = point_locations[tmpname]
-            tmpstr = create_location_link(loc, tmpname, "../locations/", do_print)
+            tmpstr = create_location_link(loc, tmpname, do_print, path="../locations/")
             if tmpname != x:
                 tmpstr += x[x.find("[")-1:]
         else:
@@ -2499,7 +2499,7 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
     if loc.parent is not None:
         p = point_locations[loc.parent]
         outfile.write("    <dt>Included within</dt>\n")
-        outfile.write("      <dd>" + create_location_link(p, p.trimmed_name, "", do_print) + "</dd>\n")
+        outfile.write("      <dd>" + create_location_link(p, p.trimmed_name, do_print) + "</dd>\n")
     if loc.unknown:
         outfile.write("    <dt>Location Could not be Identified</dt>\n")
         outfile.write("      <dd>" + loc.notes + "</dd>\n")
@@ -2532,7 +2532,7 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         outfile.write("    <h3 class=\"nobookmark\">Includes Subareas</h3>\n")
         outfile.write("    <ul class=\"splist\">\n")
         for c in loc.children:
-            outfile.write("    <li>" + create_location_link(c, c.trimmed_name, "", do_print) + "</li>\n")
+            outfile.write("    <li>" + create_location_link(c, c.trimmed_name, do_print) + "</li>\n")
             all_species |= fetch_child_data(c, location_species)
             all_bi_names |= fetch_child_data(c, location_bi_names)
             all_sp_names |= fetch_child_data(c, location_sp_names)
@@ -2621,7 +2621,7 @@ def write_location_index_entry(outfile, do_print, loc, point_locations):
     """
     print a location and all of its child locations
     """
-    outfile.write("<li>" + create_location_link(loc, loc.trimmed_name, "", do_print, mark_unknown=True))
+    outfile.write("<li>" + create_location_link(loc, loc.trimmed_name, do_print, mark_unknown=True))
     if loc.n_children() > 0:
         child_list = []
         for child in loc.children:
@@ -2703,7 +2703,7 @@ def write_location_index(outfile, do_print, point_locations, location_dict, loca
     outfile.write("    <ul class=\"namelist\">\n")
     for p in full_list:
         loc = location_dict[p]
-        outfile.write("   <li>" + create_location_link(loc, p, "", do_print, mark_unknown=True) + "</li>\n")
+        outfile.write("   <li>" + create_location_link(loc, p, do_print, mark_unknown=True) + "</li>\n")
     outfile.write("    </ul>\n")
     outfile.write("  </div>\n")
 
