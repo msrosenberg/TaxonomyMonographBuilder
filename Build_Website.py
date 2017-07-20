@@ -4824,7 +4824,6 @@ def copy_map_files(species, all_names, specific_names, point_locations):
             copy_file(TMP_MAP_PATH + pointmap_name("location_" + place_to_filename(p)) + ".kmz")
 
 
-# def print_cover(outfile, init_data):
 def print_cover(outfile):
     """
     create cover for monographic print output
@@ -4839,7 +4838,6 @@ def print_cover(outfile):
     outfile.write("\n")
 
 
-# def print_title_page(outfile, init_data):
 def print_title_page(outfile):
     """
     create title page for monographic print output
@@ -4855,7 +4853,6 @@ def print_title_page(outfile):
     outfile.write("\n")
 
 
-# def print_copyright_page(outfile, init_data, refdict):
 def print_copyright_page(outfile, refdict):
     """
     create copyright page for monographic print output
@@ -4957,14 +4954,10 @@ def print_table_of_contents(outfile, species_list):
     outfile.write("\n")
 
 
-# def write_print_only_pages(outfile, init_data, species, refdict):
 def write_print_only_pages(outfile, species, refdict):
     """
     create starting pages that are unique to print output
     """
-    # print_cover(outfile, init_data)
-    # print_title_page(outfile, init_data)
-    # print_copyright_page(outfile, init_data, refdict)
     print_cover(outfile)
     print_title_page(outfile)
     print_copyright_page(outfile, refdict)
