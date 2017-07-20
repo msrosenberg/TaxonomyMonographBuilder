@@ -31,8 +31,6 @@ TMP_MAP_PATH = TMP_PATH + "maps/"
 FOSSIL_IMAGE = " <span class=\"fossil-img\">&#9760;</span>"
 STAR = "<sup>*</sup>"
 DAGGER = "<sup>†</sup>"
-START_YEAR = 1758
-CURRENT_YEAR = datetime.date.today().year
 
 AUTHOR_NOPAREN = 0      # Smith 1970
 AUTHOR_PAREN = 1        # Smith (1970)
@@ -235,7 +233,8 @@ def common_html_footer(outfile, indexpath=""):
                   "<a href=\"mailto:msr@asu.edu\"><span class=\"fa fa-envelope-o\"></span> "
                   "Dr. Michael S. Rosenberg</a></p>\n")
     outfile.write("       <p id=\"copyright\">Release: " + init_data().version +
-                  " &mdash; Copyright &copy; 2003&ndash;" + str(CURRENT_YEAR) + " All Rights Reserved</p>\n")
+                  " &mdash; Copyright &copy; 2003&ndash;" + str(init_data().current_year) +
+                  " All Rights Reserved</p>\n")
     outfile.write("    </footer>\n")
     outfile.write("  </body>\n")
     outfile.write("</html>\n")
@@ -281,7 +280,6 @@ def rel_link_prefix(do_print, prefix=""):
 
 def abs_link_prefix(do_absolute):
     if do_absolute:
-        # return "http://www.fiddlercrab.info/"
         return init_data().site_url() + "/"
     else:
         return ""
@@ -687,8 +685,8 @@ def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, langua
         outfile.write("    </figure>\n")
 
         # pubs per year bar chart
-        miny = CURRENT_YEAR
-        maxy = START_YEAR
+        miny = init_data().current_year
+        maxy = init_data().start_year
         for y in year_data:
             miny = min(miny, y[0])
             maxy = max(maxy, y[0])
@@ -1273,8 +1271,8 @@ def clean_name(x):
 
 
 def calculate_binomial_yearly_cnts(name, refdict, citelist):
-    miny = START_YEAR
-    maxy = CURRENT_YEAR
+    miny = init_data().start_year
+    maxy = init_data().current_year
     # find citations for this name
     cites = []
     for c in citelist:
@@ -1316,8 +1314,8 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
             notecnt += 1
         uniquecites |= {c.cite_key}
 
-    miny = START_YEAR
-    maxy = CURRENT_YEAR
+    miny = init_data().start_year
+    maxy = init_data().current_year
     maxcnt = max(name_by_year.values())
     image_name = ""
     if do_print:
@@ -1396,8 +1394,8 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
 
 
 def calculate_specific_name_yearly_cnts(specific_name, binomial_names, binomial_cnts):
-    miny = START_YEAR
-    maxy = CURRENT_YEAR
+    miny = init_data().start_year
+    maxy = init_data().current_year
     year_cnts = {y: 0 for y in range(miny, maxy+1)}
     total = 0
     for n in binomial_names:
@@ -1425,8 +1423,8 @@ def calculate_specific_locations(specific_name, binomial_names, binomial_locatio
 def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cnts, outfile, do_print,
                              location_set):
     """ create a page with the history of a specific name """
-    miny = START_YEAR
-    maxy = CURRENT_YEAR
+    miny = init_data().start_year
+    maxy = init_data().current_year
     byears = {y: 0 for y in range(miny, maxy + 1)}
     for n in binomial_names:
         sp_name = clean_specific_name(n)
@@ -1643,8 +1641,8 @@ def write_chronology_chart_div(n, outfile, linkfile, title, is_species, do_print
 def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, specific_synlist, specific_name_counts,
                               do_print, outfile):
     """ create a page with the chronological history of a specific name and its synonyms """
-    miny = START_YEAR
-    maxy = CURRENT_YEAR
+    miny = init_data().start_year
+    maxy = init_data().current_year
     # --all totals and specific names--
     # find max count across all synonyms
     name_cnts = []
@@ -1770,8 +1768,8 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
         per_graph = 60
     ngraph = int(math.ceil(len(species_refs) / per_graph))
 
-    miny = START_YEAR
-    maxy = CURRENT_YEAR
+    miny = init_data().start_year
+    maxy = init_data().current_year
     byears = []
     c = 0
     for y in range(miny, maxy+1):
@@ -1782,7 +1780,7 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
             byears.append([y, 0, c])
 
     miny = 1758
-    maxy = CURRENT_YEAR
+    maxy = init_data().current_year
     syears = []
     c = 0
     for y in range(miny, maxy+1):
@@ -1913,7 +1911,7 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
     outfile.write("    <h3 class=\"nobookmark\">Cumulative Unique Binomial/Compound Names by Year</h3>\n")
     if do_print:
         filename = "cumulative_binames_line.svg"
-        create_line_chart_file(filename, byears, START_YEAR, CURRENT_YEAR, 2)
+        create_line_chart_file(filename, byears, init_data().start_year, init_data().current_year, 2)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"line_chart\" />\n")
         outfile.write("    </figure>\n")
@@ -1923,7 +1921,7 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
     outfile.write("    <h3 class=\"nobookmark\">Unique Binomial/Compound Names by Year</h3>\n")
     if do_print:
         filename = "binames_per_year.svg_bar.svg"
-        create_bar_chart_file(filename, byears, START_YEAR, CURRENT_YEAR, 1)
+        create_bar_chart_file(filename, byears, init_data().start_year, init_data().current_year, 1)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
         outfile.write("    </figure>\n")
@@ -1933,7 +1931,7 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
     outfile.write("    <h3 class=\"nobookmark\">Cumulative Unique Specific Names by Year</h3>\n")
     if do_print:
         filename = "cumulative_spnames_line.svg"
-        create_line_chart_file(filename, syears, 1758, CURRENT_YEAR, 2)
+        create_line_chart_file(filename, syears, 1758, init_data().current_year, 2)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"line_chart\" />\n")
         outfile.write("    </figure>\n")
@@ -1943,7 +1941,7 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
     outfile.write("    <h3 class=\"nobookmark\">Unique Specific Names by Year</h3>\n")
     if do_print:
         filename = "spnames_per_year_bar.svg"
-        create_bar_chart_file(filename, syears, 1758, CURRENT_YEAR, 1)
+        create_bar_chart_file(filename, syears, 1758, init_data().current_year, 1)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
         outfile.write("    </figure>\n")
@@ -2004,8 +2002,8 @@ def extract_genus(name):
 
 def create_genus_chronology(genus_cnts, do_print, outfile):
     """ create a page with the chronological history of the genera """
-    miny = START_YEAR
-    maxy = CURRENT_YEAR
+    miny = init_data().start_year
+    maxy = init_data().current_year
     # --all totals and specific names--
     # find max count across all synonyms
     maxcnt = 0
@@ -2147,13 +2145,14 @@ def calculate_name_index_data(refdict, citelist, specific_names):
     for c in genera_per_paper:
         y = refdict[c].year()
         if y is not None:
-            if START_YEAR <= y <= CURRENT_YEAR:
+            if init_data().start_year <= y <= init_data().current_year:
                 genera_set = genera_per_paper[c]
                 for genus in genera_set:
                     genus = clean_genus(genus)
                     if genus != "":
                         if genus not in genus_cnts:
-                            genus_cnts[genus] = {y: 0 for y in range(START_YEAR, CURRENT_YEAR + 1)}
+                            genus_cnts[genus] = {y: 0 for y in range(init_data().start_year,
+                                                                     init_data().current_year + 1)}
                         gcnts = genus_cnts[genus]
                         gcnts[y] += 1
 
@@ -4166,7 +4165,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
 
 
 def summarize_year(yeardict):
-    miny = CURRENT_YEAR
+    miny = init_data().current_year
     maxy = 0
     for y in yeardict:
         if y < miny:
@@ -4862,7 +4861,7 @@ def print_copyright_page(outfile, refdict):
     create copyright page for monographic print output
     """
     outfile.write("    <div id=\"copyright_page\">\n")
-    outfile.write("     <p>Copyright &copy; 2003&ndash;" + str(CURRENT_YEAR) +
+    outfile.write("     <p>Copyright &copy; 2003&ndash;" + str(init_data().current_year) +
                   " by " + init_data().site_author + ". All Rights Reserved</p>\n")
     outfile.write("     <p>Release: " + init_data().version + "</p>\n")
     outfile.write("     <p><a href=\"" + init_data().site_url() + "\">" + init_data().site_address + "</a></p>\n")
@@ -4882,8 +4881,8 @@ def print_copyright_page(outfile, refdict):
     outfile.write("       Please cite this document as:\n")
     outfile.write("     </p>\n")
     outfile.write("     <p>\n")
-    outfile.write("       Rosenberg, M.S. (" + str(CURRENT_YEAR) + ") www.fiddlercrab.info, v." + init_data().version +
-                  ".\n")
+    outfile.write("       Rosenberg, M.S. (" + str(init_data().current_year) + ") www.fiddlercrab.info, v." +
+                  init_data().version + ".\n")
     outfile.write("     </p>\n")
 
     outfile.write("     <p>\n")

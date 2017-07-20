@@ -54,7 +54,11 @@ class InitializationData:
         self.morph_url = "uca_morphology.html"
         self.cite_url = "citation.html"
         self.name_sum_url = "name_graphs.html"
+
+        # general data
         self.version = datetime.datetime.now().strftime("%Y.%m.%d.%H.%M")
+        self.start_year = 1758  # Start with Linnean taxonomy
+        self.current_year = datetime.date.today().year
 
     def site_url(self):
         return self.site_http + self.site_address
