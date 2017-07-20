@@ -43,6 +43,8 @@ CITE_URL = "citation.html"
 NAME_SUM_URL = "name_graphs.html"
 # fossilImage = "<img class=\"fossilImg\" src=\"images/fossil.png\" alt=\" (fossil)\" title=\" (fossil)\" />"
 FOSSIL_IMAGE = " <span class=\"fossil-img\">&#9760;</span>"
+STAR = "<sup>*</sup>"
+DAGGER = "<sup>†</sup>"
 START_YEAR = 1758
 CURRENT_YEAR = datetime.date.today().year
 VERSION = datetime.datetime.now().strftime("%Y.%m.%d.%H.%M")
@@ -55,7 +57,7 @@ AUTHOR_NOPCOMMA = 2
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = True
+DRAW_MAPS = False
 
 # randSeed = random.randint(0, 10000)
 
@@ -308,7 +310,7 @@ def format_reference_full(ref, do_print, logfile):
             report_error(logfile, "missing label: " + ref.cite_key)
 
 
-def format_reference_cite(ref, do_print, author_style, logfile):
+def format_reference_cite(ref, do_print, author_style, logfile, path=""):
     if author_style == AUTHOR_PAREN:
         outstr = ref.citation
     elif author_style == AUTHOR_NOPAREN:
@@ -321,7 +323,7 @@ def format_reference_cite(ref, do_print, author_style, logfile):
         return outstr
     else:
         try:
-            return ("<a href=\"" + rel_link_prefix(do_print, "references/") + ref.cite_key +
+            return ("<a href=\"" + rel_link_prefix(do_print, path + "references/") + ref.cite_key +
                     ".html\">" + outstr + "</a>")
         except LookupError:
             report_error(logfile, "missing label: " + ref.cite_key)
@@ -910,13 +912,13 @@ def create_species_link(species, status, path, do_print):
             species + "</em>" + sc + "</a>")
 
 
-def create_location_link(location, display_name, path, do_print):
-    if location.unknown:
-        suffix = "<sup>†</sup>"
+def create_location_link(location, display_name, path, do_print, mark_unknown=False):
+    if mark_unknown and location.unknown:
+        suffix = DAGGER
     else:
         suffix = ""
     return ("<a href=\"" + rel_link_prefix(do_print, path) + place_to_filename(location.name) + ".html\">" +
-            display_name + suffix + "</a>")
+            display_name + "</a>" + suffix)
 
 
 def strip_location_subtext(x):
@@ -2432,6 +2434,14 @@ def create_location_hierarchy(point_locations, logfile):
     return loc_dict
 
 
+def fetch_child_ref_data(loc, ref_dict):
+    refset = ref_dict[loc.name]
+    if loc.n_children() > 0:
+        for c in loc.children:
+            refset |= fetch_child_ref_data(c, ref_dict)
+    return refset
+
+
 def fetch_child_data(loc, location_dict):
     locset = location_dict[loc.name]
     if loc.n_children() > 0:
@@ -2441,7 +2451,7 @@ def fetch_child_data(loc, location_dict):
 
 
 def write_location_page(outfile, do_print, loc, point_locations, location_species, location_bi_names,
-                        location_sp_names):
+                        location_sp_names, location_direct_refs, location_cited_refs, references, logfile):
     """
     write the output page for an individual location
     """
@@ -2461,7 +2471,6 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         return "{:1.6f}&deg;{}, {:1.6f}&deg;{}".format(abs(lat), latdir, abs(lon), londir)
 
     # main function code
-    star_str = "<sup>*</sup>"
     if do_print:
         start_page_division(outfile, "base_page")
     else:
@@ -2515,6 +2524,9 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
     all_bi_names |= location_bi_names[loc.name]
     all_sp_names = set()
     all_sp_names |= location_sp_names[loc.name]
+    all_refs = set()
+    all_refs |= location_direct_refs[loc.name]
+    all_refs |= location_cited_refs[loc.name]
     if loc.n_children() > 0:
         outfile.write("  <section class=\"spsection\">\n")
         outfile.write("    <h3 class=\"nobookmark\">Includes Subareas</h3>\n")
@@ -2524,6 +2536,8 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
             all_species |= fetch_child_data(c, location_species)
             all_bi_names |= fetch_child_data(c, location_bi_names)
             all_sp_names |= fetch_child_data(c, location_sp_names)
+            all_refs |= fetch_child_ref_data(c, location_direct_refs)
+            all_refs |= fetch_child_ref_data(c, location_cited_refs)
         outfile.write("    </ul>\n")
         outfile.write("  </section>\n")
 
@@ -2534,11 +2548,11 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         outfile.write("    <ul class=\"splist\">\n")
         for s in sorted(list(all_species)):
             if s in location_species[loc.name]:
-                star = ""
+                suffix = ""
             else:
-                star = star_str
+                suffix = STAR
                 print_star = True
-            outfile.write("      <li>" + create_species_link(s.species, s.status, "../", do_print) + star + "</li>\n")
+            outfile.write("      <li>" + create_species_link(s.species, s.status, "../", do_print) + suffix + "</li>\n")
         outfile.write("    </ul>\n")
         outfile.write("  </section>\n")
 
@@ -2548,12 +2562,12 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         outfile.write("    <ul class=\"splist\">\n")
         for s in sorted(list(all_bi_names)):
             if s in location_bi_names[loc.name]:
-                star = ""
+                suffix = ""
             else:
-                star = star_str
+                suffix = STAR
                 print_star = True
             outfile.write("      <li><a href=\"" + rel_link_prefix(do_print, "../names/") + name_to_filename(s) +
-                          ".html\">" + format_name_string(s) + "</a>" + star + "</li>\n")
+                          ".html\">" + format_name_string(s) + "</a>" + suffix + "</li>\n")
         outfile.write("    </ul>\n")
         outfile.write("  </section>\n")
 
@@ -2563,17 +2577,26 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         outfile.write("    <ul class=\"splist\">\n")
         for s in sorted(list(all_sp_names)):
             if s in location_sp_names[loc.name]:
-                star = ""
+                suffix = ""
             else:
-                star = star_str
+                suffix = STAR
                 print_star = True
             outfile.write("      <li><a href=\"" + rel_link_prefix(do_print, "../names/") + "sn_" + s.name +
-                          ".html\">" + format_name_string(s.name) + "</a>" + star + "</li>\n")
+                          ".html\">" + format_name_string(s.name) + "</a>" + suffix + "</li>\n")
         outfile.write("    </ul>\n")
         outfile.write("  </section>\n")
 
+    write_annotated_reference_list(outfile, do_print, logfile, references, all_refs, location_direct_refs[loc.name],
+                                   location_cited_refs[loc.name], "../")
+
+    if len(location_direct_refs[loc.name]) != len(location_cited_refs[loc.name]):
+        key_str = "Entries marked with " + DAGGER + " represent indirect references to location through citation. "
+    else:
+        key_str = ""
     if print_star:
-        outfile.write("    <p>Entries marked with " + star_str + " are inferred from subareas</p>\n")
+        key_str += "Entries marked with " + STAR + " are inferred from subareas."
+    if key_str != "":
+        outfile.write("    <p>" + key_str.strip() + "</p>\n")
 
     if do_print:
         end_page_division(outfile)
@@ -2584,19 +2607,20 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         for c in loc.children:
             if do_print:
                 write_location_page(outfile, do_print, c, point_locations, location_species, location_bi_names,
-                                    location_sp_names)
+                                    location_sp_names, location_direct_refs, location_cited_refs, references, logfile)
             else:
                 with codecs.open(WEBOUT_PATH + "locations/" + place_to_filename(c.name) + ".html", "w",
                                  "utf-8") as suboutfile:
                     write_location_page(suboutfile, do_print, c, point_locations, location_species, location_bi_names,
-                                        location_sp_names)
+                                        location_sp_names, location_direct_refs, location_cited_refs, references,
+                                        logfile)
 
 
 def write_location_index_entry(outfile, do_print, loc, point_locations):
     """
     print a location and all of its child locations
     """
-    outfile.write("<li>" + create_location_link(loc, loc.trimmed_name, "", do_print))
+    outfile.write("<li>" + create_location_link(loc, loc.trimmed_name, "", do_print, mark_unknown=True))
     if loc.n_children() > 0:
         child_list = []
         for child in loc.children:
@@ -2610,7 +2634,7 @@ def write_location_index_entry(outfile, do_print, loc, point_locations):
 
 
 def write_location_index(outfile, do_print, point_locations, location_dict, location_species, location_sp_names,
-                         location_bi_names):
+                         location_bi_names, location_direct_refs, location_cited_refs, references, logfile):
     """ output observation location index to HTML """
     if do_print:
         start_page_division(outfile, "index_page")
@@ -2650,7 +2674,7 @@ def write_location_index(outfile, do_print, point_locations, location_dict, loca
                   "for a large area may only be found in a small part of the total region.\n")
     outfile.write("    </p>\n")
     outfile.write("    <p>\n")
-    outfile.write("    Locations marked by † represent place names from the literature which could not be "
+    outfile.write("    Locations marked by " + DAGGER + " represent place names from the literature which could not be "
                   "identified or associated with a modern name or place.\n")
     outfile.write("    </p>\n")
     outfile.write("\n")
@@ -2678,7 +2702,7 @@ def write_location_index(outfile, do_print, point_locations, location_dict, loca
     outfile.write("    <ul class=\"namelist\">\n")
     for p in full_list:
         loc = location_dict[p]
-        outfile.write("   <li>" + create_location_link(loc, p, "", do_print) + "</li>\n")
+        outfile.write("   <li>" + create_location_link(loc, p, "", do_print, mark_unknown=True) + "</li>\n")
     outfile.write("    </ul>\n")
     outfile.write("  </div>\n")
 
@@ -2691,12 +2715,12 @@ def write_location_index(outfile, do_print, point_locations, location_dict, loca
         loc = point_locations[p]
         if do_print:
             write_location_page(outfile, do_print, loc, point_locations, location_species, location_bi_names,
-                                location_sp_names)
+                                location_sp_names, location_direct_refs, location_cited_refs, references, logfile)
         else:
             with codecs.open(WEBOUT_PATH + "locations/" + place_to_filename(loc.name) + ".html", "w",
                              "utf-8") as suboutfile:
                 write_location_page(suboutfile, do_print, loc, point_locations, location_species, location_bi_names,
-                                    location_sp_names)
+                                    location_sp_names, location_direct_refs, location_cited_refs, references, logfile)
 
 
 def match_names_to_locations(species, specific_point_locations, binomial_point_locations, point_locations, citelist,
@@ -2706,6 +2730,8 @@ def match_names_to_locations(species, specific_point_locations, binomial_point_l
     location_species = {x: set() for x in point_locations}
     location_bi_names = {x: set() for x in point_locations}
     location_sp_names = {x: set() for x in point_locations}
+    location_cited_refs = {x: set() for x in point_locations}
+    location_direct_refs = {x: set() for x in point_locations}
     missing_set = set()
     for s in species:
         if s.status != "fossil":
@@ -2729,6 +2755,23 @@ def match_names_to_locations(species, specific_point_locations, binomial_point_l
         else:
             species_plot_locations[s] = None
             invalid_species_locations[s] = None
+
+    # create set of all citations that refer to each location
+    for c in citelist:
+        if (c.context == "location") or (c.context == "specimen"):
+            p = c.application
+            if (p != ".") and (p[0] != "[") and (p != "?"):
+                loc = strip_location_subtext(p)
+                if loc in point_locations:
+                    location_direct_refs[loc] |= {c.cite_key}
+    for c in citelist:
+        if c.applied_cites is not None:
+            for a in c.applied_cites:
+                p = a.application
+                if (p != ".") and (p[0] != "[") and (p != "?"):
+                    loc = strip_location_subtext(p)
+                    if (loc in point_locations) and (loc not in location_direct_refs[loc]):
+                        location_cited_refs[loc] |= {c.cite_key}
 
     binomial_plot_locations = {}
     for name in binomial_point_locations:
@@ -2760,7 +2803,7 @@ def match_names_to_locations(species, specific_point_locations, binomial_point_l
             report_error(logfile, "Missing point location: " + m)
 
     return (species_plot_locations, invalid_species_locations, binomial_plot_locations, specific_plot_locations,
-            location_species, location_sp_names, location_bi_names)
+            location_species, location_sp_names, location_bi_names, location_direct_refs, location_cited_refs)
 
 
 def write_common_names_pages(outfile, common_name_data, do_print):
@@ -2965,6 +3008,47 @@ def write_species_video_page(fname, video, vn):
             outfile.write("        <dd>" + video.notes + "</dd>\n")
         outfile.write("    </dl>\n")
         common_html_footer(outfile, "../")
+
+
+def write_annotated_reference_list(outfile, do_print, logfile, references, all_citations, dir_citations,
+                                   cited_citations, path):
+    outfile.write("    <section class=\"spsection\">\n")
+    if do_print:
+        outfile.write("      <h3 class=\"nobookmark\"><span class=\"fa fa-book\"></span> References</h3>\n")
+    else:
+        outfile.write("      <h3 id=\"references\" class=\"nobookmark\"><span class=\"fa fa-book\"></span> "
+                      "References</h3>\n")
+    outfile.write("      <p>\n")
+    reflist = []
+    for ref in references:
+        if ref.cite_key in all_citations:
+            if ref.cite_key in dir_citations:
+                suffix = ""
+            elif ref.cite_key in cited_citations:
+                suffix = DAGGER
+            else:
+                suffix = STAR
+            reflist.append(format_reference_cite(ref, do_print, AUTHOR_PAREN, logfile, path=path) + suffix)
+    outfile.write(", \n".join(reflist))
+    outfile.write("      </p>\n")
+    outfile.write("    </section>\n")
+
+
+def write_reference_list(outfile, do_print, logfile, references, citations):
+    outfile.write("    <section class=\"spsection\">\n")
+    if do_print:
+        outfile.write("      <h2 class=\"nobookmark\"><span class=\"fa fa-book\"></span> References</h2>\n")
+    else:
+        outfile.write("      <h2 id=\"references\" class=\"nobookmark\"><span class=\"fa fa-book\"></span> "
+                      "References</h2>\n")
+    outfile.write("      <p>\n")
+    reflist = []
+    for ref in references:
+        if ref.cite_key in citations:
+            reflist.append(format_reference_cite(ref, do_print, AUTHOR_PAREN, logfile))
+    outfile.write(", \n".join(reflist))
+    outfile.write("      </p>\n")
+    outfile.write("    </section>\n")
 
 
 def write_species_page(species, references, specific_names, all_names, photos, videos, artlist, sprefs, refdict,
@@ -3226,20 +3310,21 @@ def write_species_page(species, references, specific_names, all_names, photos, v
         outfile.write("    </section>\n")
         outfile.write("\n")
 
-    outfile.write("    <section class=\"spsection\">\n")
-    if do_print:
-        outfile.write("      <h2 class=\"nobookmark\"><span class=\"fa fa-book\"></span> References</h2>\n")
-    else:
-        outfile.write("      <h2 id=\"references\" class=\"nobookmark\"><span class=\"fa fa-book\"></span> "
-                      "References</h2>\n")
-    outfile.write("      <p>\n")
-    reflist = []
-    for ref in references:
-        if ref.cite_key in sprefs:
-            reflist.append(format_reference_cite(ref, do_print, AUTHOR_PAREN, logfile))
-    outfile.write(", \n".join(reflist))
-    outfile.write("      </p>\n")
-    outfile.write("    </section>\n")
+    write_reference_list(outfile, do_print, logfile, references, sprefs)
+    # outfile.write("    <section class=\"spsection\">\n")
+    # if do_print:
+    #     outfile.write("      <h2 class=\"nobookmark\"><span class=\"fa fa-book\"></span> References</h2>\n")
+    # else:
+    #     outfile.write("      <h2 id=\"references\" class=\"nobookmark\"><span class=\"fa fa-book\"></span> "
+    #                   "References</h2>\n")
+    # outfile.write("      <p>\n")
+    # reflist = []
+    # for ref in references:
+    #     if ref.cite_key in sprefs:
+    #         reflist.append(format_reference_cite(ref, do_print, AUTHOR_PAREN, logfile))
+    # outfile.write(", \n".join(reflist))
+    # outfile.write("      </p>\n")
+    # outfile.write("    </section>\n")
     if do_print:
         end_page_division(outfile)
     else:
@@ -4973,10 +5058,10 @@ def build_site():
         # location_sp_names is a dict of sets of specific name ojbets, key = location full names
         # location_bi_names is a dict of sets of names (strings), keys = location full names
         (species_plot_locations, invalid_species_locations, binomial_plot_locations,
-         specific_plot_locations, location_species,
-         location_sp_names, location_bi_names) = match_names_to_locations(species, specific_point_locations,
-                                                                          binomial_point_locations,
-                                                                          point_locations, citelist, logfile)
+         specific_plot_locations, location_species, location_sp_names, location_bi_names,
+         location_direct_refs, location_cited_refs) = match_names_to_locations(species, specific_point_locations,
+                                                                               binomial_point_locations,
+                                                                               point_locations, citelist, logfile)
         if DRAW_MAPS:
             TMB_Create_Maps.create_all_maps(INIT_DATA, point_locations, species, species_plot_locations,
                                             invalid_species_locations, all_names, binomial_plot_locations,
@@ -5001,12 +5086,14 @@ def build_site():
             print("......Writing Species......")
             write_species_info_pages(species, references, specific_names, all_names, photos, videos, art, species_refs,
                                      refdict, binomial_name_cnts, specific_name_cnts, logfile, None, False)
-            print("......Copying Maps......")
-            copy_map_files(species, all_names, specific_names, point_locations, logfile)
+            if DRAW_MAPS:
+                print("......Copying Maps......")
+                copy_map_files(species, all_names, specific_names, point_locations, logfile)
             print("......Writing Locations......")
             with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
                 write_location_index(outfile, False, point_locations, location_dict, location_species,
-                                     location_sp_names, location_bi_names)
+                                     location_sp_names, location_bi_names, location_direct_refs, location_cited_refs,
+                                     references, logfile)
             with codecs.open(WEBOUT_PATH + MAP_URL, "w", "utf-8") as outfile:
                 write_geography_page(species, outfile, False)
             print("......Writing Media Pages......")
@@ -5031,7 +5118,7 @@ def build_site():
             write_citation_page(refdict)
 
         # output print version
-        if True:
+        if False:
             print("...Creating Print Version...")
             with codecs.open("print.html", "w", "utf-8") as printfile:
                 start_print(printfile)
@@ -5043,7 +5130,8 @@ def build_site():
                 write_phylogeny_pages(printfile, True, refdict, logfile)
                 write_geography_page(species, printfile, True)
                 write_location_index(printfile, True, point_locations, location_dict, location_species,
-                                     location_sp_names, location_bi_names)
+                                     location_sp_names, location_bi_names, location_direct_refs, location_cited_refs,
+                                     references, logfile)
                 write_life_cycle_pages(printfile, True)
                 write_main_morphology_pages(morphology, printfile, True, logfile)
                 print("......Writing Species Pages......")
