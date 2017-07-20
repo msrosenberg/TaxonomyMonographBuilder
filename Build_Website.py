@@ -13,6 +13,7 @@ import math
 import TMB_Import
 import TMB_Create_Maps
 from TMB_Error import report_error
+import TMB_Error
 from TMB_Common import *
 import TMB_Initialize
 # external dependencies
@@ -49,6 +50,7 @@ START_YEAR = 1758
 CURRENT_YEAR = datetime.date.today().year
 VERSION = datetime.datetime.now().strftime("%Y.%m.%d.%H.%M")
 INIT_DATA = None
+# LOGFILE = None
 
 AUTHOR_NOPAREN = 0
 AUTHOR_PAREN = 1
@@ -299,7 +301,7 @@ def abs_link_prefix(do_absolute):
         return ""
 
 
-def format_reference_full(ref, do_print, logfile):
+def format_reference_full(ref, do_print):
     if ref.cite_key == "<pending>":
         return ref.formatted_html
     else:
@@ -307,10 +309,10 @@ def format_reference_full(ref, do_print, logfile):
             return ("<a href=\"" + rel_link_prefix(do_print, "references/") + ref.cite_key + ".html\">" +
                     ref.formatted_html + "</a>")
         except LookupError:
-            report_error(logfile, "missing label: " + ref.cite_key)
+            report_error("missing label: " + ref.cite_key)
 
 
-def format_reference_cite(ref, do_print, author_style, logfile, path=""):
+def format_reference_cite(ref, do_print, author_style, path=""):
     if author_style == AUTHOR_PAREN:
         outstr = ref.citation
     elif author_style == AUTHOR_NOPAREN:
@@ -326,19 +328,19 @@ def format_reference_cite(ref, do_print, author_style, logfile, path=""):
             return ("<a href=\"" + rel_link_prefix(do_print, path + "references/") + ref.cite_key +
                     ".html\">" + outstr + "</a>")
         except LookupError:
-            report_error(logfile, "missing label: " + ref.cite_key)
+            report_error("missing label: " + ref.cite_key)
 
 
-def replace_reference_in_string(instr, refdict, do_print, logfile):
+def replace_reference_in_string(instr, refdict, do_print):
     search_str = r"\[\[(?P<key>.+?),(?P<format>.+?)\]\]"
     # for every citation reference in the string
     for match in re.finditer(search_str, instr):
         # create the new link text
         ref = refdict[match.group("key")]
         if match.group("format") == ".out":
-            link_str = format_reference_cite(ref, do_print, AUTHOR_PAREN, logfile)
+            link_str = format_reference_cite(ref, do_print, AUTHOR_PAREN)
         elif match.group("format") == ".in":
-            link_str = format_reference_cite(ref, do_print, AUTHOR_NOPAREN, logfile)
+            link_str = format_reference_cite(ref, do_print, AUTHOR_NOPAREN)
         else:
             link_str = "<a href=\"" + rel_link_prefix(do_print, "references/") + ref.cite_key + ".html\">" + \
                        match.group("format") + "</a>"
@@ -347,10 +349,10 @@ def replace_reference_in_string(instr, refdict, do_print, logfile):
     return instr
 
 
-def replace_references(in_list, refdict, do_print, logfile):
+def replace_references(in_list, refdict, do_print):
     out_list = []
     for line in in_list:
-        out_list.append(replace_reference_in_string(line, refdict, do_print, logfile))
+        out_list.append(replace_reference_in_string(line, refdict, do_print))
     return out_list
 
 
@@ -752,7 +754,7 @@ def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, langua
         common_html_footer(outfile, "")
 
 
-def write_reference_bibliography(reflist, do_print, outfile, logfile):
+def write_reference_bibliography(reflist, do_print, outfile):
     if do_print:
         start_page_division(outfile, "index_page")
     else:
@@ -795,7 +797,7 @@ def write_reference_bibliography(reflist, do_print, outfile, logfile):
     outfile.write("      <div class=\"reference_list\">\n")
     outfile.write("        <ul>\n")
     for ref in reflist:
-        outfile.write("          <li>" + format_reference_full(ref, do_print, logfile) + "</li>\n")
+        outfile.write("          <li>" + format_reference_full(ref, do_print) + "</li>\n")
     outfile.write("        </ul>\n")
     outfile.write("      </div>\n")
     outfile.write("    </section>\n")
@@ -1000,7 +1002,7 @@ def clean_specific_name(x):
 
 
 def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, refdict, name_table, point_locations,
-                      logfile, do_print):
+                      do_print):
     """ create output name table """
     def create_location_sublink(x):
         """ create a link to location pages, preserving [] info when applicable """
@@ -1079,8 +1081,7 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
                                 refname = name_table[n.application][nstr][0]
                             except LookupError:
                                 if is_name:  # only print errors on one pass
-                                    report_error(logfile, "Error in citation: " +
-                                                 n.cite_key + " cites" + nstr +
+                                    report_error("Error in citation: " + n.cite_key + " cites" + nstr +
                                                  " in " + n.application)
                                 extraref = ""
                                 refname = ""
@@ -1089,7 +1090,7 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
                             try:
                                 refname = name_table[n.application][int(nstr)]
                             except ValueError:
-                                report_error(logfile, "Citation " + n.cite_key + " tried to cite " + n.application +
+                                report_error("Citation " + n.cite_key + " tried to cite " + n.application +
                                              " #" + nstr)
                                 refname = ""
                         outfile.write("      <td><span class=\"fa fa-pencil-square-o\"></span> citation: "
@@ -1104,8 +1105,7 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
                 outfile.write("      <td><span class=\"fa fa-pencil-square-o\"></span> citation: " + n.application +
                               "</td>\n")
                 if is_name and not do_print:  # only print on one pass
-                    report_error(logfile, "Citation not in DB: " +
-                                 n.cite_key + " cites " + n.application)
+                    report_error("Citation not in DB: " + n.cite_key + " cites " + n.application)
         elif n.context == "specimen":
             if n.application == "?":
                 outfile.write("      <td><span class=\"fa fa-flask\"></span> specimen: unknown locality</td>\n")
@@ -1170,7 +1170,7 @@ def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, r
     outfile.write("    </table>\n")
 
 
-def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, point_locations, logfile):
+def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, point_locations):
     if do_print:
         start_page_division(outfile, "ref_page")
     else:
@@ -1233,7 +1233,7 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
         outfile.write("      </tr>\n")
         names.sort()
         output_name_table(False, outfile, names, uniquenames, notecnt, comcnt, refdict, name_table, point_locations,
-                          logfile, do_print)
+                          do_print)
     else:
         outfile.write("    <p>\n")
         outfile.write("      Data not yet available.\n")
@@ -1263,18 +1263,17 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
         common_html_footer(outfile, "../")
 
 
-def write_reference_pages(reflist, refdict, citelist, do_print, printfile, logfile, name_table, point_locations):
+def write_reference_pages(reflist, refdict, citelist, do_print, printfile, name_table, point_locations):
     """
     control function to loop through creating a page for every reference
     """
     for ref in reflist:
         if ref.cite_key != "<pending>":
             if do_print:
-                write_reference_page(printfile, do_print, ref, citelist, refdict, name_table, point_locations, logfile)
+                write_reference_page(printfile, do_print, ref, citelist, refdict, name_table, point_locations)
             else:
                 with codecs.open(WEBOUT_PATH + "references/" + ref.cite_key + ".html", "w", "utf-8") as outfile:
-                    write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, point_locations,
-                                         logfile)
+                    write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, point_locations)
 
 
 def clean_name(x):
@@ -1310,7 +1309,7 @@ def calculate_binomial_yearly_cnts(name, refdict, citelist):
     return name_by_year, total
 
 
-def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, name_table, species_name, logfile,
+def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, name_table, species_name,
                              outfile, do_print, location_set, point_locations):
     """
     create a page listing all citations using, and other information about, a specific binomial or compound name
@@ -1400,7 +1399,7 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
     if notecnt > 0:
         outfile.write("        <th class=\"notes_col\">Note(s)</th>\n")
     outfile.write("      </tr>\n")
-    output_name_table(True, outfile, cites, uniquecites, notecnt, comcnt, refdict, name_table, point_locations, logfile,
+    output_name_table(True, outfile, cites, uniquecites, notecnt, comcnt, refdict, name_table, point_locations,
                       do_print)
     outfile.write("    <p>\n")
     outfile.write("    </p>\n")
@@ -1437,7 +1436,7 @@ def calculate_specific_locations(specific_name, binomial_names, binomial_locatio
     return locs
 
 
-def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cnts, logfile, outfile, do_print,
+def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cnts, outfile, do_print,
                              location_set):
     """ create a page with the history of a specific name """
     miny = START_YEAR
@@ -1510,7 +1509,7 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
             refname = ref.formatted_html
         except LookupError:
             # print(name.priority_source)
-            report_error(logfile, specific_name.priority_source)
+            report_error(specific_name.priority_source)
     else:
         refname = "unknown"
     outfile.write("          <dd>" + refname + "</dd>\n")
@@ -2206,7 +2205,7 @@ def calculate_name_index_data(refdict, citelist, specific_names):
 
 
 def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_table, species_refs, genus_cnts,
-                         binomial_usage_cnts_by_year, total_binomial_year_cnts, outfile, do_print, logfile,
+                         binomial_usage_cnts_by_year, total_binomial_year_cnts, outfile, do_print,
                          binomial_locations, specific_locations, point_locations):
     """ create an index of binomials and specific names """
     if do_print:
@@ -2290,23 +2289,23 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
         namefile = name_to_filename(name)
         if do_print:
             write_binomial_name_page(name, namefile, binomial_usage_cnts_by_year[name], refdict, citelist, name_table,
-                                     sname, logfile, outfile, True, binomial_locations[name], point_locations)
+                                     sname, outfile, True, binomial_locations[name], point_locations)
         else:
             with codecs.open(WEBOUT_PATH + "names/" + namefile + ".html", "w", "utf-8") as suboutfile:
                 write_binomial_name_page(name, namefile, binomial_usage_cnts_by_year[name], refdict, citelist,
-                                         name_table, sname, logfile, suboutfile, False, binomial_locations[name],
+                                         name_table, sname, suboutfile, False, binomial_locations[name],
                                          point_locations)
     for name in specific_names:
         if do_print:
-            write_specific_name_page(name, unique_names, refdict, binomial_usage_cnts_by_year, logfile, outfile,
+            write_specific_name_page(name, unique_names, refdict, binomial_usage_cnts_by_year, outfile,
                                      True, specific_locations[name])
         else:
             with codecs.open(WEBOUT_PATH + "names/sn_" + name.name + ".html", "w", "utf-8") as suboutfile:
-                write_specific_name_page(name, unique_names, refdict, binomial_usage_cnts_by_year, logfile, suboutfile,
+                write_specific_name_page(name, unique_names, refdict, binomial_usage_cnts_by_year, suboutfile,
                                          False, specific_locations[name])
 
 
-def check_specific_names(citelist, specific_names, logfile):
+def check_specific_names(citelist, specific_names):
     """ checks all specific names used to confirm they are accounted for in the full synonymy list """
     unique_names = list()
     nameset = set()
@@ -2323,7 +2322,7 @@ def check_specific_names(citelist, specific_names, logfile):
             if n in s.variations:
                 is_found = True
         if not is_found:
-            report_error(logfile, "Missing specific name: " + n)
+            report_error("Missing specific name: " + n)
 
 
 def write_geography_page(species, outfile, do_print):
@@ -2411,7 +2410,7 @@ def write_geography_page(species, outfile, do_print):
         common_html_footer(outfile, "")
 
 
-def create_location_hierarchy(point_locations, logfile):
+def create_location_hierarchy(point_locations):
     """ got through all locations and add children to the parent locations """
     loc_dict = {}
     for p in point_locations:
@@ -2421,14 +2420,14 @@ def create_location_hierarchy(point_locations, logfile):
                 ploc = point_locations[loc.parent]
                 ploc.children.append(loc)
             else:
-                report_error(logfile, "Location missing: " + loc.parent)
+                report_error("Location missing: " + loc.parent)
         if loc.trimmed_name in loc_dict:
-            report_error(logfile, "Duplicate trimmed location name: " + loc.trimmed_name)
+            report_error("Duplicate trimmed location name: " + loc.trimmed_name)
         else:
             loc_dict[loc.trimmed_name] = loc
         for a in loc.alternates:
             if a in loc_dict:
-                report_error(logfile, "Duplicate trimmed location name: " + a)
+                report_error("Duplicate trimmed location name: " + a)
             else:
                 loc_dict[a] = loc
     return loc_dict
@@ -2451,7 +2450,7 @@ def fetch_child_data(loc, location_dict):
 
 
 def write_location_page(outfile, do_print, loc, point_locations, location_species, location_bi_names,
-                        location_sp_names, location_direct_refs, location_cited_refs, references, logfile):
+                        location_sp_names, location_direct_refs, location_cited_refs, references):
     """
     write the output page for an individual location
     """
@@ -2587,7 +2586,7 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         outfile.write("    </ul>\n")
         outfile.write("  </section>\n")
 
-    write_annotated_reference_list(outfile, do_print, logfile, references, all_refs, location_direct_refs[loc.name],
+    write_annotated_reference_list(outfile, do_print, references, all_refs, location_direct_refs[loc.name],
                                    location_cited_refs[loc.name], "../")
 
     if len(location_direct_refs[loc.name]) != len(location_cited_refs[loc.name]):
@@ -2608,13 +2607,12 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         for c in loc.children:
             if do_print:
                 write_location_page(outfile, do_print, c, point_locations, location_species, location_bi_names,
-                                    location_sp_names, location_direct_refs, location_cited_refs, references, logfile)
+                                    location_sp_names, location_direct_refs, location_cited_refs, references)
             else:
                 with codecs.open(WEBOUT_PATH + "locations/" + place_to_filename(c.name) + ".html", "w",
                                  "utf-8") as suboutfile:
                     write_location_page(suboutfile, do_print, c, point_locations, location_species, location_bi_names,
-                                        location_sp_names, location_direct_refs, location_cited_refs, references,
-                                        logfile)
+                                        location_sp_names, location_direct_refs, location_cited_refs, references)
 
 
 def write_location_index_entry(outfile, do_print, loc, point_locations):
@@ -2635,7 +2633,7 @@ def write_location_index_entry(outfile, do_print, loc, point_locations):
 
 
 def write_location_index(outfile, do_print, point_locations, location_dict, location_species, location_sp_names,
-                         location_bi_names, location_direct_refs, location_cited_refs, references, logfile):
+                         location_bi_names, location_direct_refs, location_cited_refs, references):
     """ output observation location index to HTML """
     if do_print:
         start_page_division(outfile, "index_page")
@@ -2716,16 +2714,15 @@ def write_location_index(outfile, do_print, point_locations, location_dict, loca
         loc = point_locations[p]
         if do_print:
             write_location_page(outfile, do_print, loc, point_locations, location_species, location_bi_names,
-                                location_sp_names, location_direct_refs, location_cited_refs, references, logfile)
+                                location_sp_names, location_direct_refs, location_cited_refs, references)
         else:
             with codecs.open(WEBOUT_PATH + "locations/" + place_to_filename(loc.name) + ".html", "w",
                              "utf-8") as suboutfile:
                 write_location_page(suboutfile, do_print, loc, point_locations, location_species, location_bi_names,
-                                    location_sp_names, location_direct_refs, location_cited_refs, references, logfile)
+                                    location_sp_names, location_direct_refs, location_cited_refs, references)
 
 
-def match_names_to_locations(species, specific_point_locations, binomial_point_locations, point_locations, citelist,
-                             logfile):
+def match_names_to_locations(species, specific_point_locations, binomial_point_locations, point_locations, citelist):
     species_plot_locations = {}
     invalid_species_locations = {}
     location_species = {x: set() for x in point_locations}
@@ -2801,7 +2798,7 @@ def match_names_to_locations(species, specific_point_locations, binomial_point_l
     if len(missing_set) > 0:
         missing_list = sorted(list(missing_set))
         for m in missing_list:
-            report_error(logfile, "Missing point location: " + m)
+            report_error("Missing point location: " + m)
 
     return (species_plot_locations, invalid_species_locations, binomial_plot_locations, specific_plot_locations,
             location_species, location_sp_names, location_bi_names, location_direct_refs, location_cited_refs)
@@ -3011,7 +3008,7 @@ def write_species_video_page(fname, video, vn):
         common_html_footer(outfile, "../")
 
 
-def write_annotated_reference_list(outfile, do_print, logfile, references, all_citations, dir_citations,
+def write_annotated_reference_list(outfile, do_print, references, all_citations, dir_citations,
                                    cited_citations, path):
     outfile.write("    <section class=\"spsection\">\n")
     if do_print:
@@ -3029,13 +3026,13 @@ def write_annotated_reference_list(outfile, do_print, logfile, references, all_c
                 suffix = DAGGER
             else:
                 suffix = STAR
-            reflist.append(format_reference_cite(ref, do_print, AUTHOR_PAREN, logfile, path=path) + suffix)
+            reflist.append(format_reference_cite(ref, do_print, AUTHOR_PAREN, path=path) + suffix)
     outfile.write(", \n".join(reflist))
     outfile.write("      </p>\n")
     outfile.write("    </section>\n")
 
 
-def write_reference_list(outfile, do_print, logfile, references, citations):
+def write_reference_list(outfile, do_print, references, citations):
     outfile.write("    <section class=\"spsection\">\n")
     if do_print:
         outfile.write("      <h2 class=\"nobookmark\"><span class=\"fa fa-book\"></span> References</h2>\n")
@@ -3046,14 +3043,14 @@ def write_reference_list(outfile, do_print, logfile, references, citations):
     reflist = []
     for ref in references:
         if ref.cite_key in citations:
-            reflist.append(format_reference_cite(ref, do_print, AUTHOR_PAREN, logfile))
+            reflist.append(format_reference_cite(ref, do_print, AUTHOR_PAREN))
     outfile.write(", \n".join(reflist))
     outfile.write("      </p>\n")
     outfile.write("    </section>\n")
 
 
 def write_species_page(species, references, specific_names, all_names, photos, videos, artlist, sprefs, refdict,
-                       binomial_name_counts, specific_name_cnts, logfile, outfile, do_print):
+                       binomial_name_counts, specific_name_cnts, outfile, do_print):
     """
     create the master page for a valid species
     """
@@ -3311,7 +3308,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
         outfile.write("    </section>\n")
         outfile.write("\n")
 
-    write_reference_list(outfile, do_print, logfile, references, sprefs)
+    write_reference_list(outfile, do_print, references, sprefs)
     # outfile.write("    <section class=\"spsection\">\n")
     # if do_print:
     #     outfile.write("      <h2 class=\"nobookmark\"><span class=\"fa fa-book\"></span> References</h2>\n")
@@ -3341,7 +3338,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
                                           specific_name_cnts, do_print, suboutfile)
 
 
-def write_photo_index(specieslist, photos, do_print, outfile, logfile):
+def write_photo_index(specieslist, photos, do_print, outfile):
     """
     create an index of all photos
     """
@@ -3417,17 +3414,17 @@ def write_photo_index(specieslist, photos, do_print, outfile, logfile):
                     try:
                         shutil.copy2(MEDIA_PATH + tmp_name + ".jpg",  WEBOUT_PATH + "photos/")
                     except FileNotFoundError:
-                        report_error(logfile, "Missing file: " + tmp_name + ".jpg")
+                        report_error("Missing file: " + tmp_name + ".jpg")
                     try:
                         shutil.copy2(MEDIA_PATH + tmp_name + "tn.jpg", WEBOUT_PATH + "photos/")
                     except FileNotFoundError:
-                        report_error(logfile, "Missing file: " + tmp_name + "tn.jpg")
+                        report_error("Missing file: " + tmp_name + "tn.jpg")
                     with open(WEBOUT_PATH + "photos/" + pfname, "w") as suboutfile:
                         write_species_photo_page(suboutfile, pfname, species, sp.common, photo.caption, pn,
                                                  photo.species, False)
 
 
-def write_video_index(videos, do_print, outfile, logfile):
+def write_video_index(videos, do_print, outfile):
     """
     create an index of all videos
     """
@@ -3507,7 +3504,7 @@ def write_video_index(videos, do_print, outfile, logfile):
             try:
                 shutil.copy2(MEDIA_PATH + tmp_name, WEBOUT_PATH + "video/")
             except FileNotFoundError:
-                report_error(logfile, "Missing file: " + tmp_name)
+                report_error("Missing file: " + tmp_name)
 
 
 def write_specific_art_page(outfile, art, backurl, backtext, do_print):
@@ -3731,7 +3728,7 @@ def write_art_crafts_pages(artlist, do_print, outfile):
                             write_specific_art_page(suboutfile, art, ART_CRAFT_URL, "All Crafts", do_print)
 
 
-def write_all_art_pages(artlist, do_print, outfile, logfile):
+def write_all_art_pages(artlist, do_print, outfile):
     """
     create all art pages
     """
@@ -3752,15 +3749,15 @@ def write_all_art_pages(artlist, do_print, outfile, logfile):
             try:
                 shutil.copy2(MEDIA_PATH + "art/" + art.image + "." + art.ext, WEBOUT_PATH + "art/")
             except FileNotFoundError:
-                report_error(logfile, "Missing file: " + MEDIA_PATH + "art/" + art.image + "." + art.ext)
+                report_error("Missing file: " + MEDIA_PATH + "art/" + art.image + "." + art.ext)
             try:
                 shutil.copy2(MEDIA_PATH + "art/" + art.image + "_tn." + art.ext, WEBOUT_PATH + "art/")
             except FileNotFoundError:
-                report_error(logfile, "Missing file: " + MEDIA_PATH + "art/" + art.image + "_tn." + art.ext)
+                report_error("Missing file: " + MEDIA_PATH + "art/" + art.image + "_tn." + art.ext)
 
 
 def write_species_info_pages(specieslist, references, specific_names, all_names, photos, videos, art, species_refs,
-                             refdict, binomial_name_cnts, specific_name_cnts, logfile, outfile, do_print):
+                             refdict, binomial_name_cnts, specific_name_cnts, outfile, do_print):
     """
     create the species index and all individual species pages
     """
@@ -3773,14 +3770,14 @@ def write_species_info_pages(specieslist, references, specific_names, all_names,
         sprefs = species_refs[species.species]
         if do_print:
             write_species_page(species, references, specific_names, all_names, photos, videos, art, sprefs, refdict,
-                               binomial_name_cnts, specific_name_cnts, logfile, outfile, True)
+                               binomial_name_cnts, specific_name_cnts, outfile, True)
         else:
             with codecs.open(WEBOUT_PATH + "u_" + species.species + ".html", "w", "utf-8") as suboutfile:
                 write_species_page(species, references, specific_names, all_names, photos, videos, art, sprefs, refdict,
-                                   binomial_name_cnts, specific_name_cnts, logfile, suboutfile, False)
+                                   binomial_name_cnts, specific_name_cnts, suboutfile, False)
 
 
-def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_print, logfile):
+def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_print):
     """ create the systematics page """
     if do_print:
         start_page_division(outfile, "base_page")
@@ -3817,7 +3814,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
                   "Herbst, 1782</h3>\n")
     outfile.write("      <p>\n")
     outfile.write("         The earliest description of the type species of <em class=\"species\">Uca</em> is from "
-                  "a drawing in " + format_reference_cite(refdict["Seba1758"], do_print, AUTHOR_PAREN, logfile) +
+                  "a drawing in " + format_reference_cite(refdict["Seba1758"], do_print, AUTHOR_PAREN) +
                   ", which he called <em class=\"species\">Cancer uka una, Brasiliensibus</em> (shown below).\n")
     outfile.write("      </p>\n")
     outfile.write("      <figure>\n")
@@ -3829,7 +3826,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("      <p>\n")
     outfile.write("        A number of authors subsequently used this same picture as a basis for naming the "
                   "species (" +
-                  format_reference_cite(refdict["Manning1981"], do_print, AUTHOR_NOPAREN, logfile) + ").  "
+                  format_reference_cite(refdict["Manning1981"], do_print, AUTHOR_NOPAREN) + ").  "
                   "<em class=\"species\">Cancer vocans major</em> Herbst, 1782; "
                   "<em class=\"species\">Ocypode heterochelos</em> Lamarck, 1801; "
                   "<em class=\"species\">Cancer uka</em> Shaw and Nodder, 1802; and "
@@ -3842,7 +3839,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("      <blockquote>\n")
     outfile.write("        As an aside, Seba's name, <em class=\"species\">Cancer uka una</em> comes from the "
                   "nomenclature of " +
-                  format_reference_cite(refdict["Marcgrave1648"], do_print, AUTHOR_PAREN, logfile) +
+                  format_reference_cite(refdict["Marcgrave1648"], do_print, AUTHOR_PAREN) +
                   ", who mispelled &ldquo;u&ccedil;a una&rdquo; as &ldquo;uca una&rdquo;. Not only did Seba copy the "
                   "mispelling, but he applied it to the fiddler crab instead of the mangrove crab (which is today "
                   "called <em class=\"species\">Ucides</em>) to which Marcgrave applied the name (see below). "
@@ -3851,12 +3848,12 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
                   "<em class=\"species\">Uca</em> could be applied to mangrove crabs; as this was an invalid "
                   "proposal, <em class=\"species\">Uca</em> is retained for fiddlers, despite being due to a pair of "
                   "errors (" +
-                  format_reference_cite(refdict["Tavares1993"], do_print, AUTHOR_NOPAREN, logfile) + ").\n")
+                  format_reference_cite(refdict["Tavares1993"], do_print, AUTHOR_NOPAREN) + ").\n")
     outfile.write("        <figure class=\"syspic\">\n")
     outfile.write("          <img src=\"" + media_path + "art/Marcgrave_Maracoani.png\" "
                   "alt=\"Marcgrave's Maracoani image\" title=\"Marcgrave's Maracoani\">\n")
     outfile.write("          <figcaption>Oldest known drawing of a fiddler crab "
-                  "(" + format_reference_cite(refdict["Marcgrave1648"], do_print, AUTHOR_NOPAREN, logfile) + "). "
+                  "(" + format_reference_cite(refdict["Marcgrave1648"], do_print, AUTHOR_NOPAREN) + "). "
                   "He labeled it &ldquo;Maracoani&rdquo;, and it represents the namesake of the species "
                   "<em class=\"species\">Uca maracoani.</em></figcaption>\n")
     outfile.write("        </figure>\n")
@@ -3864,7 +3861,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("          <img src=\"" + media_path + "art/Marcgrave_Uca_una.png\" "
                   "alt=\"Marcgrave's Uca una image\" title=\"Marcgrave's Uca una\">\n")
     outfile.write("          <figcaption>The drawing actually labeled &ldquo;Uca Una&rdquo; by "
-                  + format_reference_cite(refdict["Marcgrave1648"], do_print, AUTHOR_PAREN, logfile) +
+                  + format_reference_cite(refdict["Marcgrave1648"], do_print, AUTHOR_PAREN) +
                   " is not a fiddler crab. Today this species is known as the mangrove crab "
                   "<em class=\"species\">Ucides cordatus.</em></figcaption>\n")
     outfile.write("        </figure>\n")
@@ -3872,7 +3869,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("          <img src=\"" + media_path + "art/Marcgrave_Ciecie_Ete.png\" "
                   "alt=\"Marcgrave's Ciecie Ete image\" title=\"Marcgrave's Ciecie Ete\">\n")
     outfile.write("          <figcaption>The other fiddler crab drawing found in "
-                  + format_reference_cite(refdict["Marcgrave1648"], do_print, AUTHOR_PAREN, logfile) + ", labeled "
+                  + format_reference_cite(refdict["Marcgrave1648"], do_print, AUTHOR_PAREN) + ", labeled "
                   "&ldquo;Ciecie Ete&rdquo; (he also refers to a very similar species called "
                   "&ldquo;Ciecie Panema&rdquo;). This figure is believed to most likely represent "
                   "<em class=\"species\">Uca thayeri.</em></figcaption>\n")
@@ -3880,14 +3877,14 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("      </blockquote>\n")
     outfile.write("      <p>\n")
     outfile.write("        For about 60 years, the genus was known as <em class=\"species\">Gelasimus,</em> "
-                  "until " + format_reference_cite(refdict["Rathbun1897.1"], do_print, AUTHOR_PAREN, logfile)
+                  "until " + format_reference_cite(refdict["Rathbun1897.1"], do_print, AUTHOR_PAREN)
                   + " showed that the abandonment of the older name <em class=\"species\">Uca</em> did not conform to "
                   "zoological naming conventions. The type species of <em class=\"species\">Uca</em> was known as both "
                   "<em class=\"species\">Uca heterochelos</em> and <em class=\"species\">U. platydactylus,</em> "
-                  "until " + format_reference_cite(refdict["Rathbun1918.2"], do_print, AUTHOR_PAREN, logfile) +
+                  "until " + format_reference_cite(refdict["Rathbun1918.2"], do_print, AUTHOR_PAREN) +
                   " suggested the adoption of "
                   "<em class=\"species\">U. heterochelos</em> as the valid name. Almost 50 years later, "
-                  + format_reference_cite(refdict["Holthuis1962"], do_print, AUTHOR_PAREN, logfile) +
+                  + format_reference_cite(refdict["Holthuis1962"], do_print, AUTHOR_PAREN) +
                   " pointed out that "
                   "<em class=\"species\">U. heterochelos</em> was an objective junior synonym of "
                   "<em class=\"species\">U. major,</em> thus the type species has been referred to as "
@@ -3895,15 +3892,15 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("      </p>\n")
     outfile.write("      <p>\n")
     outfile.write("        However, " +
-                  format_reference_cite(refdict["Bott1973.1"], do_print, AUTHOR_PAREN, logfile) +
+                  format_reference_cite(refdict["Bott1973.1"], do_print, AUTHOR_PAREN) +
                   " discovered that there "
                   "has been a universal  misinterpretation of the type species; the species pictured by Seba is "
                   "not the American species commonly referred to as "
                   "<em class=\"species\">U. major,</em> but rather the West African/Portuguese species called "
                   "<em class=\"species\">U. tangeri</em> (Eydoux, 1835). Correcting this error would have caused "
                   "a somewhat painful change of names (" +
-                  format_reference_cite(refdict["Holthuis1979"], do_print, AUTHOR_NOPAREN, logfile) + "; " +
-                  format_reference_cite(refdict["Manning1981"], do_print, AUTHOR_NOPAREN, logfile) +
+                  format_reference_cite(refdict["Holthuis1979"], do_print, AUTHOR_NOPAREN) + "; " +
+                  format_reference_cite(refdict["Manning1981"], do_print, AUTHOR_NOPAREN) +
                   "). The type species would still be called <em class=\"species\">U. major</em>, but would refer to "
                   "the West African/European species rather than the American one; the American species, "
                   "which has been called <em class=\"species\">U. major</em> since 1962, would be called "
@@ -3913,8 +3910,8 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("         To deal with this dilemma, the Society of Zoological Nomenclature officially "
                   "designated the holotype of <em class=\"species\">Gelasimus platydactylus</em> as a neotype "
                   "of <em class=\"species\">Cancer vocans major</em> (" +
-                  format_reference_cite(refdict["Holthuis1979"], do_print, AUTHOR_NOPAREN, logfile) + "; " +
-                  format_reference_cite(refdict["ICZN1983"], do_print, AUTHOR_NOPAREN, logfile) + "). "
+                  format_reference_cite(refdict["Holthuis1979"], do_print, AUTHOR_NOPAREN) + "; " +
+                  format_reference_cite(refdict["ICZN1983"], do_print, AUTHOR_NOPAREN) + "). "
                   "The result of this decision is "
                   "that we retain the names <em class=\"species\">U. major</em> for the American species and "
                   "<em class=\"species\">U. tangeri</em> for the West African/European species. It also means "
@@ -3931,9 +3928,9 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("      <h2 id=\"subgenera\" class=\"bookmark2\">Subgenera</h2>\n")
     outfile.write("      <p>\n")
     outfile.write("       There have been two major proposals for splitting up the genus, one by " +
-                  format_reference_cite(refdict["Bott1973.2"], do_print, AUTHOR_PAREN, logfile) +
+                  format_reference_cite(refdict["Bott1973.2"], do_print, AUTHOR_PAREN) +
                   " and the other by " +
-                  format_reference_cite(refdict["Crane1975"], do_print, AUTHOR_PAREN, logfile) + ". "
+                  format_reference_cite(refdict["Crane1975"], do_print, AUTHOR_PAREN) + ". "
                   "Neither is based on a numerical "
                   "phylogeny. Crane's descriptions are very complete. Bott's descriptions are poor, but have "
                   "priority. For a long time, scientists actively ignored both subdivisions and when there "
@@ -3942,14 +3939,14 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
                   "complication in most researcher's minds.\n")
     outfile.write("      </p>\n")
     outfile.write("      <p>\n")
-    outfile.write("       " + format_reference_cite(refdict["Rosenberg2001"], do_print, AUTHOR_PAREN, logfile) +
+    outfile.write("       " + format_reference_cite(refdict["Rosenberg2001"], do_print, AUTHOR_PAREN) +
                   " partly cleared up the confusion between the two systems. More recent work by " +
-                  format_reference_cite(refdict["Beinlich2006"], do_print, AUTHOR_PAREN, logfile) + ", " +
-                  format_reference_cite(refdict["Shih2009"], do_print, AUTHOR_PAREN, logfile) + ", " +
-                  format_reference_cite(refdict["Spivak2009"], do_print, AUTHOR_PAREN, logfile) + ", " +
-                  format_reference_cite(refdict["Naderloo2010"], do_print, AUTHOR_PAREN, logfile) + ", " +
-                  format_reference_cite(refdict["Landstorfer2010"], do_print, AUTHOR_PAREN, logfile) + ", and " +
-                  format_reference_cite(refdict["Shih2015.2"], do_print, AUTHOR_PAREN, logfile) +
+                  format_reference_cite(refdict["Beinlich2006"], do_print, AUTHOR_PAREN) + ", " +
+                  format_reference_cite(refdict["Shih2009"], do_print, AUTHOR_PAREN) + ", " +
+                  format_reference_cite(refdict["Spivak2009"], do_print, AUTHOR_PAREN) + ", " +
+                  format_reference_cite(refdict["Naderloo2010"], do_print, AUTHOR_PAREN) + ", " +
+                  format_reference_cite(refdict["Landstorfer2010"], do_print, AUTHOR_PAREN) + ", and " +
+                  format_reference_cite(refdict["Shih2015.2"], do_print, AUTHOR_PAREN) +
                   " have continued to refine the subgenera as detailed below.\n")
     outfile.write("      </p>\n")
     outfile.write("      <ul>\n")
@@ -3962,7 +3959,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
         outfile.write("      <hr />\n")
         outfile.write("      <h3 id=\"" + subgen.subgenus + "\" class=\"bookmark3\">Subgenus <em class=\"species\">" +
                       subgen.subgenus + "</em> " +
-                      format_reference_cite(refdict[subgen.author], do_print, AUTHOR_NOPCOMMA, logfile) + "</h3>\n")
+                      format_reference_cite(refdict[subgen.author], do_print, AUTHOR_NOPCOMMA) + "</h3>\n")
         outfile.write("      <dl>\n")
         outfile.write("        <dt>Type</dt>\n")
         outfile.write("        <dd>" + create_species_link(subgen.type_species, do_print) + "</dd>\n")
@@ -3989,13 +3986,13 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("      </ul>\n")
     outfile.write("      <p>\n")
     outfile.write("For an overview of all <em class=\"species\">Uca</em> species, the best reference is " +
-                  format_reference_cite(refdict["Crane1975"], do_print, AUTHOR_PAREN, logfile) +
+                  format_reference_cite(refdict["Crane1975"], do_print, AUTHOR_PAREN) +
                   "; any earlier major work would be "
                   "overridden by Crane's descriptions. For the most part, the taxa recognized by Crane are still "
                   "accepted today. A number of new species have been described since the publication of her "
                   "monograph, a few species has been discovered to be invalid, and two of her new species were "
                   "previously described by " +
-                  format_reference_cite(refdict["Bott1973.2"], do_print, AUTHOR_PAREN, logfile) + "; as with the "
+                  format_reference_cite(refdict["Bott1973.2"], do_print, AUTHOR_PAREN) + "; as with the "
                   "subgenera, his names have priority and take precedence. These changes are summarized below.\n")
     outfile.write("      </p>\n")
     outfile.write("      <h3 class=\"nobookmark\">Changes to the species level taxonomy of the genus "
@@ -4011,80 +4008,79 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("            <td colspan=\"2\"><strong>Note:</strong> The newly described (relative to Crane) "
                   "species <em class=\"species\">Uca pavo</em> George &amp; Jones, 1982, is a junior subsynonym "
                   "of <em class=\"species\">Uca capricornis</em> (see " +
-                  format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_PAREN, logfile) + ")</td>\n")
+                  format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_PAREN) + ")</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("        </tfoot>\n")
     outfile.write("        <tbody>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca panacea</em></td>\n")
     outfile.write("            <td>" +
-                  format_reference_cite(refdict["Novak1974"], do_print, AUTHOR_PAREN, logfile) + "</td>\n")
+                  format_reference_cite(refdict["Novak1974"], do_print, AUTHOR_PAREN) + "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca marguerita</em></td>\n")
     outfile.write("            <td>" +
-                  format_reference_cite(refdict["Thurman1981.1"], do_print, AUTHOR_PAREN, logfile) + "</td>\n")
+                  format_reference_cite(refdict["Thurman1981.1"], do_print, AUTHOR_PAREN) + "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca elegans</em></td>\n")
-    outfile.write("            <td>" + format_reference_cite(refdict["George1982"], do_print, AUTHOR_PAREN, logfile) +
+    outfile.write("            <td>" + format_reference_cite(refdict["George1982"], do_print, AUTHOR_PAREN) +
                   "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca hirsutimanus</em></td>\n")
-    outfile.write("            <td>" + format_reference_cite(refdict["George1982"], do_print, AUTHOR_PAREN, logfile) +
+    outfile.write("            <td>" + format_reference_cite(refdict["George1982"], do_print, AUTHOR_PAREN) +
                   "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca intermedia</em></td>\n")
     outfile.write("            <td>" +
-                  format_reference_cite(refdict["vonPrahl1985"], do_print, AUTHOR_PAREN, logfile) + "</td>\n")
+                  format_reference_cite(refdict["vonPrahl1985"], do_print, AUTHOR_PAREN) + "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca victoriana</em></td>\n")
     outfile.write("            <td>" +
-                  format_reference_cite(refdict["vonHagen1987.1"], do_print, AUTHOR_PAREN, logfile) + "</td>\n")
+                  format_reference_cite(refdict["vonHagen1987.1"], do_print, AUTHOR_PAREN) + "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca albimana</em></td>\n")
     outfile.write("            <td>" +
-                  format_reference_cite(refdict["Kossmann1877"], do_print, AUTHOR_PAREN, logfile) +
-                  ", " + format_reference_cite(refdict["Shih2009"], do_print, AUTHOR_PAREN, logfile) + ", " +
-                  format_reference_cite(refdict["Naderloo2010"], do_print, AUTHOR_PAREN, logfile) + "</td>\n")
+                  format_reference_cite(refdict["Kossmann1877"], do_print, AUTHOR_PAREN) +
+                  ", " + format_reference_cite(refdict["Shih2009"], do_print, AUTHOR_PAREN) + ", " +
+                  format_reference_cite(refdict["Naderloo2010"], do_print, AUTHOR_PAREN) + "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca iranica</em></td>\n")
     outfile.write("            <td>" +
-                  format_reference_cite(refdict["Pretzmann1971"], do_print, AUTHOR_PAREN, logfile) +
-                  ", " + format_reference_cite(refdict["Shih2009"], do_print, AUTHOR_PAREN, logfile) + ", " +
-                  format_reference_cite(refdict["Naderloo2010"], do_print, AUTHOR_PAREN, logfile) + "</td>\n")
+                  format_reference_cite(refdict["Pretzmann1971"], do_print, AUTHOR_PAREN) +
+                  ", " + format_reference_cite(refdict["Shih2009"], do_print, AUTHOR_PAREN) + ", " +
+                  format_reference_cite(refdict["Naderloo2010"], do_print, AUTHOR_PAREN) + "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca cryptica</em></td>\n")
     outfile.write("            <td>" +
-                  format_reference_cite(refdict["Naderloo2010"], do_print, AUTHOR_PAREN, logfile) +
+                  format_reference_cite(refdict["Naderloo2010"], do_print, AUTHOR_PAREN) +
                   "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca osa</em></td>\n")
     outfile.write("            <td>" +
-                  format_reference_cite(refdict["Landstorfer2010"], do_print, AUTHOR_PAREN, logfile) + "</td>\n")
+                  format_reference_cite(refdict["Landstorfer2010"], do_print, AUTHOR_PAREN) + "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca jocelynae</em></td>\n")
-    outfile.write("            <td>" + format_reference_cite(refdict["Shih2010.1"], do_print, AUTHOR_PAREN, logfile) +
+    outfile.write("            <td>" + format_reference_cite(refdict["Shih2010.1"], do_print, AUTHOR_PAREN) +
                   "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca splendida</em></td>\n")
     outfile.write("            <td>" +
-                  format_reference_cite(refdict["Stimpson1858"], do_print, AUTHOR_PAREN, logfile) +
-                  ", " + format_reference_cite(refdict["Shih2012"], do_print, AUTHOR_PAREN, logfile) + "</td>\n")
+                  format_reference_cite(refdict["Stimpson1858"], do_print, AUTHOR_PAREN) +
+                  ", " + format_reference_cite(refdict["Shih2012"], do_print, AUTHOR_PAREN) + "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca boninensis</em></td>\n")
-    outfile.write("            <td>" + format_reference_cite(refdict["Shih2013.2"], do_print, AUTHOR_PAREN, logfile) +
-                  "</td>\n")
+    outfile.write("            <td>" + format_reference_cite(refdict["Shih2013.2"], do_print, AUTHOR_PAREN) + "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("        </tbody>\n")
     outfile.write("      </table>\n")
@@ -4099,7 +4095,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("            <td colspan=\"3\"><strong>Note:</strong> <em class=\"species\">Uca australiae</em> "
                   "is probably not a valid species; it is based on a single specimen found washed up on the "
                   "Australian shore (" +
-                  format_reference_cite(refdict["George1982"], do_print, AUTHOR_NOPAREN, logfile) +
+                  format_reference_cite(refdict["George1982"], do_print, AUTHOR_NOPAREN) +
                   ", among others)</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("        </tfoot>\n")
@@ -4107,14 +4103,14 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca minima</em></td>\n")
     outfile.write("            <td><em class=\"species\">Uca signata</em></td>\n")
-    outfile.write("            <td>" + format_reference_cite(refdict["George1982"], do_print, AUTHOR_PAREN, logfile) +
+    outfile.write("            <td>" + format_reference_cite(refdict["George1982"], do_print, AUTHOR_PAREN) +
                   "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca spinata</em></td>\n")
     outfile.write("            <td><em class=\"species\">Uca paradussumieri</em></td>\n")
-    outfile.write("            <td>" + format_reference_cite(refdict["Dai1991"], do_print, AUTHOR_PAREN, logfile) +
-                  "; " + format_reference_cite(refdict["Jones1994"], do_print, AUTHOR_PAREN, logfile) + "</td>\n")
+    outfile.write("            <td>" + format_reference_cite(refdict["Dai1991"], do_print, AUTHOR_PAREN) +
+                  "; " + format_reference_cite(refdict["Jones1994"], do_print, AUTHOR_PAREN) + "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca pacificensis</em></td>\n")
@@ -4125,7 +4121,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("            <td><em class=\"species\">Uca leptochela</em></td>\n")
     outfile.write("            <td><em class=\"species\">Uca festae</em></td>\n")
     outfile.write("            <td>" +
-                  format_reference_cite(refdict["Beinlich2006"], do_print, AUTHOR_PAREN, logfile) + "</td>\n")
+                  format_reference_cite(refdict["Beinlich2006"], do_print, AUTHOR_PAREN) + "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("        </tbody>\n")
     outfile.write("      </table>\n")
@@ -4142,35 +4138,35 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("            <td><em class=\"species\">Uca longidigita</em></td>\n")
     outfile.write("            <td><em class=\"species\">Uca longidigitum</em></td>\n")
     outfile.write("            <td>" +
-                  format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_PAREN, logfile) + "</td>\n")
+                  format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_PAREN) + "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("          <tr>\n")
     outfile.write("            <td><em class=\"species\">Uca mjobergi</em></td>\n")
     outfile.write("            <td><em class=\"species\">Uca mjoebergi</em></td>\n")
     outfile.write("            <td>" +
-                  format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_PAREN, logfile) + "</td>\n")
+                  format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_PAREN) + "</td>\n")
     outfile.write("          </tr>\n")
     outfile.write("        </tbody>\n")
     outfile.write("      </table>\n")
     outfile.write("      <p>\n")
-    outfile.write(format_reference_cite(refdict["Crane1975"], do_print, AUTHOR_PAREN, logfile) +
+    outfile.write(format_reference_cite(refdict["Crane1975"], do_print, AUTHOR_PAREN) +
                   " tended to lump related taxa into "
                   "subspecies rather than treat them as distinct species. A number of studies since that time "
                   "have raised virtually all of her subspecies to specific status (<em>e.g.,</em> " +
-                  format_reference_cite(refdict["Barnwell1980"], do_print, AUTHOR_NOPAREN, logfile) + "; " +
-                  format_reference_cite(refdict["Barnwell1984.1"], do_print, AUTHOR_NOPAREN, logfile) + "; " +
-                  format_reference_cite(refdict["Collins1984"], do_print, AUTHOR_NOPAREN, logfile) + "; " +
-                  format_reference_cite(refdict["Green1980"], do_print, AUTHOR_NOPAREN, logfile) + "; " +
-                  format_reference_cite(refdict["Salmon1979.2"], do_print, AUTHOR_NOPAREN, logfile) + "; " +
-                  format_reference_cite(refdict["Salmon1987.2"], do_print, AUTHOR_NOPAREN, logfile) + "; " +
-                  format_reference_cite(refdict["Thurman1979"], do_print, AUTHOR_NOPAREN, logfile) + "; " +
-                  format_reference_cite(refdict["Thurman1982"], do_print, AUTHOR_NOPAREN, logfile) + "; " +
-                  format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_NOPAREN, logfile) + "). "
+                  format_reference_cite(refdict["Barnwell1980"], do_print, AUTHOR_NOPAREN) + "; " +
+                  format_reference_cite(refdict["Barnwell1984.1"], do_print, AUTHOR_NOPAREN) + "; " +
+                  format_reference_cite(refdict["Collins1984"], do_print, AUTHOR_NOPAREN) + "; " +
+                  format_reference_cite(refdict["Green1980"], do_print, AUTHOR_NOPAREN) + "; " +
+                  format_reference_cite(refdict["Salmon1979.2"], do_print, AUTHOR_NOPAREN) + "; " +
+                  format_reference_cite(refdict["Salmon1987.2"], do_print, AUTHOR_NOPAREN) + "; " +
+                  format_reference_cite(refdict["Thurman1979"], do_print, AUTHOR_NOPAREN) + "; " +
+                  format_reference_cite(refdict["Thurman1982"], do_print, AUTHOR_NOPAREN) + "; " +
+                  format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_NOPAREN) + "). "
                   "It has become common practice with many authors to ignore all of the subspecific designations "
                   "and treat each as a separate species (<em>e.g.,</em> " +
-                  format_reference_cite(refdict["George1982"], do_print, AUTHOR_NOPAREN, logfile) + "; " +
-                  format_reference_cite(refdict["Jones1994"], do_print, AUTHOR_NOPAREN, logfile) + "; " +
-                  format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_NOPAREN, logfile) + "). "
+                  format_reference_cite(refdict["George1982"], do_print, AUTHOR_NOPAREN) + "; " +
+                  format_reference_cite(refdict["Jones1994"], do_print, AUTHOR_NOPAREN) + "; " +
+                  format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_NOPAREN) + "). "
                   "I follow this practice throughout this website.\n")
     outfile.write("      </p>\n")
     outfile.write("    </section>\n")
@@ -4334,7 +4330,7 @@ def write_life_cycle_pages(outfile, do_print):
         common_html_footer(outfile, "")
 
 
-def write_phylogeny_pages(outfile, do_print, refdict, logfile):
+def write_phylogeny_pages(outfile, do_print, refdict):
     """ create the phylogeny page """
     treelist = {"tree_species.svg", "tree_subgenera.svg"}
     if do_print:
@@ -4348,7 +4344,7 @@ def write_phylogeny_pages(outfile, do_print, refdict, logfile):
             try:
                 shutil.copy2("resources/images/" + tree, WEBOUT_PATH + "images/")
             except FileNotFoundError:
-                report_error(logfile, "File missing: resources/images/" + tree)
+                report_error("File missing: resources/images/" + tree)
     outfile.write("    <header id=\"" + TREE_URL + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Phylogeny</h1>\n")
     outfile.write("    </header>\n")
@@ -4357,16 +4353,16 @@ def write_phylogeny_pages(outfile, do_print, refdict, logfile):
     outfile.write("     The phylogeny of fiddler crabs is still largely unresolved. Two trees are shown below: one "
                   "just the subgenera and one including all species. These are both rough, conservative estimates "
                   "based on combining information from " +
-                  format_reference_cite(refdict["Levinton1996"], do_print, AUTHOR_PAREN, logfile) + ", " +
-                  format_reference_cite(refdict["Sturmbauer1996"], do_print, AUTHOR_PAREN, logfile) + ", " +
-                  format_reference_cite(refdict["Rosenberg2001"], do_print, AUTHOR_PAREN, logfile) + ", " +
-                  format_reference_cite(refdict["Shih2009"], do_print, AUTHOR_PAREN, logfile) + ", " +
-                  format_reference_cite(refdict["Shih2010.1"], do_print, AUTHOR_PAREN, logfile) + ", " +
-                  format_reference_cite(refdict["Landstorfer2010"], do_print, AUTHOR_PAREN, logfile) + ", " +
-                  format_reference_cite(refdict["Shih2012"], do_print, AUTHOR_PAREN, logfile) + ", " +
-                  format_reference_cite(refdict["Shih2013"], do_print, AUTHOR_PAREN, logfile) + ", " +
-                  format_reference_cite(refdict["Shih2013.2"], do_print, AUTHOR_PAREN, logfile) + ", and " +
-                  format_reference_cite(refdict["Shih2015.2"], do_print, AUTHOR_PAREN, logfile) + ".\n")
+                  format_reference_cite(refdict["Levinton1996"], do_print, AUTHOR_PAREN) + ", " +
+                  format_reference_cite(refdict["Sturmbauer1996"], do_print, AUTHOR_PAREN) + ", " +
+                  format_reference_cite(refdict["Rosenberg2001"], do_print, AUTHOR_PAREN) + ", " +
+                  format_reference_cite(refdict["Shih2009"], do_print, AUTHOR_PAREN) + ", " +
+                  format_reference_cite(refdict["Shih2010.1"], do_print, AUTHOR_PAREN) + ", " +
+                  format_reference_cite(refdict["Landstorfer2010"], do_print, AUTHOR_PAREN) + ", " +
+                  format_reference_cite(refdict["Shih2012"], do_print, AUTHOR_PAREN) + ", " +
+                  format_reference_cite(refdict["Shih2013"], do_print, AUTHOR_PAREN) + ", " +
+                  format_reference_cite(refdict["Shih2013.2"], do_print, AUTHOR_PAREN) + ", and " +
+                  format_reference_cite(refdict["Shih2015.2"], do_print, AUTHOR_PAREN) + ".\n")
     outfile.write("    </p>\n")
     outfile.write("\n")
     outfile.write("    <section class=\"spsection\">\n")
@@ -4401,7 +4397,7 @@ def find_morphology_parent(p, mlist):
     return x
 
 
-def write_morphology_page(morph, morphlist, do_print, outfile, logfile):
+def write_morphology_page(morph, morphlist, do_print, outfile):
     """ create individual pages for morphology descriptions """
     if morph.parent == ".":
         p = ""
@@ -4471,7 +4467,7 @@ def write_morphology_page(morph, morphlist, do_print, outfile, logfile):
             try:
                 shutil.copy2(MEDIA_PATH + tmp_name, WEBOUT_PATH + "morphology/")
             except FileNotFoundError:
-                report_error(logfile, "Missing file: " + tmp_name)
+                report_error("Missing file: " + tmp_name)
     if do_print:
         end_page_division(outfile)
     else:
@@ -4525,7 +4521,7 @@ def write_morphology_index(morphlist, do_print, outfile):
         common_html_footer(outfile, "../")
 
 
-def write_main_morphology_pages(morphology, outfile, do_print, logfile):
+def write_main_morphology_pages(morphology, outfile, do_print):
     """ create page for general morphology descriptions """
     if do_print:
         start_page_division(outfile, "base_page")
@@ -4585,13 +4581,13 @@ def write_main_morphology_pages(morphology, outfile, do_print, logfile):
         end_page_division(outfile)
         write_morphology_index(morphology, do_print, outfile)
         for m in morphology:
-            write_morphology_page(m, morphology, do_print, outfile, logfile)
+            write_morphology_page(m, morphology, do_print, outfile)
     else:
         common_html_footer(outfile, "")
         for m in morphology:
             with codecs.open(WEBOUT_PATH + "morphology/" + morphology_link(m.parent, m.character) + ".html",
                              "w", "utf-8") as suboutfile:
-                write_morphology_page(m, morphology, do_print, suboutfile, logfile)
+                write_morphology_page(m, morphology, do_print, suboutfile)
         with codecs.open(WEBOUT_PATH + "morphology/index.html", "w", "utf-8") as suboutfile:
             write_morphology_index(morphology, do_print, suboutfile)
 
@@ -4759,7 +4755,7 @@ def create_temp_output_paths():
         os.makedirs(TMP_MAP_PATH)
 
 
-def copy_support_files(logfile):
+def copy_support_files():
     """
     copy a variety of resource and output files into the correct web output directories
     this includes icons, supporting images, and css files
@@ -4785,24 +4781,24 @@ def copy_support_files(logfile):
         try:
             shutil.copy2("resources/" + filename, WEBOUT_PATH)
         except FileNotFoundError:
-            report_error(logfile, "Missing file: resources/" + filename)
+            report_error("Missing file: resources/" + filename)
     filelist = {"film.png",
                 "stylifera75.png"}
     for filename in filelist:
         try:
             shutil.copy2("resources/images/" + filename, WEBOUT_PATH + "images/")
         except FileNotFoundError:
-            report_error(logfile, "Missing file: resources/images/" + filename)
+            report_error("Missing file: resources/images/" + filename)
     filelist = {"specific_word_cloud.png",
                 "binomial_word_cloud.png"}
     for filename in filelist:
         try:
             shutil.copy2(TMP_PATH + filename, WEBOUT_PATH + "images/")
         except FileNotFoundError:
-            report_error(logfile, "Missing file: " + TMP_PATH + filename)
+            report_error("Missing file: " + TMP_PATH + filename)
 
 
-def copy_map_files(species, all_names, specific_names, point_locations, logfile):
+def copy_map_files(species, all_names, specific_names, point_locations):
     """
     copy all created map files (kmz and svg) from temp directory to web output directory
     """
@@ -4810,7 +4806,7 @@ def copy_map_files(species, all_names, specific_names, point_locations, logfile)
         try:
             shutil.copy2(filename, WEBOUT_PATH + "maps/")
         except FileNotFoundError:
-            report_error(logfile, "Missing file: " + filename)
+            report_error("Missing file: " + filename)
 
     # individual species maps
     for s in species:
@@ -5014,14 +5010,13 @@ def end_print(outfile):
 # def build_site(init_data):
 def build_site():
     create_temp_output_paths()
-    with codecs.open(INIT_DATA.error_log, "w", "utf-8") as logfile:
+    with codecs.open(INIT_DATA.error_log, "w", "utf-8") as TMB_Error.LOGFILE:
         # read data and do computation
         print("...Reading References...")
         (references, refdict, citelist,
          yeardict, citecount) = TMB_Import.read_reference_data(INIT_DATA.reference_ciation_file,
                                                                INIT_DATA.reference_file,
-                                                               INIT_DATA.citation_info_file,
-                                                               logfile)
+                                                               INIT_DATA.citation_info_file)
         clean_references(references)
         yeardat, yeardat1900 = summarize_year(yeardict)
         languages = summarize_languages(references)
@@ -5035,7 +5030,7 @@ def build_site():
 
         print("...Reading Species Names...")
         specific_names = TMB_Import.read_specific_names_data(INIT_DATA.specific_names_file)
-        check_specific_names(citelist, specific_names, logfile)
+        check_specific_names(citelist, specific_names)
         (all_names, binomial_name_cnts, specific_name_cnts, genus_cnts, total_binomial_year_cnts,
          name_table, specific_point_locations, binomial_point_locations, binomial_usage_cnts,
          specific_usage_cnts) = calculate_name_index_data(refdict, citelist, specific_names)
@@ -5054,7 +5049,7 @@ def build_site():
         # a dict of locations, keys = full location names
         point_locations = TMB_Import.read_location_data(INIT_DATA.location_file)
         # a dict of locations, keys = trimmed location names and aliases
-        location_dict = create_location_hierarchy(point_locations, logfile)
+        location_dict = create_location_hierarchy(point_locations)
         # location_species is a dict of sets of species objects, key = location full names
         # location_sp_names is a dict of sets of specific name ojbets, key = location full names
         # location_bi_names is a dict of sets of names (strings), keys = location full names
@@ -5062,7 +5057,7 @@ def build_site():
          specific_plot_locations, location_species, location_sp_names, location_bi_names,
          location_direct_refs, location_cited_refs) = match_names_to_locations(species, specific_point_locations,
                                                                                binomial_point_locations,
-                                                                               point_locations, citelist, logfile)
+                                                                               point_locations, citelist)
         if DRAW_MAPS:
             TMB_Create_Maps.create_all_maps(INIT_DATA, point_locations, species, species_plot_locations,
                                             invalid_species_locations, all_names, binomial_plot_locations,
@@ -5072,48 +5067,48 @@ def build_site():
         if True:
             create_web_output_paths()
             print("...Creating Web Version...")
-            copy_support_files(logfile)
+            copy_support_files()
             print("......Writing References......")
             with codecs.open(WEBOUT_PATH + REF_URL, "w", "utf-8") as outfile:
-                write_reference_bibliography(references, False, outfile, logfile)
+                write_reference_bibliography(references, False, outfile)
             with codecs.open(WEBOUT_PATH + REF_SUM_URL, "w", "utf-8") as outfile:
                 write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, False, outfile)
-            write_reference_pages(references, refdict, citelist, False, None, logfile, name_table, point_locations)
+            write_reference_pages(references, refdict, citelist, False, None, name_table, point_locations)
             print("......Writing Names Info......")
             with codecs.open(WEBOUT_PATH + "names/index.html", "w", "utf-8") as outfile:
                 write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
-                                     binomial_name_cnts, total_binomial_year_cnts, outfile, False, logfile,
+                                     binomial_name_cnts, total_binomial_year_cnts, outfile, False,
                                      binomial_point_locations, specific_point_locations, point_locations)
             print("......Writing Species......")
             write_species_info_pages(species, references, specific_names, all_names, photos, videos, art, species_refs,
-                                     refdict, binomial_name_cnts, specific_name_cnts, logfile, None, False)
+                                     refdict, binomial_name_cnts, specific_name_cnts, None, False)
             if DRAW_MAPS:
                 print("......Copying Maps......")
-                copy_map_files(species, all_names, specific_names, point_locations, logfile)
+                copy_map_files(species, all_names, specific_names, point_locations)
             print("......Writing Locations......")
             with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
                 write_location_index(outfile, False, point_locations, location_dict, location_species,
                                      location_sp_names, location_bi_names, location_direct_refs, location_cited_refs,
-                                     references, logfile)
+                                     references)
             with codecs.open(WEBOUT_PATH + MAP_URL, "w", "utf-8") as outfile:
                 write_geography_page(species, outfile, False)
             print("......Writing Media Pages......")
             with codecs.open(WEBOUT_PATH + PHOTO_URL, "w", "utf-8") as outfile:
-                write_photo_index(species, photos, False, outfile, logfile)
-            write_all_art_pages(art, False, None, logfile)
+                write_photo_index(species, photos, False, outfile)
+            write_all_art_pages(art, False, None)
             with codecs.open(WEBOUT_PATH + VIDEO_URL, "w", "utf-8") as outfile:
-                write_video_index(videos, False, outfile, logfile)
+                write_video_index(videos, False, outfile)
             print("......Writing Misc......")
             with codecs.open(WEBOUT_PATH + SYST_URL, "w", "utf-8") as outfile:
-                write_systematics_overview(subgenera, species, refdict, outfile, False, logfile)
+                write_systematics_overview(subgenera, species, refdict, outfile, False)
             with codecs.open(WEBOUT_PATH + COMMON_URL, "w", "utf-8") as outfile:
-                write_common_names_pages(outfile, replace_references(common_name_data, refdict, False, logfile), False)
+                write_common_names_pages(outfile, replace_references(common_name_data, refdict, False), False)
             with codecs.open(WEBOUT_PATH + LIFECYCLE_URL, "w", "utf-8") as outfile:
                 write_life_cycle_pages(outfile, False)
             with codecs.open(WEBOUT_PATH + TREE_URL, "w", "utf-8") as outfile:
-                write_phylogeny_pages(outfile, False, refdict, logfile)
+                write_phylogeny_pages(outfile, False, refdict)
             with codecs.open(WEBOUT_PATH + MORPH_URL, "w", "utf-8") as outfile:
-                write_main_morphology_pages(morphology, outfile, False, logfile)
+                write_main_morphology_pages(morphology, outfile, False)
             with codecs.open(WEBOUT_PATH + "index.html", "w", "utf-8") as outfile:
                 write_introduction(outfile, species, False)
             write_citation_page(refdict)
@@ -5126,32 +5121,31 @@ def build_site():
                 # write_print_only_pages(printfile, init_data, species, refdict)
                 write_print_only_pages(printfile, species, refdict)
                 write_introduction(printfile, species, True)
-                write_common_names_pages(printfile, replace_references(common_name_data, refdict, True, logfile), True)
-                write_systematics_overview(subgenera, species, refdict, printfile, True, logfile)
-                write_phylogeny_pages(printfile, True, refdict, logfile)
+                write_common_names_pages(printfile, replace_references(common_name_data, refdict, True), True)
+                write_systematics_overview(subgenera, species, refdict, printfile, True)
+                write_phylogeny_pages(printfile, True, refdict)
                 write_geography_page(species, printfile, True)
                 write_location_index(printfile, True, point_locations, location_dict, location_species,
                                      location_sp_names, location_bi_names, location_direct_refs, location_cited_refs,
-                                     references, logfile)
+                                     references)
                 write_life_cycle_pages(printfile, True)
-                write_main_morphology_pages(morphology, printfile, True, logfile)
+                write_main_morphology_pages(morphology, printfile, True)
                 print("......Writing Species Pages......")
                 write_species_info_pages(species, references, specific_names, all_names, photos, videos, art,
-                                         species_refs, refdict, binomial_name_cnts, specific_name_cnts, logfile,
+                                         species_refs, refdict, binomial_name_cnts, specific_name_cnts,
                                          printfile, True)
                 print("......Writing Name Pages......")
                 write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
-                                     binomial_name_cnts, total_binomial_year_cnts, printfile, True, logfile,
+                                     binomial_name_cnts, total_binomial_year_cnts, printfile, True,
                                      binomial_point_locations, specific_point_locations, point_locations)
                 print("......Writing Media Pages......")
-                write_photo_index(species, photos, True, printfile, logfile)
-                write_video_index(videos, True, printfile, logfile)
-                write_all_art_pages(art, True, printfile, logfile)
+                write_photo_index(species, photos, True, printfile)
+                write_video_index(videos, True, printfile)
+                write_all_art_pages(art, True, printfile)
                 print("......Writing Reference Pages......")
                 write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, True, printfile)
-                write_reference_bibliography(references, True, printfile, logfile)
-                write_reference_pages(references, refdict, citelist, True, printfile, logfile, name_table,
-                                      point_locations)
+                write_reference_bibliography(references, True, printfile)
+                write_reference_pages(references, refdict, citelist, True, printfile, name_table, point_locations)
                 end_print(printfile)
     print("done")
 

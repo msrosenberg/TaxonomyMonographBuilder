@@ -58,7 +58,7 @@ def read_citation_file(citation_filename):
     return citelist
 
 
-def read_reference_data(ref_filename, formatref_filename, citation_filename, logfile):
+def read_reference_data(ref_filename, formatref_filename, citation_filename):
     """ read reference data """
     reflist = []
     year_dat = {}
@@ -101,7 +101,7 @@ def read_reference_data(ref_filename, formatref_filename, citation_filename, log
     refdict = {}
     for ref in reflist:
         if ref.cite_key in refdict and ref.cite_key != "<pending>":
-            report_error(logfile, "Duplicate reference key:" + ref.cite_key)
+            report_error("Duplicate reference key:" + ref.cite_key)
         refdict[ref.cite_key] = ref
 
     # citation records information

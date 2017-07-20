@@ -2,7 +2,9 @@
 Error reporting
 """
 
+LOGFILE = None
 
-def report_error(logfile, outstr):
+
+def report_error(outstr):
     print(outstr)
-    logfile.write(outstr + "\n")
+    LOGFILE.write(outstr + "\n")
