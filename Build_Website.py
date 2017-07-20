@@ -112,7 +112,7 @@ def common_header_part1(outfile, title, indexpath=""):
     outfile.write("    <link rel=\"author\" href=\"mailto:msr@asu.edu\" />\n")
 
 
-def common_header_part2(outfile, indexpath, include_map):
+def common_header_part2(outfile, indexpath="", include_map=False):
     """
     part 2 of the common header for all webout html files
     """
@@ -229,7 +229,7 @@ def common_html_header(outfile, title, indexpath=""):
     write common header for webout html files without special scripts
     """
     common_header_part1(outfile, title, indexpath=indexpath)
-    common_header_part2(outfile, indexpath, False)
+    common_header_part2(outfile, indexpath=indexpath)
 
 
 def common_html_footer(outfile, indexpath):
@@ -668,7 +668,7 @@ def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, langua
                       "(document.getElementById('chart6_div'));\n")
         outfile.write("        chart6.draw(data6, options6);\n")
         end_google_chart_header(outfile)
-        common_header_part2(outfile, "", False)
+        common_header_part2(outfile)
 
     outfile.write("    <header id=\"" + REF_SUM_URL + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Summary of References</h1>\n")
@@ -1352,7 +1352,7 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
             image_name = 0
             setup_chronology_chart(image_name, miny, maxy, maxcnt, name_by_year, outfile)
             end_google_chart_header(outfile)
-        common_header_part2(outfile, "../", True)
+        common_header_part2(outfile, indexpath="../", include_map=True)
 
     outfile.write("    <header id=\"" + namefile + ".html\" class=\"tabular_page\">\n")
     outfile.write("      <h1 class=\"nobookmark\">" + format_name_string(name) + "</h1>\n")
@@ -1471,7 +1471,7 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
             image_name = 0
             setup_chronology_chart(image_name, miny, maxy, maxcnt, byears, outfile)
             end_google_chart_header(outfile)
-        common_header_part2(outfile, "../", True)
+        common_header_part2(outfile, indexpath="../", include_map=True)
 
     outfile.write("    <header id=\"sn_" + specific_name.name + ".html\" class=\"tabular_page\">\n")
     outfile.write("      <h1 class=\"nobookmark\">" + format_name_string(specific_name.name) + "</h1>\n")
@@ -1720,7 +1720,7 @@ def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, s
         for i, name in enumerate(bi_order):
             setup_chronology_chart(i + adjust, miny, maxy, bmaxcnt, binomial_name_counts[clean_name(name)], outfile)
         end_google_chart_header(outfile)
-        common_header_part2(outfile, "", False)
+        common_header_part2(outfile)
 
     outfile.write("    <header>\n")
     outfile.write("      <h1 class=\"nobookmark\">Synonym Chronology of " + format_name_string("Uca " + species) +
@@ -1904,7 +1904,7 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
             outfile.write("        spcnt_chart" + j + ".draw(spcnt_data" + j + ", spcnt_options);\n")
 
         end_google_chart_header(outfile)
-        common_header_part2(outfile, "", False)
+        common_header_part2(outfile)
 
     outfile.write("    <header>\n")
     outfile.write("      <h1 id=\"" + NAME_SUM_URL + "\" class=\"bookmark2\">Summary of Names</h1>\n")
@@ -2056,7 +2056,7 @@ def create_genus_chronology(genus_cnts, do_print, outfile):
         for i, name in enumerate(order):
             setup_chronology_chart(i + adjust, miny, maxy, maxcnt, genus_cnts[name], outfile)
         end_google_chart_header(outfile)
-        common_header_part2(outfile, "", False)
+        common_header_part2(outfile)
 
     outfile.write("    <header>\n")
     outfile.write("      <h1 class=\"bookmark2\">Synonym Chronology of the genus " + format_name_string("Uca") +
@@ -2340,7 +2340,7 @@ def write_geography_page(species, outfile, do_print):
         write_google_map_range_header(outfile, "uca_all")
         write_google_map_point_header(outfile, "uca_all", None)
         end_google_map_header(outfile)
-        common_header_part2(outfile, "", True)
+        common_header_part2(outfile, include_map=True)
 
     outfile.write("    <header id=\"" + MAP_URL + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Geographic Ranges</h1>\n")
@@ -2479,7 +2479,7 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
             start_google_map_header(outfile)
             write_google_map_point_header(outfile, "location_" + place_to_filename(loc.name), loc)
             end_google_map_header(outfile)
-        common_header_part2(outfile, "../", True)
+        common_header_part2(outfile, indexpath="../", include_map=True)
 
     outfile.write("    <header id=\"" + place_to_filename(loc.name) + ".html\">\n")
     outfile.write("      <h1 class=\"nobookmark\">" + loc.trimmed_name + "</h1>\n")
@@ -3075,7 +3075,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
             write_google_map_range_header(outfile, "u_" + species.species)
             write_google_map_point_header(outfile, "u_" + species.species, None)
             end_google_map_header(outfile)
-            common_header_part2(outfile, "", True)
+            common_header_part2(outfile, include_map=True)
 
     outfile.write("    <header id=\"u_" + species.species + ".html\">\n")
     if is_fossil:
