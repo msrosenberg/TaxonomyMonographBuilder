@@ -27,22 +27,6 @@ MEDIA_PATH = "media/"
 TMP_PATH = "temp/"
 TMP_MAP_PATH = TMP_PATH + "maps/"
 
-SPECIES_URL = "uca_species.html"
-REF_URL = "uca_references.html"
-REF_SUM_URL = "uca_refsummary.html"
-SYST_URL = "uca_systematics.html"
-COMMON_URL = "uca_common_names.html"
-PHOTO_URL = "uca_photos.html"
-VIDEO_URL = "uca_videos.html"
-MAP_URL = "uca_ranges.html"
-LIFECYCLE_URL = "uca_lifecycle.html"
-TREE_URL = "uca_phylogeny.html"
-ART_SCI_URL = "uca_art_science.html"
-ART_STAMP_URL = "uca_art_stamps.html"
-ART_CRAFT_URL = "uca_art_crafts.html"
-MORPH_URL = "uca_morphology.html"
-CITE_URL = "citation.html"
-NAME_SUM_URL = "name_graphs.html"
 # fossilImage = "<img class=\"fossilImg\" src=\"images/fossil.png\" alt=\" (fossil)\" title=\" (fossil)\" />"
 FOSSIL_IMAGE = " <span class=\"fossil-img\">&#9760;</span>"
 STAR = "<sup>*</sup>"
@@ -246,7 +230,7 @@ def common_html_footer(outfile, indexpath=""):
     outfile.write("       <figure id=\"footmap\"><script type=\"text/javascript\" "
                   "src=\"http://jf.revolvermaps.com/p.js\"></script><script type=\"text/javascript\">rm2d_ki101('0',"
                   "'150','75','5f9t1sywiez','ff0000',20);</script><figcaption>Visitors</figcaption></figure>\n")
-    outfile.write("       <p id=\"citation\"><a href=\"" + indexpath + CITE_URL +
+    outfile.write("       <p id=\"citation\"><a href=\"" + indexpath + init_data().cite_url +
                   "\"><span class=\"fa fa-pencil\"></span> How to cite this site</a></p>\n")
     outfile.write("       <p id=\"contact\">Questions or comments about the site? Contact "
                   "<a href=\"mailto:msr@asu.edu\"><span class=\"fa fa-envelope-o\"></span> "
@@ -675,12 +659,12 @@ def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, langua
         end_google_chart_header(outfile)
         common_header_part2(outfile)
 
-    outfile.write("    <header id=\"" + REF_SUM_URL + "\">\n")
+    outfile.write("    <header id=\"" + init_data().ref_sum_url + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Summary of References</h1>\n")
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + REF_URL +
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + init_data().ref_url +
                       "\"><span class=\"fa fa-list\"></span> Full Reference List</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
@@ -691,7 +675,7 @@ def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, langua
                   format(datetime.date.isoformat(datetime.date.today())))
     outfile.write("      " + str(cite_count) + " of " + str(nrefs) +
                   " references  have had citation data recorded.\n")
-    outfile.write("      See also the <a href=\"" + rel_link_prefix(do_print, "names/") + NAME_SUM_URL +
+    outfile.write("      See also the <a href=\"" + rel_link_prefix(do_print, "names/") + init_data().name_sum_url +
                   "\">name summary page</a> for information on reference patterns to specific species.\n")
     outfile.write("    </p>\n")
     if do_print:
@@ -762,12 +746,12 @@ def write_reference_bibliography(reflist, do_print, outfile):
         start_page_division(outfile, "index_page")
     else:
         common_html_header(outfile, "Fiddler Crab Publications")
-    outfile.write("    <header id=\"" + REF_URL + "\">\n")
+    outfile.write("    <header id=\"" + init_data().ref_url + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Full Reference List</h1>\n")
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + REF_SUM_URL +
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + init_data().ref_sum_url +
                       "\"><span class=\"fa fa-line-chart\"></span> Reference/Citation Summary</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
@@ -1185,7 +1169,7 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"../" + REF_URL +
+        outfile.write("          <li><a href=\"../" + init_data().ref_url +
                       "\"><span class=\"fa fa-list\"></span> Full Reference List</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
@@ -1909,12 +1893,12 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
         common_header_part2(outfile)
 
     outfile.write("    <header>\n")
-    outfile.write("      <h1 id=\"" + NAME_SUM_URL + "\" class=\"bookmark2\">Summary of Names</h1>\n")
+    outfile.write("      <h1 id=\"" + init_data().name_sum_url + "\" class=\"bookmark2\">Summary of Names</h1>\n")
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
         outfile.write("          <li><a href=\".\"><span class=\"fa fa-list\"></span> Name Index</a></li>\n")
-        outfile.write("          <li><a href=\"../" + SPECIES_URL +
+        outfile.write("          <li><a href=\"../" + init_data().species_url +
                       "\"><span class=\"fa fa-check-circle\"></span> Accepted Species</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
@@ -1923,7 +1907,7 @@ def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do
     outfile.write("    <p>\n")
     outfile.write("      A summary of the names in the database (last updated {}).\n".
                   format(datetime.date.isoformat(datetime.date.today())))
-    outfile.write("      Most of these data are only based on <a href=\"../" + REF_SUM_URL +
+    outfile.write("      Most of these data are only based on <a href=\"../" + init_data().ref_sum_url +
                   "\">references whose citation data is already included in the database</a>.\n")
     outfile.write("    </p>\n")
 
@@ -2220,9 +2204,9 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + NAME_SUM_URL +
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + init_data().name_sum_url +
                       "\"><span class=\"fa fa-line-chart\"></span> Name Summary</a></li>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + SPECIES_URL +
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + init_data().species_url +
                       "\"><span class=\"fa fa-check-circle\"></span> Accepted Species</a></li>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) +
                       "synonyms_uca.html\">Synonyms of <em class=\"species\">Uca</em></a></li>\n")
@@ -2281,7 +2265,7 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
         create_name_summary(total_binomial_year_cnts, specific_year_cnts, species_refs, do_print, outfile)
         create_genus_chronology(genus_cnts, do_print, outfile)
     else:
-        with codecs.open(WEBOUT_PATH + "names/" + NAME_SUM_URL, "w", "utf-8") as suboutfile:
+        with codecs.open(WEBOUT_PATH + "names/" + init_data().name_sum_url, "w", "utf-8") as suboutfile:
             create_name_summary(total_binomial_year_cnts, specific_year_cnts, species_refs, do_print, suboutfile)
         with codecs.open(WEBOUT_PATH + "names/synonyms_uca.html", "w", "utf-8") as suboutfile:
             create_genus_chronology(genus_cnts, do_print, suboutfile)
@@ -2344,7 +2328,7 @@ def write_geography_page(species, outfile, do_print):
         end_google_map_header(outfile)
         common_header_part2(outfile, include_map=True)
 
-    outfile.write("    <header id=\"" + MAP_URL + "\">\n")
+    outfile.write("    <header id=\"" + init_data().map_url + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Geographic Ranges</h1>\n")
     if not do_print:
         outfile.write("      <nav>\n")
@@ -2647,8 +2631,8 @@ def write_location_index(outfile, do_print, point_locations, location_dict, loca
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"../" + MAP_URL + "\"><span class=\"fa fa-map-o\"></span> Range "
-                      "Maps</a></li>\n")
+        outfile.write("          <li><a href=\"../" + init_data().map_url +
+                      "\"><span class=\"fa fa-map-o\"></span> Range Maps</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -2813,13 +2797,14 @@ def write_common_names_pages(outfile, common_name_data, do_print):
         start_page_division(outfile, "base_page")
     else:
         common_html_header(outfile, "Common Names of Fiddler Crabs")
-    outfile.write("    <header id=\"" + COMMON_URL + "\">\n")
+    outfile.write("    <header id=\"" + init_data().common_url + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Common Names of Fiddler Crabs</h1>\n")
     outfile.write("    </header>\n")
     outfile.write("\n")
     outfile.write("    <p>\n")
     outfile.write("      Following is a summary of common names for crabs in the genus "
-                  "<em class=\"species\">Uca</em>. See <a href=\"" + rel_link_prefix(do_print) + SPECIES_URL +
+                  "<em class=\"species\">Uca</em>. See <a href=\"" + rel_link_prefix(do_print) +
+                  init_data().species_url +
                   "\">individual species</a> for more information on the common names of a particular species.\n")
     outfile.write("    </p>\n")
     outfile.write("    <dl class=\"common\">\n")
@@ -2876,7 +2861,7 @@ def write_species_list(specieslist, outfile, do_print):
     else:
         common_html_header(outfile, "Fiddler Crab Species")
         link_str = "names/"
-    outfile.write("    <header id=\"" + SPECIES_URL + "\">\n")
+    outfile.write("    <header id=\"" + init_data().species_url + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Species</h1>\n")
     outfile.write("    </header>\n")
     outfile.write("\n")
@@ -2937,7 +2922,7 @@ def write_species_photo_page(outfile, fname, species, common_name, caption, pn, 
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + species +
                       ".html\"><span class=\"fa fa-info-circle\"></span> Species page</a></li>\n")
     if not do_print:
-        outfile.write("          <li><a href=\"../" + PHOTO_URL +
+        outfile.write("          <li><a href=\"../" + init_data().photo_url +
                       "\"><span class=\"fa fa-camera\"></span> All species photos</a></li>\n")
     outfile.write("        </ul>\n")
     outfile.write("      </nav>\n")
@@ -2981,7 +2966,7 @@ def write_species_video_page(fname, video, vn):
         else:
             outfile.write("          <li><a href=\"../u_" + video.species +
                           ".html\"><span class=\"fa fa-info-circle\"></span> Species page</a></li>\n")
-        outfile.write("          <li><a href=\"../" + VIDEO_URL +
+        outfile.write("          <li><a href=\"../" + init_data().video_url +
                       "\"><span class=\"fa fa-video-camera\"></span> All species videos</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
@@ -3127,8 +3112,8 @@ def write_species_page(species, references, specific_names, all_names, photos, v
                       "Information</h2>\n")
     outfile.write("      <dl>\n")
     outfile.write("       <dt>Subgenus</dt>\n")
-    outfile.write("         <dd><a href=\"" + rel_link_prefix(do_print) + SYST_URL + "#" + species.subgenus +
-                  "\"><em class=\"species\">" + species.subgenus + "</em></a></dd>\n")
+    outfile.write("         <dd><a href=\"" + rel_link_prefix(do_print) + init_data().syst_url + "#" +
+                  species.subgenus + "\"><em class=\"species\">" + species.subgenus + "</em></a></dd>\n")
     if not is_fossil:
         outfile.write("       <dt>Common Names</dt>\n")
         outfile.write("         <dd>" + species.commonext + "</dd>\n")
@@ -3351,7 +3336,7 @@ def write_photo_index(specieslist, photos, do_print, outfile):
     else:
         common_html_header(outfile, "Fiddler Crab Photos")
         media_path = ""
-    outfile.write("    <header id=\"" + PHOTO_URL + "\">\n")
+    outfile.write("    <header id=\"" + init_data().photo_url + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Photo Index</h1>\n")
     outfile.write("    </header>\n")
     outfile.write("\n")
@@ -3438,7 +3423,7 @@ def write_video_index(videos, do_print, outfile):
         start_page_division(outfile, "index_page")
     else:
         common_html_header(outfile, "Fiddler Crab Videos")
-    outfile.write("    <header id=\"" + VIDEO_URL + "\">\n")
+    outfile.write("    <header id=\"" + init_data().video_url + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Video Index</h1>\n")
     if not do_print:
         outfile.write("      <nav>\n")
@@ -3462,7 +3447,7 @@ def write_video_index(videos, do_print, outfile):
     if do_print:
         linktxt = "individual species' page"
     else:
-        linktxt = "<a href=\"" + rel_link_prefix(do_print) + SPECIES_URL + "\">individual species' page</a>"
+        linktxt = "<a href=\"" + rel_link_prefix(do_print) + init_data().species_url + "\">individual species' page</a>"
     outfile.write("      Most of these videos predate digital video (let alone HD) and were recorded on Hi8 tape. "
                   "Hopefully they will eventually be replaced by higher quality video. These are grouped by "
                   "activity. Videos for specific species can be found on the " + linktxt + ".\n")
@@ -3561,7 +3546,7 @@ def write_art_science_pages(artlist, do_print, outfile):
     else:
         common_html_header(outfile, "Fiddler Crab Art - Scientific")
         media_path = ""
-    outfile.write("    <header id=\"" + ART_SCI_URL + "\">\n")
+    outfile.write("    <header id=\"" + init_data().art_sci_url + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Scientific Drawings</h1>\n")
     outfile.write("    </header>\n")
     outfile.write("\n")
@@ -3604,10 +3589,12 @@ def write_art_science_pages(artlist, do_print, outfile):
                 artist = art.author + " (" + art.year + ")"
                 if artist == a:
                     if do_print:
-                        write_specific_art_page(outfile, art, ART_SCI_URL, "All Scientific Drawings", do_print)
+                        write_specific_art_page(outfile, art, init_data().art_sci_url, "All Scientific Drawings",
+                                                do_print)
                     else:
                         with codecs.open(WEBOUT_PATH + "art/" + art.image + ".html", "w", "utf-8") as suboutfile:
-                            write_specific_art_page(suboutfile, art, ART_SCI_URL, "All Scientific Drawings", do_print)
+                            write_specific_art_page(suboutfile, art, init_data().art_sci_url, "All Scientific Drawings",
+                                                    do_print)
 
 
 def write_art_stamps_pages(artlist, do_print, outfile):
@@ -3620,7 +3607,7 @@ def write_art_stamps_pages(artlist, do_print, outfile):
     else:
         common_html_header(outfile, "Fiddler Crab Stamps")
         media_path = ""
-    outfile.write("    <header id=\"" + ART_STAMP_URL + "\">\n")
+    outfile.write("    <header id=\"" + init_data().art_stamp_url + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Postage Stamps</h1>\n")
     outfile.write("    </header>\n")
     outfile.write("\n")
@@ -3662,10 +3649,10 @@ def write_art_stamps_pages(artlist, do_print, outfile):
             if art.art_type == "stamp":
                 if art.author == a:
                     if do_print:
-                        write_specific_art_page(outfile, art, ART_STAMP_URL, "All Stamps", do_print)
+                        write_specific_art_page(outfile, art, init_data().art_stamp_url, "All Stamps", do_print)
                     else:
                         with codecs.open(WEBOUT_PATH + "art/" + art.image + ".html", "w", "utf-8") as suboutfile:
-                            write_specific_art_page(suboutfile, art, ART_STAMP_URL, "All Stamps", do_print)
+                            write_specific_art_page(suboutfile, art, init_data().art_stamp_url, "All Stamps", do_print)
 
     
 def write_art_crafts_pages(artlist, do_print, outfile):
@@ -3678,7 +3665,7 @@ def write_art_crafts_pages(artlist, do_print, outfile):
     else:
         common_html_header(outfile, "Fiddler Crab Crafts")
         media_path = ""
-    outfile.write("    <header id=\"" + ART_CRAFT_URL + "\">\n")
+    outfile.write("    <header id=\"" + init_data().art_craft_url + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Arts &amp; Crafts</h1>\n")
     if not do_print:
         outfile.write("      <nav>\n")
@@ -3725,10 +3712,10 @@ def write_art_crafts_pages(artlist, do_print, outfile):
             if art.art_type == "origami":
                 if art.author == a:
                     if do_print:
-                        write_specific_art_page(outfile, art, ART_CRAFT_URL, "All Crafts", do_print)
+                        write_specific_art_page(outfile, art, init_data().art_craft_url, "All Crafts", do_print)
                     else:
                         with codecs.open(WEBOUT_PATH + "art/" + art.image + ".html", "w", "utf-8") as suboutfile:
-                            write_specific_art_page(suboutfile, art, ART_CRAFT_URL, "All Crafts", do_print)
+                            write_specific_art_page(suboutfile, art, init_data().art_craft_url, "All Crafts", do_print)
 
 
 def write_all_art_pages(artlist, do_print, outfile):
@@ -3740,11 +3727,11 @@ def write_all_art_pages(artlist, do_print, outfile):
         write_art_stamps_pages(artlist, do_print, outfile)
         write_art_crafts_pages(artlist, do_print, outfile)
     else:
-        with codecs.open(WEBOUT_PATH + ART_CRAFT_URL, "w", "utf-8") as suboutfile:
+        with codecs.open(WEBOUT_PATH + init_data().art_craft_url, "w", "utf-8") as suboutfile:
             write_art_crafts_pages(artlist, do_print, suboutfile)
-        with codecs.open(WEBOUT_PATH + ART_STAMP_URL, "w", "utf-8") as suboutfile:
+        with codecs.open(WEBOUT_PATH + init_data().art_stamp_url, "w", "utf-8") as suboutfile:
             write_art_stamps_pages(artlist, do_print, suboutfile)
-        with codecs.open(WEBOUT_PATH + ART_SCI_URL, "w", "utf-8") as suboutfile:
+        with codecs.open(WEBOUT_PATH + init_data().art_sci_url, "w", "utf-8") as suboutfile:
             write_art_science_pages(artlist, do_print, suboutfile)
     # copy art files
     if not do_print:
@@ -3767,7 +3754,7 @@ def write_species_info_pages(specieslist, references, specific_names, all_names,
     if do_print:
         write_species_list(specieslist, outfile, True)
     else:
-        with codecs.open(WEBOUT_PATH + SPECIES_URL, "w", "utf-8") as suboutfile:
+        with codecs.open(WEBOUT_PATH + init_data().species_url, "w", "utf-8") as suboutfile:
             write_species_list(specieslist, suboutfile, False)
     for species in specieslist:
         sprefs = species_refs[species.species]
@@ -3788,7 +3775,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     else:
         common_html_header(outfile, "Fiddler Crab Systematics")
         media_path = ""
-    outfile.write("    <header id=\"" + SYST_URL + "\">\n")
+    outfile.write("    <header id=\"" + init_data().syst_url + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Systematics</h1>\n")
     if not do_print:
         outfile.write("      <nav>\n")
@@ -3985,7 +3972,7 @@ def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_pri
     outfile.write("    <section class=\"spsection\">\n")
     outfile.write("      <h2 id=\"species\" class=\"bookmark2\">Species Level Systematics</h2>\n")
     outfile.write("      <ul>\n")
-    outfile.write("        <li><a href=\"" + SPECIES_URL + "\">Currently recognized species</a></li>\n")
+    outfile.write("        <li><a href=\"" + init_data().species_url + "\">Currently recognized species</a></li>\n")
     outfile.write("      </ul>\n")
     outfile.write("      <p>\n")
     outfile.write("For an overview of all <em class=\"species\">Uca</em> species, the best reference is " +
@@ -4230,7 +4217,7 @@ def write_life_cycle_pages(outfile, do_print):
         common_html_header(outfile, "Fiddler Crab Life Cycle")
         media_path = ""
 
-    outfile.write("    <header id=\"" + LIFECYCLE_URL + "\">\n")
+    outfile.write("    <header id=\"" + init_data().lifecycle_url + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Life Cycle</h1>\n")
     outfile.write("    </header>\n")
     outfile.write("\n")
@@ -4348,7 +4335,7 @@ def write_phylogeny_pages(outfile, do_print, refdict):
                 shutil.copy2("resources/images/" + tree, WEBOUT_PATH + "images/")
             except FileNotFoundError:
                 report_error("File missing: resources/images/" + tree)
-    outfile.write("    <header id=\"" + TREE_URL + "\">\n")
+    outfile.write("    <header id=\"" + init_data().tree_url + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Phylogeny</h1>\n")
     outfile.write("    </header>\n")
     outfile.write("\n")
@@ -4423,7 +4410,7 @@ def write_morphology_page(morph, morphlist, do_print, outfile):
         if morph.parent != ".":
             outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) +
                           find_morphology_parent(morph.parent, morphlist) + ".html\">" + morph.parent + "</a></li>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + MORPH_URL +
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + init_data().morph_url +
                       "\">General Morphology</a></li>\n")
         if do_print:
             index_page = "#morphology_index.html"
@@ -4488,7 +4475,7 @@ def write_morphology_index(morphlist, do_print, outfile):
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + MORPH_URL +
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + init_data().morph_url +
                       "\">General Morphology</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
@@ -4532,7 +4519,7 @@ def write_main_morphology_pages(morphology, outfile, do_print):
     else:
         common_html_header(outfile, "Fiddler Crab Morphology")
         media_path = ""
-    outfile.write("    <header id=\"" + MORPH_URL + "\">\n")
+    outfile.write("    <header id=\"" + init_data().morph_url + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Morphology</h1>\n")
     if not do_print:
         outfile.write("      <nav>\n")
@@ -4597,9 +4584,9 @@ def write_main_morphology_pages(morphology, outfile, do_print):
 
 def write_citation_page(refdict):
     """ create page with site citation info """
-    with codecs.open(WEBOUT_PATH + CITE_URL, "w", "utf-8") as outfile:
+    with codecs.open(WEBOUT_PATH + init_data().cite_url, "w", "utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Website Citation")
-        outfile.write("    <header id=\"" + CITE_URL + "\">\n")
+        outfile.write("    <header id=\"" + init_data().cite_url + "\">\n")
         outfile.write("      <h1>Citation Info</h1>\n")
         outfile.write("    </header>\n")
         outfile.write("\n")
@@ -4641,8 +4628,8 @@ def write_introduction(outfile, species, do_print):
     outfile.write("      Fiddler crabs are small, semi-terrestrial crabs of the genus <em "
                   "class=\"species\">Uca</em> that are characterized by extreme cheliped asymmetry in males.  "
                   "They are most closely related to the <em class=\"species\">Ocypode</em> (ghost crabs). "
-                  "<a href=\"" + rel_link_prefix(do_print) + SPECIES_URL + "\">There are currently {} recognized "
-                  "extant species</a>.\n".format(scnt))
+                  "<a href=\"" + rel_link_prefix(do_print) + init_data().species_url +
+                  "\">There are currently {} recognized extant species</a>.\n".format(scnt))
     outfile.write("    </p>\n")
     if do_print:
         media_path = MEDIA_PATH
@@ -4681,44 +4668,45 @@ def write_introduction(outfile, species, do_print):
     else:
         outfile.write("    <h2>Information</h2>\n")
         outfile.write("    <ul class=\"fa-ul\">\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-signal fa-rotate-270\"></span><a href=\"" + SYST_URL +
-                      "\">Systematics</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-share-alt fa-rotate-270\"></span><a href=\"" + TREE_URL +
-                      "\">Phylogeny</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-list\"></span><a href=\"" + SPECIES_URL + "\">Species</a>\n")
+        outfile.write("      <li><span class=\"fa-li fa fa-signal fa-rotate-270\"></span><a href=\"" +
+                      init_data().syst_url + "\">Systematics</a></li>\n")
+        outfile.write("      <li><span class=\"fa-li fa fa-share-alt fa-rotate-270\"></span><a href=\"" +
+                      init_data().tree_url + "\">Phylogeny</a></li>\n")
+        outfile.write("      <li><span class=\"fa-li fa fa-list\"></span><a href=\"" + init_data().species_url +
+                      "\">Species</a>\n")
         outfile.write("        <ul>\n")
         outfile.write("           <li><a href=\"names\">Name Index</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-comments-o\"></span><a href=\"" + COMMON_URL +
+        outfile.write("      <li><span class=\"fa-li fa fa-comments-o\"></span><a href=\"" + init_data().common_url +
                       "\">Common Names</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-map-o\"></span><a href=\"" + MAP_URL +
+        outfile.write("      <li><span class=\"fa-li fa fa-map-o\"></span><a href=\"" + init_data().map_url +
                       "\">Geographic Ranges and Locations</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-refresh\"></span><a href=\"" + LIFECYCLE_URL +
+        outfile.write("      <li><span class=\"fa-li fa fa-refresh\"></span><a href=\"" + init_data().lifecycle_url +
                       "\">Life Cycle</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-heart-o\"></span><a href=\"" + MORPH_URL +
+        outfile.write("      <li><span class=\"fa-li fa fa-heart-o\"></span><a href=\"" + init_data().morph_url +
                       "\">Morphology</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-book\"></span><a href=\"" + REF_URL +
+        outfile.write("      <li><span class=\"fa-li fa fa-book\"></span><a href=\"" + init_data().ref_url +
                       "\">Comprehensive Reference List</a></li>\n")
         outfile.write("    </ul>\n")
         outfile.write("    <h2>Multimedia</h2>\n")
         outfile.write("    <ul class=\"fa-ul\">\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-camera\"></span><a href=\"" + PHOTO_URL +
+        outfile.write("      <li><span class=\"fa-li fa fa-camera\"></span><a href=\"" + init_data().photo_url +
                       "\">Photos</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-video-camera\"></span><a href=\"" + VIDEO_URL +
+        outfile.write("      <li><span class=\"fa-li fa fa-video-camera\"></span><a href=\"" + init_data().video_url +
                       "\">Videos</a></li>\n")
         outfile.write("      <li><span class=\"fa-li fa fa-paint-brush\"></span>Art\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + ART_SCI_URL + "\">Scientific Art</a></li>\n")
-        outfile.write("          <li><a href=\"" + ART_STAMP_URL + "\">Postage Stamps</a></li>\n")
-        outfile.write("          <li><a href=\"" + ART_CRAFT_URL + "\">Crafts</a></li>\n")
+        outfile.write("          <li><a href=\"" + init_data().art_sci_url + "\">Scientific Art</a></li>\n")
+        outfile.write("          <li><a href=\"" + init_data().art_stamp_url + "\">Postage Stamps</a></li>\n")
+        outfile.write("          <li><a href=\"" + init_data().art_craft_url + "\">Crafts</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </li>\n")
         outfile.write("    </ul>\n")
         outfile.write("    <h2>Miscellania</h2>\n")
         outfile.write("    <ul class=\"fa-ul\">\n")
         outfile.write("      <li><span class=\"fa-li fa fa-pencil\"></span>"
-                      "<a href=\"" + CITE_URL + "\">Citation info for this website</a></li>\n")
+                      "<a href=\"" + init_data().cite_url + "\">Citation info for this website</a></li>\n")
         outfile.write("      <li><span class=\"fa-li fa fa-github\"></span>"
                       "<a href=\"https://github.com/msrosenberg/fiddlercrab.info\">Website data on GitHub</a></li>\n")
         outfile.write("    </ul>\n")
@@ -4920,23 +4908,23 @@ def print_table_of_contents(outfile, species_list):
     outfile.write("     <h1 class=\"bookmark1\">Table of Contents</h1>\n")
     outfile.write("     <ul>\n")
     outfile.write("       <li><a href=\"#introduction\">Introduction</a></li>\n")
-    outfile.write("       <li><a href=\"#" + COMMON_URL + "\">Common Names</a></li>\n")
-    outfile.write("       <li><a href=\"#" + SYST_URL + "\">Systematics Overview</a>\n")
+    outfile.write("       <li><a href=\"#" + init_data().common_url + "\">Common Names</a></li>\n")
+    outfile.write("       <li><a href=\"#" + init_data().syst_url + "\">Systematics Overview</a>\n")
     outfile.write("         <ul>\n")
     outfile.write("           <li><a href=\"#genus\">Genus</a></li>\n")
     outfile.write("           <li><a href=\"#subgenera\">Subgenera</a></li>\n")
     outfile.write("           <li><a href=\"#species\">Species</a></li>\n")
     outfile.write("         </ul>\n")
     outfile.write("       </li>\n")
-    outfile.write("       <li><a href=\"#" + TREE_URL + "\">Phylogeny</a></li>\n")
-    outfile.write("       <li><a href=\"#" + MAP_URL + "\">Geography</a>\n")
+    outfile.write("       <li><a href=\"#" + init_data().tree_url + "\">Phylogeny</a></li>\n")
+    outfile.write("       <li><a href=\"#" + init_data().map_url + "\">Geography</a>\n")
     outfile.write("         <ul>\n")
     outfile.write("           <li><a href=\"#location_index\">Location Index</a></li>\n")
     outfile.write("         </ul>\n")
     outfile.write("       </li>\n")
-    outfile.write("       <li><a href=\"#" + LIFECYCLE_URL + "\">Life Cycle</a></li>\n")
-    outfile.write("       <li><a href=\"#" + MORPH_URL + "\">Morphology</a></li>\n")
-    outfile.write("       <li><a href=\"#" + SPECIES_URL + "\">Species</a>\n")
+    outfile.write("       <li><a href=\"#" + init_data().lifecycle_url + "\">Life Cycle</a></li>\n")
+    outfile.write("       <li><a href=\"#" + init_data().morph_url + "\">Morphology</a></li>\n")
+    outfile.write("       <li><a href=\"#" + init_data().species_url + "\">Species</a>\n")
     outfile.write("         <ul>\n")
     for species in species_list:
         outfile.write("           <li>" + create_species_link(species.species, True) + "</li>\n")
@@ -4947,22 +4935,22 @@ def print_table_of_contents(outfile, species_list):
     outfile.write("         <ul>\n")
     outfile.write("           <li><a href=\"#binomials\">Binomials and Other Compound Names</a>\n")
     outfile.write("           <li><a href=\"#specificnames\">Specific Names</a>\n")
-    outfile.write("           <li><a href=\"#" + NAME_SUM_URL + "\">Summary of Names</a>\n")
+    outfile.write("           <li><a href=\"#" + init_data().name_sum_url + "\">Summary of Names</a>\n")
     outfile.write("         </ul>\n")
     outfile.write("       </li>\n")
-    outfile.write("       <li><a href=\"#" + PHOTO_URL + "\">Photo Index</a></li>\n")
-    outfile.write("       <li><a href=\"#" + VIDEO_URL + "\">Video Index</a></li>\n")
+    outfile.write("       <li><a href=\"#" + init_data().photo_url + "\">Photo Index</a></li>\n")
+    outfile.write("       <li><a href=\"#" + init_data().video_url + "\">Video Index</a></li>\n")
     outfile.write("       <li>Art\n")
     outfile.write("         <ul>\n")
-    outfile.write("           <li><a href=\"#" + ART_SCI_URL + "\">Scientific Drawings</a></li>\n")
-    outfile.write("           <li><a href=\"#" + ART_STAMP_URL + "\">Postage Stamps</a></li>\n")
-    outfile.write("           <li><a href=\"#" + ART_CRAFT_URL + "\">Arts &amp; Crafts</a></li>\n")
+    outfile.write("           <li><a href=\"#" + init_data().art_sci_url + "\">Scientific Drawings</a></li>\n")
+    outfile.write("           <li><a href=\"#" + init_data().art_stamp_url + "\">Postage Stamps</a></li>\n")
+    outfile.write("           <li><a href=\"#" + init_data().art_craft_url + "\">Arts &amp; Crafts</a></li>\n")
     outfile.write("         </ul>\n")
     outfile.write("       </li>\n")
     outfile.write("       <li>References\n")
     outfile.write("         <ul>\n")
-    outfile.write("           <li><a href=\"#" + REF_SUM_URL + "\">Summary of References</a></li>\n")
-    outfile.write("           <li><a href=\"#" + REF_URL + "\">Full Reference List</a></li>\n")
+    outfile.write("           <li><a href=\"#" + init_data().ref_sum_url + "\">Summary of References</a></li>\n")
+    outfile.write("           <li><a href=\"#" + init_data().ref_url + "\">Full Reference List</a></li>\n")
     outfile.write("         </ul>\n")
     outfile.write("       </li>\n")
     outfile.write("     </ul>\n")
@@ -5072,9 +5060,9 @@ def build_site():
             print("...Creating Web Version...")
             copy_support_files()
             print("......Writing References......")
-            with codecs.open(WEBOUT_PATH + REF_URL, "w", "utf-8") as outfile:
+            with codecs.open(WEBOUT_PATH + init_data().ref_url, "w", "utf-8") as outfile:
                 write_reference_bibliography(references, False, outfile)
-            with codecs.open(WEBOUT_PATH + REF_SUM_URL, "w", "utf-8") as outfile:
+            with codecs.open(WEBOUT_PATH + init_data().ref_sum_url, "w", "utf-8") as outfile:
                 write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, False, outfile)
             write_reference_pages(references, refdict, citelist, False, None, name_table, point_locations)
             print("......Writing Names Info......")
@@ -5093,24 +5081,24 @@ def build_site():
                 write_location_index(outfile, False, point_locations, location_dict, location_species,
                                      location_sp_names, location_bi_names, location_direct_refs, location_cited_refs,
                                      references)
-            with codecs.open(WEBOUT_PATH + MAP_URL, "w", "utf-8") as outfile:
+            with codecs.open(WEBOUT_PATH + init_data().map_url, "w", "utf-8") as outfile:
                 write_geography_page(species, outfile, False)
             print("......Writing Media Pages......")
-            with codecs.open(WEBOUT_PATH + PHOTO_URL, "w", "utf-8") as outfile:
+            with codecs.open(WEBOUT_PATH + init_data().photo_url, "w", "utf-8") as outfile:
                 write_photo_index(species, photos, False, outfile)
             write_all_art_pages(art, False, None)
-            with codecs.open(WEBOUT_PATH + VIDEO_URL, "w", "utf-8") as outfile:
+            with codecs.open(WEBOUT_PATH + init_data().video_url, "w", "utf-8") as outfile:
                 write_video_index(videos, False, outfile)
             print("......Writing Misc......")
-            with codecs.open(WEBOUT_PATH + SYST_URL, "w", "utf-8") as outfile:
+            with codecs.open(WEBOUT_PATH + init_data().syst_url, "w", "utf-8") as outfile:
                 write_systematics_overview(subgenera, species, refdict, outfile, False)
-            with codecs.open(WEBOUT_PATH + COMMON_URL, "w", "utf-8") as outfile:
+            with codecs.open(WEBOUT_PATH + init_data().common_url, "w", "utf-8") as outfile:
                 write_common_names_pages(outfile, replace_references(common_name_data, refdict, False), False)
-            with codecs.open(WEBOUT_PATH + LIFECYCLE_URL, "w", "utf-8") as outfile:
+            with codecs.open(WEBOUT_PATH + init_data().lifecycle_url, "w", "utf-8") as outfile:
                 write_life_cycle_pages(outfile, False)
-            with codecs.open(WEBOUT_PATH + TREE_URL, "w", "utf-8") as outfile:
+            with codecs.open(WEBOUT_PATH + init_data().tree_url, "w", "utf-8") as outfile:
                 write_phylogeny_pages(outfile, False, refdict)
-            with codecs.open(WEBOUT_PATH + MORPH_URL, "w", "utf-8") as outfile:
+            with codecs.open(WEBOUT_PATH + init_data().morph_url, "w", "utf-8") as outfile:
                 write_main_morphology_pages(morphology, outfile, False)
             with codecs.open(WEBOUT_PATH + "index.html", "w", "utf-8") as outfile:
                 write_introduction(outfile, species, False)

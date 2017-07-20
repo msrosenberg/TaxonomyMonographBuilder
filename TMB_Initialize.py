@@ -36,6 +36,24 @@ class InitializationData:
         self.site_address = "www.fiddlercrab.info"
         self.site_http = "http://"  # this leaves open the option of quick switching to https
 
+        # major web output file names
+        self.species_url = "uca_species.html"
+        self.ref_url = "uca_references.html"
+        self.ref_sum_url = "uca_refsummary.html"
+        self.syst_url = "uca_systematics.html"
+        self.common_url = "uca_common_names.html"
+        self.photo_url = "uca_photos.html"
+        self.video_url = "uca_videos.html"
+        self.map_url = "uca_ranges.html"
+        self.lifecycle_url = "uca_lifecycle.html"
+        self.tree_url = "uca_phylogeny.html"
+        self.art_sci_url = "uca_art_science.html"
+        self.art_stamp_url = "uca_art_stamps.html"
+        self.art_craft_url = "uca_art_crafts.html"
+        self.morph_url = "uca_morphology.html"
+        self.cite_url = "citation.html"
+        self.name_sum_url = "name_graphs.html"
+
     def site_url(self):
         return self.site_http + self.site_address
 
