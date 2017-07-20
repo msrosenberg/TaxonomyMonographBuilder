@@ -289,7 +289,7 @@ def create_blank_index(fname):
         outfile.write("</html>\n")
 
 
-def rel_link_prefix(do_print, prefix):
+def rel_link_prefix(do_print, prefix=""):
     if do_print:
         return "#"
     else:
@@ -680,7 +680,7 @@ def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, langua
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") + REF_URL +
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + REF_URL +
                       "\"><span class=\"fa fa-list\"></span> Full Reference List</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
@@ -767,7 +767,7 @@ def write_reference_bibliography(reflist, do_print, outfile):
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") + REF_SUM_URL +
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + REF_SUM_URL +
                       "\"><span class=\"fa fa-line-chart\"></span> Reference/Citation Summary</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
@@ -1249,7 +1249,7 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
         for c in cites_to:
             if c.cite_key in refdict:
                 crossref = refdict[c.cite_key]
-                cs |= {"<a href=\"" + rel_link_prefix(do_print, "") + crossref.cite_key +
+                cs |= {"<a href=\"" + rel_link_prefix(do_print) + crossref.cite_key +
                        ".html\">" + crossref.citation + "</a>"}
             else:
                 cs |= {c.cite_key}
@@ -1361,7 +1361,7 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
     outfile.write("      <nav>\n")
     outfile.write("        <ul>\n")
     if species_name != "":
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") + "sn_" + species_name +
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + "sn_" + species_name +
                       ".html\"><span class=\"fa fa-window-minimize\"></span> " + format_name_string(species_name) +
                       "</a></li>\n")
         if not do_print:
@@ -1558,7 +1558,7 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
         tmpnamelist = specific_name.variations.split(";")
         if (x != "") and (x in tmpnamelist):
             namefile = name_to_filename(n)
-            outfile.write("      <li><a href=\"" + rel_link_prefix(do_print, "") + namefile + ".html\">" +
+            outfile.write("      <li><a href=\"" + rel_link_prefix(do_print) + namefile + ".html\">" +
                           format_name_string(n) + "</a></li>\n")
     outfile.write("      </ul>\n")
     outfile.write("    </section>\n")
@@ -1637,7 +1637,7 @@ def write_chronology_chart_div(n, outfile, linkfile, title, is_species, do_print
     # n can be either the file name (print) or the chart # on the page (web)
     if is_species:
         if linkfile is not None:
-            fn = rel_link_prefix(do_print, "") + name_to_filename(linkfile) + ".html"
+            fn = rel_link_prefix(do_print) + name_to_filename(linkfile) + ".html"
             title_str = "<a href=\"" + fn + "\"><em class=\"species\">" + title + "</em></a>"
         else:
             title_str = "<em class=\"species\">" + title + "</em>"
@@ -2066,7 +2066,7 @@ def create_genus_chronology(genus_cnts, do_print, outfile):
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") +
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) +
                       "index.html\"><span class=\"fa fa-list\"></span> Full Name Index</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
@@ -2220,11 +2220,11 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") + NAME_SUM_URL +
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + NAME_SUM_URL +
                       "\"><span class=\"fa fa-line-chart\"></span> Name Summary</a></li>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + SPECIES_URL +
                       "\"><span class=\"fa fa-check-circle\"></span> Accepted Species</a></li>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") +
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) +
                       "synonyms_uca.html\">Synonyms of <em class=\"species\">Uca</em></a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
@@ -2249,7 +2249,7 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
     outfile.write("      <ul class=\"namelist\">\n")
     for name in unique_names:
         namefile = name_to_filename(name)
-        outfile.write("        <li><a href=\"" + rel_link_prefix(do_print, "") + namefile + ".html\">" +
+        outfile.write("        <li><a href=\"" + rel_link_prefix(do_print) + namefile + ".html\">" +
                       format_name_string(name) + "</a></li>\n")
 
     outfile.write("      </ul>\n")
@@ -2260,7 +2260,7 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
 
     specific_year_cnts = {}
     for name in specific_names:
-        outfile.write("        <li><a href=\"" + rel_link_prefix(do_print, "") + "sn_" + name.name + ".html\">" +
+        outfile.write("        <li><a href=\"" + rel_link_prefix(do_print) + "sn_" + name.name + ".html\">" +
                       format_name_string(name.name) + "</a></li>\n")
         tmpkey = name.priority_source
         if tmpkey != ".":
@@ -2819,7 +2819,7 @@ def write_common_names_pages(outfile, common_name_data, do_print):
     outfile.write("\n")
     outfile.write("    <p>\n")
     outfile.write("      Following is a summary of common names for crabs in the genus "
-                  "<em class=\"species\">Uca</em>. See <a href=\"" + rel_link_prefix(do_print, "") + SPECIES_URL +
+                  "<em class=\"species\">Uca</em>. See <a href=\"" + rel_link_prefix(do_print) + SPECIES_URL +
                   "\">individual species</a> for more information on the common names of a particular species.\n")
     outfile.write("    </p>\n")
     outfile.write("    <dl class=\"common\">\n")
@@ -3127,7 +3127,7 @@ def write_species_page(species, references, specific_names, all_names, photos, v
                       "Information</h2>\n")
     outfile.write("      <dl>\n")
     outfile.write("       <dt>Subgenus</dt>\n")
-    outfile.write("         <dd><a href=\"" + rel_link_prefix(do_print, "") + SYST_URL + "#" + species.subgenus +
+    outfile.write("         <dd><a href=\"" + rel_link_prefix(do_print) + SYST_URL + "#" + species.subgenus +
                   "\"><em class=\"species\">" + species.subgenus + "</em></a></dd>\n")
     if not is_fossil:
         outfile.write("       <dt>Common Names</dt>\n")
@@ -3462,7 +3462,7 @@ def write_video_index(videos, do_print, outfile):
     if do_print:
         linktxt = "individual species' page"
     else:
-        linktxt = "<a href=\"" + rel_link_prefix(do_print, "") + SPECIES_URL + "\">individual species' page</a>"
+        linktxt = "<a href=\"" + rel_link_prefix(do_print) + SPECIES_URL + "\">individual species' page</a>"
     outfile.write("      Most of these videos predate digital video (let alone HD) and were recorded on Hi8 tape. "
                   "Hopefully they will eventually be replaced by higher quality video. These are grouped by "
                   "activity. Videos for specific species can be found on the " + linktxt + ".\n")
@@ -4421,7 +4421,7 @@ def write_morphology_page(morph, morphlist, do_print, outfile):
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
         if morph.parent != ".":
-            outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "") +
+            outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) +
                           find_morphology_parent(morph.parent, morphlist) + ".html\">" + morph.parent + "</a></li>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + MORPH_URL +
                       "\">General Morphology</a></li>\n")
@@ -4448,7 +4448,7 @@ def write_morphology_page(morph, morphlist, do_print, outfile):
         outfile.write("     <ul>\n")
         for m in morphlist:
             if m.parent == morph.character:
-                outfile.write("       <li><a href=\"" + rel_link_prefix(do_print, "") +
+                outfile.write("       <li><a href=\"" + rel_link_prefix(do_print) +
                               morphology_link(m.parent, m.character) + ".html\">" + m.character + "</a></li>\n")
         outfile.write("     </ul>\n")
     outfile.write("    </div>\n")
@@ -4515,7 +4515,7 @@ def write_morphology_index(morphlist, do_print, outfile):
             p = " ("+m.parent+")"
         else:
             p = ""
-        outfile.write("      <li><a href=\"" + rel_link_prefix(do_print, "") + morphology_link(m.parent, m.character) +
+        outfile.write("      <li><a href=\"" + rel_link_prefix(do_print) + morphology_link(m.parent, m.character) +
                       ".html\">" + m.character + p + "</a></li>\n")
     outfile.write("     </ul>\n")
     if do_print:
@@ -4641,7 +4641,7 @@ def write_introduction(outfile, species, do_print):
     outfile.write("      Fiddler crabs are small, semi-terrestrial crabs of the genus <em "
                   "class=\"species\">Uca</em> that are characterized by extreme cheliped asymmetry in males.  "
                   "They are most closely related to the <em class=\"species\">Ocypode</em> (ghost crabs). "
-                  "<a href=\"" + rel_link_prefix(do_print, "") + SPECIES_URL + "\">There are currently {} recognized "
+                  "<a href=\"" + rel_link_prefix(do_print) + SPECIES_URL + "\">There are currently {} recognized "
                   "extant species</a>.\n".format(scnt))
     outfile.write("    </p>\n")
     if do_print:
