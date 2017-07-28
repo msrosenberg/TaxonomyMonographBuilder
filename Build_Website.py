@@ -352,6 +352,9 @@ def clean_reference_html(ref):
     # replace hyphens with an n-dash in volume ranges
     sstr = r"(\([\d]+)(-)([\d]+\))"
     ref = re.sub(sstr, r"\1&ndash;\3", ref)
+
+    # remove (?) from entries with unknown years
+    ref = ref.replace(" (?) ", " ")
     return ref
 
 
