@@ -346,14 +346,12 @@ def clean_reference_html(ref):
       in particular, replace hyphens with n-dashes for commonly seen ranges
     """
     # replace hyphens with an n-dash in page ranges
-    sstr = r"((?:Pp\. |:)[\d]+)(-)([\d]+)"
+    sstr = r"((?:Pp\. |:)[\D]?[\d]+)(-)([\D]?[\d]+)"
     ref = re.sub(sstr, r"\1&ndash;\3", ref)
-    # print(re.sub(sstr, r"\1&ndash;\3", ref))
 
     # replace hyphens with an n-dash in volume ranges
     sstr = r"(\([\d]+)(-)([\d]+\))"
     ref = re.sub(sstr, r"\1&ndash;\3", ref)
-    # print(re.sub(sstr, r"\1&ndash;\3", ref))
     return ref
 
 
