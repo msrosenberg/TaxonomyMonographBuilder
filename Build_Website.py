@@ -34,7 +34,7 @@ DAGGER = "<sup>†</sup>"
 
 AUTHOR_NOPAREN = 0      # Smith 1970
 AUTHOR_PAREN = 1        # Smith (1970)
-AUTHOR_NOPCOMMA = 2     # Smith, 1970
+AUTHOR_NOPCOMMA = 2     # Smith, 1970  <-- this one is needed for taxonomic name authority
 
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
