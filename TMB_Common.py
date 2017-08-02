@@ -64,7 +64,7 @@ def unicode_to_html_encoding(x):
         ["ó", "&#x00F3;"],  # 243
         ["ơ", "&#x01A1;"],  # 417
         ["ú", "&#x00FA;"],  # 250
-        ["ū", "&#x016B;"]  # 363
+        ["ū", "&#x016B;"]   # 363
     ]
     for r in unicode_replace_list:
         x = x.replace(r[0], r[1])
