@@ -265,13 +265,13 @@ def create_blank_index(fname):
     with open(fname, "w") as outfile:
         outfile.write("<!DOCTYPE HTML>\n")
         outfile.write("<html lang=\"en\">\n")
-        outfile.write(" <head>\n")
-        outfile.write("  <meta charset=\"utf-8\" />\n")
-        outfile.write("  <title>n/a</title>\n")
-        outfile.write("  <meta name=\"description\" content=\"n/a\" />\n")
-        outfile.write(" </head>\n")
-        outfile.write(" <body>\n")
-        outfile.write(" </body>\n")
+        outfile.write("  <head>\n")
+        outfile.write("    <meta charset=\"utf-8\" />\n")
+        outfile.write("    <title>n/a</title>\n")
+        outfile.write("    <meta name=\"description\" content=\"n/a\" />\n")
+        outfile.write("  </head>\n")
+        outfile.write("  <body>\n")
+        outfile.write("  </body>\n")
         outfile.write("</html>\n")
 
 
@@ -552,7 +552,7 @@ def create_chronology_chart_file(filename, miny, maxy, maxcnt, yearly_data):
     mplpy.close("all")
 
 
-def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, languages, do_print, outfile):
+def write_reference_summary(outfile, do_print, nrefs, year_data, year_data_1900, cite_count, languages):
     if do_print:
         start_page_division(outfile, "")
     else:
@@ -743,7 +743,7 @@ def write_reference_summary(nrefs, year_data, year_data_1900, cite_count, langua
         common_html_footer(outfile)
 
 
-def write_reference_bibliography(reflist, do_print, outfile):
+def write_reference_bibliography(outfile, do_print, reflist):
     if do_print:
         start_page_division(outfile, "index_page")
     else:
@@ -990,8 +990,8 @@ def clean_specific_name(x):
             return x.lower()
 
 
-def output_name_table(is_name, outfile, itemlist, uniquelist, notecnt, comcnt, refdict, name_table, point_locations,
-                      do_print):
+def output_name_table(outfile, do_print, is_name, itemlist, uniquelist, notecnt, comcnt, refdict, name_table,
+                      point_locations):
     """ create output name table """
     def create_location_sublink(x):
         """ create a link to location pages, preserving [] info when applicable """
@@ -1221,8 +1221,8 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
             outfile.write("        <th class=\"notes_col\">Note(s)</th>\n")
         outfile.write("      </tr>\n")
         names.sort()
-        output_name_table(False, outfile, names, uniquenames, notecnt, comcnt, refdict, name_table, point_locations,
-                          do_print)
+        output_name_table(outfile, do_print, False, names, uniquenames, notecnt, comcnt, refdict, name_table,
+                          point_locations)
     else:
         outfile.write("    <p>\n")
         outfile.write("      Data not yet available.\n")
@@ -1252,7 +1252,7 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
         common_html_footer(outfile, indexpath="../")
 
 
-def write_reference_pages(reflist, refdict, citelist, do_print, printfile, name_table, point_locations):
+def write_reference_pages(printfile, do_print, reflist, refdict, citelist, name_table, point_locations):
     """
     control function to loop through creating a page for every reference
     """
@@ -1298,8 +1298,8 @@ def calculate_binomial_yearly_cnts(name, refdict, citelist):
     return name_by_year, total
 
 
-def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, name_table, species_name,
-                             outfile, do_print, location_set, point_locations):
+def write_binomial_name_page(outfile, do_print, name, namefile, name_by_year, refdict, citelist, name_table,
+                             species_name, location_set, point_locations):
     """
     create a page listing all citations using, and other information about, a specific binomial or compound name
     """
@@ -1338,7 +1338,7 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
         if maxcnt > 0:
             start_google_chart_header(outfile)
             image_name = 0
-            setup_chronology_chart(image_name, miny, maxy, maxcnt, name_by_year, outfile)
+            setup_chronology_chart(outfile, image_name, miny, maxy, maxcnt, name_by_year)
             end_google_chart_header(outfile)
         common_header_part2(outfile, indexpath="../", include_map=True)
 
@@ -1370,8 +1370,7 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
             outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
         outfile.write("    </div>\n")
     if maxcnt > 0:
-        write_chronology_chart_div(image_name, outfile, None, "Number of Uses of Name per Year", False, do_print,
-                                   False)
+        write_chronology_chart_div(outfile, do_print, image_name, None, "Number of Uses of Name per Year", False, False)
         outfile.write("\n")
 
     # write name table
@@ -1388,8 +1387,8 @@ def write_binomial_name_page(name, namefile, name_by_year, refdict, citelist, na
     if notecnt > 0:
         outfile.write("        <th class=\"notes_col\">Note(s)</th>\n")
     outfile.write("      </tr>\n")
-    output_name_table(True, outfile, cites, uniquecites, notecnt, comcnt, refdict, name_table, point_locations,
-                      do_print)
+    output_name_table(outfile, do_print, True, cites, uniquecites, notecnt, comcnt, refdict, name_table,
+                      point_locations)
     outfile.write("    <p>\n")
     outfile.write("    </p>\n")
     if do_print:
@@ -1425,8 +1424,7 @@ def calculate_specific_locations(specific_name, binomial_names, binomial_locatio
     return locs
 
 
-def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cnts, outfile, do_print,
-                             location_set):
+def write_specific_name_page(outfile, do_print, specific_name, binomial_names, refdict, binomial_cnts, location_set):
     """ create a page with the history of a specific name """
     miny = init_data().start_year
     maxy = init_data().current_year
@@ -1457,7 +1455,7 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
         if maxcnt > 0:
             start_google_chart_header(outfile)
             image_name = 0
-            setup_chronology_chart(image_name, miny, maxy, maxcnt, byears, outfile)
+            setup_chronology_chart(outfile, image_name, miny, maxy, maxcnt, byears)
             end_google_chart_header(outfile)
         common_header_part2(outfile, indexpath="../", include_map=True)
 
@@ -1525,8 +1523,7 @@ def write_specific_name_page(specific_name, binomial_names, refdict, binomial_cn
         outfile.write("    </div>\n")
 
     if maxcnt > 0:
-        write_chronology_chart_div(image_name, outfile, None, "Number of Uses of Name per Year", False, do_print,
-                                   False)
+        write_chronology_chart_div(outfile, do_print, image_name, None, "Number of Uses of Name per Year", False, False)
         outfile.write("\n")
 
     if specific_name.notes != ".":
@@ -1568,7 +1565,7 @@ def create_word_cloud_image(binomial_cnts, specific_cnts):
     wordcloud.to_file(TMP_PATH + "specific_word_cloud.png")
 
 
-def setup_chronology_chart(n, miny, maxy, maxcnt, yearly_data, outfile):
+def setup_chronology_chart(outfile, n, miny, maxy, maxcnt, yearly_data):
     nstr = str(n)
     outfile.write("        var data" + nstr + " = google.visualization.arrayToDataTable([\n")
     outfile.write("          ['Year', 'Number of Uses', 'Number of Uses'],\n")
@@ -1619,7 +1616,7 @@ def setup_chronology_chart(n, miny, maxy, maxcnt, yearly_data, outfile):
     outfile.write("\n")
 
 
-def write_chronology_chart_div(n, outfile, linkfile, title, is_species, do_print, do_multi):
+def write_chronology_chart_div(outfile, do_print, n, linkfile, title, is_species, do_multi):
     # n can be either the file name (print) or the chart # on the page (web)
     if is_species:
         if linkfile is not None:
@@ -1643,8 +1640,8 @@ def write_chronology_chart_div(n, outfile, linkfile, title, is_species, do_print
     outfile.write("    </div>\n")
 
 
-def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, specific_synlist, specific_name_counts,
-                              do_print, outfile):
+def create_synonym_chronology(outfile, do_print, species, binomial_synlist, binomial_name_counts, specific_synlist,
+                              specific_name_counts):
     """ create a page with the chronological history of a specific name and its synonyms """
     miny = init_data().start_year
     maxy = init_data().current_year
@@ -1700,13 +1697,13 @@ def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, s
         common_header_part1(outfile, species, indexpath="../")
         start_google_chart_header(outfile)
         image_name = 0
-        setup_chronology_chart(image_name, miny, maxy, maxcnt, total_cnts, outfile)
+        setup_chronology_chart(outfile, image_name, miny, maxy, maxcnt, total_cnts)
         adjust = 1
         for i, name in enumerate(sp_order):
-            setup_chronology_chart(i + adjust, miny, maxy, maxcnt, specific_name_counts[name], outfile)
+            setup_chronology_chart(outfile, i + adjust, miny, maxy, maxcnt, specific_name_counts[name])
         adjust += len(specific_synlist)
         for i, name in enumerate(bi_order):
-            setup_chronology_chart(i + adjust, miny, maxy, bmaxcnt, binomial_name_counts[clean_name(name)], outfile)
+            setup_chronology_chart(outfile, i + adjust, miny, maxy, bmaxcnt, binomial_name_counts[clean_name(name)])
         end_google_chart_header(outfile)
         common_header_part2(outfile)
 
@@ -1726,7 +1723,7 @@ def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, s
         image_name = "synonym_" + name_to_filename(species) + "_total_chronology.svg"
     else:
         image_name = 0
-    write_chronology_chart_div(image_name, outfile, None, "All Names", False, do_print, True)
+    write_chronology_chart_div(outfile, do_print, image_name, None, "All Names", False, True)
     adjust = 1
     outfile.write("    <p style=\"clear: both\">Accepted name is listed first, followed by synonyms in decreasing "
                   "order of use.</p>\n")
@@ -1736,7 +1733,7 @@ def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, s
             image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
         else:
             image_name = i + adjust
-        write_chronology_chart_div(image_name, outfile, "sn_"+name, name, True, do_print, True)
+        write_chronology_chart_div(outfile, do_print, image_name, "sn_" + name, name, True, True)
     adjust += len(specific_synlist)
     outfile.write("    <h2  class=\"nobookmark\" style=\"clear: both\">Binomial Synonyms</h2>\n")
     for i, name in enumerate(bi_order):
@@ -1744,7 +1741,7 @@ def create_synonym_chronology(species, binomial_synlist, binomial_name_counts, s
             image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
         else:
             image_name = i + adjust
-        write_chronology_chart_div(image_name, outfile, name, name, True, do_print, True)
+        write_chronology_chart_div(outfile, do_print, image_name, name, name, True, True)
 
     if do_print:
         end_page_division(outfile)
@@ -1766,7 +1763,7 @@ def match_specific_name(name, specific_names):
         return y
 
 
-def create_name_summary(binomial_year_cnts, specific_year_cnts, species_refs, do_print, outfile):
+def create_name_summary(outfile, do_print, binomial_year_cnts, specific_year_cnts, species_refs):
     if do_print:
         per_graph = 40
     else:
@@ -2005,7 +2002,7 @@ def extract_genus(name):
         return name
 
 
-def create_genus_chronology(genus_cnts, do_print, outfile):
+def create_genus_chronology(outfile, do_print, genus_cnts):
     """ create a page with the chronological history of the genera """
     miny = init_data().start_year
     maxy = init_data().current_year
@@ -2039,10 +2036,10 @@ def create_genus_chronology(genus_cnts, do_print, outfile):
     else:
         common_header_part1(outfile, "Uca", indexpath="../")
         start_google_chart_header(outfile)
-        setup_chronology_chart(0, miny, maxy, maxcnt, total_cnts, outfile)
+        setup_chronology_chart(outfile, 0, miny, maxy, maxcnt, total_cnts)
         adjust = 1
         for i, name in enumerate(order):
-            setup_chronology_chart(i + adjust, miny, maxy, maxcnt, genus_cnts[name], outfile)
+            setup_chronology_chart(outfile, i + adjust, miny, maxy, maxcnt, genus_cnts[name])
         end_google_chart_header(outfile)
         common_header_part2(outfile)
 
@@ -2066,7 +2063,7 @@ def create_genus_chronology(genus_cnts, do_print, outfile):
                   "not all of these are synonyms; the charts include instances when fiddler crabs were placed in "
                   "other, valid, genera (<em>e.g.,</em> <em class=\"species\">Cancer</em>) as well as cases in the "
                   "19th century when the genus <em class=\"species\">Uca</em> was used for non-fiddler crabs.</p>\n")
-    write_chronology_chart_div(filename, outfile, None, "All Genera", False, do_print, True)
+    write_chronology_chart_div(outfile, do_print, filename, None, "All Genera", False, True)
     adjust = 1
     outfile.write("    <p style=\"clear: both\">Accepted name is listed first, followed by synonyms in decreasing "
                   "order of use.</p>\n")
@@ -2076,7 +2073,7 @@ def create_genus_chronology(genus_cnts, do_print, outfile):
             filename = "Genus_" + name + "_chronology.svg"
         else:
             filename = i + adjust
-        write_chronology_chart_div(filename, outfile, None, name, True, do_print, True)
+        write_chronology_chart_div(outfile, do_print, filename, None, name, True, True)
 
     if do_print:
         end_page_division(outfile)
@@ -2194,9 +2191,9 @@ def calculate_name_index_data(refdict, citelist, specific_names):
             binomial_usage_cnts, specific_usage_cnts)
 
 
-def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_table, species_refs, genus_cnts,
-                         binomial_usage_cnts_by_year, total_binomial_year_cnts, outfile, do_print,
-                         binomial_locations, specific_locations, point_locations):
+def write_all_name_pages(outfile, do_print, refdict, citelist, unique_names, specific_names, name_table, species_refs,
+                         genus_cnts, binomial_usage_cnts_by_year, total_binomial_year_cnts, binomial_locations,
+                         specific_locations, point_locations):
     """ create an index of binomials and specific names """
     if do_print:
         start_page_division(outfile, "index_page")
@@ -2265,34 +2262,33 @@ def write_all_name_pages(refdict, citelist, unique_names, specific_names, name_t
         common_html_footer(outfile, indexpath="../")
 
     if do_print:
-        create_name_summary(total_binomial_year_cnts, specific_year_cnts, species_refs, do_print, outfile)
-        create_genus_chronology(genus_cnts, do_print, outfile)
+        create_name_summary(outfile, do_print, total_binomial_year_cnts, specific_year_cnts, species_refs)
+        create_genus_chronology(outfile, do_print, genus_cnts)
     else:
         with codecs.open(WEBOUT_PATH + "names/" + init_data().name_sum_url, "w", "utf-8") as suboutfile:
-            create_name_summary(total_binomial_year_cnts, specific_year_cnts, species_refs, do_print, suboutfile)
+            create_name_summary(suboutfile, do_print, total_binomial_year_cnts, specific_year_cnts, species_refs)
         with codecs.open(WEBOUT_PATH + "names/synonyms_uca.html", "w", "utf-8") as suboutfile:
-            create_genus_chronology(genus_cnts, do_print, suboutfile)
+            create_genus_chronology(suboutfile, do_print, genus_cnts)
 
     # write out individual pages for each binomial name and specific name
     for name in unique_names:
         sname = match_specific_name(name, specific_names)
         namefile = name_to_filename(name)
         if do_print:
-            write_binomial_name_page(name, namefile, binomial_usage_cnts_by_year[name], refdict, citelist, name_table,
-                                     sname, outfile, True, binomial_locations[name], point_locations)
+            write_binomial_name_page(outfile, True, name, namefile, binomial_usage_cnts_by_year[name], refdict,
+                                     citelist, name_table, sname, binomial_locations[name], point_locations)
         else:
             with codecs.open(WEBOUT_PATH + "names/" + namefile + ".html", "w", "utf-8") as suboutfile:
-                write_binomial_name_page(name, namefile, binomial_usage_cnts_by_year[name], refdict, citelist,
-                                         name_table, sname, suboutfile, False, binomial_locations[name],
-                                         point_locations)
+                write_binomial_name_page(suboutfile, False, name, namefile, binomial_usage_cnts_by_year[name], refdict,
+                                         citelist, name_table, sname, binomial_locations[name], point_locations)
     for name in specific_names:
         if do_print:
-            write_specific_name_page(name, unique_names, refdict, binomial_usage_cnts_by_year, outfile,
-                                     True, specific_locations[name])
+            write_specific_name_page(outfile, True, name, unique_names, refdict, binomial_usage_cnts_by_year,
+                                     specific_locations[name])
         else:
             with codecs.open(WEBOUT_PATH + "names/sn_" + name.name + ".html", "w", "utf-8") as suboutfile:
-                write_specific_name_page(name, unique_names, refdict, binomial_usage_cnts_by_year, suboutfile,
-                                         False, specific_locations[name])
+                write_specific_name_page(suboutfile, False, name, unique_names, refdict, binomial_usage_cnts_by_year,
+                                         specific_locations[name])
 
 
 def check_specific_names(citelist, specific_names):
@@ -2315,7 +2311,7 @@ def check_specific_names(citelist, specific_names):
             report_error("Missing specific name: " + n)
 
 
-def write_geography_page(species, outfile, do_print):
+def write_geography_page(outfile, do_print, species):
     """ output geographic ranges to HTML """
     regions = ("Eastern Atlantic",
                "Western Atlantic",
@@ -2794,7 +2790,7 @@ def match_names_to_locations(species, specific_point_locations, binomial_point_l
             location_species, location_sp_names, location_bi_names, location_direct_refs, location_cited_refs)
 
 
-def write_common_names_pages(outfile, common_name_data, do_print):
+def write_common_names_pages(outfile, do_print, common_name_data):
     """ output common names to HTML """
     if do_print:
         start_page_division(outfile, "base_page")
@@ -2854,7 +2850,7 @@ def connect_refs_to_species(species, citelist):
     return species_refs
 
 
-def write_species_list(specieslist, outfile, do_print):
+def write_species_list(outfile, do_print, specieslist):
     """
     create an index of all valid species
     """
@@ -2890,7 +2886,7 @@ def write_species_list(specieslist, outfile, do_print):
         common_html_footer(outfile)
 
 
-def write_species_photo_page(outfile, fname, species, common_name, caption, pn, pspecies, do_print):
+def write_species_photo_page(outfile, do_print, fname, species, common_name, caption, pn, pspecies):
     """
     create a page for a specific photo
     """
@@ -3040,8 +3036,8 @@ def write_reference_list(outfile, do_print, references, citations):
     outfile.write("    </section>\n")
 
 
-def write_species_page(species, references, specific_names, all_names, photos, videos, artlist, sprefs, refdict,
-                       binomial_name_counts, specific_name_cnts, outfile, do_print):
+def write_species_page(outfile, do_print, species, references, specific_names, all_names, photos, videos, artlist,
+                       sprefs, refdict, binomial_name_counts, specific_name_cnts):
     """
     create the master page for a valid species
     """
@@ -3321,15 +3317,15 @@ def write_species_page(species, references, specific_names, all_names, photos, v
 
     if len(binomial_synlist) > 0:
         if do_print:
-            create_synonym_chronology(species.species, binomial_synlist, binomial_name_counts, specific_synlist,
-                                      specific_name_cnts, do_print, outfile)
+            create_synonym_chronology(outfile, do_print, species.species, binomial_synlist, binomial_name_counts,
+                                      specific_synlist, specific_name_cnts)
         else:
             with codecs.open(WEBOUT_PATH + "names/synonyms_" + species.species + ".html", "w", "utf-8") as suboutfile:
-                create_synonym_chronology(species.species, binomial_synlist, binomial_name_counts, specific_synlist,
-                                          specific_name_cnts, do_print, suboutfile)
+                create_synonym_chronology(suboutfile, do_print, species.species, binomial_synlist, binomial_name_counts,
+                                          specific_synlist, specific_name_cnts)
 
 
-def write_photo_index(specieslist, photos, do_print, outfile):
+def write_photo_index(outfile, do_print, specieslist, photos):
     """
     create an index of all photos
     """
@@ -3397,8 +3393,8 @@ def write_photo_index(specieslist, photos, do_print, outfile):
                     spname = photo.species
                 pfname = "photo_u_" + spname + format(pn, "0>2") + ".html"
                 if do_print:
-                    write_species_photo_page(outfile, pfname, species, sp.common, photo.caption, pn,
-                                             photo.species, True)
+                    write_species_photo_page(outfile, True, pfname, species, sp.common, photo.caption, pn,
+                                             photo.species)
                 else:
                     # copy photos and thumbnails to web output directory
                     tmp_name = "photos/U_" + spname + format(pn, "0>2")
@@ -3411,11 +3407,11 @@ def write_photo_index(specieslist, photos, do_print, outfile):
                     except FileNotFoundError:
                         report_error("Missing file: " + tmp_name + "tn.jpg")
                     with open(WEBOUT_PATH + "photos/" + pfname, "w") as suboutfile:
-                        write_species_photo_page(suboutfile, pfname, species, sp.common, photo.caption, pn,
-                                                 photo.species, False)
+                        write_species_photo_page(suboutfile, False, pfname, species, sp.common, photo.caption, pn,
+                                                 photo.species)
 
 
-def write_video_index(videos, do_print, outfile):
+def write_video_index(outfile, do_print, videos):
     """
     create an index of all videos
     """
@@ -3498,7 +3494,7 @@ def write_video_index(videos, do_print, outfile):
                 report_error("Missing file: " + tmp_name)
 
 
-def write_specific_art_page(outfile, art, backurl, backtext, do_print):
+def write_specific_art_page(outfile, do_print, art, backurl, backtext):
     """
     create a page for a piece of art
     """
@@ -3539,7 +3535,7 @@ def write_specific_art_page(outfile, art, backurl, backtext, do_print):
         common_html_footer(outfile, indexpath="../")
 
 
-def write_art_science_pages(artlist, do_print, outfile):
+def write_art_science_pages(outfile, do_print, artlist):
     """
     create an index for all scientific art
     """
@@ -3592,15 +3588,15 @@ def write_art_science_pages(artlist, do_print, outfile):
                 artist = art.author + " (" + art.year + ")"
                 if artist == a:
                     if do_print:
-                        write_specific_art_page(outfile, art, init_data().art_sci_url, "All Scientific Drawings",
-                                                do_print)
+                        write_specific_art_page(outfile, do_print, art, init_data().art_sci_url,
+                                                "All Scientific Drawings")
                     else:
                         with codecs.open(WEBOUT_PATH + "art/" + art.image + ".html", "w", "utf-8") as suboutfile:
-                            write_specific_art_page(suboutfile, art, init_data().art_sci_url, "All Scientific Drawings",
-                                                    do_print)
+                            write_specific_art_page(suboutfile, do_print, art, init_data().art_sci_url,
+                                                    "All Scientific Drawings")
 
 
-def write_art_stamps_pages(artlist, do_print, outfile):
+def write_art_stamps_pages(outfile, do_print, artlist):
     """
     create an index for all stamps
     """
@@ -3652,13 +3648,13 @@ def write_art_stamps_pages(artlist, do_print, outfile):
             if art.art_type == "stamp":
                 if art.author == a:
                     if do_print:
-                        write_specific_art_page(outfile, art, init_data().art_stamp_url, "All Stamps", do_print)
+                        write_specific_art_page(outfile, do_print, art, init_data().art_stamp_url, "All Stamps")
                     else:
                         with codecs.open(WEBOUT_PATH + "art/" + art.image + ".html", "w", "utf-8") as suboutfile:
-                            write_specific_art_page(suboutfile, art, init_data().art_stamp_url, "All Stamps", do_print)
+                            write_specific_art_page(suboutfile, do_print, art, init_data().art_stamp_url, "All Stamps")
 
     
-def write_art_crafts_pages(artlist, do_print, outfile):
+def write_art_crafts_pages(outfile, do_print, artlist):
     """
     create an index for all crafts
     """
@@ -3715,27 +3711,27 @@ def write_art_crafts_pages(artlist, do_print, outfile):
             if art.art_type == "origami":
                 if art.author == a:
                     if do_print:
-                        write_specific_art_page(outfile, art, init_data().art_craft_url, "All Crafts", do_print)
+                        write_specific_art_page(outfile, do_print, art, init_data().art_craft_url, "All Crafts")
                     else:
                         with codecs.open(WEBOUT_PATH + "art/" + art.image + ".html", "w", "utf-8") as suboutfile:
-                            write_specific_art_page(suboutfile, art, init_data().art_craft_url, "All Crafts", do_print)
+                            write_specific_art_page(suboutfile, do_print, art, init_data().art_craft_url, "All Crafts")
 
 
-def write_all_art_pages(artlist, do_print, outfile):
+def write_all_art_pages(outfile, do_print, artlist):
     """
     create all art pages
     """
     if do_print:
-        write_art_science_pages(artlist, do_print, outfile)
-        write_art_stamps_pages(artlist, do_print, outfile)
-        write_art_crafts_pages(artlist, do_print, outfile)
+        write_art_science_pages(outfile, do_print, artlist)
+        write_art_stamps_pages(outfile, do_print, artlist)
+        write_art_crafts_pages(outfile, do_print, artlist)
     else:
         with codecs.open(WEBOUT_PATH + init_data().art_craft_url, "w", "utf-8") as suboutfile:
-            write_art_crafts_pages(artlist, do_print, suboutfile)
+            write_art_crafts_pages(suboutfile, do_print, artlist)
         with codecs.open(WEBOUT_PATH + init_data().art_stamp_url, "w", "utf-8") as suboutfile:
-            write_art_stamps_pages(artlist, do_print, suboutfile)
+            write_art_stamps_pages(suboutfile, do_print, artlist)
         with codecs.open(WEBOUT_PATH + init_data().art_sci_url, "w", "utf-8") as suboutfile:
-            write_art_science_pages(artlist, do_print, suboutfile)
+            write_art_science_pages(suboutfile, do_print, artlist)
     # copy art files
     if not do_print:
         for art in artlist:
@@ -3749,28 +3745,28 @@ def write_all_art_pages(artlist, do_print, outfile):
                 report_error("Missing file: " + MEDIA_PATH + "art/" + art.image + "_tn." + art.ext)
 
 
-def write_species_info_pages(specieslist, references, specific_names, all_names, photos, videos, art, species_refs,
-                             refdict, binomial_name_cnts, specific_name_cnts, outfile, do_print):
+def write_species_info_pages(outfile, do_print, specieslist, references, specific_names, all_names, photos, videos, art,
+                             species_refs, refdict, binomial_name_cnts, specific_name_cnts):
     """
     create the species index and all individual species pages
     """
     if do_print:
-        write_species_list(specieslist, outfile, True)
+        write_species_list(outfile, True, specieslist)
     else:
         with codecs.open(WEBOUT_PATH + init_data().species_url, "w", "utf-8") as suboutfile:
-            write_species_list(specieslist, suboutfile, False)
+            write_species_list(suboutfile, False, specieslist)
     for species in specieslist:
         sprefs = species_refs[species.species]
         if do_print:
-            write_species_page(species, references, specific_names, all_names, photos, videos, art, sprefs, refdict,
-                               binomial_name_cnts, specific_name_cnts, outfile, True)
+            write_species_page(outfile, True, species, references, specific_names, all_names, photos, videos, art,
+                               sprefs, refdict, binomial_name_cnts, specific_name_cnts)
         else:
             with codecs.open(WEBOUT_PATH + "u_" + species.species + ".html", "w", "utf-8") as suboutfile:
-                write_species_page(species, references, specific_names, all_names, photos, videos, art, sprefs, refdict,
-                                   binomial_name_cnts, specific_name_cnts, suboutfile, False)
+                write_species_page(suboutfile, False, species, references, specific_names, all_names, photos, videos,
+                                   art, sprefs, refdict, binomial_name_cnts, specific_name_cnts)
 
 
-def write_systematics_overview(subgenlist, specieslist, refdict, outfile, do_print):
+def write_systematics_overview(outfile, do_print, subgenlist, specieslist, refdict):
     """ create the systematics page """
     if do_print:
         start_page_division(outfile, "base_page")
@@ -4390,7 +4386,7 @@ def find_morphology_parent(p, mlist):
     return x
 
 
-def write_morphology_page(morph, morphlist, do_print, outfile):
+def write_morphology_page(outfile, do_print, morph, morphlist):
     """ create individual pages for morphology descriptions """
     if morph.parent == ".":
         p = ""
@@ -4467,7 +4463,7 @@ def write_morphology_page(morph, morphlist, do_print, outfile):
         common_html_footer(outfile, indexpath="../")
 
 
-def write_morphology_index(morphlist, do_print, outfile):
+def write_morphology_index(outfile, do_print, morphlist):
     """ create index for morphology pages """
     if do_print:
         start_page_division(outfile, "index_page")
@@ -4514,7 +4510,7 @@ def write_morphology_index(morphlist, do_print, outfile):
         common_html_footer(outfile, indexpath="../")
 
 
-def write_main_morphology_pages(morphology, outfile, do_print):
+def write_main_morphology_pages(outfile, do_print, morphology):
     """ create page for general morphology descriptions """
     if do_print:
         start_page_division(outfile, "base_page")
@@ -4572,17 +4568,17 @@ def write_main_morphology_pages(morphology, outfile, do_print):
     outfile.write("    </figure>\n")
     if do_print:
         end_page_division(outfile)
-        write_morphology_index(morphology, do_print, outfile)
+        write_morphology_index(outfile, do_print, morphology)
         for m in morphology:
-            write_morphology_page(m, morphology, do_print, outfile)
+            write_morphology_page(outfile, do_print, m, morphology)
     else:
         common_html_footer(outfile)
         for m in morphology:
             with codecs.open(WEBOUT_PATH + "morphology/" + morphology_link(m.parent, m.character) + ".html",
                              "w", "utf-8") as suboutfile:
-                write_morphology_page(m, morphology, do_print, suboutfile)
+                write_morphology_page(suboutfile, do_print, m, morphology)
         with codecs.open(WEBOUT_PATH + "morphology/index.html", "w", "utf-8") as suboutfile:
-            write_morphology_index(morphology, do_print, suboutfile)
+            write_morphology_index(suboutfile, do_print, morphology)
 
 
 def write_citation_page(refdict):
@@ -4614,7 +4610,7 @@ def write_citation_page(refdict):
         common_html_footer(outfile)
 
 
-def write_introduction(outfile, species, do_print):
+def write_introduction(outfile, do_print, species):
     """ create the site index """
     if do_print:
         start_page_division(outfile, "base_page")
@@ -5073,18 +5069,18 @@ def build_site():
             copy_support_files()
             print("......Writing References......")
             with codecs.open(WEBOUT_PATH + init_data().ref_url, "w", "utf-8") as outfile:
-                write_reference_bibliography(references, False, outfile)
+                write_reference_bibliography(outfile, False, references)
             with codecs.open(WEBOUT_PATH + init_data().ref_sum_url, "w", "utf-8") as outfile:
-                write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, False, outfile)
-            write_reference_pages(references, refdict, citelist, False, None, name_table, point_locations)
+                write_reference_summary(outfile, False, len(references), yeardat, yeardat1900, citecount, languages)
+            write_reference_pages(None, False, references, refdict, citelist, name_table, point_locations)
             print("......Writing Names Info......")
             with codecs.open(WEBOUT_PATH + "names/index.html", "w", "utf-8") as outfile:
-                write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
-                                     binomial_name_cnts, total_binomial_year_cnts, outfile, False,
+                write_all_name_pages(outfile, False, refdict, citelist, all_names, specific_names, name_table,
+                                     species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
                                      binomial_point_locations, specific_point_locations, point_locations)
             print("......Writing Species......")
-            write_species_info_pages(species, references, specific_names, all_names, photos, videos, art, species_refs,
-                                     refdict, binomial_name_cnts, specific_name_cnts, None, False)
+            write_species_info_pages(None, False, species, references, specific_names, all_names, photos, videos, art,
+                                     species_refs, refdict, binomial_name_cnts, specific_name_cnts)
             if DRAW_MAPS:
                 print("......Copying Maps......")
                 copy_map_files(species, all_names, specific_names, point_locations)
@@ -5094,26 +5090,26 @@ def build_site():
                                      location_sp_names, location_bi_names, location_direct_refs, location_cited_refs,
                                      references)
             with codecs.open(WEBOUT_PATH + init_data().map_url, "w", "utf-8") as outfile:
-                write_geography_page(species, outfile, False)
+                write_geography_page(outfile, False, species)
             print("......Writing Media Pages......")
             with codecs.open(WEBOUT_PATH + init_data().photo_url, "w", "utf-8") as outfile:
-                write_photo_index(species, photos, False, outfile)
-            write_all_art_pages(art, False, None)
+                write_photo_index(outfile, False, species, photos)
+            write_all_art_pages(None, False, art)
             with codecs.open(WEBOUT_PATH + init_data().video_url, "w", "utf-8") as outfile:
-                write_video_index(videos, False, outfile)
+                write_video_index(outfile, False, videos)
             print("......Writing Misc......")
             with codecs.open(WEBOUT_PATH + init_data().syst_url, "w", "utf-8") as outfile:
-                write_systematics_overview(subgenera, species, refdict, outfile, False)
+                write_systematics_overview(outfile, False, subgenera, species, refdict)
             with codecs.open(WEBOUT_PATH + init_data().common_url, "w", "utf-8") as outfile:
-                write_common_names_pages(outfile, replace_references(common_name_data, refdict, False), False)
+                write_common_names_pages(outfile, False, replace_references(common_name_data, refdict, False))
             with codecs.open(WEBOUT_PATH + init_data().lifecycle_url, "w", "utf-8") as outfile:
                 write_life_cycle_pages(outfile, False)
             with codecs.open(WEBOUT_PATH + init_data().tree_url, "w", "utf-8") as outfile:
                 write_phylogeny_pages(outfile, False, refdict)
             with codecs.open(WEBOUT_PATH + init_data().morph_url, "w", "utf-8") as outfile:
-                write_main_morphology_pages(morphology, outfile, False)
+                write_main_morphology_pages(outfile, False, morphology)
             with codecs.open(WEBOUT_PATH + "index.html", "w", "utf-8") as outfile:
-                write_introduction(outfile, species, False)
+                write_introduction(outfile, False, species)
             write_citation_page(refdict)
 
         # output print version
@@ -5122,32 +5118,31 @@ def build_site():
             with codecs.open("print.html", "w", "utf-8") as printfile:
                 start_print(printfile)
                 write_print_only_pages(printfile, species, refdict)
-                write_introduction(printfile, species, True)
-                write_common_names_pages(printfile, replace_references(common_name_data, refdict, True), True)
-                write_systematics_overview(subgenera, species, refdict, printfile, True)
+                write_introduction(printfile, True, species)
+                write_common_names_pages(printfile, True, replace_references(common_name_data, refdict, True))
+                write_systematics_overview(printfile, True, subgenera, species, refdict)
                 write_phylogeny_pages(printfile, True, refdict)
-                write_geography_page(species, printfile, True)
+                write_geography_page(printfile, True, species)
                 write_location_index(printfile, True, point_locations, location_dict, location_species,
                                      location_sp_names, location_bi_names, location_direct_refs, location_cited_refs,
                                      references)
                 write_life_cycle_pages(printfile, True)
-                write_main_morphology_pages(morphology, printfile, True)
+                write_main_morphology_pages(printfile, True, morphology)
                 print("......Writing Species Pages......")
-                write_species_info_pages(species, references, specific_names, all_names, photos, videos, art,
-                                         species_refs, refdict, binomial_name_cnts, specific_name_cnts,
-                                         printfile, True)
+                write_species_info_pages(printfile, True, species, references, specific_names, all_names, photos,
+                                         videos, art, species_refs, refdict, binomial_name_cnts, specific_name_cnts)
                 print("......Writing Name Pages......")
-                write_all_name_pages(refdict, citelist, all_names, specific_names, name_table, species_refs, genus_cnts,
-                                     binomial_name_cnts, total_binomial_year_cnts, printfile, True,
+                write_all_name_pages(printfile, True, refdict, citelist, all_names, specific_names, name_table,
+                                     species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
                                      binomial_point_locations, specific_point_locations, point_locations)
                 print("......Writing Media Pages......")
-                write_photo_index(species, photos, True, printfile)
-                write_video_index(videos, True, printfile)
-                write_all_art_pages(art, True, printfile)
+                write_photo_index(printfile, True, species, photos)
+                write_video_index(printfile, True, videos)
+                write_all_art_pages(printfile, True, art)
                 print("......Writing Reference Pages......")
-                write_reference_summary(len(references), yeardat, yeardat1900, citecount, languages, True, printfile)
-                write_reference_bibliography(references, True, printfile)
-                write_reference_pages(references, refdict, citelist, True, printfile, name_table, point_locations)
+                write_reference_summary(printfile, True, len(references), yeardat, yeardat1900, citecount, languages)
+                write_reference_bibliography(printfile, True, references)
+                write_reference_pages(printfile, True, references, refdict, citelist, name_table, point_locations)
                 end_print(printfile)
     print("done")
 
