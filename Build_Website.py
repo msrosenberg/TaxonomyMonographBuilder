@@ -39,7 +39,7 @@ AUTHOR_NOPCOMMA = 2     # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = False
+DRAW_MAPS = True
 
 # randSeed = random.randint(0, 10000)
 
@@ -224,9 +224,12 @@ def common_html_footer(outfile, indexpath=""):
     """
     outfile.write("\n")
     outfile.write("    <footer>\n")
+    # outfile.write("       <figure id=\"footmap\"><script type=\"text/javascript\" "
+    #               "src=\"http://jf.revolvermaps.com/p.js\"></script><script type=\"text/javascript\">rm2d_ki101('0',"
+    #               "'150','75','5f9t1sywiez','ff0000',20);</script><figcaption>Visitors</figcaption></figure>\n")
     outfile.write("       <figure id=\"footmap\"><script type=\"text/javascript\" "
-                  "src=\"http://jf.revolvermaps.com/p.js\"></script><script type=\"text/javascript\">rm2d_ki101('0',"
-                  "'150','75','5f9t1sywiez','ff0000',20);</script><figcaption>Visitors</figcaption></figure>\n")
+                  "src=\"//rf.revolvermaps.com/0/0/4.js?i=5f9t1sywiez&amp;m=0&amp;h=75&amp;c=ff0000&amp;r=30\" "
+                  "async=\"async\"></script><figcaption>Visitors</figcaption></figure>\n")
     outfile.write("       <p id=\"citation\"><a href=\"" + indexpath + init_data().cite_url +
                   "\"><span class=\"fa fa-pencil\"></span> How to cite this site</a></p>\n")
     outfile.write("       <p id=\"contact\">Questions or comments about the site? Contact "
