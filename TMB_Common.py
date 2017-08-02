@@ -1,13 +1,17 @@
 
-def rangemap_name(name):
+def indent(n: int) -> str:
+    return n * " "
+
+
+def rangemap_name(name: str) -> str:
     return name + "_range_map"
 
 
-def pointmap_name(name):
+def pointmap_name(name: str) -> str:
     return name + "_point_map"
 
 
-def name_to_filename(x):
+def name_to_filename(x: str) -> str:
     """ Convert a full species name into a valid file name """
     name_replace_list = [
         [" ", "_"],
@@ -27,7 +31,7 @@ def name_to_filename(x):
     return x
 
 
-def place_to_filename(x):
+def place_to_filename(x: str) -> str:
     """ Convert a location name into a valid file name """
     place_replace_list = [
         [", ", "_-_"],
@@ -53,7 +57,7 @@ def place_to_filename(x):
     return x
 
 
-def unicode_to_html_encoding(x):
+def unicode_to_html_encoding(x: str) -> str:
     unicode_replace_list = [
         ["ç", "&#x00E7;"],  # 231
         ["ñ", "&#x00F1;"],  # 241
