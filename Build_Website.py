@@ -10,6 +10,7 @@ import os
 import shutil
 import re
 import math
+import subprocess
 # local dependencies
 import TMB_Import
 import TMB_Create_Maps
@@ -2356,9 +2357,9 @@ def write_geography_page(species, outfile, do_print):
         outfile.write("        <div id=\"range_map_canvas\"></div>\n")
         outfile.write("        <div id=\"point_map_canvas\"></div>\n")
         outfile.write("        <div class=\"map_download\">\n")
-        outfile.write("          <a href=\"maps/" + rangemap_name("uca_all") + ".svg\">"
+        outfile.write("          <a href=\"maps/" + rangemap_name("uca_all") + ".svgz\">"
                       "<span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
-        outfile.write("          <a href=\"maps/" + pointmap_name("uca_all") + ".svg\">"
+        outfile.write("          <a href=\"maps/" + pointmap_name("uca_all") + ".svgz\">"
                       "<span class=\"fa fa-download\"></span> Download SVG line map of point locations.</a>\n")
         outfile.write("        </div>\n")
     outfile.write("      </div>\n")
@@ -3160,9 +3161,9 @@ def write_species_page(species, references, specific_names, all_names, photos, v
             outfile.write("           <div id=\"range_map_canvas\" class=\"sp_map\"></div>\n")
             outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
             outfile.write("           <div class=\"map_download\">\n")
-            outfile.write("             <a href=\"maps/" + rangemap_name("u_" + species.species) +
-                          ".svg\"><span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
-            outfile.write("             <a href=\"maps/" + pointmap_name("u_" + species.species) + ".svg\">"
+            outfile.write("             <a href=\"maps/" + rangemap_name("u_" + species.species) + ".svgz\">"
+                          "<span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
+            outfile.write("             <a href=\"maps/" + pointmap_name("u_" + species.species) + ".svgz\">"
                           "<span class=\"fa fa-download\"></span> Download SVG line map of point locations.</a>\n")
             outfile.write("           </div>\n")
         outfile.write("         </dd>\n")
@@ -4801,27 +4802,42 @@ def copy_map_files(species, all_names, specific_names, point_locations):
         except FileNotFoundError:
             report_error("Missing file: " + filename)
 
+    def scour_svg(filename):
+        """
+        run scour to reduce size of svg maps
+
+        theoretically scour could be imported and run from within the code, but it is really not designed
+        to be run that way
+        """
+        subprocess.Popen("scour -i " + filename + " -o " + filename + "z").wait()
+
     # individual species maps
     for s in species:
         if s.status != "fossil":
             copy_file(TMP_MAP_PATH + rangemap_name("u_" + s.species) + ".kmz")
             copy_file(TMP_MAP_PATH + pointmap_name("u_" + s.species) + ".kmz")
-            copy_file(TMP_MAP_PATH + rangemap_name("u_" + s.species) + ".svg")
-            copy_file(TMP_MAP_PATH + pointmap_name("u_" + s.species) + ".svg")
+            scour_svg(TMP_MAP_PATH + rangemap_name("u_" + s.species) + ".svg")
+            scour_svg(TMP_MAP_PATH + pointmap_name("u_" + s.species) + ".svg")
+            copy_file(TMP_MAP_PATH + rangemap_name("u_" + s.species) + ".svgz")
+            copy_file(TMP_MAP_PATH + pointmap_name("u_" + s.species) + ".svgz")
     # combined map
     copy_file(TMP_MAP_PATH + rangemap_name("uca_all") + ".kmz")
     copy_file(TMP_MAP_PATH + pointmap_name("uca_all") + ".kmz")
-    copy_file(TMP_MAP_PATH + rangemap_name("uca_all") + ".svg")
-    copy_file(TMP_MAP_PATH + pointmap_name("uca_all") + ".svg")
+    scour_svg(TMP_MAP_PATH + rangemap_name("uca_all") + ".svg")
+    scour_svg(TMP_MAP_PATH + pointmap_name("uca_all") + ".svg")
+    copy_file(TMP_MAP_PATH + rangemap_name("uca_all") + ".svgz")
+    copy_file(TMP_MAP_PATH + pointmap_name("uca_all") + ".svgz")
 
     # binomial maps
     for n in all_names:
         copy_file(TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".kmz")
-        copy_file(TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".svg")
+        scour_svg(TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".svg")
+        copy_file(TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".svgz")
     # specific name maps
     for n in specific_names:
         copy_file(TMP_MAP_PATH + pointmap_name("sn_" + n.name) + ".kmz")
-        copy_file(TMP_MAP_PATH + pointmap_name("sn_" + n.name) + ".svg")
+        scour_svg(TMP_MAP_PATH + pointmap_name("sn_" + n.name) + ".svg")
+        copy_file(TMP_MAP_PATH + pointmap_name("sn_" + n.name) + ".svgz")
     # point location maps
     for p in point_locations:
         if not point_locations[p].unknown:
