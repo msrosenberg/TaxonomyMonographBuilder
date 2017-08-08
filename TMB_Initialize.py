@@ -27,6 +27,9 @@ class InitializationData:
         self.morphology_file = "data/morphology.txt"
         self.map_kml_file = "data/Fiddler Crabs.kml"
         self.location_file = "data/location_data.txt"
+        self.species_changes_new = "data/species_changes_new.txt"
+        self.species_changes_spelling = "data/species_changes_spelling.txt"
+        self.species_changes_synonyms = "data/species_changes_synonyms.txt"
 
         self.error_log = "errorlog.txt"
 

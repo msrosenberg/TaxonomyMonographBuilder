@@ -3766,8 +3766,37 @@ def write_species_info_pages(outfile, do_print, specieslist, references, specifi
                                    art, sprefs, refdict, binomial_name_cnts, specific_name_cnts)
 
 
-def write_systematics_overview(outfile, do_print, subgenlist, specieslist, refdict):
-    """ create the systematics page """
+def write_systematics_overview(outfile, do_print, subgenlist, specieslist, refdict, species_changes_new,
+                               species_changes_synonyms, species_changes_spelling):
+    """
+    create the systematics page
+    """
+
+    def write_species_table(header, data_list):
+        outfile.write("      <table>\n")
+        outfile.write("        <thead>\n")
+        outfile.write("          <tr>\n")
+        for h in header:
+            outfile.write("            <th>" + h + "</th>\n")
+        outfile.write("          </tr>\n")
+        outfile.write("        </thead>\n")
+        outfile.write("        <tbody>\n")
+        for data in data_list:
+            outfile.write("          <tr>\n")
+            outfile.write("            <td><em class=\"species\">Uca " + data[0] + "</em></td>\n")
+            if data[1] != ".":
+                outfile.write("            <td><em class=\"species\">Uca " + data[1] + "</em></td>\n")
+            if data[2] == ".":
+                outfile.write("            <td>Unpublished</td>\n")
+            else:
+                refs = data[2].split(";")
+                frefs = [format_reference_cite(refdict[r], do_print, AUTHOR_PAREN) for r in refs]
+                outfile.write("            <td>" + ", ".join(frefs) + "</td>\n")
+            outfile.write("          </tr>\n")
+        outfile.write("        </tbody>\n")
+        outfile.write("      </table>\n")
+
+    # main function code
     if do_print:
         start_page_division(outfile, "base_page")
         media_path = MEDIA_PATH
@@ -3798,9 +3827,10 @@ def write_systematics_overview(outfile, do_print, subgenlist, specieslist, refdi
 
     # genus section
     outfile.write("    <section class=\"spsection\">\n")
-    outfile.write("      <h2 id=\"genus\" class=\"bookmark2\">Genus <em class=\"species\">Uca</em> Leach, 1814</h2>\n")
-    outfile.write("      <h3 class=\"nobookmark\">Type species: <em class=\"species\">Cancer vocans major</em> "
-                  "Herbst, 1782</h3>\n")
+    outfile.write("      <h2 id=\"genus\" class=\"bookmark2\">Genus <em class=\"species\">Uca</em> " +
+                  format_reference_cite(refdict["Leach1814"], do_print, AUTHOR_NOPCOMMA) + "</h2>\n")
+    outfile.write("      <h3 class=\"nobookmark\">Type species: <em class=\"species\">Cancer vocans major</em> " +
+                  format_reference_cite(refdict["Herbst1782"], do_print, AUTHOR_NOPCOMMA) + "</h3>\n")
     outfile.write("      <p>\n")
     outfile.write("         The earliest description of the type species of <em class=\"species\">Uca</em> is from "
                   "a drawing in " + format_reference_cite(refdict["Seba1758"], do_print, AUTHOR_PAREN) +
@@ -3986,157 +4016,9 @@ def write_systematics_overview(outfile, do_print, subgenlist, specieslist, refdi
     outfile.write("      </p>\n")
     outfile.write("      <h3 class=\"nobookmark\">Changes to the species level taxonomy of the genus "
                   "<em class=\"species\">Uca</em> since Crane (1975)</h3>\n")
-    outfile.write("      <table>\n")
-    outfile.write("        <thead>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <th>New/Validated Extant Species</th><th>Reference(s)</th>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("        </thead>\n")
-    outfile.write("        <tfoot>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td colspan=\"2\"><strong>Note:</strong> The newly described (relative to Crane) "
-                  "species <em class=\"species\">Uca pavo</em> George &amp; Jones, 1982, is a junior subsynonym "
-                  "of <em class=\"species\">Uca capricornis</em> (see " +
-                  format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_PAREN) + ")</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("        </tfoot>\n")
-    outfile.write("        <tbody>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td><em class=\"species\">Uca panacea</em></td>\n")
-    outfile.write("            <td>" +
-                  format_reference_cite(refdict["Novak1974"], do_print, AUTHOR_PAREN) + "</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td><em class=\"species\">Uca marguerita</em></td>\n")
-    outfile.write("            <td>" +
-                  format_reference_cite(refdict["Thurman1981.1"], do_print, AUTHOR_PAREN) + "</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td><em class=\"species\">Uca elegans</em></td>\n")
-    outfile.write("            <td>" + format_reference_cite(refdict["George1982"], do_print, AUTHOR_PAREN) +
-                  "</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td><em class=\"species\">Uca hirsutimanus</em></td>\n")
-    outfile.write("            <td>" + format_reference_cite(refdict["George1982"], do_print, AUTHOR_PAREN) +
-                  "</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td><em class=\"species\">Uca intermedia</em></td>\n")
-    outfile.write("            <td>" +
-                  format_reference_cite(refdict["vonPrahl1985"], do_print, AUTHOR_PAREN) + "</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td><em class=\"species\">Uca victoriana</em></td>\n")
-    outfile.write("            <td>" +
-                  format_reference_cite(refdict["vonHagen1987.1"], do_print, AUTHOR_PAREN) + "</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td><em class=\"species\">Uca albimana</em></td>\n")
-    outfile.write("            <td>" +
-                  format_reference_cite(refdict["Kossmann1877"], do_print, AUTHOR_PAREN) +
-                  ", " + format_reference_cite(refdict["Shih2009"], do_print, AUTHOR_PAREN) + ", " +
-                  format_reference_cite(refdict["Naderloo2010"], do_print, AUTHOR_PAREN) + "</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td><em class=\"species\">Uca iranica</em></td>\n")
-    outfile.write("            <td>" +
-                  format_reference_cite(refdict["Pretzmann1971"], do_print, AUTHOR_PAREN) +
-                  ", " + format_reference_cite(refdict["Shih2009"], do_print, AUTHOR_PAREN) + ", " +
-                  format_reference_cite(refdict["Naderloo2010"], do_print, AUTHOR_PAREN) + "</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td><em class=\"species\">Uca cryptica</em></td>\n")
-    outfile.write("            <td>" +
-                  format_reference_cite(refdict["Naderloo2010"], do_print, AUTHOR_PAREN) +
-                  "</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td><em class=\"species\">Uca osa</em></td>\n")
-    outfile.write("            <td>" +
-                  format_reference_cite(refdict["Landstorfer2010"], do_print, AUTHOR_PAREN) + "</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td><em class=\"species\">Uca jocelynae</em></td>\n")
-    outfile.write("            <td>" + format_reference_cite(refdict["Shih2010.1"], do_print, AUTHOR_PAREN) +
-                  "</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td><em class=\"species\">Uca splendida</em></td>\n")
-    outfile.write("            <td>" +
-                  format_reference_cite(refdict["Stimpson1858"], do_print, AUTHOR_PAREN) +
-                  ", " + format_reference_cite(refdict["Shih2012"], do_print, AUTHOR_PAREN) + "</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td><em class=\"species\">Uca boninensis</em></td>\n")
-    outfile.write("            <td>" + format_reference_cite(refdict["Shih2013.2"], do_print, AUTHOR_PAREN) + "</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("        </tbody>\n")
-    outfile.write("      </table>\n")
-    outfile.write("      <table>\n")
-    outfile.write("        <thead>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <th>Junior Subsynonym</th><th>Correct Name</th><th>Reference(s)</th>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("        </thead>\n")
-    outfile.write("        <tfoot>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td colspan=\"3\"><strong>Note:</strong> <em class=\"species\">Uca australiae</em> "
-                  "is probably not a valid species; it is based on a single specimen found washed up on the "
-                  "Australian shore (" +
-                  format_reference_cite(refdict["George1982"], do_print, AUTHOR_NOPAREN) +
-                  ", among others)</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("        </tfoot>\n")
-    outfile.write("        <tbody>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td><em class=\"species\">Uca minima</em></td>\n")
-    outfile.write("            <td><em class=\"species\">Uca signata</em></td>\n")
-    outfile.write("            <td>" + format_reference_cite(refdict["George1982"], do_print, AUTHOR_PAREN) +
-                  "</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td><em class=\"species\">Uca spinata</em></td>\n")
-    outfile.write("            <td><em class=\"species\">Uca paradussumieri</em></td>\n")
-    outfile.write("            <td>" + format_reference_cite(refdict["Dai1991"], do_print, AUTHOR_PAREN) +
-                  "; " + format_reference_cite(refdict["Jones1994"], do_print, AUTHOR_PAREN) + "</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td><em class=\"species\">Uca pacificensis</em></td>\n")
-    outfile.write("            <td><em class=\"species\">Uca excisa</em></td>\n")
-    outfile.write("            <td>Unpublished\n")
-    outfile.write("          </tr>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td><em class=\"species\">Uca leptochela</em></td>\n")
-    outfile.write("            <td><em class=\"species\">Uca festae</em></td>\n")
-    outfile.write("            <td>" +
-                  format_reference_cite(refdict["Beinlich2006"], do_print, AUTHOR_PAREN) + "</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("        </tbody>\n")
-    outfile.write("      </table>\n")
-    outfile.write("      <table>\n")
-    outfile.write("        <thead>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <th>Incorrect Spelling</th>\n")
-    outfile.write("            <th>Correct Spelling</th>\n")
-    outfile.write("            <th>Reference(s)</th>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("        </thead>\n")
-    outfile.write("        <tbody>\n")
-    outfile.write("          <tr> \n")
-    outfile.write("            <td><em class=\"species\">Uca longidigita</em></td>\n")
-    outfile.write("            <td><em class=\"species\">Uca longidigitum</em></td>\n")
-    outfile.write("            <td>" +
-                  format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_PAREN) + "</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("          <tr>\n")
-    outfile.write("            <td><em class=\"species\">Uca mjobergi</em></td>\n")
-    outfile.write("            <td><em class=\"species\">Uca mjoebergi</em></td>\n")
-    outfile.write("            <td>" +
-                  format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_PAREN) + "</td>\n")
-    outfile.write("          </tr>\n")
-    outfile.write("        </tbody>\n")
-    outfile.write("      </table>\n")
+    write_species_table(["New/Validated Extant Species", "Reference(s)"], species_changes_new)
+    write_species_table(["Junior Subsynonym", "Correct Name", "Reference(s)"], species_changes_synonyms)
+    write_species_table(["Incorrect Spelling", "Correct Spelling", "Reference(s)"], species_changes_spelling)
     outfile.write("      <p>\n")
     outfile.write(format_reference_cite(refdict["Crane1975"], do_print, AUTHOR_PAREN) +
                   " tended to lump related taxa into "
@@ -5021,6 +4903,9 @@ def build_site():
         languages = summarize_languages(references)
         print("...Reading Species...")
         species = TMB_Import.read_species_data(init_data().species_data_file)
+        species_changes_new = TMB_Import.read_simple_file(init_data().species_changes_new)
+        species_changes_synonyms = TMB_Import.read_simple_file(init_data().species_changes_synonyms)
+        species_changes_spelling = TMB_Import.read_simple_file(init_data().species_changes_spelling)
 
         print("...Connecting References...")
         compute_species_from_citation_linking(citelist)
@@ -5099,7 +4984,8 @@ def build_site():
                 write_video_index(outfile, False, videos)
             print("......Writing Misc......")
             with codecs.open(WEBOUT_PATH + init_data().syst_url, "w", "utf-8") as outfile:
-                write_systematics_overview(outfile, False, subgenera, species, refdict)
+                write_systematics_overview(outfile, False, subgenera, species, refdict, species_changes_new,
+                                           species_changes_synonyms, species_changes_spelling)
             with codecs.open(WEBOUT_PATH + init_data().common_url, "w", "utf-8") as outfile:
                 write_common_names_pages(outfile, False, replace_references(common_name_data, refdict, False))
             with codecs.open(WEBOUT_PATH + init_data().lifecycle_url, "w", "utf-8") as outfile:
@@ -5120,7 +5006,8 @@ def build_site():
                 write_print_only_pages(printfile, species, refdict)
                 write_introduction(printfile, True, species)
                 write_common_names_pages(printfile, True, replace_references(common_name_data, refdict, True))
-                write_systematics_overview(printfile, True, subgenera, species, refdict)
+                write_systematics_overview(printfile, True, subgenera, species, refdict, species_changes_new,
+                                           species_changes_synonyms, species_changes_spelling)
                 write_phylogeny_pages(printfile, True, refdict)
                 write_geography_page(printfile, True, species)
                 write_location_index(printfile, True, point_locations, location_dict, location_species,
