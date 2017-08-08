@@ -90,8 +90,8 @@ def common_header_part1(outfile, title, indexpath=""):
                   "href=\"" + indexpath + "apple-touch-icon-114x114-precomposed.png\">\n")
     outfile.write("    <link rel=\"apple-touch-icon-precomposed\" sizes=\"144x144\" "
                   "href=\"" + indexpath + "apple-touch-icon-144x144-precomposed.png\">\n")
-    outfile.write("    <link rel=\"stylesheet\" href=\"http://fonts.googleapis.com/css?family=Merienda+One|"
-                  "Lora:400,700,400italic,700italic\" />\n")
+    # outfile.write("    <link rel=\"stylesheet\" href=\"http://fonts.googleapis.com/css?family=Merienda+One|"
+    #               "Lora:400,700,400italic,700italic\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath + "uca_style.css\" />\n")
     outfile.write("    <script src=\"https://use.fontawesome.com/3669ad7c2b.js\"></script>\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath +
@@ -156,8 +156,6 @@ def write_google_map_range_header(outfile, map_name):
     """
     outfile.write("        var range_map = new google.maps.Map(document.getElementById(\"range_map_canvas\"),"
                   "mapOptions);\n")
-    # outfile.write("        var range_layer = new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" +
-    #               rangemap_name(map_name) + ".kmz\",{suppressInfoWindows: true});\n")
     outfile.write("        var range_layer = new google.maps.KmlLayer(\"" + init_data().site_url() + "/maps/" +
                   rangemap_name(map_name) + ".kmz\",{suppressInfoWindows: true});\n")
     outfile.write("        range_layer.setMap(range_map);\n")
@@ -176,9 +174,6 @@ def write_google_map_point_header(outfile, map_name, location):
 
     outfile.write("        var point_map = new google.maps.Map(document.getElementById(\"point_map_canvas\"),"
                   "mapOptions);\n")
-    # outfile.write("        var point_layer = "
-    #               "new google.maps.KmlLayer(\"http://www.fiddlercrab.info/maps/" + pointmap_name(map_name) +
-    #               ".kmz\",{suppressInfoWindows: false" + preserve + "});\n")
     outfile.write("        var point_layer = "
                   "new google.maps.KmlLayer(\"" + init_data().site_url() + "/maps/" + pointmap_name(map_name) +
                   ".kmz\",{suppressInfoWindows: false" + preserve + "});\n")
@@ -400,21 +395,9 @@ def create_pie_chart_file(filename, data):
     for d in datalist:
         sizes.append(data[d])
     fig, faxes = mplpy.subplots(figsize=[6, 3])
-    # cl = [i for i in range(len(data))]
-    # faxes.pie(sizes, labels=datalist, autopct="%1.1f%%")
-    # color_list = mplpy.cm.Vega20(cl)
     # my approximation of the pygal color scheme
     color_list = ["salmon", "royalblue", "lightseagreen", "gold", "darkorange", "mediumorchid", "deepskyblue",
                   "lightgreen", "sandybrown", "palevioletred", "lightskyblue", "mediumaquamarine", "lemonchiffon"]
-    # tol14rainbow
-    # color_list = ["#882E72", "#B178A6", "#D6C1DE", "#1965B0", "#5289C7", "#7BAFDE", "#4EB265", "#90C987", "#CAE0AB",
-    #                  "#F7EE55", "#F6C141", "#F1932D", "#E8601C", "#DC050C"]
-    # color brewer paired (12)
-    # color_list = ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6',
-    #               '#6a3d9a', '#ffff99', '#b15928']
-    # color brewer set3 (12)
-    # color_list = ['#8dd3c7', '#ffffb3', '#bebada', '#fb8072', '#80b1d3', '#fdb462', '#b3de69', '#fccde5', '#d9d9d9',
-    #               '#bc80bd', '#ccebc5', '#ffed6f']
     faxes.pie(sizes, colors=color_list, startangle=90, counterclock=False)
     faxes.axis("equal")
     faxes.legend(datalist, loc="upper left", frameon=False)
@@ -502,37 +485,8 @@ def create_line_chart_file(filename, data, minx, maxx, y):
 
 def create_chronology_chart_file(filename, miny, maxy, maxcnt, yearly_data):
     y_list = []
-
     for y in range(miny, maxy + 1):
         y_list.append(float(yearly_data[y]))
-    # for y in range(miny, maxy + 1):
-    #     if yearly_data[y] != 0:
-    #         y_list.append(yearly_data[y])
-    #     else:
-    #         do_null = True
-    #         if miny < y < maxy:
-    #             if (yearly_data[y + 1] != 0) or (yearly_data[y - 1] != 0):
-    #                 do_null = False
-    #         elif y > miny:
-    #             if yearly_data[y-1] != 0:
-    #                 do_null = False
-    #         elif y < maxy:
-    #             if yearly_data[y+1] != 0:
-    #                 do_null = False
-    #         if do_null:
-    #             y_list.append(None)
-    #         else:
-    #             y_list.append(0)
-    # y2_list = []
-    # for x in y_list:
-    #     if x is None:
-    #         y2_list.append(None)
-    #     else:
-    #         y2_list.append(-x)
-
-    # print(filename)
-    # print(y_list)
-    # print(y2_list)
 
     x = [y for y in range(miny, maxy+1)]
     fig, faxes = mplpy.subplots(figsize=[6.5, 1.5])
