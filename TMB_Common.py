@@ -58,6 +58,7 @@ def place_to_filename(x: str) -> str:
 
 
 def unicode_to_html_encoding(x: str) -> str:
+    """ Change unicode characters to html encoding in order to display correctly in google maps """
     unicode_replace_list = [
         ["ç", "&#x00E7;"],  # 231
         ["ñ", "&#x00F1;"],  # 241
