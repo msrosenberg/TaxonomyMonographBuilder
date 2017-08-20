@@ -63,11 +63,11 @@ class InitializationData:
         self.start_year = 1758  # Start with Linnean taxonomy
         self.current_year = datetime.date.today().year
 
-    def site_url(self):
+    def site_url(self) -> str:
         return self.site_http + self.site_address
 
 
-def initialize():
+def initialize() -> None:
     global INIT_DATA
     INIT_DATA = InitializationData()
     os.chdir(INIT_DATA.main_path)

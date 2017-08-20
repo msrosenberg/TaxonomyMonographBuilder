@@ -2,16 +2,17 @@
 Functions to read data from files
 """
 
-import codecs
+# import codecs
+from typing import Tuple
 import TMB_Classes
 from TMB_Error import report_error
 
 
-def read_simple_file(filename):
+def read_simple_file(filename: str) -> list:
     """
     read data from generic flatfile
     """
-    with codecs.open(filename, "r", "utf-8") as infile:
+    with open(filename, "r", encoding="utf-8") as infile:
         data_list = []
         got_header = False
         for line in infile:
@@ -28,40 +29,59 @@ def read_simple_file(filename):
     return data_list
 
 
-def read_citation_file(citation_filename):
+def read_citation_file(filename: str) -> list:
     """
     read citation info
     """
-    with codecs.open(citation_filename, "r", "utf-8") as reffile:
-        cite_list = []
-        got_header = False
-        for line in reffile:
-            if not got_header:
-                got_header = True
-            else:
-                line = line.replace("\"\"", "\"")
-                cite = line.strip().split("\t")
-                for i, x in enumerate(cite):
-                    if x.startswith("\"") and x.endswith("\""):
-                        cite[i] = x[1:len(x)-1]
-                newcite = TMB_Classes.CitationClass()
-                newcite.cite_key = cite[0]
-                newcite.name_key = cite[1]
-                newcite.name = cite[2]
-                newcite.common = cite[3]
-                newcite.where = cite[4]
-                newcite.context = cite[5]
-                newcite.application = cite[6]
-                newcite.cite_n = cite[7]
-                newcite.actual = cite[8]
-                newcite.source = cite[9]
-                newcite.name_note = cite[10]
-                newcite.general_note = cite[11]
-                cite_list.append(newcite)
+    tmplist = read_simple_file(filename)
+    cite_list = []
+    for cite in tmplist:
+        newcite = TMB_Classes.CitationClass()
+        newcite.cite_key = cite[0]
+        newcite.name_key = cite[1]
+        newcite.name = cite[2]
+        newcite.common = cite[3]
+        newcite.where = cite[4]
+        newcite.context = cite[5]
+        newcite.application = cite[6]
+        newcite.cite_n = cite[7]
+        newcite.actual = cite[8]
+        newcite.source = cite[9]
+        newcite.name_note = cite[10]
+        newcite.general_note = cite[11]
+        cite_list.append(newcite)
     return cite_list
+    # with codecs.open(citation_filename, "r", "utf-8") as reffile:
+    #     cite_list = []
+    #     got_header = False
+    #     for line in reffile:
+    #         if not got_header:
+    #             got_header = True
+    #         else:
+    #             line = line.replace("\"\"", "\"")
+    #             cite = line.strip().split("\t")
+    #             for i, x in enumerate(cite):
+    #                 if x.startswith("\"") and x.endswith("\""):
+    #                     cite[i] = x[1:len(x)-1]
+    #             newcite = TMB_Classes.CitationClass()
+    #             newcite.cite_key = cite[0]
+    #             newcite.name_key = cite[1]
+    #             newcite.name = cite[2]
+    #             newcite.common = cite[3]
+    #             newcite.where = cite[4]
+    #             newcite.context = cite[5]
+    #             newcite.application = cite[6]
+    #             newcite.cite_n = cite[7]
+    #             newcite.actual = cite[8]
+    #             newcite.source = cite[9]
+    #             newcite.name_note = cite[10]
+    #             newcite.general_note = cite[11]
+    #             cite_list.append(newcite)
+    # return cite_list
 
 
-def read_reference_data(ref_filename, formatref_filename, citation_filename):
+def read_reference_data(ref_filename: str, formatref_filename: str,
+                        citation_filename: str) -> Tuple[list, dict, list, dict, int]:
     """
     read all reference data
     """
@@ -70,7 +90,7 @@ def read_reference_data(ref_filename, formatref_filename, citation_filename):
     cite_done = {}
 
     # citation style data (Author, Year) and language for each reference
-    with codecs.open(ref_filename, "r", "utf-8") as reffile:
+    with open(ref_filename, "r", encoding="utf-8") as reffile:
         for line in reffile:
             line = line.replace("et al.", "<em>et al.</em>")
             line = line.replace(" & ", " &amp; ")
@@ -92,7 +112,7 @@ def read_reference_data(ref_filename, formatref_filename, citation_filename):
             ref_list.append(newref)
 
     # html formatted full references
-    with codecs.open(formatref_filename, "r", "utf-8") as reffile:
+    with open(formatref_filename, "r", encoding="utf-8") as reffile:
         c = -1
         for line in reffile:
             line = line.strip()
@@ -127,7 +147,7 @@ def read_reference_data(ref_filename, formatref_filename, citation_filename):
     return ref_list, refdict, citelist, year_dat, cite_count
 
 
-def read_species_data(filename):
+def read_species_data(filename: str) -> list:
     """
     read data from species flatfile
     """
@@ -153,7 +173,7 @@ def read_species_data(filename):
     return species_list
 
 
-def read_photo_data(filename):
+def read_photo_data(filename: str) -> list:
     """
     read data from photo flatfile
     """
@@ -168,7 +188,7 @@ def read_photo_data(filename):
     return photo_list
 
 
-def read_video_data(filename):
+def read_video_data(filename: str) -> list:
     """
     read data from video flatfile
     """
@@ -190,7 +210,7 @@ def read_video_data(filename):
     return video_list
 
 
-def read_subgenera_data(filename):
+def read_subgenera_data(filename: str) -> list:
     """
     read subgenera data
     """
@@ -208,7 +228,7 @@ def read_subgenera_data(filename):
     return genlist
 
 
-def read_specific_names_data(filename):
+def read_specific_names_data(filename: str) -> list:
     """
     read specific name data
     """
@@ -227,8 +247,10 @@ def read_specific_names_data(filename):
     return spec_name_list
 
 
-def read_art_data(filename):
-    """ read art data """
+def read_art_data(filename: str) -> list:
+    """
+    read art data
+    """
     tmplist = read_simple_file(filename)
     art_list = []
     for a in tmplist:
@@ -246,8 +268,10 @@ def read_art_data(filename):
     return art_list
 
 
-def read_morphology_data(filename):
-    """ read morphology data """
+def read_morphology_data(filename: str) -> list:
+    """
+    read morphology data
+    """
     tmplist = read_simple_file(filename)
     morph_list = []
     for m in tmplist:
@@ -261,13 +285,19 @@ def read_morphology_data(filename):
     return morph_list
 
 
-def read_common_name_data(filename):
-    with codecs.open(filename, "r", "utf-8") as infile:
+def read_common_name_data(filename: str) -> list:
+    """
+    read common name text info
+    """
+    with open(filename, "r", encoding="utf-8") as infile:
         lines = infile.readlines()
     return lines
 
 
-def read_location_data(filename):
+def read_location_data(filename: str) -> dict:
+    """
+    read location data
+    """
     tmplist = read_simple_file(filename)
     locdict = {}
     for loc in tmplist:

@@ -12,7 +12,9 @@ def pointmap_name(name: str) -> str:
 
 
 def name_to_filename(x: str) -> str:
-    """ Convert a full species name into a valid file name """
+    """
+    Convert a full species name into a valid file name
+    """
     name_replace_list = [
         [" ", "_"],
         ["(", ""],
@@ -32,7 +34,9 @@ def name_to_filename(x: str) -> str:
 
 
 def place_to_filename(x: str) -> str:
-    """ Convert a location name into a valid file name """
+    """
+    Convert a location name into a valid file name
+    """
     place_replace_list = [
         [", ", "_-_"],
         [" (", "_-_"],
@@ -58,7 +62,9 @@ def place_to_filename(x: str) -> str:
 
 
 def unicode_to_html_encoding(x: str) -> str:
-    """ Change unicode characters to html encoding in order to display correctly in google maps """
+    """
+    Change unicode characters to html encoding in order to display correctly in google maps
+    """
     unicode_replace_list = [
         ["ç", "&#x00E7;"],  # 231
         ["ñ", "&#x00F1;"],  # 241

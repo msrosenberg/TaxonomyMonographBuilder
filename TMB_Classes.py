@@ -2,6 +2,8 @@
 General Data Classes for the Taxonomy Manuscript Builder
 """
 
+from typing import Optional
+
 
 # ----classes----
 class ReferenceClass:
@@ -12,7 +14,7 @@ class ReferenceClass:
         self.cite_key = ""
         self.language = ""
 
-    def year(self):
+    def year(self) -> Optional[int]:
         y = self.citation
         y = y[y.find("(") + 1:y.find(")")]
         if (y != "?") and (y.lower() != "in press"):
@@ -25,7 +27,7 @@ class ReferenceClass:
         else:
             return None
 
-    def author(self):
+    def author(self) -> str:
         return self.citation[:self.citation.find("(")].strip()
 
 
@@ -93,6 +95,7 @@ class ArtClass:
 
 
 class MorphologyClass:
+    """ a class to hold morphology information """
     def __init__(self):
         self.character = ""
         self.parent = ""
@@ -102,6 +105,7 @@ class MorphologyClass:
 
 
 class SpeciesClass:
+    """ a class to hold species information """
     def __init__(self):
         self.species = ""
         self.subgenus = ""
@@ -123,6 +127,7 @@ class SpeciesClass:
 
 
 class CitationClass:
+    """ a class to hold citation data """
     def __init__(self):
         self.cite_key = ""
         self.name_key = ""
@@ -149,6 +154,7 @@ class CitationClass:
 
 
 class LocationClass:
+    """ a class to hold location data """
     def __init__(self):
         self.name = ""
         self.trimmed_name = ""
@@ -165,8 +171,8 @@ class LocationClass:
         self.sw_lon = None
         self.unknown = False
 
-    def n_children(self):
+    def n_children(self) -> int:
         return len(self.children)
 
-    def n_alternates(self):
+    def n_alternates(self) -> int:
         return len(self.alternates)

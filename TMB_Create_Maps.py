@@ -9,20 +9,24 @@ A temporary file called doc.kml is produced and not automatically deleted upon
 completion of the code.
 """
 
-import codecs
+# import codecs
 import zipfile
+import TMB_Initialize
+from typing import Tuple, Union, Optional
+from io import TextIOWrapper
 import matplotlib.pyplot as mplpy
 from matplotlib.collections import PatchCollection
 import matplotlib.patches as mplp
 # from TMB_Error import report_error
 from TMB_Common import *
 
+Number = Union[int, float]
 __TMP_PATH__ = "temp/"
 __OUTPUT_PATH__ = __TMP_PATH__ + "maps/"
 
 
 class Point:
-    def __init__(self, lat=0.0, lon=0.0):
+    def __init__(self, lat: Number = 0, lon: Number = 0):
         self.lat = lat
         self.lon = lon
 
@@ -31,11 +35,11 @@ class Polygon:
     def __init__(self):
         self.points = []
 
-    def n(self):
+    def n(self) -> int:
         return len(self.points)
 
 
-def read_kml_placemark(infile):
+def read_kml_placemark(infile: TextIOWrapper) -> list:
     namestr = infile.readline().strip()  # read name
     line = infile.readline().strip()
     while (not line.startswith("<LineString>") and not line.startswith("<Polygon>") and
@@ -61,7 +65,7 @@ def read_kml_placemark(infile):
         return [namestr, False, coords]
 
 
-def read_species_from_kml(infile, namestr):
+def read_species_from_kml(infile: TextIOWrapper, namestr: str) -> list:
     line = infile.readline().strip()
     crabplaces = []
     while not line.startswith("</Folder>"):
@@ -72,7 +76,7 @@ def read_species_from_kml(infile, namestr):
     return [namestr, crabplaces]
 
 
-def read_kml_folder(infile):
+def read_kml_folder(infile: TextIOWrapper) -> list:
     line = infile.readline().strip()
     crab = None
     while not line.startswith("</Folder>"):
@@ -84,9 +88,9 @@ def read_kml_folder(infile):
     return crab
 
 
-def read_raw_kml(filename):
+def read_raw_kml(filename: str) -> list:
     maplist = []
-    with open(filename, "r") as infile:
+    with open(filename, "r", encoding="utf-8") as infile:
         line = infile.readline()
         while line != "":
             line = line.strip()
@@ -97,11 +101,11 @@ def read_raw_kml(filename):
     return maplist
 
 
-def write_species_range_map_kml(species_map):
+def write_species_range_map_kml(species_map: list) -> None:
     name = species_map[0]
     locs = species_map[1]
     name = name[name.find("Uca")+4:name.find("</")]
-    with open(__TMP_PATH__ + "doc.kml", "w") as outfile:
+    with open(__TMP_PATH__ + "doc.kml", "w", encoding="UTF-8") as outfile:
         outfile.write("<?xml version=\"1.0\"?>\n")
         outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
         outfile.write("  <Document>\n")
@@ -141,8 +145,8 @@ def write_species_range_map_kml(species_map):
         myzip.close()
 
 
-def write_all_range_map_kml(species_maps):
-    with open(__TMP_PATH__ + "doc.kml", "w") as outfile:
+def write_all_range_map_kml(species_maps: list) -> None:
+    with open(__TMP_PATH__ + "doc.kml", "w", encoding="UTF-8") as outfile:
         outfile.write("<?xml version=\"1.0\"?>\n")
         outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
         outfile.write("  <Document>\n")
@@ -189,7 +193,7 @@ def write_all_range_map_kml(species_maps):
         myzip.close()
 
 
-def read_base_map(mainfile, islandfile):
+def read_base_map(mainfile: str, islandfile: Optional[str] = None) -> list:
     polygon_list = []
     with open(mainfile, "r") as infile:
         line = infile.readline()
@@ -229,7 +233,7 @@ def read_base_map(mainfile, islandfile):
     return polygon_list
 
 
-def draw_base_svg_map(faxes, base_map):
+def draw_base_svg_map(faxes, base_map: list) -> None:
     """
     Draw the background map of countries and islands
     """
@@ -245,7 +249,8 @@ def draw_base_svg_map(faxes, base_map):
     faxes.add_collection(pc)
 
 
-def adjust_svg_map_boundaries(minlon, maxlon, minlat, maxlat):
+def adjust_svg_map_boundaries(minlon: Number, maxlon: Number, minlat: Number, maxlat: Number) -> Tuple[Number, Number,
+                                                                                                       Number, Number]:
     """
     Adjust ranges to keep map scale (2:1 ratio, lon to lat), with a 5 degree buffer
     Do not allow the boundaries to exceed 180/-180 in lon or 90/-90 in lat
@@ -285,7 +290,8 @@ def adjust_svg_map_boundaries(minlon, maxlon, minlat, maxlat):
         return minlon, maxlon, minlat, maxlat
 
 
-def add_line_to_svg_map(faxes, points, minlon, maxlon, minlat, maxlat, lw, a):
+def add_line_to_svg_map(faxes, points: str, minlon: Number, maxlon: Number, minlat: Number, maxlat: Number,
+                        lw: int, a: Number) -> Tuple[Number, Number, Number, Number]:
     lons = []
     lats = []
     points = points.split(" ")
@@ -303,7 +309,7 @@ def add_line_to_svg_map(faxes, points, minlon, maxlon, minlat, maxlat, lw, a):
     return minlon, maxlon, minlat, maxlat
 
 
-def write_species_range_map_svg(base_map, species_map):
+def write_species_range_map_svg(base_map: list, species_map: list) -> None:
     fig, faxes = mplpy.subplots(figsize=[6.5, 3.25])
     draw_base_svg_map(faxes, base_map)
     for spine in faxes.spines:
@@ -333,7 +339,7 @@ def write_species_range_map_svg(base_map, species_map):
     mplpy.close("all")
 
 
-def write_all_range_map_svg(base_map, species_maps):
+def write_all_range_map_svg(base_map: list, species_maps: list) -> None:
     fig, faxes = mplpy.subplots(figsize=[6.5, 3.25])
     draw_base_svg_map(faxes, base_map)
     for spine in faxes.spines:
@@ -365,8 +371,9 @@ def write_all_range_map_svg(base_map, species_maps):
     mplpy.close("all")
 
 
-def write_point_map_kml(title, place_list, point_locations, invalid_places, init_data):
-    with codecs.open(__TMP_PATH__ + "doc.kml", "w", "utf-8") as outfile:
+def write_point_map_kml(title: str, place_list: list, point_locations: dict, invalid_places: Optional[set],
+                        init_data: TMB_Initialize.InitializationData) -> None:
+    with open(__TMP_PATH__ + "doc.kml", "w", encoding="utf-8") as outfile:
         outfile.write("<?xml version=\"1.0\"?>\n")
         outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
         outfile.write("  <Document>\n")
@@ -416,7 +423,8 @@ def write_point_map_kml(title, place_list, point_locations, invalid_places, init
         myzip.close()
 
 
-def write_point_map_svg(title, place_list, point_locations, invalid_places, base_map, skip_axes, set_bounds):
+def write_point_map_svg(title: str, place_list: list, point_locations: dict, invalid_places: Optional[set],
+                        base_map: list, skip_axes: bool, set_bounds: bool) -> None:
     fig, faxes = mplpy.subplots(figsize=[6.5, 3.25])
     draw_base_svg_map(faxes, base_map)
     for spine in faxes.spines:
@@ -488,8 +496,9 @@ def write_point_map_svg(title, place_list, point_locations, invalid_places, base
     mplpy.close("all")
 
 
-def create_all_point_maps(species, point_locations, species_plot_locations, invalid_species_locations, base_map,
-                          init_data):
+def create_all_point_maps(species: list, point_locations: dict, species_plot_locations: dict,
+                          invalid_species_locations: dict, base_map: list,
+                          init_data: TMB_Initialize.InitializationData) -> None:
     all_places = set()
     for s in species:
         if s.status != "fossil":
@@ -503,8 +512,9 @@ def create_all_point_maps(species, point_locations, species_plot_locations, inva
     write_point_map_kml("uca_all", all_list, point_locations, None, init_data)
 
 
-def create_all_species_maps(base_map, init_data, species, point_locations, species_plot_locations,
-                            invalid_species_locations):
+def create_all_species_maps(base_map: list, init_data: TMB_Initialize.InitializationData, species: list,
+                            point_locations: dict, species_plot_locations: dict,
+                            invalid_species_locations: dict) -> None:
     # create range maps
     species_maps = read_raw_kml(init_data.map_kml_file)
     for m in species_maps:
@@ -518,8 +528,9 @@ def create_all_species_maps(base_map, init_data, species, point_locations, speci
                           init_data)
 
 
-def create_all_name_maps(base_map, all_names, specific_names, point_locations, specific_plot_locations,
-                         binomial_plot_locations, init_data):
+def create_all_name_maps(base_map: list, all_names: list, specific_names: list, point_locations: dict,
+                         specific_plot_locations: dict, binomial_plot_locations: dict,
+                         init_data: TMB_Initialize.InitializationData) -> None:
     for name in all_names:
         namefile = "name_" + name_to_filename(name)
         place_list = binomial_plot_locations[name]
@@ -532,7 +543,8 @@ def create_all_name_maps(base_map, all_names, specific_names, point_locations, s
         write_point_map_kml(namefile, place_list, point_locations, None, init_data)
 
 
-def create_all_location_maps(base_map, point_locations, init_data):
+def create_all_location_maps(base_map: list, point_locations: dict,
+                             init_data: TMB_Initialize.InitializationData) -> None:
     for loc in point_locations:
         point = point_locations[loc]
         if not point.unknown:
@@ -542,10 +554,11 @@ def create_all_location_maps(base_map, point_locations, init_data):
             write_point_map_kml(namefile, place_list, point_locations, None, init_data)
 
 
-def create_all_maps(init_data, point_locations, species, species_plot_locations, invalid_species_locations, all_names,
-                    binomial_plot_locations, specific_names, specific_plot_locations):
+def create_all_maps(init_data: TMB_Initialize.InitializationData, point_locations: dict, species: list,
+                    species_plot_locations: dict, invalid_species_locations: dict, all_names: list,
+                    binomial_plot_locations: dict, specific_names: list, specific_plot_locations: dict) -> None:
     # base_map = read_base_map("resources/ne_10m_admin_0_countries.txt", "resources/ne_10m_minor_islands.txt")
-    base_map = read_base_map("resources/ne_50m_admin_0_countries.txt", None)
+    base_map = read_base_map("resources/ne_50m_admin_0_countries.txt")
     print("......Creating Species Maps......")
     create_all_species_maps(base_map, init_data, species, point_locations, species_plot_locations,
                             invalid_species_locations)

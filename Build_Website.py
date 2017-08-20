@@ -3,7 +3,7 @@ Taxonomy Monograph Builder
 """
 
 # built-in dependencies
-import codecs
+# import codecs
 import datetime
 # import random
 import os
@@ -11,6 +11,8 @@ import shutil
 import re
 import math
 import subprocess
+from typing import Optional, Tuple, Union
+from io import TextIOWrapper
 # local dependencies
 import TMB_Import
 import TMB_Create_Maps
@@ -18,6 +20,7 @@ from TMB_Error import report_error
 import TMB_Error
 from TMB_Common import *
 import TMB_Initialize
+import TMB_Classes
 # external dependencies
 import matplotlib.pyplot as mplpy
 from wordcloud import WordCloud
@@ -33,6 +36,7 @@ FOSSIL_IMAGE = " <span class=\"fossil-img\">&#9760;</span>"
 STAR = "<sup>*</sup>"
 DAGGER = "<sup>†</sup>"
 
+CitationStyle = int
 AUTHOR_NOPAREN = 0      # Smith 1970
 AUTHOR_PAREN = 1        # Smith (1970)
 AUTHOR_NOPCOMMA = 2     # Smith, 1970  <-- this one is needed for taxonomic name authority
@@ -45,11 +49,11 @@ DRAW_MAPS = True
 # randSeed = random.randint(0, 10000)
 
 
-def init_data():
+def init_data() -> TMB_Initialize.InitializationData:
     return TMB_Initialize.INIT_DATA
 
 
-def remove_html(x):
+def remove_html(x: str) -> str:
     """
     remove any stray html tags from string before using as title of html document
     """
@@ -57,7 +61,7 @@ def remove_html(x):
     return re.sub(regex, "", x)
 
 
-def common_header_part1(outfile, title, indexpath=""):
+def common_header_part1(outfile: TextIOWrapper, title: str, indexpath: str = "") -> None:
     """
     part 1 of the common header for all webout html files
     """
@@ -99,7 +103,7 @@ def common_header_part1(outfile, title, indexpath=""):
     outfile.write("    <link rel=\"author\" href=\"mailto:msr@asu.edu\" />\n")
 
 
-def common_header_part2(outfile, indexpath="", include_map=False):
+def common_header_part2(outfile: TextIOWrapper, indexpath: str ="", include_map: bool = False) -> None:
     """
     part 2 of the common header for all webout html files
     """
@@ -118,7 +122,7 @@ def common_header_part2(outfile, indexpath="", include_map=False):
     outfile.write("    </div>\n")
 
 
-def start_google_map_header(outfile):
+def start_google_map_header(outfile: TextIOWrapper) -> None:
     """
     start of common header entries for webout html files which contain Google maps elements
     """
@@ -142,7 +146,7 @@ def start_google_map_header(outfile):
     outfile.write("        };\n")
 
 
-def end_google_map_header(outfile):
+def end_google_map_header(outfile: TextIOWrapper) -> None:
     """
     end of common header entries for webout html files which contain Google maps elements
     """
@@ -150,7 +154,7 @@ def end_google_map_header(outfile):
     outfile.write("    </script>\n")
 
 
-def write_google_map_range_header(outfile, map_name):
+def write_google_map_range_header(outfile: TextIOWrapper, map_name: str) -> None:
     """
     common header entries for webout html files which contain Google maps elements - range map version
     """
@@ -161,7 +165,8 @@ def write_google_map_range_header(outfile, map_name):
     outfile.write("        range_layer.setMap(range_map);\n")
 
 
-def write_google_map_point_header(outfile, map_name, location):
+def write_google_map_point_header(outfile: TextIOWrapper, map_name: str,
+                                  location: Optional[TMB_Classes.LocationClass]) -> None:
     """
     common header entries for webout html files which contain Google maps elements - point map version
     """
@@ -187,7 +192,7 @@ def write_google_map_point_header(outfile, map_name, location):
         outfile.write("        point_map.fitBounds(bounds);\n")
 
 
-def start_google_chart_header(outfile):
+def start_google_chart_header(outfile: TextIOWrapper) -> None:
     """
     start of common header entries for webout html files which contain Google chart elements
     """
@@ -198,7 +203,7 @@ def start_google_chart_header(outfile):
     outfile.write("      function drawChart() {\n")
 
 
-def end_google_chart_header(outfile):
+def end_google_chart_header(outfile: TextIOWrapper) -> None:
     """
     end of common header entries for webout html files which contain Google maps elements - range map version
     """
@@ -206,7 +211,7 @@ def end_google_chart_header(outfile):
     outfile.write("    </script>\n")
 
 
-def common_html_header(outfile, title, indexpath=""):
+def common_html_header(outfile: TextIOWrapper, title: str, indexpath: str = "") -> None:
     """
     write common header for webout html files without special scripts
     """
@@ -214,7 +219,7 @@ def common_html_header(outfile, title, indexpath=""):
     common_header_part2(outfile, indexpath=indexpath)
 
 
-def common_html_footer(outfile, indexpath=""):
+def common_html_footer(outfile: TextIOWrapper, indexpath: str = "") -> None:
     """
     common footer and closing elements for all webout html files
     """
@@ -239,21 +244,21 @@ def common_html_footer(outfile, indexpath=""):
     outfile.write("</html>\n")
 
 
-def start_page_division(outfile, page_class):
+def start_page_division(outfile: TextIOWrapper, page_class: str) -> None:
     """
     write start page information for print output
     """
     outfile.write("  <div class=\"" + page_class + "\">\n")
 
 
-def end_page_division(outfile):
+def end_page_division(outfile: TextIOWrapper) -> None:
     """
     write end page information for print output
     """
     outfile.write("  </div>\n")
 
 
-def create_blank_index(fname):
+def create_blank_index(fname: str) -> None:
     """
     create a blank index.html file for webout directories to prevent browsers from listing containing files
     """
@@ -270,21 +275,21 @@ def create_blank_index(fname):
         outfile.write("</html>\n")
 
 
-def rel_link_prefix(do_print, prefix=""):
+def rel_link_prefix(do_print: bool, prefix: str = "") -> str:
     if do_print:
         return "#"
     else:
         return prefix
 
 
-def abs_link_prefix(do_absolute):
+def abs_link_prefix(do_absolute: bool) -> str:
     if do_absolute:
         return init_data().site_url() + "/"
     else:
         return ""
 
 
-def format_reference_full(ref, do_print):
+def format_reference_full(ref: TMB_Classes.ReferenceClass, do_print: bool) -> str:
     if ref.cite_key == "<pending>":
         return ref.formatted_html
     else:
@@ -293,9 +298,11 @@ def format_reference_full(ref, do_print):
                     ref.formatted_html + "</a>")
         except LookupError:
             report_error("missing label: " + ref.cite_key)
+            return ref.cite_key
 
 
-def format_reference_cite(ref, do_print, author_style, path=""):
+def format_reference_cite(ref: TMB_Classes.ReferenceClass, do_print: bool, author_style: CitationStyle,
+                          path: str = "") -> str:
     if author_style == AUTHOR_PAREN:
         outstr = ref.citation
     elif author_style == AUTHOR_NOPAREN:
@@ -303,7 +310,7 @@ def format_reference_cite(ref, do_print, author_style, path=""):
     elif author_style == AUTHOR_NOPCOMMA:
         outstr = ref.author() + ", " + str(ref.year())
     else:
-        outstr = ref.citaiton
+        outstr = ref.citation
     if ref.cite_key == "<pending>":
         return outstr
     else:
@@ -312,9 +319,10 @@ def format_reference_cite(ref, do_print, author_style, path=""):
                     ".html\">" + outstr + "</a>")
         except LookupError:
             report_error("missing label: " + ref.cite_key)
+            return ref.cite_key
 
 
-def replace_reference_in_string(instr, refdict, do_print):
+def replace_reference_in_string(instr: str, refdict: dict, do_print: bool) -> str:
     search_str = r"\[\[(?P<key>.+?),(?P<format>.+?)\]\]"
     # for every citation reference in the string
     for match in re.finditer(search_str, instr):
@@ -332,14 +340,14 @@ def replace_reference_in_string(instr, refdict, do_print):
     return instr
 
 
-def replace_references(in_list, refdict, do_print):
+def replace_references(in_list: list, refdict: dict, do_print: bool) -> list:
     out_list = []
     for line in in_list:
         out_list.append(replace_reference_in_string(line, refdict, do_print))
     return out_list
 
 
-def clean_reference_html(ref):
+def clean_reference_html(ref: str) -> str:
     """
     add slightly better formatting to html formatted references
       in particular, replace hyphens with n-dashes for commonly seen ranges
@@ -357,12 +365,12 @@ def clean_reference_html(ref):
     return ref
 
 
-def clean_references(references):
+def clean_references(references: list) -> None:
     for ref in references:
         ref.formatted_html = clean_reference_html(ref.formatted_html)
 
 
-def format_language(x):
+def format_language(x: str) -> str:
     """
     beautify language listings for references by adding flag icons for each language and replacing the word
     'and' with an ampersand
@@ -388,7 +396,7 @@ def format_language(x):
     return x
 
 
-def create_pie_chart_file(filename, data):
+def create_pie_chart_file(filename: str, data: dict) -> None:
     datalist = list(data.keys())
     datalist.sort()
     sizes = []
@@ -407,7 +415,7 @@ def create_pie_chart_file(filename, data):
     mplpy.close("all")
 
 
-def create_bar_chart_file(filename, data, minx, maxx, y):
+def create_bar_chart_file(filename: str, data: list, minx: int, maxx: int, y: int) -> None:
     x_list = [x for x in range(minx, maxx+1)]
     y_list = [d[y] for d in data]
     fig, faxes = mplpy.subplots(figsize=[6.5, 2])
@@ -425,7 +433,7 @@ def create_bar_chart_file(filename, data, minx, maxx, y):
     mplpy.close("all")
 
 
-def create_stacked_bar_chart_file(filename, data, minx, maxx, cols):
+def create_stacked_bar_chart_file(filename: str, data: list, minx: int, maxx: int, cols: list) -> None:
     # currently assumes only two stacked bars
     x_list = [x for x in range(minx, maxx+1)]
     fig, faxes = mplpy.subplots(figsize=[6.5, 2])
@@ -444,7 +452,7 @@ def create_stacked_bar_chart_file(filename, data, minx, maxx, cols):
     mplpy.close("all")
 
 
-def create_qual_bar_chart_file(filename, label_list, data_dict, max_value):
+def create_qual_bar_chart_file(filename: str, label_list: list, data_dict: dict, max_value: int) -> None:
     x_list = [x for x in range(len(label_list))]
     y_list = [data_dict[x] for x in label_list]
     fig, faxes = mplpy.subplots(figsize=[6.5, 2.5])
@@ -465,7 +473,7 @@ def create_qual_bar_chart_file(filename, label_list, data_dict, max_value):
     mplpy.close("all")
 
 
-def create_line_chart_file(filename, data, minx, maxx, y):
+def create_line_chart_file(filename: str, data: list, minx: int, maxx: int, y: int) -> None:
     x_list = [x for x in range(minx, maxx+1)]
     y_list = [d[y] for d in data]
     fig, faxes = mplpy.subplots(figsize=[6.5, 2])
@@ -483,7 +491,7 @@ def create_line_chart_file(filename, data, minx, maxx, y):
     mplpy.close("all")
 
 
-def create_chronology_chart_file(filename, miny, maxy, maxcnt, yearly_data):
+def create_chronology_chart_file(filename: str, miny: int, maxy: int, maxcnt: int, yearly_data: dict) -> None:
     y_list = []
     for y in range(miny, maxy + 1):
         y_list.append(float(yearly_data[y]))
@@ -506,7 +514,8 @@ def create_chronology_chart_file(filename, miny, maxy, maxcnt, yearly_data):
     mplpy.close("all")
 
 
-def write_reference_summary(outfile, do_print, nrefs, year_data, year_data_1900, cite_count, languages):
+def write_reference_summary(outfile: TextIOWrapper, do_print: bool, nrefs: int, year_data: list, year_data_1900: list,
+                            cite_count: int, languages: dict) -> None:
     if do_print:
         start_page_division(outfile, "")
     else:
@@ -697,7 +706,7 @@ def write_reference_summary(outfile, do_print, nrefs, year_data, year_data_1900,
         common_html_footer(outfile)
 
 
-def write_reference_bibliography(outfile, do_print, reflist):
+def write_reference_bibliography(outfile: TextIOWrapper, do_print: bool, reflist: list) -> None:
     if do_print:
         start_page_division(outfile, "index_page")
     else:
@@ -750,7 +759,7 @@ def write_reference_bibliography(outfile, do_print, reflist):
         common_html_footer(outfile)
 
 
-def create_name_table(citelist):
+def create_name_table(citelist: list) -> dict:
     name_refs = {}
     for c in citelist:
         nstr = c.name_key
@@ -768,7 +777,7 @@ def create_name_table(citelist):
     return name_refs
 
 
-def match_num_ref(x, y):
+def match_num_ref(x: str, y: str) -> bool:
     if (("." in x) and ("." in y)) or (("." not in x) and ("." not in y)):
         return x == y
     elif "." in x:
@@ -777,7 +786,7 @@ def match_num_ref(x, y):
         return y[:y.find(".")] == x
 
 
-def compute_applied_name_contexts(citelist):
+def compute_applied_name_contexts(citelist: list) -> None:
     """ function to gather list of primary contexts referred to by other citation entries  """
     for i, cite in enumerate(citelist):
         if (cite.context == "specimen") or (cite.context == "location"):
@@ -800,7 +809,7 @@ def compute_applied_name_contexts(citelist):
         # input()
 
 
-def compute_species_from_citation_linking(citelist):
+def compute_species_from_citation_linking(citelist: list) -> None:
     """ function to update correct species citations through cross-references to earlier works """
     for i, cite in enumerate(citelist):
         if cite.actual == "=":
@@ -848,7 +857,7 @@ def compute_species_from_citation_linking(citelist):
                     cite.name_note = "in part; " + cite.name_note
 
 
-def create_species_link(species, do_print, status="", path=""):
+def create_species_link(species: str, do_print: bool, status: str = "", path: str ="") -> str:
     if status == "fossil":
         sc = FOSSIL_IMAGE
     else:
@@ -857,7 +866,8 @@ def create_species_link(species, do_print, status="", path=""):
             species + "</em>" + sc + "</a>")
 
 
-def create_location_link(location, display_name, do_print, path="", mark_unknown=False):
+def create_location_link(location: TMB_Classes.LocationClass, display_name: str, do_print: bool, path: str = "",
+                         mark_unknown: bool = False) -> str:
     if mark_unknown and location.unknown:
         suffix = DAGGER
     else:
@@ -866,7 +876,7 @@ def create_location_link(location, display_name, do_print, path="", mark_unknown
             display_name + "</a>" + suffix)
 
 
-def strip_location_subtext(x):
+def strip_location_subtext(x: str) -> str:
     """
     remove extra information from a location string when present
     """
@@ -878,7 +888,7 @@ def strip_location_subtext(x):
     return x
 
 
-def format_name_string(x):
+def format_name_string(x: str) -> str:
     """
     properly emphasize species names, but not non-name signifiers
     """
@@ -904,7 +914,7 @@ def format_name_string(x):
         return "<em class=\"species\">" + x + "</em>"
 
 
-def clean_specific_name(x):
+def clean_specific_name(x: str) -> str:
     """
     function to extract the specific names from binomials
     """
@@ -944,10 +954,10 @@ def clean_specific_name(x):
             return x.lower()
 
 
-def output_name_table(outfile, do_print, is_name, itemlist, uniquelist, notecnt, comcnt, refdict, name_table,
-                      point_locations):
+def output_name_table(outfile: TextIOWrapper, do_print: bool, is_name: bool, itemlist: list, uniquelist: list,
+                      notecnt: int, comcnt: int, refdict: dict, name_table: dict, point_locations: dict) -> None:
     """ create output name table """
-    def create_location_sublink(x):
+    def create_location_sublink(x: str) -> str:
         """ create a link to location pages, preserving [] info when applicable """
         tmpname = strip_location_subtext(x)
         if tmpname in point_locations:
@@ -1113,14 +1123,15 @@ def output_name_table(outfile, do_print, is_name, itemlist, uniquelist, notecnt,
     outfile.write("    </table>\n")
 
 
-def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, point_locations):
+def write_reference_page(outfile: TextIOWrapper, do_print: bool, ref: TMB_Classes.ReferenceClass, citelist: list,
+                         refdict: dict, name_table: dict, point_locations: dict) -> None:
     if do_print:
         start_page_division(outfile, "ref_page")
     else:
         common_html_header(outfile, ref.citation, indexpath="../")
     outfile.write("    <header id=\"" + ref.cite_key + ".html\">\n")
-    if not do_print:
-        outfile.write("      <h1 class=\"nobookmark\">" + ref.citation + "</h1>\n")
+    # if not do_print:
+    #     outfile.write("      <h1 class=\"nobookmark\">" + ref.citation + "</h1>\n")
     outfile.write("      <h2 class=\"nobookmark\">" + ref.formatted_html + "</h2>\n")
     if not do_print:
         outfile.write("      <nav>\n")
@@ -1206,7 +1217,8 @@ def write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, 
         common_html_footer(outfile, indexpath="../")
 
 
-def write_reference_pages(printfile, do_print, reflist, refdict, citelist, name_table, point_locations):
+def write_reference_pages(printfile: Optional[TextIOWrapper], do_print: bool, reflist: list, refdict: dict,
+                          citelist: list, name_table: dict, point_locations: dict) -> None:
     """
     control function to loop through creating a page for every reference
     """
@@ -1215,11 +1227,11 @@ def write_reference_pages(printfile, do_print, reflist, refdict, citelist, name_
             if do_print:
                 write_reference_page(printfile, do_print, ref, citelist, refdict, name_table, point_locations)
             else:
-                with codecs.open(WEBOUT_PATH + "references/" + ref.cite_key + ".html", "w", "utf-8") as outfile:
+                with open(WEBOUT_PATH + "references/" + ref.cite_key + ".html", "w", encoding="utf-8") as outfile:
                     write_reference_page(outfile, do_print, ref, citelist, refdict, name_table, point_locations)
 
 
-def clean_name(x):
+def clean_name(x: str) -> str:
     """
     function to clean up names so that variation such as punctuation does not prevent a match
     """
@@ -1229,7 +1241,7 @@ def clean_name(x):
     return x
 
 
-def calculate_binomial_yearly_cnts(name, refdict, citelist):
+def calculate_binomial_yearly_cnts(name: str, refdict: dict, citelist: list) -> Tuple[dict, int]:
     miny = init_data().start_year
     maxy = init_data().current_year
     # find citations for this name
@@ -1252,8 +1264,9 @@ def calculate_binomial_yearly_cnts(name, refdict, citelist):
     return name_by_year, total
 
 
-def write_binomial_name_page(outfile, do_print, name, namefile, name_by_year, refdict, citelist, name_table,
-                             species_name, location_set, point_locations):
+def write_binomial_name_page(outfile: TextIOWrapper, do_print: bool, name: str, namefile: str, name_by_year: dict,
+                             refdict: dict, citelist: list, name_table: dict, species_name: str, location_set: set,
+                             point_locations: dict) -> None:
     """
     create a page listing all citations using, and other information about, a specific binomial or compound name
     """
@@ -1351,7 +1364,8 @@ def write_binomial_name_page(outfile, do_print, name, namefile, name_by_year, re
         common_html_footer(outfile, indexpath="../")
 
 
-def calculate_specific_name_yearly_cnts(specific_name, binomial_names, binomial_cnts):
+def calculate_specific_name_yearly_cnts(specific_name: TMB_Classes.SpecificNameClass, binomial_names: list,
+                                        binomial_cnts: dict) -> Tuple[dict, int]:
     miny = init_data().start_year
     maxy = init_data().current_year
     year_cnts = {y: 0 for y in range(miny, maxy+1)}
@@ -1368,7 +1382,8 @@ def calculate_specific_name_yearly_cnts(specific_name, binomial_names, binomial_
     return year_cnts, total
 
 
-def calculate_specific_locations(specific_name, binomial_names, binomial_locations):
+def calculate_specific_locations(specific_name: TMB_Classes.SpecificNameClass, binomial_names: list,
+                                 binomial_locations: dict) -> set:
     locs = set()
     for n in binomial_names:
         sp_name = clean_specific_name(n)
@@ -1378,7 +1393,8 @@ def calculate_specific_locations(specific_name, binomial_names, binomial_locatio
     return locs
 
 
-def write_specific_name_page(outfile, do_print, specific_name, binomial_names, refdict, binomial_cnts, location_set):
+def write_specific_name_page(outfile: TextIOWrapper, do_print: bool, specific_name: TMB_Classes.SpecificNameClass,
+                             binomial_names: list, refdict: dict, binomial_cnts: dict, location_set: set) -> None:
     """ create a page with the history of a specific name """
     miny = init_data().start_year
     maxy = init_data().current_year
@@ -1506,7 +1522,7 @@ def write_specific_name_page(outfile, do_print, specific_name, binomial_names, r
         common_html_footer(outfile, indexpath="../")
 
 
-def create_word_cloud_image(binomial_cnts, specific_cnts):
+def create_word_cloud_image(binomial_cnts: dict, specific_cnts: dict) -> None:
     # fiddler_mask = np.array(Image.open("private/silhouette.png"))
     # generate wordcloud image from binomials
     wordcloud = WordCloud(width=2000, height=1500, background_color="white", max_words=1000,  normalize_plurals=False,
@@ -1519,7 +1535,8 @@ def create_word_cloud_image(binomial_cnts, specific_cnts):
     wordcloud.to_file(TMP_PATH + "specific_word_cloud.png")
 
 
-def setup_chronology_chart(outfile, n, miny, maxy, maxcnt, yearly_data):
+def setup_chronology_chart(outfile: TextIOWrapper, n: int, miny: int, maxy: int, maxcnt: int,
+                           yearly_data: dict) -> None:
     nstr = str(n)
     outfile.write("        var data" + nstr + " = google.visualization.arrayToDataTable([\n")
     outfile.write("          ['Year', 'Number of Uses', 'Number of Uses'],\n")
@@ -1570,7 +1587,8 @@ def setup_chronology_chart(outfile, n, miny, maxy, maxcnt, yearly_data):
     outfile.write("\n")
 
 
-def write_chronology_chart_div(outfile, do_print, n, linkfile, title, is_species, do_multi):
+def write_chronology_chart_div(outfile: TextIOWrapper, do_print: bool, n: Union[str, int], linkfile: Optional[str],
+                               title: str, is_species: bool, do_multi: bool) -> None:
     # n can be either the file name (print) or the chart # on the page (web)
     if is_species:
         if linkfile is not None:
@@ -1594,8 +1612,8 @@ def write_chronology_chart_div(outfile, do_print, n, linkfile, title, is_species
     outfile.write("    </div>\n")
 
 
-def create_synonym_chronology(outfile, do_print, species, binomial_synlist, binomial_name_counts, specific_synlist,
-                              specific_name_counts):
+def create_synonym_chronology(outfile: TextIOWrapper, do_print: bool, species: str, binomial_synlist: list,
+                              binomial_name_counts: dict, specific_synlist: list, specific_name_counts: dict) -> None:
     """ create a page with the chronological history of a specific name and its synonyms """
     miny = init_data().start_year
     maxy = init_data().current_year
@@ -1703,7 +1721,7 @@ def create_synonym_chronology(outfile, do_print, species, binomial_synlist, bino
         common_html_footer(outfile, indexpath="../")
 
 
-def match_specific_name(name, specific_names):
+def match_specific_name(name: str, specific_names: list) -> str:
     """ match the specific name from a binomial to the list of accepted specific names """
     c = clean_specific_name(name)
     if c == "":
@@ -1717,7 +1735,8 @@ def match_specific_name(name, specific_names):
         return y
 
 
-def create_name_summary(outfile, do_print, binomial_year_cnts, specific_year_cnts, species_refs):
+def create_name_summary(outfile: TextIOWrapper, do_print: bool, binomial_year_cnts: dict, specific_year_cnts: dict,
+                        species_refs: dict) -> None:
     if do_print:
         per_graph = 40
     else:
@@ -1949,14 +1968,14 @@ def create_name_summary(outfile, do_print, binomial_year_cnts, specific_year_cnt
         common_html_footer(outfile, indexpath="../")
 
 
-def extract_genus(name):
+def extract_genus(name: str) -> str:
     if " " in name:
         return name[:name.find(" ")]
     else:
         return name
 
 
-def create_genus_chronology(outfile, do_print, genus_cnts):
+def create_genus_chronology(outfile: TextIOWrapper, do_print: bool, genus_cnts: dict) -> None:
     """ create a page with the chronological history of the genera """
     miny = init_data().start_year
     maxy = init_data().current_year
@@ -2035,7 +2054,7 @@ def create_genus_chronology(outfile, do_print, genus_cnts):
         common_html_footer(outfile, indexpath="../")
 
 
-def calculate_binomial_locations(name, citelist):
+def calculate_binomial_locations(name: str, citelist: list) -> set:
     """
     find all locations this name is applied to
     """
@@ -2051,7 +2070,7 @@ def calculate_binomial_locations(name, citelist):
     return locs
 
 
-def clean_genus(genus):
+def clean_genus(genus: str) -> str:
     """
     fix and match alternate genus spellings when performing summaries
     """
@@ -2069,7 +2088,9 @@ def clean_genus(genus):
         return genus
 
 
-def calculate_name_index_data(refdict, citelist, specific_names):
+def calculate_name_index_data(refdict: dict, citelist: list, specific_names: list) -> Tuple[list, dict, dict, dict,
+                                                                                            dict, dict, dict, dict,
+                                                                                            dict, dict]:
     """ calculate all the data associated with binomials and specific names """
     name_table = create_name_table(citelist)
     unique_names = list()
@@ -2145,9 +2166,10 @@ def calculate_name_index_data(refdict, citelist, specific_names):
             binomial_usage_cnts, specific_usage_cnts)
 
 
-def write_all_name_pages(outfile, do_print, refdict, citelist, unique_names, specific_names, name_table, species_refs,
-                         genus_cnts, binomial_usage_cnts_by_year, total_binomial_year_cnts, binomial_locations,
-                         specific_locations, point_locations):
+def write_all_name_pages(outfile: TextIOWrapper, do_print: bool, refdict: dict, citelist: list, unique_names: list,
+                         specific_names: list, name_table: dict, species_refs: dict, genus_cnts: dict,
+                         binomial_usage_cnts_by_year: dict, total_binomial_year_cnts: dict, binomial_locations: dict,
+                         specific_locations: dict, point_locations: dict) -> None:
     """ create an index of binomials and specific names """
     if do_print:
         start_page_division(outfile, "index_page")
@@ -2219,9 +2241,9 @@ def write_all_name_pages(outfile, do_print, refdict, citelist, unique_names, spe
         create_name_summary(outfile, do_print, total_binomial_year_cnts, specific_year_cnts, species_refs)
         create_genus_chronology(outfile, do_print, genus_cnts)
     else:
-        with codecs.open(WEBOUT_PATH + "names/" + init_data().name_sum_url, "w", "utf-8") as suboutfile:
+        with open(WEBOUT_PATH + "names/" + init_data().name_sum_url, "w", encoding="utf-8") as suboutfile:
             create_name_summary(suboutfile, do_print, total_binomial_year_cnts, specific_year_cnts, species_refs)
-        with codecs.open(WEBOUT_PATH + "names/synonyms_uca.html", "w", "utf-8") as suboutfile:
+        with open(WEBOUT_PATH + "names/synonyms_uca.html", "w", encoding="utf-8") as suboutfile:
             create_genus_chronology(suboutfile, do_print, genus_cnts)
 
     # write out individual pages for each binomial name and specific name
@@ -2232,7 +2254,7 @@ def write_all_name_pages(outfile, do_print, refdict, citelist, unique_names, spe
             write_binomial_name_page(outfile, True, name, namefile, binomial_usage_cnts_by_year[name], refdict,
                                      citelist, name_table, sname, binomial_locations[name], point_locations)
         else:
-            with codecs.open(WEBOUT_PATH + "names/" + namefile + ".html", "w", "utf-8") as suboutfile:
+            with open(WEBOUT_PATH + "names/" + namefile + ".html", "w", encoding="utf-8") as suboutfile:
                 write_binomial_name_page(suboutfile, False, name, namefile, binomial_usage_cnts_by_year[name], refdict,
                                          citelist, name_table, sname, binomial_locations[name], point_locations)
     for name in specific_names:
@@ -2240,12 +2262,12 @@ def write_all_name_pages(outfile, do_print, refdict, citelist, unique_names, spe
             write_specific_name_page(outfile, True, name, unique_names, refdict, binomial_usage_cnts_by_year,
                                      specific_locations[name])
         else:
-            with codecs.open(WEBOUT_PATH + "names/sn_" + name.name + ".html", "w", "utf-8") as suboutfile:
+            with open(WEBOUT_PATH + "names/sn_" + name.name + ".html", "w", encoding="utf-8") as suboutfile:
                 write_specific_name_page(suboutfile, False, name, unique_names, refdict, binomial_usage_cnts_by_year,
                                          specific_locations[name])
 
 
-def check_specific_names(citelist, specific_names):
+def check_specific_names(citelist: list, specific_names: list) -> None:
     """ checks all specific names used to confirm they are accounted for in the full synonymy list """
     unique_names = list()
     nameset = set()
@@ -2265,7 +2287,7 @@ def check_specific_names(citelist, specific_names):
             report_error("Missing specific name: " + n)
 
 
-def write_geography_page(outfile, do_print, species):
+def write_geography_page(outfile: TextIOWrapper, do_print: bool, species: list) -> None:
     """ output geographic ranges to HTML """
     regions = ("Eastern Atlantic",
                "Western Atlantic",
@@ -2350,7 +2372,7 @@ def write_geography_page(outfile, do_print, species):
         common_html_footer(outfile)
 
 
-def create_location_hierarchy(point_locations):
+def create_location_hierarchy(point_locations: dict) -> dict:
     """ got through all locations and add children to the parent locations """
     loc_dict = {}
     for p in point_locations:
@@ -2373,7 +2395,7 @@ def create_location_hierarchy(point_locations):
     return loc_dict
 
 
-def fetch_child_ref_data(loc, ref_dict):
+def fetch_child_ref_data(loc: TMB_Classes.LocationClass, ref_dict: dict) -> set:
     refset = ref_dict[loc.name]
     if loc.n_children() > 0:
         for c in loc.children:
@@ -2381,7 +2403,7 @@ def fetch_child_ref_data(loc, ref_dict):
     return refset
 
 
-def fetch_child_data(loc, location_dict):
+def fetch_child_data(loc: TMB_Classes.LocationClass, location_dict: dict) -> set:
     locset = location_dict[loc.name]
     if loc.n_children() > 0:
         for c in loc.children:
@@ -2389,13 +2411,14 @@ def fetch_child_data(loc, location_dict):
     return locset
 
 
-def write_location_page(outfile, do_print, loc, point_locations, location_species, location_bi_names,
-                        location_sp_names, location_direct_refs, location_cited_refs, references):
+def write_location_page(outfile: TextIOWrapper, do_print: bool, loc: TMB_Classes.LocationClass, point_locations: dict,
+                        location_species: dict, location_bi_names: dict, location_sp_names: dict,
+                        location_direct_refs: dict, location_cited_refs: dict, references: list) -> None:
     """
     write the output page for an individual location
     """
 
-    def format_latlon(lat, lon):
+    def format_latlon(lat: float, lon: float) -> str:
         """
         subfunction to format a lat,lon pair for printing
         """
@@ -2480,8 +2503,10 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         outfile.write("    </ul>\n")
         outfile.write("  </section>\n")
 
+    is_error = True
     print_star = False
     if len(all_species) > 0:
+        is_error = False
         outfile.write("  <section class=\"spsection\">\n")
         outfile.write("    <h3 class=\"nobookmark\">Currently Recognized Species</h3>\n")
         outfile.write("    <ul class=\"splist\">\n")
@@ -2497,6 +2522,7 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         outfile.write("  </section>\n")
 
     if len(all_bi_names) > 0:
+        is_error = False
         outfile.write("  <section class=\"spsection\">\n")
         outfile.write("    <h3 class=\"nobookmark\">Names Which Have Been Used in This Area</h3>\n")
         outfile.write("    <ul class=\"splist\">\n")
@@ -2512,6 +2538,7 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
         outfile.write("  </section>\n")
 
     if len(all_sp_names) > 0:
+        is_error = False
         outfile.write("  <section class=\"spsection\">\n")
         outfile.write("    <h3 class=\"nobookmark\">Specific Names Which Have Been Used in This Area</h3>\n")
         outfile.write("    <ul class=\"splist\">\n")
@@ -2525,6 +2552,10 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
                           ".html\">" + format_name_string(s.name) + "</a>" + suffix + "</li>\n")
         outfile.write("    </ul>\n")
         outfile.write("  </section>\n")
+
+    # the following is to identify locations which are no longer used in the DB and can be removed
+    if is_error:
+        report_error("Phantom Location:" + loc.name)
 
     write_annotated_reference_list(outfile, do_print, references, all_refs, location_direct_refs[loc.name],
                                    location_cited_refs[loc.name], "../")
@@ -2549,13 +2580,14 @@ def write_location_page(outfile, do_print, loc, point_locations, location_specie
                 write_location_page(outfile, do_print, c, point_locations, location_species, location_bi_names,
                                     location_sp_names, location_direct_refs, location_cited_refs, references)
             else:
-                with codecs.open(WEBOUT_PATH + "locations/" + place_to_filename(c.name) + ".html", "w",
-                                 "utf-8") as suboutfile:
+                with open(WEBOUT_PATH + "locations/" + place_to_filename(c.name) + ".html", "w",
+                          encoding="utf-8") as suboutfile:
                     write_location_page(suboutfile, do_print, c, point_locations, location_species, location_bi_names,
                                         location_sp_names, location_direct_refs, location_cited_refs, references)
 
 
-def write_location_index_entry(outfile, do_print, loc, point_locations):
+def write_location_index_entry(outfile: TextIOWrapper, do_print: bool, loc: TMB_Classes.LocationClass,
+                               point_locations: dict) -> None:
     """
     print a location and all of its child locations
     """
@@ -2572,8 +2604,9 @@ def write_location_index_entry(outfile, do_print, loc, point_locations):
     outfile.write("</li>\n")
 
 
-def write_location_index(outfile, do_print, point_locations, location_dict, location_species, location_sp_names,
-                         location_bi_names, location_direct_refs, location_cited_refs, references):
+def write_location_index(outfile: TextIOWrapper, do_print: bool, point_locations: dict, location_dict: dict,
+                         location_species: dict, location_sp_names: dict, location_bi_names: dict,
+                         location_direct_refs: dict, location_cited_refs: dict, references: list) -> None:
     """ output observation location index to HTML """
     if do_print:
         start_page_division(outfile, "index_page")
@@ -2656,13 +2689,15 @@ def write_location_index(outfile, do_print, point_locations, location_dict, loca
             write_location_page(outfile, do_print, loc, point_locations, location_species, location_bi_names,
                                 location_sp_names, location_direct_refs, location_cited_refs, references)
         else:
-            with codecs.open(WEBOUT_PATH + "locations/" + place_to_filename(loc.name) + ".html", "w",
-                             "utf-8") as suboutfile:
+            with open(WEBOUT_PATH + "locations/" + place_to_filename(loc.name) + ".html", "w",
+                      encoding="utf-8") as suboutfile:
                 write_location_page(suboutfile, do_print, loc, point_locations, location_species, location_bi_names,
                                     location_sp_names, location_direct_refs, location_cited_refs, references)
 
 
-def match_names_to_locations(species, specific_point_locations, binomial_point_locations, point_locations, citelist):
+def match_names_to_locations(species: list, specific_point_locations: dict,  binomial_point_locations: dict,
+                             point_locations: dict, citelist: list) -> Tuple[dict, dict, dict, dict, dict, dict,  dict,
+                                                                             dict, dict]:
     species_plot_locations = {}
     invalid_species_locations = {}
     location_species = {x: set() for x in point_locations}
@@ -2744,7 +2779,7 @@ def match_names_to_locations(species, specific_point_locations, binomial_point_l
             location_species, location_sp_names, location_bi_names, location_direct_refs, location_cited_refs)
 
 
-def write_common_names_pages(outfile, do_print, common_name_data):
+def write_common_names_pages(outfile: TextIOWrapper, do_print: bool, common_name_data: list) -> None:
     """ output common names to HTML """
     if do_print:
         start_page_division(outfile, "base_page")
@@ -2789,7 +2824,7 @@ def write_common_names_pages(outfile, do_print, common_name_data):
         common_html_footer(outfile)
 
 
-def connect_refs_to_species(species, citelist):
+def connect_refs_to_species(species: list, citelist: list) -> dict:
     """
     create a list of references for each species
     """
@@ -2804,7 +2839,7 @@ def connect_refs_to_species(species, citelist):
     return species_refs
 
 
-def write_species_list(outfile, do_print, specieslist):
+def write_species_list(outfile: TextIOWrapper, do_print: bool, specieslist: list) -> None:
     """
     create an index of all valid species
     """
@@ -2840,7 +2875,8 @@ def write_species_list(outfile, do_print, specieslist):
         common_html_footer(outfile)
 
 
-def write_species_photo_page(outfile, do_print, fname, species, common_name, caption, pn, pspecies):
+def write_species_photo_page(outfile: TextIOWrapper, do_print: bool, fname: str, species: str, common_name: str,
+                             caption: str, pn: int, pspecies: str) -> None:
     """
     create a page for a specific photo
     """
@@ -2892,11 +2928,11 @@ def write_species_photo_page(outfile, do_print, fname, species, common_name, cap
         common_html_footer(outfile, indexpath="../")
 
 
-def write_species_video_page(fname, video, vn):
+def write_species_video_page(fname: str, video: TMB_Classes.VideoClass, vn: int) -> None:
     """
     create a page for a specific video
     """
-    with codecs.open(fname, "w", "utf-8") as outfile:
+    with open(fname, "w", encoding="utf-8") as outfile:
         if ";" in video.species:
             spname = video.species.replace(";", "_")
             vtitle = "Uca " + video.species.replace(";", " & Uca ")
@@ -2949,8 +2985,8 @@ def write_species_video_page(fname, video, vn):
         common_html_footer(outfile, indexpath="../")
 
 
-def write_annotated_reference_list(outfile, do_print, references, all_citations, dir_citations,
-                                   cited_citations, path):
+def write_annotated_reference_list(outfile: TextIOWrapper, do_print: bool, references: list, all_citations: list,
+                                   dir_citations: list, cited_citations: list, path: str) -> None:
     outfile.write("    <section class=\"spsection\">\n")
     if do_print:
         outfile.write("      <h3 class=\"nobookmark\"><span class=\"fa fa-book\"></span> References</h3>\n")
@@ -2973,7 +3009,7 @@ def write_annotated_reference_list(outfile, do_print, references, all_citations,
     outfile.write("    </section>\n")
 
 
-def write_reference_list(outfile, do_print, references, citations):
+def write_reference_list(outfile: TextIOWrapper, do_print: bool, references: list, citations: dict) -> None:
     outfile.write("    <section class=\"spsection\">\n")
     if do_print:
         outfile.write("      <h2 class=\"nobookmark\"><span class=\"fa fa-book\"></span> References</h2>\n")
@@ -2990,8 +3026,9 @@ def write_reference_list(outfile, do_print, references, citations):
     outfile.write("    </section>\n")
 
 
-def write_species_page(outfile, do_print, species, references, specific_names, all_names, photos, videos, artlist,
-                       sprefs, refdict, binomial_name_counts, specific_name_cnts):
+def write_species_page(outfile: TextIOWrapper, do_print: bool, species: TMB_Classes.SpeciesClass, references: list,
+                       specific_names: list, all_names: list, photos: list, videos: list, artlist: list,
+                       sprefs: dict, refdict: dict, binomial_name_counts: dict, specific_name_cnts: dict) -> None:
     """
     create the master page for a valid species
     """
@@ -3274,12 +3311,12 @@ def write_species_page(outfile, do_print, species, references, specific_names, a
             create_synonym_chronology(outfile, do_print, species.species, binomial_synlist, binomial_name_counts,
                                       specific_synlist, specific_name_cnts)
         else:
-            with codecs.open(WEBOUT_PATH + "names/synonyms_" + species.species + ".html", "w", "utf-8") as suboutfile:
+            with open(WEBOUT_PATH + "names/synonyms_" + species.species + ".html", "w", encoding="utf-8") as suboutfile:
                 create_synonym_chronology(suboutfile, do_print, species.species, binomial_synlist, binomial_name_counts,
                                           specific_synlist, specific_name_cnts)
 
 
-def write_photo_index(outfile, do_print, specieslist, photos):
+def write_photo_index(outfile: TextIOWrapper, do_print: bool, specieslist: list, photos: list) -> None:
     """
     create an index of all photos
     """
@@ -3360,12 +3397,12 @@ def write_photo_index(outfile, do_print, specieslist, photos):
                         shutil.copy2(MEDIA_PATH + tmp_name + "tn.jpg", WEBOUT_PATH + "photos/")
                     except FileNotFoundError:
                         report_error("Missing file: " + tmp_name + "tn.jpg")
-                    with open(WEBOUT_PATH + "photos/" + pfname, "w") as suboutfile:
+                    with open(WEBOUT_PATH + "photos/" + pfname, "w", encoding="utf-8") as suboutfile:
                         write_species_photo_page(suboutfile, False, pfname, species, sp.common, photo.caption, pn,
                                                  photo.species)
 
 
-def write_video_index(outfile, do_print, videos):
+def write_video_index(outfile: TextIOWrapper, do_print: bool, videos: list) -> None:
     """
     create an index of all videos
     """
@@ -3448,7 +3485,8 @@ def write_video_index(outfile, do_print, videos):
                 report_error("Missing file: " + tmp_name)
 
 
-def write_specific_art_page(outfile, do_print, art, backurl, backtext):
+def write_specific_art_page(outfile: TextIOWrapper, do_print: bool, art: TMB_Classes.ArtClass, backurl: str,
+                            backtext: str) -> None:
     """
     create a page for a piece of art
     """
@@ -3489,7 +3527,7 @@ def write_specific_art_page(outfile, do_print, art, backurl, backtext):
         common_html_footer(outfile, indexpath="../")
 
 
-def write_art_science_pages(outfile, do_print, artlist):
+def write_art_science_pages(outfile: TextIOWrapper, do_print: bool, artlist: list) -> None:
     """
     create an index for all scientific art
     """
@@ -3545,12 +3583,12 @@ def write_art_science_pages(outfile, do_print, artlist):
                         write_specific_art_page(outfile, do_print, art, init_data().art_sci_url,
                                                 "All Scientific Drawings")
                     else:
-                        with codecs.open(WEBOUT_PATH + "art/" + art.image + ".html", "w", "utf-8") as suboutfile:
+                        with open(WEBOUT_PATH + "art/" + art.image + ".html", "w", encoding="utf-8") as suboutfile:
                             write_specific_art_page(suboutfile, do_print, art, init_data().art_sci_url,
                                                     "All Scientific Drawings")
 
 
-def write_art_stamps_pages(outfile, do_print, artlist):
+def write_art_stamps_pages(outfile: TextIOWrapper, do_print: bool, artlist: list) -> None:
     """
     create an index for all stamps
     """
@@ -3604,11 +3642,11 @@ def write_art_stamps_pages(outfile, do_print, artlist):
                     if do_print:
                         write_specific_art_page(outfile, do_print, art, init_data().art_stamp_url, "All Stamps")
                     else:
-                        with codecs.open(WEBOUT_PATH + "art/" + art.image + ".html", "w", "utf-8") as suboutfile:
+                        with open(WEBOUT_PATH + "art/" + art.image + ".html", "w", encoding="utf-8") as suboutfile:
                             write_specific_art_page(suboutfile, do_print, art, init_data().art_stamp_url, "All Stamps")
 
     
-def write_art_crafts_pages(outfile, do_print, artlist):
+def write_art_crafts_pages(outfile: TextIOWrapper, do_print: bool, artlist: list) -> None:
     """
     create an index for all crafts
     """
@@ -3667,11 +3705,11 @@ def write_art_crafts_pages(outfile, do_print, artlist):
                     if do_print:
                         write_specific_art_page(outfile, do_print, art, init_data().art_craft_url, "All Crafts")
                     else:
-                        with codecs.open(WEBOUT_PATH + "art/" + art.image + ".html", "w", "utf-8") as suboutfile:
+                        with open(WEBOUT_PATH + "art/" + art.image + ".html", "w", encoding="utf-8") as suboutfile:
                             write_specific_art_page(suboutfile, do_print, art, init_data().art_craft_url, "All Crafts")
 
 
-def write_all_art_pages(outfile, do_print, artlist):
+def write_all_art_pages(outfile: Optional[TextIOWrapper], do_print: bool, artlist: list) -> None:
     """
     create all art pages
     """
@@ -3680,11 +3718,11 @@ def write_all_art_pages(outfile, do_print, artlist):
         write_art_stamps_pages(outfile, do_print, artlist)
         write_art_crafts_pages(outfile, do_print, artlist)
     else:
-        with codecs.open(WEBOUT_PATH + init_data().art_craft_url, "w", "utf-8") as suboutfile:
+        with open(WEBOUT_PATH + init_data().art_craft_url, "w", encoding="utf-8") as suboutfile:
             write_art_crafts_pages(suboutfile, do_print, artlist)
-        with codecs.open(WEBOUT_PATH + init_data().art_stamp_url, "w", "utf-8") as suboutfile:
+        with open(WEBOUT_PATH + init_data().art_stamp_url, "w", encoding="utf-8") as suboutfile:
             write_art_stamps_pages(suboutfile, do_print, artlist)
-        with codecs.open(WEBOUT_PATH + init_data().art_sci_url, "w", "utf-8") as suboutfile:
+        with open(WEBOUT_PATH + init_data().art_sci_url, "w", encoding="utf-8") as suboutfile:
             write_art_science_pages(suboutfile, do_print, artlist)
     # copy art files
     if not do_print:
@@ -3699,15 +3737,17 @@ def write_all_art_pages(outfile, do_print, artlist):
                 report_error("Missing file: " + MEDIA_PATH + "art/" + art.image + "_tn." + art.ext)
 
 
-def write_species_info_pages(outfile, do_print, specieslist, references, specific_names, all_names, photos, videos, art,
-                             species_refs, refdict, binomial_name_cnts, specific_name_cnts):
+def write_species_info_pages(outfile: Optional[TextIOWrapper], do_print: bool, specieslist: list, references: list,
+                             specific_names: list, all_names: list, photos: list, videos: list, art: list,
+                             species_refs: dict, refdict: dict, binomial_name_cnts: dict,
+                             specific_name_cnts: dict) -> None:
     """
     create the species index and all individual species pages
     """
     if do_print:
         write_species_list(outfile, True, specieslist)
     else:
-        with codecs.open(WEBOUT_PATH + init_data().species_url, "w", "utf-8") as suboutfile:
+        with open(WEBOUT_PATH + init_data().species_url, "w", encoding="utf-8") as suboutfile:
             write_species_list(suboutfile, False, specieslist)
     for species in specieslist:
         sprefs = species_refs[species.species]
@@ -3715,18 +3755,19 @@ def write_species_info_pages(outfile, do_print, specieslist, references, specifi
             write_species_page(outfile, True, species, references, specific_names, all_names, photos, videos, art,
                                sprefs, refdict, binomial_name_cnts, specific_name_cnts)
         else:
-            with codecs.open(WEBOUT_PATH + "u_" + species.species + ".html", "w", "utf-8") as suboutfile:
+            with open(WEBOUT_PATH + "u_" + species.species + ".html", "w", encoding="utf-8") as suboutfile:
                 write_species_page(suboutfile, False, species, references, specific_names, all_names, photos, videos,
                                    art, sprefs, refdict, binomial_name_cnts, specific_name_cnts)
 
 
-def write_systematics_overview(outfile, do_print, subgenlist, specieslist, refdict, species_changes_new,
-                               species_changes_synonyms, species_changes_spelling):
+def write_systematics_overview(outfile: TextIOWrapper, do_print: bool, subgenlist: list, specieslist: list,
+                               refdict: dict, species_changes_new: list, species_changes_synonyms: list,
+                               species_changes_spelling: list) -> None:
     """
     create the systematics page
     """
 
-    def write_species_table(header, data_list):
+    def write_species_table(header: list, data_list: list) -> None:
         outfile.write("      <table>\n")
         outfile.write("        <thead>\n")
         outfile.write("          <tr>\n")
@@ -4001,7 +4042,7 @@ def write_systematics_overview(outfile, do_print, subgenlist, specieslist, refdi
         common_html_footer(outfile)
 
 
-def summarize_year(yeardict):
+def summarize_year(yeardict: dict) -> Tuple[list, list]:
     miny = init_data().current_year
     maxy = 0
     for y in yeardict:
@@ -4028,7 +4069,7 @@ def summarize_year(yeardict):
     return datalist, datalist1900
 
 
-def summarize_languages(refs):
+def summarize_languages(refs: list) -> dict:
     languages = {}
     for ref in refs:
         l = ref.language
@@ -4043,7 +4084,7 @@ def summarize_languages(refs):
     return languages
 
 
-def write_life_cycle_pages(outfile, do_print):
+def write_life_cycle_pages(outfile: TextIOWrapper, do_print: bool) -> None:
     """ create the life cycle page """
     if do_print:
         start_page_division(outfile, "base_page")
@@ -4155,7 +4196,7 @@ def write_life_cycle_pages(outfile, do_print):
         common_html_footer(outfile)
 
 
-def write_phylogeny_pages(outfile, do_print, refdict):
+def write_phylogeny_pages(outfile: TextIOWrapper, do_print: bool, refdict: dict) -> None:
     """ create the phylogeny page """
     treelist = {"tree_species.svg", "tree_subgenera.svg"}
     if do_print:
@@ -4207,14 +4248,14 @@ def write_phylogeny_pages(outfile, do_print, refdict):
         common_html_footer(outfile)
 
 
-def morphology_link(parent, character):
+def morphology_link(parent: str, character: str) -> str:
     if parent == ".":
         return character.replace(" ", "_")
     else:
         return parent.replace(" ", "_") + "_" + character.replace(" ", "_")
 
 
-def find_morphology_parent(p, mlist):
+def find_morphology_parent(p: str, mlist: list) -> str:
     x = ""
     for m in mlist:
         if p == m.character:
@@ -4222,7 +4263,8 @@ def find_morphology_parent(p, mlist):
     return x
 
 
-def write_morphology_page(outfile, do_print, morph, morphlist):
+def write_morphology_page(outfile: TextIOWrapper, do_print: bool, morph: TMB_Classes.MorphologyClass,
+                          morphlist: list) -> None:
     """ create individual pages for morphology descriptions """
     if morph.parent == ".":
         p = ""
@@ -4299,7 +4341,7 @@ def write_morphology_page(outfile, do_print, morph, morphlist):
         common_html_footer(outfile, indexpath="../")
 
 
-def write_morphology_index(outfile, do_print, morphlist):
+def write_morphology_index(outfile: TextIOWrapper, do_print: bool, morphlist: list) -> None:
     """ create index for morphology pages """
     if do_print:
         start_page_division(outfile, "index_page")
@@ -4346,7 +4388,7 @@ def write_morphology_index(outfile, do_print, morphlist):
         common_html_footer(outfile, indexpath="../")
 
 
-def write_main_morphology_pages(outfile, do_print, morphology):
+def write_main_morphology_pages(outfile: TextIOWrapper, do_print: bool, morphology: list) -> None:
     """ create page for general morphology descriptions """
     if do_print:
         start_page_division(outfile, "base_page")
@@ -4410,16 +4452,16 @@ def write_main_morphology_pages(outfile, do_print, morphology):
     else:
         common_html_footer(outfile)
         for m in morphology:
-            with codecs.open(WEBOUT_PATH + "morphology/" + morphology_link(m.parent, m.character) + ".html",
-                             "w", "utf-8") as suboutfile:
+            with open(WEBOUT_PATH + "morphology/" + morphology_link(m.parent, m.character) + ".html", "w",
+                      encoding="utf-8") as suboutfile:
                 write_morphology_page(suboutfile, do_print, m, morphology)
-        with codecs.open(WEBOUT_PATH + "morphology/index.html", "w", "utf-8") as suboutfile:
+        with open(WEBOUT_PATH + "morphology/index.html", "w", encoding="utf-8") as suboutfile:
             write_morphology_index(suboutfile, do_print, morphology)
 
 
-def write_citation_page(refdict):
+def write_citation_page(refdict: dict) -> None:
     """ create page with site citation info """
-    with codecs.open(WEBOUT_PATH + init_data().cite_url, "w", "utf-8") as outfile:
+    with open(WEBOUT_PATH + init_data().cite_url, "w", encoding="utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Website Citation")
         outfile.write("    <header id=\"" + init_data().cite_url + "\">\n")
         outfile.write("      <h1>Citation Info</h1>\n")
@@ -4446,7 +4488,7 @@ def write_citation_page(refdict):
         common_html_footer(outfile)
 
 
-def write_introduction(outfile, do_print, species):
+def write_introduction(outfile: TextIOWrapper, do_print: bool, species: list) -> None:
     """ create the site index """
     if do_print:
         start_page_division(outfile, "base_page")
@@ -4548,13 +4590,13 @@ def write_introduction(outfile, do_print, species):
         common_html_footer(outfile)
 
 
-def create_path_and_index(subdir):
+def create_path_and_index(subdir: str) -> None:
     if not os.path.exists(WEBOUT_PATH + subdir):
         os.makedirs(WEBOUT_PATH + subdir)
     create_blank_index(WEBOUT_PATH + subdir + "index.html")
 
 
-def create_web_output_paths():
+def create_web_output_paths() -> None:
     """
     create web output directories if they do not already exist
     add a blank index to each one
@@ -4571,7 +4613,7 @@ def create_web_output_paths():
     create_path_and_index("locations/")
 
 
-def create_temp_output_paths():
+def create_temp_output_paths() -> None:
     """
     create temporary output directories if they do not already exist
     """
@@ -4581,7 +4623,7 @@ def create_temp_output_paths():
         os.makedirs(TMP_MAP_PATH)
 
 
-def copy_support_files():
+def copy_support_files() -> None:
     """
     copy a variety of resource and output files into the correct web output directories
     this includes icons, supporting images, and css files
@@ -4624,17 +4666,17 @@ def copy_support_files():
             report_error("Missing file: " + TMP_PATH + filename)
 
 
-def copy_map_files(species, all_names, specific_names, point_locations):
+def copy_map_files(species: list, all_names: list, specific_names: list, point_locations: dict) -> None:
     """
     copy all created map files (kmz and svg) from temp directory to web output directory
     """
-    def copy_file(filename):
+    def copy_file(filename: str) -> None:
         try:
             shutil.copy2(filename, WEBOUT_PATH + "maps/")
         except FileNotFoundError:
             report_error("Missing file: " + filename)
 
-    def scour_svg(filename):
+    def scour_svg(filename: str) -> None:
         """
         run scour to reduce size of svg maps
 
@@ -4676,7 +4718,7 @@ def copy_map_files(species, all_names, specific_names, point_locations):
             copy_file(TMP_MAP_PATH + pointmap_name("location_" + place_to_filename(p)) + ".kmz")
 
 
-def print_cover(outfile):
+def print_cover(outfile: TextIOWrapper) -> None:
     """
     create cover for monographic print output
     """
@@ -4690,7 +4732,7 @@ def print_cover(outfile):
     outfile.write("\n")
 
 
-def print_title_page(outfile):
+def print_title_page(outfile: TextIOWrapper) -> None:
     """
     create title page for monographic print output
     """
@@ -4705,7 +4747,7 @@ def print_title_page(outfile):
     outfile.write("\n")
 
 
-def print_copyright_page(outfile, refdict):
+def print_copyright_page(outfile: TextIOWrapper, refdict: dict) -> None:
     """
     create copyright page for monographic print output
     """
@@ -4748,7 +4790,7 @@ def print_copyright_page(outfile, refdict):
     outfile.write("\n")
 
 
-def print_table_of_contents(outfile, species_list):
+def print_table_of_contents(outfile: TextIOWrapper, species_list: list) -> None:
     """
     create Table of Contents for monographic print output
     """
@@ -4806,7 +4848,7 @@ def print_table_of_contents(outfile, species_list):
     outfile.write("\n")
 
 
-def write_print_only_pages(outfile, species, refdict):
+def write_print_only_pages(outfile: TextIOWrapper, species: list, refdict: dict) -> None:
     """
     create starting pages that are unique to print output
     """
@@ -4816,7 +4858,7 @@ def write_print_only_pages(outfile, species, refdict):
     print_table_of_contents(outfile, species)
 
 
-def start_print(outfile):
+def start_print(outfile: TextIOWrapper) -> None:
     """
     start html file for print monographic output
     """
@@ -4834,7 +4876,7 @@ def start_print(outfile):
     outfile.write("  <body>\n")
 
 
-def end_print(outfile):
+def end_print(outfile: TextIOWrapper) -> None:
     """
     end html file for print monographic output
     """
@@ -4843,9 +4885,9 @@ def end_print(outfile):
 
 
 # def build_site(init_data):
-def build_site():
+def build_site() -> None:
     create_temp_output_paths()
-    with codecs.open(init_data().error_log, "w", "utf-8") as TMB_Error.LOGFILE:
+    with open(init_data().error_log, "w", encoding="utf-8") as TMB_Error.LOGFILE:
         # read data and do computation
         print("...Reading References...")
         (references, refdict, citelist,
@@ -4907,13 +4949,13 @@ def build_site():
             print("...Creating Web Version...")
             copy_support_files()
             print("......Writing References......")
-            with codecs.open(WEBOUT_PATH + init_data().ref_url, "w", "utf-8") as outfile:
+            with open(WEBOUT_PATH + init_data().ref_url, "w", encoding="utf-8") as outfile:
                 write_reference_bibliography(outfile, False, references)
-            with codecs.open(WEBOUT_PATH + init_data().ref_sum_url, "w", "utf-8") as outfile:
+            with open(WEBOUT_PATH + init_data().ref_sum_url, "w", encoding="utf-8") as outfile:
                 write_reference_summary(outfile, False, len(references), yeardat, yeardat1900, citecount, languages)
             write_reference_pages(None, False, references, refdict, citelist, name_table, point_locations)
             print("......Writing Names Info......")
-            with codecs.open(WEBOUT_PATH + "names/index.html", "w", "utf-8") as outfile:
+            with open(WEBOUT_PATH + "names/index.html", "w", encoding="utf-8") as outfile:
                 write_all_name_pages(outfile, False, refdict, citelist, all_names, specific_names, name_table,
                                      species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
                                      binomial_point_locations, specific_point_locations, point_locations)
@@ -4924,38 +4966,38 @@ def build_site():
                 print("......Copying Maps......")
                 copy_map_files(species, all_names, specific_names, point_locations)
             print("......Writing Locations......")
-            with codecs.open(WEBOUT_PATH + "locations/index.html", "w", "utf-8") as outfile:
+            with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
                 write_location_index(outfile, False, point_locations, location_dict, location_species,
                                      location_sp_names, location_bi_names, location_direct_refs, location_cited_refs,
                                      references)
-            with codecs.open(WEBOUT_PATH + init_data().map_url, "w", "utf-8") as outfile:
+            with open(WEBOUT_PATH + init_data().map_url, "w", encoding="utf-8") as outfile:
                 write_geography_page(outfile, False, species)
             print("......Writing Media Pages......")
-            with codecs.open(WEBOUT_PATH + init_data().photo_url, "w", "utf-8") as outfile:
+            with open(WEBOUT_PATH + init_data().photo_url, "w", encoding="utf-8") as outfile:
                 write_photo_index(outfile, False, species, photos)
             write_all_art_pages(None, False, art)
-            with codecs.open(WEBOUT_PATH + init_data().video_url, "w", "utf-8") as outfile:
+            with open(WEBOUT_PATH + init_data().video_url, "w", encoding="utf-8") as outfile:
                 write_video_index(outfile, False, videos)
             print("......Writing Misc......")
-            with codecs.open(WEBOUT_PATH + init_data().syst_url, "w", "utf-8") as outfile:
+            with open(WEBOUT_PATH + init_data().syst_url, "w", encoding="utf-8") as outfile:
                 write_systematics_overview(outfile, False, subgenera, species, refdict, species_changes_new,
                                            species_changes_synonyms, species_changes_spelling)
-            with codecs.open(WEBOUT_PATH + init_data().common_url, "w", "utf-8") as outfile:
+            with open(WEBOUT_PATH + init_data().common_url, "w", encoding="utf-8") as outfile:
                 write_common_names_pages(outfile, False, replace_references(common_name_data, refdict, False))
-            with codecs.open(WEBOUT_PATH + init_data().lifecycle_url, "w", "utf-8") as outfile:
+            with open(WEBOUT_PATH + init_data().lifecycle_url, "w", encoding="utf-8") as outfile:
                 write_life_cycle_pages(outfile, False)
-            with codecs.open(WEBOUT_PATH + init_data().tree_url, "w", "utf-8") as outfile:
+            with open(WEBOUT_PATH + init_data().tree_url, "w", encoding="utf-8") as outfile:
                 write_phylogeny_pages(outfile, False, refdict)
-            with codecs.open(WEBOUT_PATH + init_data().morph_url, "w", "utf-8") as outfile:
+            with open(WEBOUT_PATH + init_data().morph_url, "w", encoding="utf-8") as outfile:
                 write_main_morphology_pages(outfile, False, morphology)
-            with codecs.open(WEBOUT_PATH + "index.html", "w", "utf-8") as outfile:
+            with open(WEBOUT_PATH + "index.html", "w", encoding="utf-8") as outfile:
                 write_introduction(outfile, False, species)
             write_citation_page(refdict)
 
         # output print version
         if False:
             print("...Creating Print Version...")
-            with codecs.open("print.html", "w", "utf-8") as printfile:
+            with open("print.html", "w", encoding="utf-8") as printfile:
                 start_print(printfile)
                 write_print_only_pages(printfile, species, refdict)
                 write_introduction(printfile, True, species)
