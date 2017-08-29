@@ -44,7 +44,7 @@ AUTHOR_NOPCOMMA = 2     # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = True
+DRAW_MAPS = False
 
 # randSeed = random.randint(0, 10000)
 
@@ -97,7 +97,11 @@ def common_header_part1(outfile: TextIOWrapper, title: str, indexpath: str = "")
     # outfile.write("    <link rel=\"stylesheet\" href=\"http://fonts.googleapis.com/css?family=Merienda+One|"
     #               "Lora:400,700,400italic,700italic\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath + "uca_style.css\" />\n")
-    outfile.write("    <script src=\"https://use.fontawesome.com/3669ad7c2b.js\"></script>\n")
+    # outfile.write("    <script src=\"https://use.fontawesome.com/3669ad7c2b.js\"></script>\n")
+    outfile.write("    <script defer src=\"" + indexpath + "js/packs/solid.js\"></script>\n")
+    outfile.write("    <script defer src=\"" + indexpath + "js/packs/regular.js\"></script>\n")
+    outfile.write("    <script defer src=\"" + indexpath + "js/packs/brands.js\"></script>\n")
+    outfile.write("    <script defer src=\"" + indexpath + "js/fontawesome.js\"></script>\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath +
                   "images/flag-icon-css/css/flag-icon.min.css\" />\n")
     outfile.write("    <link rel=\"author\" href=\"mailto:msr@asu.edu\" />\n")
@@ -118,7 +122,7 @@ def common_header_part2(outfile: TextIOWrapper, indexpath: str ="", include_map:
     outfile.write("      <a href=\"" + indexpath +
                   "index.html\" class=\"home-link\"><span class =\"fa fa-home\"></span> Home</a>\n")
     outfile.write("      <a href=\"" + indexpath +
-                  "blog\" class=\"home-link\"><span class =\"fa fa-pencil\"></span> Blog</a>\n")
+                  "blog\" class=\"home-link\"><span class =\"fa fa-pencil-alt\"></span> Blog</a>\n")
     outfile.write("    </div>\n")
 
 
@@ -232,9 +236,9 @@ def common_html_footer(outfile: TextIOWrapper, indexpath: str = "") -> None:
                   "src=\"//rf.revolvermaps.com/0/0/4.js?i=5f9t1sywiez&amp;m=0&amp;h=75&amp;c=ff0000&amp;r=30\" "
                   "async=\"async\"></script><figcaption>Visitors</figcaption></figure>\n")
     outfile.write("       <p id=\"citation\"><a href=\"" + indexpath + init_data().cite_url +
-                  "\"><span class=\"fa fa-pencil\"></span> How to cite this site</a></p>\n")
+                  "\"><span class=\"fa fa-pencil-alt\"></span> How to cite this site</a></p>\n")
     outfile.write("       <p id=\"contact\">Questions or comments about the site? Contact "
-                  "<a href=\"mailto:msr@asu.edu\"><span class=\"fa fa-envelope-o\"></span> "
+                  "<a href=\"mailto:msr@asu.edu\"><span class=\"fa fa-envelope\"></span> "
                   "Dr. Michael S. Rosenberg</a></p>\n")
     outfile.write("       <p id=\"copyright\">Release: " + init_data().version +
                   " &mdash; Copyright &copy; 2003&ndash;" + str(init_data().current_year) +
@@ -717,7 +721,7 @@ def write_reference_bibliography(outfile: TextIOWrapper, do_print: bool, reflist
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + init_data().ref_sum_url +
-                      "\"><span class=\"fa fa-line-chart\"></span> Reference/Citation Summary</a></li>\n")
+                      "\"><span class=\"fa fa-chart-line\"></span> Reference/Citation Summary</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -1017,14 +1021,14 @@ def output_name_table(outfile: TextIOWrapper, do_print: bool, is_name: bool, ite
         # applies to...
         if n.context == "location":
             outstr = create_location_sublink(n.application)
-            outfile.write("      <td><span class=\"fa fa-map-marker\"></span> location: " + outstr + "</td>\n")
+            outfile.write("      <td><span class=\"fa fa-map-marker-alt\"></span> location: " + outstr + "</td>\n")
         elif n.context == "citation":
             if n.application in refdict:
                 crossref = refdict[n.application]
                 if n.application in name_table:
                     nstr = n.cite_n
                     if nstr == "0":
-                        outfile.write("      <td><span class=\"fa fa-pencil-square-o\"></span> citation: "
+                        outfile.write("      <td><span class=\"fa fa-edit\"></span> citation: "
                                       "<a href=\"" + rel_link_prefix(do_print, "../references/") + crossref.cite_key +
                                       ".html\">" + crossref.citation + "</a></td>\n")
                     else:
@@ -1046,16 +1050,16 @@ def output_name_table(outfile: TextIOWrapper, do_print: bool, is_name: bool, ite
                                 report_error("Citation " + n.cite_key + " tried to cite " + n.application +
                                              " #" + nstr)
                                 refname = ""
-                        outfile.write("      <td><span class=\"fa fa-pencil-square-o\"></span> citation: "
+                        outfile.write("      <td><span class=\"fa fa-edit\"></span> citation: "
                                       "<a href=\"" + rel_link_prefix(do_print, "../references/") + crossref.cite_key +
                                       ".html\">" + crossref.citation + "</a> → " + format_name_string(refname) +
                                       extraref + "</td>\n")
                 else:
-                    outfile.write("      <td><span class=\"fa fa-pencil-square-o\"></span> citation: "
+                    outfile.write("      <td><span class=\"fa fa-edit\"></span> citation: "
                                   "<a href=\"" + rel_link_prefix(do_print, "../references/") + crossref.cite_key +
                                   ".html\">" + crossref.citation + "</a></td>\n")
             else:
-                outfile.write("      <td><span class=\"fa fa-pencil-square-o\"></span> citation: " + n.application +
+                outfile.write("      <td><span class=\"fa fa-edit\"></span> citation: " + n.application +
                               "</td>\n")
                 if is_name and not do_print:  # only print on one pass
                     report_error("Citation not in DB: " + n.cite_key + " cites " + n.application)
@@ -1092,7 +1096,7 @@ def output_name_table(outfile: TextIOWrapper, do_print: bool, is_name: bool, ite
         elif n.source == "<":  # original name retained
             outfile.write("      <td><span class=\"fa fa-arrow-left\"></span> Original</td>\n")
         elif n.source == "=":  # automatically computer
-            outfile.write("      <td><span class=\"fa fa-gears\"></span> Computed</td>\n")
+            outfile.write("      <td><span class=\"fa fa-cogs\"></span> Computed</td>\n")
         else:
             if ";" in n.source:
                 source_list = n.source.split(";")
@@ -1108,7 +1112,7 @@ def output_name_table(outfile: TextIOWrapper, do_print: bool, is_name: bool, ite
                     tmpsource = source[1:]
                     tmpsource = tmpsource.replace("MSR:", "")
                     tmpsource = tmpsource.replace("/", "/<br />")
-                    tmpsource = tmpsource.replace("geography", "<span class=\"fa fa-map-o\"></span> Geography")
+                    tmpsource = tmpsource.replace("geography", "<span class=\"far fa-map\"></span> Geography")
                     tmpsource = tmpsource.replace("synonymy", "<span class=\"fa fa-exchange\"></span> Synonymy")
                     source_strs.append(tmpsource)
             outfile.write("      <td>" + ", ".join(source_strs) + "</td>\n")
@@ -2181,7 +2185,7 @@ def write_all_name_pages(outfile: TextIOWrapper, do_print: bool, refdict: dict, 
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + init_data().name_sum_url +
-                      "\"><span class=\"fa fa-line-chart\"></span> Name Summary</a></li>\n")
+                      "\"><span class=\"fa fa-chart-line\"></span> Name Summary</a></li>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + init_data().species_url +
                       "\"><span class=\"fa fa-check-circle\"></span> Accepted Species</a></li>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) +
@@ -2618,7 +2622,7 @@ def write_location_index(outfile: TextIOWrapper, do_print: bool, point_locations
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
         outfile.write("          <li><a href=\"../" + init_data().map_url +
-                      "\"><span class=\"fa fa-map-o\"></span> Range Maps</a></li>\n")
+                      "\"><span class=\"far fa-map\"></span> Range Maps</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -2912,7 +2916,7 @@ def write_species_photo_page(outfile: TextIOWrapper, do_print: bool, fname: str,
                       ".html\"><span class=\"fa fa-info-circle\"></span> Species page</a></li>\n")
     if not do_print:
         outfile.write("          <li><a href=\"../" + init_data().photo_url +
-                      "\"><span class=\"fa fa-camera\"></span> All species photos</a></li>\n")
+                      "\"><span class=\"fa fa-camera-alt\"></span> All species photos</a></li>\n")
     outfile.write("        </ul>\n")
     outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -2956,7 +2960,7 @@ def write_species_video_page(fname: str, video: TMB_Classes.VideoClass, vn: int)
             outfile.write("          <li><a href=\"../u_" + video.species +
                           ".html\"><span class=\"fa fa-info-circle\"></span> Species page</a></li>\n")
         outfile.write("          <li><a href=\"../" + init_data().video_url +
-                      "\"><span class=\"fa fa-video-camera\"></span> All species videos</a></li>\n")
+                      "\"><span class=\"fa fa-video\"></span> All species videos</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
         outfile.write("    </header>\n")
@@ -3070,9 +3074,9 @@ def write_species_page(outfile: TextIOWrapper, do_print: bool, species: TMB_Clas
         outfile.write("          <li><a href=\"#type\">Type</a></li>\n")
         outfile.write("          <li><a href=\"#info\"><span class=\"fa fa-info-circle\"></span> "
                       "Information</a></li>\n")
-        outfile.write("          <li><a href=\"#pics\"><span class=\"fa fa-camera\"></span> Photos</a></li>\n")
+        outfile.write("          <li><a href=\"#pics\"><span class=\"fa fa-camera-alt\"></span> Photos</a></li>\n")
         if not is_fossil:
-            outfile.write("          <li><a href=\"#video\"><span class=\"fa fa-video-camera\"></span> "
+            outfile.write("          <li><a href=\"#video\"><span class=\"fa fa-video\"></span> "
                           "Video</a></li>\n")
             outfile.write("          <li><a href=\"#art\"><span class=\"fa fa-paint-brush\"></span> Art</a></li>\n")
         outfile.write("          <li><a href=\"#references\"><span class=\"fa fa-book\"></span> References</a></li>\n")
@@ -3190,9 +3194,9 @@ def write_species_page(outfile: TextIOWrapper, do_print: bool, species: TMB_Clas
     outfile.write("\n")
     outfile.write("    <section class=\"spsection\">\n")
     if do_print:
-        outfile.write("      <h2 class=\"nobookmark\"><span class=\"fa fa-camera\"></span> Photos</h2>\n")
+        outfile.write("      <h2 class=\"nobookmark\"><span class=\"fa fa-camera-alt\"></span> Photos</h2>\n")
     else:
-        outfile.write("      <h2 id=\"pics\" class=\"nobookmark\"><span class=\"fa fa-camera\"></span> Photos</h2>\n")
+        outfile.write("      <h2 id=\"pics\" class=\"nobookmark\"><span class=\"fa fa-camera-alt\"></span> Photos</h2>\n")
     photo_n = 0
     for photo in photos:
         slist = photo.species.split(";")
@@ -3222,9 +3226,9 @@ def write_species_page(outfile: TextIOWrapper, do_print: bool, species: TMB_Clas
     if not is_fossil:
         outfile.write("    <section class=\"spsection\">\n")
         if do_print:
-            outfile.write("      <h2 class=\"nobookmark\"><span class=\"fa fa-video-camera\"></span> Video</h2>\n")
+            outfile.write("      <h2 class=\"nobookmark\"><span class=\"fa fa-video\"></span> Video</h2>\n")
         else:
-            outfile.write("      <h2 id=\"video\" class=\"nobookmark\"><span class=\"fa fa-video-camera\"></span> "
+            outfile.write("      <h2 id=\"video\" class=\"nobookmark\"><span class=\"fa fa-video\"></span> "
                           "Video</h2>\n")
         video_n = 0
         for video in videos:
@@ -4478,10 +4482,10 @@ def write_citation_page(refdict: dict) -> None:
         outfile.write("      </ul>\n")
         outfile.write("    </div>\n")
         outfile.write("    <ul class=\"fa-ul\">\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-file-pdf-o\"></span>"
+        outfile.write("      <li><span class=\"fa-li far fa-file-pdf\"></span>"
                       "<a href=\"http://dx.plos.org/10.1371/journal.pone.0101704\">Read paper online at "
                       "PLoS ONE</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-github\"></span>"
+        outfile.write("      <li><span class=\"fa-li fab fa-github\"></span>"
                       "<a href=\"https://github.com/msrosenberg/fiddlercrab.info\">Website data repository on "
                       "GitHub</a></li>\n")
         outfile.write("    </ul>\n")
@@ -4555,22 +4559,22 @@ def write_introduction(outfile: TextIOWrapper, do_print: bool, species: list) ->
         outfile.write("           <li><a href=\"names\">Name Index</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-comments-o\"></span><a href=\"" + init_data().common_url +
+        outfile.write("      <li><span class=\"fa-li far fa-comments\"></span><a href=\"" + init_data().common_url +
                       "\">Common Names</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-map-o\"></span><a href=\"" + init_data().map_url +
+        outfile.write("      <li><span class=\"fa-li far fa-map\"></span><a href=\"" + init_data().map_url +
                       "\">Geographic Ranges and Locations</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-refresh\"></span><a href=\"" + init_data().lifecycle_url +
+        outfile.write("      <li><span class=\"fa-li fa fa-sync\"></span><a href=\"" + init_data().lifecycle_url +
                       "\">Life Cycle</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-heart-o\"></span><a href=\"" + init_data().morph_url +
+        outfile.write("      <li><span class=\"fa-li far fa-heart\"></span><a href=\"" + init_data().morph_url +
                       "\">Morphology</a></li>\n")
         outfile.write("      <li><span class=\"fa-li fa fa-book\"></span><a href=\"" + init_data().ref_url +
                       "\">Comprehensive Reference List</a></li>\n")
         outfile.write("    </ul>\n")
         outfile.write("    <h2>Multimedia</h2>\n")
         outfile.write("    <ul class=\"fa-ul\">\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-camera\"></span><a href=\"" + init_data().photo_url +
+        outfile.write("      <li><span class=\"fa-li fa fa-camera-alt\"></span><a href=\"" + init_data().photo_url +
                       "\">Photos</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-video-camera\"></span><a href=\"" + init_data().video_url +
+        outfile.write("      <li><span class=\"fa-li fa fa-video\"></span><a href=\"" + init_data().video_url +
                       "\">Videos</a></li>\n")
         outfile.write("      <li><span class=\"fa-li fa fa-paint-brush\"></span>Art\n")
         outfile.write("        <ul>\n")
@@ -4582,9 +4586,9 @@ def write_introduction(outfile: TextIOWrapper, do_print: bool, species: list) ->
         outfile.write("    </ul>\n")
         outfile.write("    <h2>Miscellania</h2>\n")
         outfile.write("    <ul class=\"fa-ul\">\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-pencil\"></span>"
+        outfile.write("      <li><span class=\"fa-li fa fa-pencil-alt\"></span>"
                       "<a href=\"" + init_data().cite_url + "\">Citation info for this website</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-github\"></span>"
+        outfile.write("      <li><span class=\"fa-li fab fa-github\"></span>"
                       "<a href=\"https://github.com/msrosenberg/fiddlercrab.info\">Website data on GitHub</a></li>\n")
         outfile.write("    </ul>\n")
         common_html_footer(outfile)
@@ -4611,6 +4615,8 @@ def create_web_output_paths() -> None:
     create_path_and_index("maps/")
     create_path_and_index("images/")
     create_path_and_index("locations/")
+    create_path_and_index("js/")
+    create_path_and_index("js/packs/")
 
 
 def create_temp_output_paths() -> None:
@@ -4664,6 +4670,20 @@ def copy_support_files() -> None:
             shutil.copy2(TMP_PATH + filename, WEBOUT_PATH + "images/")
         except FileNotFoundError:
             report_error("Missing file: " + TMP_PATH + filename)
+    filelist = {"fontawesome.js"}
+    for filename in filelist:
+        try:
+            shutil.copy2("resources/font-awesome/js/" + filename, WEBOUT_PATH + "js/")
+        except FileNotFoundError:
+            report_error("Missing file: resources/font-awesome/js/" + TMP_PATH + filename)
+    filelist = {"brands.js",
+                "regular.js",
+                "solid.js"}
+    for filename in filelist:
+        try:
+            shutil.copy2("resources/font-awesome/js/packs/" + filename, WEBOUT_PATH + "js/packs/")
+        except FileNotFoundError:
+            report_error("Missing file: resources/font-awesome/js/packs/" + TMP_PATH + filename)
 
 
 def copy_map_files(species: list, all_names: list, specific_names: list, point_locations: dict) -> None:
