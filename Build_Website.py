@@ -44,7 +44,7 @@ AUTHOR_NOPCOMMA = 2     # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = False
+DRAW_MAPS = True
 
 # randSeed = random.randint(0, 10000)
 
@@ -2560,7 +2560,7 @@ def write_location_page(outfile: TextIOWrapper, do_print: bool, loc: TMB_Classes
 
     # the following is to identify locations which are no longer used in the DB and can be removed
     if is_error:
-        report_error("Phantom Location:" + loc.name)
+        report_error("Phantom Location: " + loc.name)
 
     write_annotated_reference_list(outfile, do_print, references, all_refs, location_direct_refs[loc.name],
                                    location_cited_refs[loc.name], "../")
@@ -5016,7 +5016,7 @@ def build_site() -> None:
             write_citation_page(refdict)
 
         # output print version
-        if False:
+        if True:
             print("...Creating Print Version...")
             with open("print.html", "w", encoding="utf-8") as printfile:
                 start_print(printfile)
