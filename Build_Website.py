@@ -3197,7 +3197,8 @@ def write_species_page(outfile: TextIOWrapper, do_print: bool, species: TMB_Clas
     if do_print:
         outfile.write("      <h2 class=\"nobookmark\"><span class=\"fa fa-camera-alt\"></span> Photos</h2>\n")
     else:
-        outfile.write("      <h2 id=\"pics\" class=\"nobookmark\"><span class=\"fa fa-camera-alt\"></span> Photos</h2>\n")
+        outfile.write("      <h2 id=\"pics\" class=\"nobookmark\"><span class=\"fa fa-camera-alt\"></span> "
+                      "Photos</h2>\n")
     photo_n = 0
     for photo in photos:
         slist = photo.species.split(";")
@@ -4077,15 +4078,15 @@ def summarize_year(yeardict: dict) -> Tuple[list, list]:
 def summarize_languages(refs: list) -> dict:
     languages = {}
     for ref in refs:
-        l = ref.language
-        if l != "":
-            s = l.find(" ")
+        lang = ref.language
+        if lang != "":
+            s = lang.find(" ")
             if s > -1:
-                l = l[:s]
-            if l in languages:
-                languages[l] += 1
+                lang = lang[:s]
+            if lang in languages:
+                languages[lang] += 1
             else:
-                languages[l] = 1
+                languages[lang] = 1
     return languages
 
 
