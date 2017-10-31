@@ -372,7 +372,7 @@ def write_all_range_map_svg(base_map: list, species_maps: list) -> None:
 
 
 def write_point_map_kml(title: str, place_list: list, point_locations: dict, invalid_places: Optional[set],
-                        init_data: TMB_Initialize.InitializationData) -> None:
+                        init_data: TMB_Initialize.InitializationData, sub_locations: Optional[list]) -> None:
     with open(__TMP_PATH__ + "doc.kml", "w", encoding="utf-8") as outfile:
         outfile.write("<?xml version=\"1.0\"?>\n")
         outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
@@ -391,6 +391,13 @@ def write_point_map_kml(title: str, place_list: list, point_locations: dict, inv
         outfile.write("        </Icon >\n")
         outfile.write("      </IconStyle>\n")
         outfile.write("    </Style>\n")
+        outfile.write("    <Style id=\"sub_location\">\n")
+        outfile.write("      <IconStyle>\n")
+        outfile.write("        <Icon>\n")
+        outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/ylw-circle.png</href>\n")
+        outfile.write("        </Icon >\n")
+        outfile.write("      </IconStyle>\n")
+        outfile.write("    </Style>\n")
         for place in place_list:
             pnt = point_locations[place]
             if not pnt.unknown:
@@ -400,6 +407,10 @@ def write_point_map_kml(title: str, place_list: list, point_locations: dict, inv
                         is_invalid = True
                 if pnt.validity == "X":
                     is_invalid = True
+                is_sub = False
+                if sub_locations is not None:
+                    if pnt in sub_locations:
+                        is_sub = True
                 outfile.write("    <Placemark>\n")
                 outfile.write("      <name>" + unicode_to_html_encoding(place) + "</name>\n")
                 outfile.write("      <description>" + init_data.site_url() + "/locations/" + place_to_filename(place) +
@@ -407,6 +418,8 @@ def write_point_map_kml(title: str, place_list: list, point_locations: dict, inv
                 outfile.write("      <styleUrl>\n")
                 if is_invalid:
                     outfile.write("        #bad_location\n")
+                elif is_sub:
+                    outfile.write("        #sub_location\n")
                 else:
                     outfile.write("        #good_location\n")
                 outfile.write("      </styleUrl>\n")
@@ -424,7 +437,7 @@ def write_point_map_kml(title: str, place_list: list, point_locations: dict, inv
 
 
 def write_point_map_svg(title: str, place_list: list, point_locations: dict, invalid_places: Optional[set],
-                        base_map: list, skip_axes: bool, set_bounds: bool) -> None:
+                        base_map: list, skip_axes: bool, set_bounds: bool, sub_locations: Optional[list]) -> None:
     fig, faxes = mplpy.subplots(figsize=[6.5, 3.25])
     draw_base_svg_map(faxes, base_map)
     for spine in faxes.spines:
@@ -447,11 +460,18 @@ def write_point_map_svg(title: str, place_list: list, point_locations: dict, inv
                         is_invalid = True
                 if point.validity == "X":
                     is_invalid = True
+                is_sub = False
+                if sub_locations is not None:
+                    if point in sub_locations:
+                        is_sub = True
                 lats.append(point.latitude)
                 lons.append(point.longitude)
                 if is_invalid:
                     colors.append("blue")
                     edges.append("darkblue")
+                elif is_sub:
+                    colors.append("yellow")
+                    edges.append("gold")
                 else:
                     colors.append("red")
                     edges.append("darkred")
@@ -504,12 +524,12 @@ def create_all_point_maps(species: list, point_locations: dict, species_plot_loc
         if s.status != "fossil":
             places = species_plot_locations[s]
             invalid_places = invalid_species_locations[s]
-            write_point_map_svg("u_" + s.species, places, point_locations, invalid_places, base_map, False, False)
-            write_point_map_kml("u_" + s.species, places, point_locations, invalid_places, init_data)
+            write_point_map_svg("u_" + s.species, places, point_locations, invalid_places, base_map, False, False, None)
+            write_point_map_kml("u_" + s.species, places, point_locations, invalid_places, init_data, None)
             all_places |= set(places)
     all_list = sorted(list(all_places))
-    write_point_map_svg("uca_all", all_list, point_locations, None, base_map, True, False)
-    write_point_map_kml("uca_all", all_list, point_locations, None, init_data)
+    write_point_map_svg("uca_all", all_list, point_locations, None, base_map, True, False, None)
+    write_point_map_kml("uca_all", all_list, point_locations, None, init_data, None)
 
 
 def create_all_species_maps(base_map: list, init_data: TMB_Initialize.InitializationData, species: list,
@@ -534,13 +554,13 @@ def create_all_name_maps(base_map: list, all_names: list, specific_names: list, 
     for name in all_names:
         namefile = "name_" + name_to_filename(name)
         place_list = binomial_plot_locations[name]
-        write_point_map_svg(namefile, place_list, point_locations, None, base_map, False, False)
-        write_point_map_kml(namefile, place_list, point_locations, None, init_data)
+        write_point_map_svg(namefile, place_list, point_locations, None, base_map, False, False, None)
+        write_point_map_kml(namefile, place_list, point_locations, None, init_data, None)
     for name in specific_names:
         namefile = "sn_" + name.name
         place_list = specific_plot_locations[name]
-        write_point_map_svg(namefile, place_list, point_locations, None, base_map, False, False)
-        write_point_map_kml(namefile, place_list, point_locations, None, init_data)
+        write_point_map_svg(namefile, place_list, point_locations, None, base_map, False, False, None)
+        write_point_map_kml(namefile, place_list, point_locations, None, init_data, None)
 
 
 def create_all_location_maps(base_map: list, point_locations: dict,
@@ -548,10 +568,14 @@ def create_all_location_maps(base_map: list, point_locations: dict,
     for loc in point_locations:
         point = point_locations[loc]
         if not point.unknown:
-            place_list = [loc]
+            place_list = []
+            sub_list = point.all_children()
+            for p in sub_list:
+                place_list.append(p.name)
+            place_list.append(loc)  # put the primary location at end so it is drawn above children
             namefile = "location_" + place_to_filename(loc)
-            write_point_map_svg(namefile, place_list, point_locations, None, base_map, False, True)
-            write_point_map_kml(namefile, place_list, point_locations, None, init_data)
+            write_point_map_svg(namefile, place_list, point_locations, None, base_map, False, True, sub_list)
+            write_point_map_kml(namefile, place_list, point_locations, None, init_data, sub_list)
 
 
 def create_all_maps(init_data: TMB_Initialize.InitializationData, point_locations: dict, species: list,

@@ -176,3 +176,10 @@ class LocationClass:
 
     def n_alternates(self) -> int:
         return len(self.alternates)
+
+    def all_children(self) -> list:
+        result = []
+        result.extend(self.children)
+        for c in self.children:
+            result.extend(c.all_children())
+        return result
