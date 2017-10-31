@@ -3823,19 +3823,22 @@ def write_systematics_overview(outfile: TextIOWrapper, do_print: bool, subgenlis
                   "genus <em class=\"species\">Uca.</em> <em>Journal of Crustacean Biology</em> 21(3):839-869.\n")
     outfile.write("    </blockquote>\n")
     outfile.write("    <p>Additional references for updated information will be detailed below.</p>")
-    outfile.write("      <blockquote>\n")
+    outfile.write("    </div>\n")
+    outfile.write("\n")
+    outfile.write("    <section class=\"spsection\">\n")
+    outfile.write("      <h2>A Note on Classification</h2>\n")
     outfile.write("        <p>" + format_reference_cite(refdict["Shih2016.2"], do_print, AUTHOR_PAREN) +
                   " published a paper which uses a phylogenetic tree showing "
                   "ghost crabs as a subgroup of fiddler crabs to justify splitting fiddler crabs into eleven "
                   "different genera (essentially, raising the subgenera listed below to genera, except for "
                   "<em class=\"species\">Australuca</em> which they find to be a subset of <em class=\"species\">"
                   "Tubuca</em>). While one can argue whether differences among the subgroups warrant being "
-                  "considered genera or subgenera, I do not believe the phylogenetic tree is correct and for now "
+                  "considered genera or subgenera, I do not believe the phylogenetic tree which they use to justify "
+                  "this change is correct and for now "
                   "am sticking with the more traditional approach of keeping all fiddler crabs within a single "
                   "genus on this website. I will update this site to match their classification if additional data "
                   "and future analyses continue to support their result.</p>")
-    outfile.write("      </blockquote>\n")
-    outfile.write("    </div>\n")
+    outfile.write("    </section>\n")
     outfile.write("\n")
 
     # genus section
