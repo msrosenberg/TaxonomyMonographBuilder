@@ -17,7 +17,7 @@ from io import TextIOWrapper
 import matplotlib.pyplot as mplpy
 from matplotlib.collections import PatchCollection
 import matplotlib.patches as mplp
-# from TMB_Error import report_error
+from TMB_Error import report_error
 from TMB_Common import *
 
 Number = Union[int, float]
@@ -520,7 +520,15 @@ def create_all_point_maps(species: list, point_locations: dict, species_plot_loc
                           invalid_species_locations: dict, base_map: list,
                           init_data: TMB_Initialize.InitializationData) -> None:
     all_places = set()
-    for s in species:
+    total = len(species)
+    report = total / 20
+    j = 0
+    print(".........Point Maps.........")
+    for i, s in enumerate(species):
+        if i >= report:
+            j += 1
+            print("............{}%".format(j*5))
+            report += total / 20
         if s.status != "fossil":
             places = species_plot_locations[s]
             invalid_places = invalid_species_locations[s]
@@ -537,7 +545,15 @@ def create_all_species_maps(base_map: list, init_data: TMB_Initialize.Initializa
                             invalid_species_locations: dict) -> None:
     # create range maps
     species_maps = read_raw_kml(init_data.map_kml_file)
-    for m in species_maps:
+    total = len(species_maps)
+    report = total / 20
+    j = 0
+    print(".........Range Maps.........")
+    for i, m in enumerate(species_maps):
+        if i >= report:
+            j += 1
+            print("............{}%".format(j*5))
+            report += total / 20
         write_species_range_map_kml(m)
         write_species_range_map_svg(base_map, m)
     write_all_range_map_kml(species_maps)
@@ -551,12 +567,23 @@ def create_all_species_maps(base_map: list, init_data: TMB_Initialize.Initializa
 def create_all_name_maps(base_map: list, all_names: list, specific_names: list, point_locations: dict,
                          specific_plot_locations: dict, binomial_plot_locations: dict,
                          init_data: TMB_Initialize.InitializationData) -> None:
-    for name in all_names:
+    total = len(all_names) + len(specific_names)
+    report = total / 20
+    j = 0
+    for i, name in enumerate(all_names):
+        if i >= report:
+            j += 1
+            print(".........{}%".format(j*5))
+            report += total / 20
         namefile = "name_" + name_to_filename(name)
         place_list = binomial_plot_locations[name]
         write_point_map_svg(namefile, place_list, point_locations, None, base_map, False, False, None)
         write_point_map_kml(namefile, place_list, point_locations, None, init_data, None)
-    for name in specific_names:
+    for i, name in enumerate(specific_names):
+        if i + len(all_names) >= report:
+            j += 1
+            print("...{}%".format(j*5), end="")
+            report += total / 20
         namefile = "sn_" + name.name
         place_list = specific_plot_locations[name]
         write_point_map_svg(namefile, place_list, point_locations, None, base_map, False, False, None)
@@ -565,11 +592,22 @@ def create_all_name_maps(base_map: list, all_names: list, specific_names: list, 
 
 def create_all_location_maps(base_map: list, point_locations: dict,
                              init_data: TMB_Initialize.InitializationData) -> None:
-    for loc in point_locations:
+    total = len(point_locations)
+    report = total / 20
+    j = 0
+    for i, loc in enumerate(point_locations):
+        if i >= report:
+            j += 1
+            print(".........{}%".format(j*5))
+            report += total / 20
         point = point_locations[loc]
         if not point.unknown:
             place_list = []
-            sub_list = point.all_children()
+            try:
+                sub_list = point.all_children()
+            except RecursionError:
+                report_error("Recursion Error on location: " + loc)
+                quit()
             for p in sub_list:
                 place_list.append(p.name)
             place_list.append(loc)  # put the primary location at end so it is drawn above children
