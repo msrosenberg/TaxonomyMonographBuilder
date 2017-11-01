@@ -2483,6 +2483,12 @@ def write_location_page(outfile: TextIOWrapper, do_print: bool, loc: TMB_Classes
             outfile.write("      </figure>\n")
         else:
             outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
+
+        outfile.write("        <div class=\"map_download\">\n")
+        outfile.write("         The red marker indicates the coordinates used to represent this location, "
+                      "yellow markers all other locations contained within this location.\n")
+        outfile.write("        </div>\n")
+
         outfile.write("    </div>\n")
     outfile.write("    </dl>\n")
     all_species = set()
