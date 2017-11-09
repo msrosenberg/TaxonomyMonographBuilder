@@ -4640,6 +4640,10 @@ def create_web_output_paths() -> None:
     create_path_and_index("morphology/")
     create_path_and_index("maps/")
     create_path_and_index("images/")
+    create_path_and_index("images/flag-icon-css/")
+    create_path_and_index("images/flag-icon-css/css/")
+    create_path_and_index("images/flag-icon-css/flags/")
+    create_path_and_index("images/flag-icon-css/flags/4x3/")
     create_path_and_index("locations/")
     create_path_and_index("js/")
     create_path_and_index("js/packs/")
@@ -4696,6 +4700,7 @@ def copy_support_files() -> None:
             shutil.copy2(TMP_PATH + filename, WEBOUT_PATH + "images/")
         except FileNotFoundError:
             report_error("Missing file: " + TMP_PATH + filename)
+    # font-awesome files
     filelist = {"fontawesome.js"}
     for filename in filelist:
         try:
@@ -4710,6 +4715,33 @@ def copy_support_files() -> None:
             shutil.copy2("resources/font-awesome/js/packs/" + filename, WEBOUT_PATH + "js/packs/")
         except FileNotFoundError:
             report_error("Missing file: resources/font-awesome/js/packs/" + TMP_PATH + filename)
+    # flag-icon files
+    filelist = {"flag-icon.min.css"}
+    for filename in filelist:
+        try:
+            shutil.copy2("resources/flag-icon-css/css/" + filename, WEBOUT_PATH + "images/flag-icon-css/css/")
+        except FileNotFoundError:
+            report_error("Missing file: images/flag-icon-css/css/" + TMP_PATH + filename)
+    filelist = {"de.svg",  # Germany
+                "es.svg",  # Spain
+                "ru.svg",  # Russia
+                "fr.svg",  # France
+                "pt.svg",  # Portugal
+                "dk.svg",  # Denmark
+                "nl.svg",  # Netherlands
+                "jp.svg",  # Japan
+                "cn.svg",  # China
+                "us.svg",  # USA
+                "th.svg",  # Thailand
+                "va.svg",  # Vatican
+                "it.svg",  # Italy
+                "vn.svg"}  # Vietnam
+    for filename in filelist:
+        try:
+            shutil.copy2("resources/flag-icon-css/flags/4x3/" + filename, WEBOUT_PATH +
+                         "images/flag-icon-css/flags/4x3/")
+        except FileNotFoundError:
+            report_error("Missing file: images/flag-icon-css/flags/4x3/" + TMP_PATH + filename)
 
 
 def copy_map_files(species: list, all_names: list, specific_names: list, point_locations: dict) -> None:
