@@ -2465,15 +2465,18 @@ def write_location_page(outfile: TextIOWrapper, do_print: bool, loc: TMB_Classes
         outfile.write("      <dd>" + ", ".join(loc.alternates) + "</dd>\n")
     if loc.parent is not None:
         p = point_locations[loc.parent]
-        outfile.write("    <dt>Included within</dt>\n")
+        outfile.write("    <dt>Included Within</dt>\n")
         outfile.write("      <dd>" + create_location_link(p, p.trimmed_name, do_print) + "</dd>\n")
     if loc.unknown:
         outfile.write("    <dt>Location Could not be Identified</dt>\n")
-        outfile.write("      <dd>" + loc.notes + "</dd>\n")
+        if loc.notes is not None:
+            outfile.write("      <dd>" + loc.notes + "</dd>\n")
     else:
+        if loc.notes is not None:
+            outfile.write("    <dt>Note</dt>\n")
+            outfile.write("      <dd>" + loc.notes + "</dd>\n")
         outfile.write("    <dt>Approximate Coordinates</dt>\n")
         outfile.write("      <dd>" + format_latlon(loc.latitude, loc.longitude) + "</dd>\n")
-
         outfile.write("    <div class=\"map_section\">\n")
         if do_print:
             outfile.write("      <figure>\n")

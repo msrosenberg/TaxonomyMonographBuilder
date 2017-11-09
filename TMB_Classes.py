@@ -161,7 +161,7 @@ class LocationClass:
         self.latitude = 0
         self.longitude = 0
         self.parent = None
-        self.notes = ""
+        self.notes = None
         self.children = []
         self.alternates = []
         self.validity = ""

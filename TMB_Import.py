@@ -308,18 +308,20 @@ def read_location_data(filename: str) -> dict:
             newloc.longitude = float(loc[2])
         except ValueError:
             newloc.unknown = True
-        newloc.notes = loc[3]
-        newloc.trimmed_name = loc[4]
+        if loc[3] != ".":
+            newloc.notes = loc[3]
+        # column 4 is for reference but not needed as data
+        newloc.trimmed_name = loc[5]
         if loc[5] != ".":
-            newloc.alternates = list(loc[5].split(";"))
+            newloc.alternates = list(loc[6].split(";"))
         if loc[6] != ".":
-            newloc.parent = loc[6]
-        newloc.validity = loc[7]
+            newloc.parent = loc[7]
+        newloc.validity = loc[8]
         if loc[8] != ".":
-            newloc.ne_lat = float(loc[8])
-            newloc.ne_lon = float(loc[9])
-            newloc.sw_lat = float(loc[10])
-            newloc.sw_lon = float(loc[11])
+            newloc.ne_lat = float(loc[9])
+            newloc.ne_lon = float(loc[10])
+            newloc.sw_lat = float(loc[11])
+            newloc.sw_lon = float(loc[12])
         else:  # set default boundaries if they are not loaded
             newloc.ne_lat = newloc.latitude + 7.5
             newloc.ne_lon = newloc.longitude + 15
