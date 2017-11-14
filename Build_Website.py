@@ -394,7 +394,9 @@ def format_language(x: str) -> str:
         ["Thai", "<span class=\"flag-icon flag-icon-th\"></span> Thai"],
         ["Latin", "<span class=\"flag-icon flag-icon-va\"></span> Latin"],
         ["Italian", "<span class=\"flag-icon flag-icon-it\"></span> Italian"],
-        ["Vietnamese", "<span class=\"flag-icon flag-icon-vn\"></span> Vietnamese"]
+        ["Vietnamese", "<span class=\"flag-icon flag-icon-vn\"></span> Vietnamese"],
+        ["Korean", "<span class=\"flag-icon flag-icon-kr\"></span> Korean"],
+        ["Polish", "<span class=\"flag-icon flag-icon-pl\"></span> Polish"]
     ]
     for r in language_replace_list:
         x = x.replace(r[0], r[1])
@@ -4735,6 +4737,8 @@ def copy_support_files() -> None:
                 "th.svg",  # Thailand
                 "va.svg",  # Vatican
                 "it.svg",  # Italy
+                "kr.svg",  # South Korea
+                "pl.svg",  # Poland
                 "vn.svg"}  # Vietnam
     for filename in filelist:
         try:
