@@ -98,10 +98,10 @@ def common_header_part1(outfile: TextIOWrapper, title: str, indexpath: str = "")
     #               "Lora:400,700,400italic,700italic\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath + "uca_style.css\" />\n")
     # outfile.write("    <script src=\"https://use.fontawesome.com/3669ad7c2b.js\"></script>\n")
-    outfile.write("    <script defer src=\"" + indexpath + "js/packs/solid.js\"></script>\n")
-    outfile.write("    <script defer src=\"" + indexpath + "js/packs/regular.js\"></script>\n")
-    outfile.write("    <script defer src=\"" + indexpath + "js/packs/brands.js\"></script>\n")
-    outfile.write("    <script defer src=\"" + indexpath + "js/fontawesome.js\"></script>\n")
+    outfile.write("    <script defer src=\"" + indexpath + "js/fa-solid.min.js\"></script>\n")
+    outfile.write("    <script defer src=\"" + indexpath + "js/fa-regular.min.js\"></script>\n")
+    outfile.write("    <script defer src=\"" + indexpath + "js/fa-brands.min.js\"></script>\n")
+    outfile.write("    <script defer src=\"" + indexpath + "js/fontawesome.min.js\"></script>\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath +
                   "images/flag-icon-css/css/flag-icon.min.css\" />\n")
     outfile.write("    <link rel=\"author\" href=\"mailto:msr@asu.edu\" />\n")
@@ -4648,7 +4648,7 @@ def create_web_output_paths() -> None:
     create_path_and_index("images/flag-icon-css/flags/4x3/")
     create_path_and_index("locations/")
     create_path_and_index("js/")
-    create_path_and_index("js/packs/")
+    # create_path_and_index("js/packs/")
 
 
 def create_temp_output_paths() -> None:
@@ -4703,20 +4703,29 @@ def copy_support_files() -> None:
         except FileNotFoundError:
             report_error("Missing file: " + TMP_PATH + filename)
     # font-awesome files
-    filelist = {"fontawesome.js"}
+    # filelist = {"fontawesome.js"}
+    # for filename in filelist:
+    #     try:
+    #         shutil.copy2("resources/font-awesome/js/" + filename, WEBOUT_PATH + "js/")
+    #     except FileNotFoundError:
+    #         report_error("Missing file: resources/font-awesome/js/" + TMP_PATH + filename)
+    # filelist = {"brands.js",
+    #             "regular.js",
+    #             "solid.js"}
+    # for filename in filelist:
+    #     try:
+    #         shutil.copy2("resources/font-awesome/js/packs/" + filename, WEBOUT_PATH + "js/packs/")
+    #     except FileNotFoundError:
+    #         report_error("Missing file: resources/font-awesome/js/packs/" + TMP_PATH + filename)
+    filelist = {"fontawesome.min.js",
+                "fa-brands.min.js",
+                "fa-regular.min.js",
+                "fa-solid.min.js"}
     for filename in filelist:
         try:
             shutil.copy2("resources/font-awesome/js/" + filename, WEBOUT_PATH + "js/")
         except FileNotFoundError:
             report_error("Missing file: resources/font-awesome/js/" + TMP_PATH + filename)
-    filelist = {"brands.js",
-                "regular.js",
-                "solid.js"}
-    for filename in filelist:
-        try:
-            shutil.copy2("resources/font-awesome/js/packs/" + filename, WEBOUT_PATH + "js/packs/")
-        except FileNotFoundError:
-            report_error("Missing file: resources/font-awesome/js/packs/" + TMP_PATH + filename)
     # flag-icon files
     filelist = {"flag-icon.min.css"}
     for filename in filelist:
