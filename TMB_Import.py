@@ -312,12 +312,12 @@ def read_location_data(filename: str) -> dict:
             newloc.notes = loc[3]
         # column 4 is for reference but not needed as data
         newloc.trimmed_name = loc[5]
-        if loc[5] != ".":
-            newloc.alternates = list(loc[6].split(";"))
         if loc[6] != ".":
+            newloc.alternates = list(loc[6].split(";"))
+        if loc[7] != ".":
             newloc.parent = loc[7]
         newloc.validity = loc[8]
-        if loc[8] != ".":
+        if loc[9] != ".":
             newloc.ne_lat = float(loc[9])
             newloc.ne_lon = float(loc[10])
             newloc.sw_lat = float(loc[11])
