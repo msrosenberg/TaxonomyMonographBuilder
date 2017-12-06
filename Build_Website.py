@@ -1133,6 +1133,32 @@ def output_name_table(outfile: TextIOWrapper, do_print: bool, is_name: bool, ite
     outfile.write("    </table>\n")
 
 
+def check_citation_cross_references(citelist: list, refdict: dict, name_table: dict) -> None:
+    for c in citelist:
+        if c.context == "citation":
+            if c.application in refdict:
+                if c.application in name_table:
+                    nstr = c.cite_n
+                    if nstr == "0":
+                        pass
+                    else:
+                        if "." in nstr:
+                            try:
+                                _ = name_table[c.application][nstr][1]
+                                _ = name_table[c.application][nstr][0]
+                            except LookupError:
+                                report_error("Error in citation: " + c.cite_key + " cites" + nstr +
+                                             " in " + c.application)
+                        else:
+                            try:
+                                _ = name_table[c.application][int(nstr)]
+                            except ValueError:
+                                report_error("Citation " + c.cite_key + " tried to cite " + c.application +
+                                             " #" + nstr)
+            else:
+                report_error("Citation not in DB: " + c.cite_key + " cites " + c.application)
+
+
 def write_reference_page(outfile: TextIOWrapper, do_print: bool, ref: TMB_Classes.ReferenceClass, citelist: list,
                          refdict: dict, name_table: dict, point_locations: dict) -> None:
     if do_print:
@@ -2712,6 +2738,45 @@ def write_location_index(outfile: TextIOWrapper, do_print: bool, point_locations
                       encoding="utf-8") as suboutfile:
                 write_location_page(suboutfile, do_print, loc, point_locations, location_species, location_bi_names,
                                     location_sp_names, location_direct_refs, location_cited_refs, references)
+
+
+def check_location_page(loc: TMB_Classes.LocationClass, location_species: dict, location_bi_names: dict,
+                        location_sp_names: dict) -> None:
+    """
+    check the output page for an individual location
+    """
+    all_species = set()
+    all_species |= location_species[loc.name]
+    all_bi_names = set()
+    all_bi_names |= location_bi_names[loc.name]
+    all_sp_names = set()
+    all_sp_names |= location_sp_names[loc.name]
+    if loc.n_children() > 0:
+        for c in loc.children:
+            all_species |= fetch_child_data(c, location_species)
+            all_bi_names |= fetch_child_data(c, location_bi_names)
+            all_sp_names |= fetch_child_data(c, location_sp_names)
+
+    if (len(all_species) == 0) and (len(all_bi_names) == 0) and (len(all_sp_names) == 0):
+        report_error("Phantom Location: " + loc.name)
+
+    if loc.n_children() > 0:
+        for c in loc.children:
+            check_location_page(c, location_species, location_bi_names, location_sp_names)
+
+
+def check_location_index(point_locations: dict, location_species: dict, location_sp_names: dict,
+                         location_bi_names: dict) -> None:
+    top_list = []
+    for p in point_locations:
+        loc = point_locations[p]
+        if loc.parent is None:
+            top_list.append(loc.name)
+    top_list.sort()
+
+    for p in top_list:
+        loc = point_locations[p]
+        check_location_page(loc, location_species, location_bi_names, location_sp_names)
 
 
 def match_names_to_locations(species: list, specific_point_locations: dict,  binomial_point_locations: dict,
@@ -5019,7 +5084,7 @@ def build_site() -> None:
         art = TMB_Import.read_art_data(init_data().art_file)
         morphology = TMB_Import.read_morphology_data(init_data().morphology_file)
 
-        print("...Creating Maps...")
+        print("...Reading Locations...")
         # a dict of locations, keys = full location names
         point_locations = TMB_Import.read_location_data(init_data().location_file)
         # a dict of locations, keys = trimmed location names and aliases
@@ -5032,95 +5097,104 @@ def build_site() -> None:
          location_direct_refs, location_cited_refs) = match_names_to_locations(species, specific_point_locations,
                                                                                binomial_point_locations,
                                                                                point_locations, citelist)
-        if DRAW_MAPS and not CHECK_DATA:
-            TMB_Create_Maps.create_all_maps(init_data(), point_locations, species, species_plot_locations,
-                                            invalid_species_locations, all_names, binomial_plot_locations,
-                                            specific_names, specific_plot_locations)
 
-        # output website version
-        if True and not CHECK_DATA:
-            create_web_output_paths()
-            print("...Creating Web Version...")
-            copy_support_files()
-            print("......Writing References......")
-            with open(WEBOUT_PATH + init_data().ref_url, "w", encoding="utf-8") as outfile:
-                write_reference_bibliography(outfile, False, references)
-            with open(WEBOUT_PATH + init_data().ref_sum_url, "w", encoding="utf-8") as outfile:
-                write_reference_summary(outfile, False, len(references), yeardat, yeardat1900, citecount, languages)
-            write_reference_pages(None, False, references, refdict, citelist, name_table, point_locations)
-            print("......Writing Names Info......")
-            with open(WEBOUT_PATH + "names/index.html", "w", encoding="utf-8") as outfile:
-                write_all_name_pages(outfile, False, refdict, citelist, all_names, specific_names, name_table,
-                                     species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
-                                     binomial_point_locations, specific_point_locations, point_locations)
-            print("......Writing Species......")
-            write_species_info_pages(None, False, species, references, specific_names, all_names, photos, videos, art,
-                                     species_refs, refdict, binomial_name_cnts, specific_name_cnts)
+        if CHECK_DATA:
+            # run functions that cross check data but skip the output
+            check_location_index(point_locations, location_species, location_sp_names, location_bi_names)
+            check_citation_cross_references(citelist, refdict, name_table)
+        else:
             if DRAW_MAPS:
-                print("......Copying Maps......")
-                copy_map_files(species, all_names, specific_names, point_locations)
-            print("......Writing Locations......")
-            with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
-                write_location_index(outfile, False, point_locations, location_dict, location_species,
-                                     location_sp_names, location_bi_names, location_direct_refs, location_cited_refs,
-                                     references)
-            with open(WEBOUT_PATH + init_data().map_url, "w", encoding="utf-8") as outfile:
-                write_geography_page(outfile, False, species)
-            print("......Writing Media Pages......")
-            with open(WEBOUT_PATH + init_data().photo_url, "w", encoding="utf-8") as outfile:
-                write_photo_index(outfile, False, species, photos)
-            write_all_art_pages(None, False, art)
-            with open(WEBOUT_PATH + init_data().video_url, "w", encoding="utf-8") as outfile:
-                write_video_index(outfile, False, videos)
-            print("......Writing Misc......")
-            with open(WEBOUT_PATH + init_data().syst_url, "w", encoding="utf-8") as outfile:
-                write_systematics_overview(outfile, False, subgenera, species, refdict, species_changes_new,
-                                           species_changes_synonyms, species_changes_spelling)
-            with open(WEBOUT_PATH + init_data().common_url, "w", encoding="utf-8") as outfile:
-                write_common_names_pages(outfile, False, replace_references(common_name_data, refdict, False))
-            with open(WEBOUT_PATH + init_data().lifecycle_url, "w", encoding="utf-8") as outfile:
-                write_life_cycle_pages(outfile, False)
-            with open(WEBOUT_PATH + init_data().tree_url, "w", encoding="utf-8") as outfile:
-                write_phylogeny_pages(outfile, False, refdict)
-            with open(WEBOUT_PATH + init_data().morph_url, "w", encoding="utf-8") as outfile:
-                write_main_morphology_pages(outfile, False, morphology)
-            with open(WEBOUT_PATH + "index.html", "w", encoding="utf-8") as outfile:
-                write_introduction(outfile, False, species)
-            write_citation_page(refdict)
+                print("...Creating Maps...")
+                TMB_Create_Maps.create_all_maps(init_data(), point_locations, species, species_plot_locations,
+                                                invalid_species_locations, all_names, binomial_plot_locations,
+                                                specific_names, specific_plot_locations)
 
-        # output print version
-        if True and not CHECK_DATA :
-            print("...Creating Print Version...")
-            with open("print.html", "w", encoding="utf-8") as printfile:
-                start_print(printfile)
-                write_print_only_pages(printfile, species, refdict)
-                write_introduction(printfile, True, species)
-                write_common_names_pages(printfile, True, replace_references(common_name_data, refdict, True))
-                write_systematics_overview(printfile, True, subgenera, species, refdict, species_changes_new,
-                                           species_changes_synonyms, species_changes_spelling)
-                write_phylogeny_pages(printfile, True, refdict)
-                write_geography_page(printfile, True, species)
-                write_location_index(printfile, True, point_locations, location_dict, location_species,
-                                     location_sp_names, location_bi_names, location_direct_refs, location_cited_refs,
-                                     references)
-                write_life_cycle_pages(printfile, True)
-                write_main_morphology_pages(printfile, True, morphology)
-                print("......Writing Species Pages......")
-                write_species_info_pages(printfile, True, species, references, specific_names, all_names, photos,
-                                         videos, art, species_refs, refdict, binomial_name_cnts, specific_name_cnts)
-                print("......Writing Name Pages......")
-                write_all_name_pages(printfile, True, refdict, citelist, all_names, specific_names, name_table,
-                                     species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
-                                     binomial_point_locations, specific_point_locations, point_locations)
+            # output website version
+            if True:
+                create_web_output_paths()
+                print("...Creating Web Version...")
+                copy_support_files()
+                print("......Writing References......")
+                with open(WEBOUT_PATH + init_data().ref_url, "w", encoding="utf-8") as outfile:
+                    write_reference_bibliography(outfile, False, references)
+                with open(WEBOUT_PATH + init_data().ref_sum_url, "w", encoding="utf-8") as outfile:
+                    write_reference_summary(outfile, False, len(references), yeardat, yeardat1900, citecount, languages)
+                write_reference_pages(None, False, references, refdict, citelist, name_table, point_locations)
+                print("......Writing Names Info......")
+                with open(WEBOUT_PATH + "names/index.html", "w", encoding="utf-8") as outfile:
+                    write_all_name_pages(outfile, False, refdict, citelist, all_names, specific_names, name_table,
+                                         species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
+                                         binomial_point_locations, specific_point_locations, point_locations)
+                print("......Writing Species......")
+                write_species_info_pages(None, False, species, references, specific_names, all_names, photos, videos,
+                                         art, species_refs, refdict, binomial_name_cnts, specific_name_cnts)
+                if DRAW_MAPS:
+                    print("......Copying Maps......")
+                    copy_map_files(species, all_names, specific_names, point_locations)
+                print("......Writing Locations......")
+                with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
+                    write_location_index(outfile, False, point_locations, location_dict, location_species,
+                                         location_sp_names, location_bi_names, location_direct_refs,
+                                         location_cited_refs, references)
+                with open(WEBOUT_PATH + init_data().map_url, "w", encoding="utf-8") as outfile:
+                    write_geography_page(outfile, False, species)
                 print("......Writing Media Pages......")
-                write_photo_index(printfile, True, species, photos)
-                write_video_index(printfile, True, videos)
-                write_all_art_pages(printfile, True, art)
-                print("......Writing Reference Pages......")
-                write_reference_summary(printfile, True, len(references), yeardat, yeardat1900, citecount, languages)
-                write_reference_bibliography(printfile, True, references)
-                write_reference_pages(printfile, True, references, refdict, citelist, name_table, point_locations)
-                end_print(printfile)
+                with open(WEBOUT_PATH + init_data().photo_url, "w", encoding="utf-8") as outfile:
+                    write_photo_index(outfile, False, species, photos)
+                write_all_art_pages(None, False, art)
+                with open(WEBOUT_PATH + init_data().video_url, "w", encoding="utf-8") as outfile:
+                    write_video_index(outfile, False, videos)
+                print("......Writing Misc......")
+                with open(WEBOUT_PATH + init_data().syst_url, "w", encoding="utf-8") as outfile:
+                    write_systematics_overview(outfile, False, subgenera, species, refdict, species_changes_new,
+                                               species_changes_synonyms, species_changes_spelling)
+                with open(WEBOUT_PATH + init_data().common_url, "w", encoding="utf-8") as outfile:
+                    write_common_names_pages(outfile, False, replace_references(common_name_data, refdict, False))
+                with open(WEBOUT_PATH + init_data().lifecycle_url, "w", encoding="utf-8") as outfile:
+                    write_life_cycle_pages(outfile, False)
+                with open(WEBOUT_PATH + init_data().tree_url, "w", encoding="utf-8") as outfile:
+                    write_phylogeny_pages(outfile, False, refdict)
+                with open(WEBOUT_PATH + init_data().morph_url, "w", encoding="utf-8") as outfile:
+                    write_main_morphology_pages(outfile, False, morphology)
+                with open(WEBOUT_PATH + "index.html", "w", encoding="utf-8") as outfile:
+                    write_introduction(outfile, False, species)
+                write_citation_page(refdict)
+
+            # output print version
+            if True:
+                print("...Creating Print Version...")
+                with open("print.html", "w", encoding="utf-8") as printfile:
+                    start_print(printfile)
+                    write_print_only_pages(printfile, species, refdict)
+                    write_introduction(printfile, True, species)
+                    write_common_names_pages(printfile, True, replace_references(common_name_data, refdict, True))
+                    write_systematics_overview(printfile, True, subgenera, species, refdict, species_changes_new,
+                                               species_changes_synonyms, species_changes_spelling)
+                    write_phylogeny_pages(printfile, True, refdict)
+                    write_geography_page(printfile, True, species)
+                    write_location_index(printfile, True, point_locations, location_dict, location_species,
+                                         location_sp_names, location_bi_names, location_direct_refs,
+                                         location_cited_refs, references)
+                    write_life_cycle_pages(printfile, True)
+                    write_main_morphology_pages(printfile, True, morphology)
+                    print("......Writing Species Pages......")
+                    write_species_info_pages(printfile, True, species, references, specific_names, all_names, photos,
+                                             videos, art, species_refs, refdict, binomial_name_cnts, specific_name_cnts)
+                    print("......Writing Name Pages......")
+                    write_all_name_pages(printfile, True, refdict, citelist, all_names, specific_names, name_table,
+                                         species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
+                                         binomial_point_locations, specific_point_locations, point_locations)
+                    print("......Writing Media Pages......")
+                    write_photo_index(printfile, True, species, photos)
+                    write_video_index(printfile, True, videos)
+                    write_all_art_pages(printfile, True, art)
+                    print("......Writing Reference Pages......")
+                    write_reference_summary(printfile, True, len(references), yeardat, yeardat1900, citecount,
+                                            languages)
+                    write_reference_bibliography(printfile, True, references)
+                    write_reference_pages(printfile, True, references, refdict, citelist, name_table, point_locations)
+                    end_print(printfile)
+
     print("done")
 
 
