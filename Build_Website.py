@@ -45,6 +45,9 @@ AUTHOR_NOPCOMMA = 2     # Smith, 1970  <-- this one is needed for taxonomic name
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
 DRAW_MAPS = True
+# this flag suppresses creation of output files, allowing data integrity checking without the output time cost
+CHECK_DATA = True
+
 
 # randSeed = random.randint(0, 10000)
 
@@ -5029,13 +5032,13 @@ def build_site() -> None:
          location_direct_refs, location_cited_refs) = match_names_to_locations(species, specific_point_locations,
                                                                                binomial_point_locations,
                                                                                point_locations, citelist)
-        if DRAW_MAPS:
+        if DRAW_MAPS and not CHECK_DATA:
             TMB_Create_Maps.create_all_maps(init_data(), point_locations, species, species_plot_locations,
                                             invalid_species_locations, all_names, binomial_plot_locations,
                                             specific_names, specific_plot_locations)
 
         # output website version
-        if True:
+        if True and not CHECK_DATA:
             create_web_output_paths()
             print("...Creating Web Version...")
             copy_support_files()
@@ -5086,7 +5089,7 @@ def build_site() -> None:
             write_citation_page(refdict)
 
         # output print version
-        if True:
+        if True and not CHECK_DATA :
             print("...Creating Print Version...")
             with open("print.html", "w", encoding="utf-8") as printfile:
                 start_print(printfile)
