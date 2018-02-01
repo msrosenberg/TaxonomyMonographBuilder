@@ -46,7 +46,7 @@ SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
 DRAW_MAPS = True
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
-CHECK_DATA = True
+CHECK_DATA = False
 
 
 # randSeed = random.randint(0, 10000)
@@ -949,7 +949,9 @@ def clean_specific_name(x: str) -> str:
                  "raninus",
                  "serratus",
                  "cordimana",
-                 "spec.")
+                 "spec.",
+                 "5",
+                 "6")
 
     if " " not in x:
         return ""
