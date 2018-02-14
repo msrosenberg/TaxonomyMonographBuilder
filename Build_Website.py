@@ -44,7 +44,7 @@ AUTHOR_NOPCOMMA = 2     # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = True
+DRAW_MAPS = False
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
 
@@ -2421,6 +2421,12 @@ def create_location_hierarchy(point_locations: dict) -> dict:
                 ploc.children.append(loc)
             else:
                 report_error("Location missing: " + loc.parent)
+        for sp in loc.secondary_parents:
+            if sp in point_locations:
+                ploc = point_locations[sp]
+                ploc.secondary_children.append(loc)
+            else:
+                report_error("Location missing: " + sp)
         if loc.trimmed_name in loc_dict:
             report_error("Duplicate trimmed location name: " + loc.trimmed_name)
         else:
@@ -2435,16 +2441,16 @@ def create_location_hierarchy(point_locations: dict) -> dict:
 
 def fetch_child_ref_data(loc: TMB_Classes.LocationClass, ref_dict: dict) -> set:
     refset = ref_dict[loc.name]
-    if loc.n_children() > 0:
-        for c in loc.children:
+    if loc.n_direct_children() > 0:
+        for c in loc.direct_children():
             refset |= fetch_child_ref_data(c, ref_dict)
     return refset
 
 
 def fetch_child_data(loc: TMB_Classes.LocationClass, location_dict: dict) -> set:
     locset = location_dict[loc.name]
-    if loc.n_children() > 0:
-        for c in loc.children:
+    if loc.n_direct_children() > 0:
+        for c in loc.direct_children():
             locset |= fetch_child_data(c, location_dict)
     return locset
 
@@ -2499,7 +2505,14 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
     if loc.parent is not None:
         p = point_locations[loc.parent]
         outfile.write("    <dt>Included Within</dt>\n")
-        outfile.write("      <dd>" + create_location_link(p, p.trimmed_name, do_print) + "</dd>\n")
+        dstr = create_location_link(p, p.trimmed_name, do_print)
+        if loc.n_secondary_parents() > 0:
+            dlist = [dstr]
+            for a in loc.secondary_parents:
+                p = point_locations[a]
+                dlist.append(create_location_link(p, p.trimmed_name, do_print))
+            dstr = ", ".join(dlist)
+        outfile.write("      <dd>" + dstr + "</dd>\n")
     if loc.unknown:
         outfile.write("    <dt>Location Could not be Identified</dt>\n")
         if loc.notes is not None:
@@ -2536,11 +2549,11 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
     all_refs = set()
     all_refs |= location_direct_refs[loc.name]
     all_refs |= location_cited_refs[loc.name]
-    if loc.n_children() > 0:
+    if loc.n_direct_children() > 0:
         outfile.write("  <section class=\"spsection\">\n")
         outfile.write("    <h3 class=\"nobookmark\">Includes Subareas</h3>\n")
         outfile.write("    <ul class=\"splist\">\n")
-        for c in loc.children:
+        for c in loc.direct_children():
             outfile.write("    <li>" + create_location_link(c, c.trimmed_name, do_print) + "</li>\n")
             all_species |= fetch_child_data(c, location_species)
             all_bi_names |= fetch_child_data(c, location_bi_names)
@@ -2600,7 +2613,7 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
         outfile.write("    </ul>\n")
         outfile.write("  </section>\n")
 
-    # the following is to identify locations which are no longer used in the DB and can be removed
+    # the following is to identify locations which may no longer used in the DB and can be removed
     if is_error:
         report_error("Phantom Location: " + loc.name)
 
@@ -2621,6 +2634,7 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
     else:
         common_html_footer(outfile)
 
+    # write out children pages (primary children only)
     if loc.n_children() > 0:
         for c in loc.children:
             if do_print:
@@ -2634,19 +2648,23 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
 
 
 def write_location_index_entry(outfile: TextIO, do_print: bool, loc: TMB_Classes.LocationClass,
-                               point_locations: dict) -> None:
+                               point_locations: dict, is_primary: bool) -> None:
     """
     print a location and all of its child locations
     """
     outfile.write("<li>" + create_location_link(loc, loc.trimmed_name, do_print, mark_unknown=True))
-    if loc.n_children() > 0:
+    if not is_primary:
+        outfile.write(STAR)
+    if is_primary and (loc.n_direct_children() > 0):
         child_list = []
         for child in loc.children:
-            child_list.append(child.name)
+            child_list.append([child.name, True])
+        for child in loc.secondary_children:
+            child_list.append([child.name, False])
         child_list.sort()
         outfile.write("\n <ul>\n")
         for child in child_list:
-            write_location_index_entry(outfile, do_print, point_locations[child], point_locations)
+            write_location_index_entry(outfile, do_print, point_locations[child[0]], point_locations, child[1])
         outfile.write(" </ul>\n")
     outfile.write("</li>\n")
 
@@ -2675,7 +2693,11 @@ def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict,
                   "where fiddler crabs have been reported. The first list includes all modern names in a rough, "
                   "hierarchical framework, mostly by country and subregions within country. Bodies of water which "
                   "cannot be associated with a single country are listed independently. The hierarchy is imperfect "
-                  "because some observations were general enough to cross political or other structural boundaries.\n")
+                  "because some observations were general enough to cross political or other structural boundaries. "
+                  "To deal with this, sublocations may contain duplicate listings within the hierarchy. Such "
+                  "duplicates are marked by a " + STAR + " and do not display further sublocations under these "
+                  "duplicate entries within the index (although all sublocations are included on all location-specific "
+                  "pages).\n")
     outfile.write("    </p>\n")
     outfile.write("    <p>\n")
     outfile.write("      The second list is strictly alphabetical and includes archaic and older place names.\n")
@@ -2709,7 +2731,7 @@ def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict,
     outfile.write("    <ul class=\"namelist\">\n")
     for p in top_list:
         loc = point_locations[p]
-        write_location_index_entry(outfile, do_print, loc, point_locations)
+        write_location_index_entry(outfile, do_print, loc, point_locations, True)
     outfile.write("    </ul>\n")
     outfile.write("  </div>\n")
 
@@ -2753,8 +2775,8 @@ def check_location_page(loc: TMB_Classes.LocationClass, location_species: dict, 
     all_bi_names |= location_bi_names[loc.name]
     all_sp_names = set()
     all_sp_names |= location_sp_names[loc.name]
-    if loc.n_children() > 0:
-        for c in loc.children:
+    if loc.n_direct_children() > 0:
+        for c in loc.direct_children():
             all_species |= fetch_child_data(c, location_species)
             all_bi_names |= fetch_child_data(c, location_bi_names)
             all_sp_names |= fetch_child_data(c, location_sp_names)
@@ -5163,7 +5185,7 @@ def build_site() -> None:
                 write_citation_page(refdict)
 
             # output print version
-            if True:
+            if False:
                 print("...Creating Print Version...")
                 with open("print.html", "w", encoding="utf-8") as printfile:
                     start_print(printfile)

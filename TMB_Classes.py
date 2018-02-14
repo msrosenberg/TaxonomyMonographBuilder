@@ -161,8 +161,10 @@ class LocationClass:
         self.latitude = 0
         self.longitude = 0
         self.parent = None
+        self.secondary_parents = []
         self.notes = None
         self.children = []
+        self.secondary_children = []
         self.alternates = []
         self.validity = ""
         self.ne_lat = None
@@ -183,3 +185,15 @@ class LocationClass:
         for c in self.children:
             result.extend(c.all_children())
         return result
+
+    def n_secondary_parents(self) -> int:
+        return len(self.secondary_parents)
+
+    def n_secondary_children(self) -> int:
+        return len(self.secondary_children)
+
+    def direct_children(self) -> list:
+        return self.children + self.secondary_children
+
+    def n_direct_children(self) -> int:
+        return self.n_children() + self.n_secondary_children()
