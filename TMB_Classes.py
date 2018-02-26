@@ -197,3 +197,10 @@ class LocationClass:
 
     def n_direct_children(self) -> int:
         return self.n_children() + self.n_secondary_children()
+
+    def n_parents(self) -> int:
+        if self.parent is None:
+            cnt = 0
+        else:
+            cnt = 1
+        return cnt + self.n_secondary_parents()

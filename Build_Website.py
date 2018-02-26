@@ -46,7 +46,12 @@ SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
 DRAW_MAPS = False
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
-CHECK_DATA = False
+CHECK_DATA = True
+# this flag creates the location web pages only; it is for checking changes and not general use
+CHECK_LOCATIONS = False
+# these flags control creating print and web output, respectively
+OUTPUT_PRINT = False
+OUTPUT_WEB = True
 
 
 # randSeed = random.randint(0, 10000)
@@ -2502,12 +2507,18 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
     if loc.n_alternates() > 0:
         outfile.write("    <dt>Also Known As</dt>\n")
         outfile.write("      <dd>" + ", ".join(loc.alternates) + "</dd>\n")
-    if loc.parent is not None:
-        p = point_locations[loc.parent]
+    if loc.n_parents() > 0:
         outfile.write("    <dt>Included Within</dt>\n")
-        dstr = create_location_link(p, p.trimmed_name, do_print)
+        if loc.parent is not None:
+            p = point_locations[loc.parent]
+            dstr = create_location_link(p, p.trimmed_name, do_print)
+        else:
+            dstr = None
         if loc.n_secondary_parents() > 0:
-            dlist = [dstr]
+            if dstr is None:
+                dlist = []
+            else:
+                dlist = [dstr]
             for a in loc.secondary_parents:
                 p = point_locations[a]
                 dlist.append(create_location_link(p, p.trimmed_name, do_print))
@@ -5126,6 +5137,15 @@ def build_site() -> None:
             # run functions that cross check data but skip the output
             check_location_index(point_locations, location_species, location_sp_names, location_bi_names)
             check_citation_cross_references(citelist, refdict, name_table)
+        elif CHECK_LOCATIONS:
+            if DRAW_MAPS:
+                print("...Creating Maps...")
+                TMB_Create_Maps.create_all_maps(init_data(), point_locations)
+            print("......Writing Locations......")
+            with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
+                write_location_index(outfile, False, point_locations, location_dict, location_species,
+                                     location_sp_names, location_bi_names, location_direct_refs,
+                                     location_cited_refs, references)
         else:
             if DRAW_MAPS:
                 print("...Creating Maps...")
@@ -5134,7 +5154,7 @@ def build_site() -> None:
                                                 specific_names, specific_plot_locations)
 
             # output website version
-            if True:
+            if OUTPUT_WEB:
                 create_web_output_paths()
                 print("...Creating Web Version...")
                 copy_support_files()
@@ -5185,7 +5205,7 @@ def build_site() -> None:
                 write_citation_page(refdict)
 
             # output print version
-            if False:
+            if OUTPUT_PRINT:
                 print("...Creating Print Version...")
                 with open("print.html", "w", encoding="utf-8") as printfile:
                     start_print(printfile)

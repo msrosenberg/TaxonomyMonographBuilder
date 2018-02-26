@@ -616,17 +616,20 @@ def create_all_location_maps(base_map: list, point_locations: dict,
             write_point_map_kml(namefile, place_list, point_locations, None, init_data, sub_list)
 
 
-def create_all_maps(init_data: TMB_Initialize.InitializationData, point_locations: dict, species: list,
-                    species_plot_locations: dict, invalid_species_locations: dict, all_names: list,
-                    binomial_plot_locations: dict, specific_names: list, specific_plot_locations: dict) -> None:
+def create_all_maps(init_data: TMB_Initialize.InitializationData, point_locations: dict, species: Optional[list] = None,
+                    species_plot_locations: Optional[dict] = None, invalid_species_locations: Optional[dict] = None,
+                    all_names: Optional[list] = None, binomial_plot_locations: Optional[dict] = None,
+                    specific_names: Optional[list] = None, specific_plot_locations: Optional[dict] = None) -> None:
     # base_map = read_base_map("resources/ne_10m_admin_0_countries.txt", "resources/ne_10m_minor_islands.txt")
     base_map = read_base_map("resources/ne_50m_admin_0_countries.txt")
-    print("......Creating Species Maps......")
-    create_all_species_maps(base_map, init_data, species, point_locations, species_plot_locations,
-                            invalid_species_locations)
-    print("......Creating Name Maps......")
-    create_all_name_maps(base_map, all_names, specific_names, point_locations, specific_plot_locations,
-                         binomial_plot_locations, init_data)
+    if species is not None:
+        print("......Creating Species Maps......")
+        create_all_species_maps(base_map, init_data, species, point_locations, species_plot_locations,
+                                invalid_species_locations)
+    if specific_names is not None:
+        print("......Creating Name Maps......")
+        create_all_name_maps(base_map, all_names, specific_names, point_locations, specific_plot_locations,
+                             binomial_plot_locations, init_data)
     print("......Creating Location Maps......")
     create_all_location_maps(base_map, point_locations, init_data)
 
