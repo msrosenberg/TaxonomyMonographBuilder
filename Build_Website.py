@@ -44,9 +44,9 @@ AUTHOR_NOPCOMMA = 2     # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = False
+DRAW_MAPS = True
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
-CHECK_DATA = True
+CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
 CHECK_LOCATIONS = False
 # these flags control creating print and web output, respectively
@@ -946,7 +946,7 @@ def clean_specific_name(x: str) -> str:
                  "quadratus",
                  "albidus",
                  "vociferans",
-                 "(gelasimus)",
+                 # "(gelasimus)",
                  "raniformis",
                  "nigra",
                  "albicans",
@@ -958,11 +958,11 @@ def clean_specific_name(x: str) -> str:
                  "5",
                  "6")
 
-    if " " not in x:
+    if (" " not in x) or ("(" in x):
         return ""
     else:
         if "{" in x:
-            x = x[:x.find("{")-1]        
+            x = x[:x.find("{")-1]
         y = x.split(" ")
         x = y[len(y)-1].lower()
         if x in skip_list or ("gruppe" in x):
