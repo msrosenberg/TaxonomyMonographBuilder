@@ -181,10 +181,10 @@ class LocationClass:
 
     def all_children(self) -> list:
         result = []
-        result.extend(self.children)
-        for c in self.children:
+        result.extend(self.direct_children())
+        for c in self.direct_children():
             result.extend(c.all_children())
-        return result
+        return list(set(result))
 
     def n_secondary_parents(self) -> int:
         return len(self.secondary_parents)
