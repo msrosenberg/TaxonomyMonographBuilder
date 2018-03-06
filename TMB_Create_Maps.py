@@ -12,8 +12,8 @@ completion of the code.
 # import codecs
 import zipfile
 import TMB_Initialize
-from typing import Tuple, Union, Optional
-from io import TextIOWrapper
+from typing import Tuple, Union, Optional, TextIO
+# from io import TextIOWrapper
 import matplotlib.pyplot as mplpy
 from matplotlib.collections import PatchCollection
 import matplotlib.patches as mplp
@@ -39,7 +39,7 @@ class Polygon:
         return len(self.points)
 
 
-def read_kml_placemark(infile: TextIOWrapper) -> list:
+def read_kml_placemark(infile: TextIO) -> list:
     namestr = infile.readline().strip()  # read name
     line = infile.readline().strip()
     while (not line.startswith("<LineString>") and not line.startswith("<Polygon>") and
@@ -65,7 +65,7 @@ def read_kml_placemark(infile: TextIOWrapper) -> list:
         return [namestr, False, coords]
 
 
-def read_species_from_kml(infile: TextIOWrapper, namestr: str) -> list:
+def read_species_from_kml(infile: TextIO, namestr: str) -> list:
     line = infile.readline().strip()
     crabplaces = []
     while not line.startswith("</Folder>"):
@@ -76,7 +76,7 @@ def read_species_from_kml(infile: TextIOWrapper, namestr: str) -> list:
     return [namestr, crabplaces]
 
 
-def read_kml_folder(infile: TextIOWrapper) -> list:
+def read_kml_folder(infile: TextIO) -> list:
     line = infile.readline().strip()
     crab = None
     while not line.startswith("</Folder>"):
@@ -233,7 +233,7 @@ def read_base_map(mainfile: str, islandfile: Optional[str] = None) -> list:
     return polygon_list
 
 
-def draw_base_svg_map(faxes, base_map: list) -> None:
+def draw_base_svg_map(faxes, base_map: list, adj_lon: int=0) -> None:
     """
     Draw the background map of countries and islands
     """
@@ -241,10 +241,11 @@ def draw_base_svg_map(faxes, base_map: list) -> None:
     for polygon in base_map:
         plist = []
         for p in polygon.points:
-            plist.append([p.lon, p.lat])
+            plist.append([p.lon + adj_lon, p.lat])
         newp = mplp.Polygon(plist, True)
         poly_list.append(newp)
     pc = PatchCollection(poly_list, alpha=0.2, facecolor="silver", edgecolor="darkgray", zorder=1)
+    # pc = PatchCollection(poly_list, alpha=0.2, facecolor="silver", edgecolor="darkgray", zorder=1, linewidths=0.5)
     # pc = PatchCollection(poly_list, alpha=0.2, facecolor="white", edgecolor="darkgray", zorder=1)
     faxes.add_collection(pc)
 
@@ -256,18 +257,59 @@ def adjust_svg_map_boundaries(minlon: Number, maxlon: Number, minlat: Number, ma
     Do not allow the boundaries to exceed 180/-180 in lon or 90/-90 in lat
     Force small areas to have a minimum size of 30x15 degrees
     """
-    maxlon += 5
-    minlon -= 5
-    maxlat += 5
-    minlat -= 5
+    # min_width = 30  # mininmum width of map in degrees
+    # min_height = min_width / 2
+    # buffer = 5
+    #
+    # maxlon += buffer
+    # minlon -= buffer
+    # maxlat += buffer
+    # minlat -= buffer
+    # lon_range = maxlon - minlon
+    # lat_range = maxlat - minlat
+    # if lon_range < min_width:
+    #     maxlon += min_width/2 - lon_range/2
+    #     minlon -= min_width/2 - lon_range/2
+    # if lat_range < min_height:
+    #     maxlat += min_height/2 - lat_range/2
+    #     minlat -= min_height/2 - lat_range/2
+    # if lon_range > 2 * lat_range:
+    #     d = lon_range - 2 * lat_range
+    #     minlat -= d / 2
+    #     maxlat += d / 2
+    # else:
+    #     d = 2 * lat_range - lon_range
+    #     minlon -= d / 2
+    #     maxlon += d / 2
+    # if maxlon > 180:
+    #     maxlon, minlon = 180, minlon - (maxlon-180)
+    # if minlon < -180:
+    #     maxlon, minlon = maxlon + (-180 - minlon), -180
+    # if maxlat > 90:
+    #     maxlat, minlat = 90, minlat - (maxlat-90)
+    # if minlat < -90:
+    #     maxlat, minlat = maxlat + (-90 - minlat), -90
+    # if (maxlon > 180) or (minlon < -180) or (maxlat > 90) or (minlat < -90):
+    #     return -180, 180, -90, 90
+    # else:
+    #     return minlon, maxlon, minlat, maxlat
+
+    min_width = 10  # mininmum width of map in degrees
+    min_height = min_width / 2
+    buffer = 2  # buffer around points in degrees
+
+    maxlon += buffer
+    minlon -= buffer
+    maxlat += buffer
+    minlat -= buffer
     lon_range = maxlon - minlon
     lat_range = maxlat - minlat
-    if lon_range < 30:
-        maxlon += 15 - lon_range/2
-        minlon -= 15 - lon_range/2
-    if lat_range < 15:
-        maxlat += 7.5 - lat_range/2
-        minlat -= 7.5 - lat_range/2
+    if lon_range < min_width:
+        maxlon += min_width/2 - lon_range/2
+        minlon -= min_width/2 - lon_range/2
+    if lat_range < min_height:
+        maxlat += min_height/2 - lat_range/2
+        minlat -= min_height/2 - lat_range/2
     if lon_range > 2 * lat_range:
         d = lon_range - 2 * lat_range
         minlat -= d / 2
@@ -276,15 +318,15 @@ def adjust_svg_map_boundaries(minlon: Number, maxlon: Number, minlat: Number, ma
         d = 2 * lat_range - lon_range
         minlon -= d / 2
         maxlon += d / 2
-    if maxlon > 180:
-        maxlon, minlon = 180, minlon - (maxlon-180)
-    if minlon < -180:
-        maxlon, minlon = maxlon + (-180 - minlon), -180
+    # if maxlon > 180:
+    #     maxlon, minlon = 180, minlon - (maxlon-180)
+    # if minlon < -180:
+    #     maxlon, minlon = maxlon + (-180 - minlon), -180
     if maxlat > 90:
         maxlat, minlat = 90, minlat - (maxlat-90)
     if minlat < -90:
         maxlat, minlat = maxlat + (-90 - minlat), -90
-    if (maxlon > 180) or (minlon < -180) or (maxlat > 90) or (minlat < -90):
+    if (maxlon - minlon > 360) or (maxlat - minlat > 180):
         return -180, 180, -90, 90
     else:
         return minlon, maxlon, minlat, maxlat
@@ -335,7 +377,8 @@ def write_species_range_map_svg(base_map: list, species_map: list) -> None:
     mplpy.ylabel("latitude")
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("u_" + name) + ".svg", format="svg")
+    # mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("u_" + name) + ".svg", format="svg")
+    mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("u_" + name) + ".png", format="png", dpi=600)
     mplpy.close("all")
 
 
@@ -367,7 +410,8 @@ def write_all_range_map_svg(base_map: list, species_maps: list) -> None:
     faxes.axes.get_xaxis().set_visible(False)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("uca_all") + ".svg", format="svg")
+    # mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("uca_all") + ".svg", format="svg")
+    mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("uca_all") + ".png", format="png", dpi=600)
     mplpy.close("all")
 
 
@@ -439,13 +483,13 @@ def write_point_map_kml(title: str, place_list: list, point_locations: dict, inv
 def write_point_map_svg(title: str, place_list: list, point_locations: dict, invalid_places: Optional[set],
                         base_map: list, skip_axes: bool, set_bounds: bool, sub_locations: Optional[list]) -> None:
     fig, faxes = mplpy.subplots(figsize=[6.5, 3.25])
-    draw_base_svg_map(faxes, base_map)
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
     maxlat = -90
     minlat = 90
     maxlon = -180
     minlon = 180
+    mid_atlantic = False
     lats = []
     lons = []
     colors = []
@@ -479,24 +523,50 @@ def write_point_map_svg(title: str, place_list: list, point_locations: dict, inv
                 minlon = min(minlon, point.longitude)
                 maxlat = max(maxlat, point.latitude)
                 minlat = min(minlat, point.latitude)
+                if 0 > point.longitude > -50:
+                    mid_atlantic = True
+
+    # if set_bounds:
+    #     place = place_list[0]
+    #     if place in point_locations:
+    #         point = point_locations[place]
+    #         if point.sw_lon is None:
+    #             minlon = point.longitude - 15
+    #             maxlon = point.longitude + 15
+    #             minlat = point.latitude - 7.5
+    #             maxlat = point.latitude + 7.5
+    #         else:
+    #             minlon = point.sw_lon
+    #             maxlon = point.ne_lon
+    #             minlat = point.sw_lat
+    #             maxlat = point.ne_lat
+    minlon, maxlon, minlat, maxlat = adjust_svg_map_boundaries(minlon, maxlon, minlat, maxlat)
+    draw_base_svg_map(faxes, base_map)
+    if (not mid_atlantic) and (maxlon == 180) and (minlon == -180):
+        # shift map focus so default center is international date line rather than Greenwich
+        draw_base_svg_map(faxes, base_map, 360)
+        # adjust longitude of points and recalculate boundaries
+        maxlat = -90
+        minlat = 90
+        maxlon = 0
+        minlon = 360
+        for i in range(len(lons)):
+            if lons[i] < 0:
+                lons[i] += 360
+            maxlon = max(maxlon, lons[i])
+            minlon = min(minlon, lons[i])
+            maxlat = max(maxlat, lats[i])
+            minlat = min(minlat, lats[i])
+        minlon, maxlon, minlat, maxlat = adjust_svg_map_boundaries(minlon, maxlon, minlat, maxlat)
+    else:  # if necessary, wrap map across international date line
+        if maxlon > 180:
+            draw_base_svg_map(faxes, base_map, 360)
+        if minlon < -180:
+            draw_base_svg_map(faxes, base_map, -360)
 
     # faxes.scatter(lons, lats, s=20, color="red", edgecolors="darkred", alpha=1, zorder=2, clip_on=False)
     faxes.scatter(lons, lats, s=20, color=colors, edgecolors=edges, alpha=1, zorder=2, clip_on=False)
-    if set_bounds:
-        place = place_list[0]
-        if place in point_locations:
-            point = point_locations[place]
-            if point.sw_lon is None:
-                minlon = point.longitude - 15
-                maxlon = point.longitude + 15
-                minlat = point.latitude - 7.5
-                maxlat = point.latitude + 7.5
-            else:
-                minlon = point.sw_lon
-                maxlon = point.ne_lon
-                minlat = point.sw_lat
-                maxlat = point.ne_lat
-    minlon, maxlon, minlat, maxlat = adjust_svg_map_boundaries(minlon, maxlon, minlat, maxlat)
+
     # uncomment to force full world map
     # maxlat = 90
     # minlat = -90
@@ -512,7 +582,21 @@ def write_point_map_svg(title: str, place_list: list, point_locations: dict, inv
         mplpy.ylabel("latitude")
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    mplpy.savefig(__OUTPUT_PATH__ + pointmap_name(title) + ".svg", format="svg")
+    # adjust longitude tick labels
+    xlabels = list(faxes.get_xticks())
+    adj_labels = False
+    for i, x in enumerate(xlabels):
+        if x > 180:
+            xlabels[i] = x - 360
+            adj_labels = True
+        elif x < -180:
+            xlabels[i] = x + 360
+            adj_labels = True
+    if adj_labels:
+        faxes.set_xticklabels(xlabels)
+
+    # mplpy.savefig(__OUTPUT_PATH__ + pointmap_name(title) + ".svg", format="svg")
+    mplpy.savefig(__OUTPUT_PATH__ + pointmap_name(title) + ".png", format="png", dpi=600)
     mplpy.close("all")
 
 
@@ -601,6 +685,10 @@ def create_all_location_maps(base_map: list, point_locations: dict,
             print(".........{}%".format(j*5))
             report += total / 20
         point = point_locations[loc]
+        # if not point.unknown and (("Pacific" in loc) or
+        #                           ("Samoa" in loc) or
+        #                           ("Fiji" in loc) or
+        #                           ("Kiribati" in loc)):  # for testing purposes
         if not point.unknown:
             place_list = []
             try:
@@ -620,8 +708,8 @@ def create_all_maps(init_data: TMB_Initialize.InitializationData, point_location
                     species_plot_locations: Optional[dict] = None, invalid_species_locations: Optional[dict] = None,
                     all_names: Optional[list] = None, binomial_plot_locations: Optional[dict] = None,
                     specific_names: Optional[list] = None, specific_plot_locations: Optional[dict] = None) -> None:
-    # base_map = read_base_map("resources/ne_10m_admin_0_countries.txt", "resources/ne_10m_minor_islands.txt")
-    base_map = read_base_map("resources/ne_50m_admin_0_countries.txt")
+    base_map = read_base_map("resources/ne_10m_admin_0_countries.txt", "resources/ne_10m_minor_islands.txt")
+    # base_map = read_base_map("resources/ne_50m_admin_0_countries.txt")
     if species is not None:
         print("......Creating Species Maps......")
         create_all_species_maps(base_map, init_data, species, point_locations, species_plot_locations,

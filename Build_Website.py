@@ -48,10 +48,10 @@ DRAW_MAPS = True
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
-CHECK_LOCATIONS = False
+CHECK_LOCATIONS = True
 # these flags control creating print and web output, respectively
 OUTPUT_PRINT = False
-OUTPUT_WEB = True
+OUTPUT_WEB = False
 
 
 # randSeed = random.randint(0, 10000)
@@ -182,12 +182,12 @@ def write_google_map_point_header(outfile: TextIO, map_name: str,
     """
     common header entries for webout html files which contain Google maps elements - point map version
     """
-    do_bounds = False
+    # do_bounds = False
     preserve = ""
-    if location is not None:
-        if location.sw_lon is not None:
-            do_bounds = True
-            preserve = ", preserveViewport: true"
+    # if location is not None:
+    #     if location.sw_lon is not None:
+    #         do_bounds = True
+    #         preserve = ", preserveViewport: true"
 
     outfile.write("        var point_map = new google.maps.Map(document.getElementById(\"point_map_canvas\"),"
                   "mapOptions);\n")
@@ -195,13 +195,13 @@ def write_google_map_point_header(outfile: TextIO, map_name: str,
                   "new google.maps.KmlLayer(\"" + init_data().site_url() + "/maps/" + pointmap_name(map_name) +
                   ".kmz\",{suppressInfoWindows: false" + preserve + "});\n")
     outfile.write("        point_layer.setMap(point_map);\n")
-    if do_bounds:
-        outfile.write("        var necorner = new google.maps.LatLng(" +
-                      str(location.ne_lat) + ", " + str(location.ne_lon) + ");\n")
-        outfile.write("        var swcorner = new google.maps.LatLng(" +
-                      str(location.sw_lat) + ", " + str(location.sw_lon) + ");\n")
-        outfile.write("        var bounds = new google.maps.LatLngBounds(swcorner, necorner);\n")
-        outfile.write("        point_map.fitBounds(bounds);\n")
+    # if do_bounds:
+    #     outfile.write("        var necorner = new google.maps.LatLng(" +
+    #                   str(location.ne_lat) + ", " + str(location.ne_lon) + ");\n")
+    #     outfile.write("        var swcorner = new google.maps.LatLng(" +
+    #                   str(location.sw_lat) + ", " + str(location.sw_lon) + ");\n")
+    #     outfile.write("        var bounds = new google.maps.LatLngBounds(swcorner, necorner);\n")
+    #     outfile.write("        point_map.fitBounds(bounds);\n")
 
 
 def start_google_chart_header(outfile: TextIO) -> None:
@@ -1373,8 +1373,10 @@ def write_binomial_name_page(outfile: TextIO, do_print: bool, name: str, namefil
         outfile.write("    <h3 class=\"nobookmark\">Locations Where the Name has Been Applied</h3>\n")
         if do_print:
             outfile.write("      <figure>\n")
+            # outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(name)) +
+            #               ".svg\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
             outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(name)) +
-                          ".svg\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
+                          ".png\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
             outfile.write("      </figure>\n")
         else:
             outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
@@ -1527,8 +1529,10 @@ def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB
         outfile.write("    <h3 class=\"nobookmark\">Locations Where the Name has Been Applied</h3>\n")
         if do_print:
             outfile.write("      <figure>\n")
+            # outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("sn_" + specific_name.name) +
+            #               ".svg\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
             outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("sn_" + specific_name.name) +
-                          ".svg\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
+                          ".png\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
             outfile.write("      </figure>\n")
         else:
             # outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
@@ -2361,11 +2365,15 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
     outfile.write("      <div class=\"map_section\">\n")
     if do_print:
         outfile.write("      <figure>\n")
-        outfile.write("        <img src=\"" + TMP_MAP_PATH + rangemap_name("uca_all") + ".svg\" alt=\"Map\" "
+        # outfile.write("        <img src=\"" + TMP_MAP_PATH + rangemap_name("uca_all") + ".svg\" alt=\"Map\" "
+        #               "title=\"Map of fiddler crab distribution\" />\n")
+        outfile.write("        <img src=\"" + TMP_MAP_PATH + rangemap_name("uca_all") + ".png\" alt=\"Map\" "
                       "title=\"Map of fiddler crab distribution\" />\n")
         outfile.write("      </figure>\n")
         outfile.write("      <figure>\n")
-        outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("uca_all") + ".svg\" alt=\"Point Map\" "
+        # outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("uca_all") + ".svg\" alt=\"Point Map\" "
+        #               "title=\"Point map of fiddler crab distribution\" />\n")
+        outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("uca_all") + ".png\" alt=\"Point Map\" "
                       "title=\"Point map of fiddler crab distribution\" />\n")
         outfile.write("      </figure>\n")
     else:
@@ -2537,8 +2545,11 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
         outfile.write("    <div class=\"map_section\">\n")
         if do_print:
             outfile.write("      <figure>\n")
+            # outfile.write("        <img src=\"" + TMP_MAP_PATH +
+            #               pointmap_name("location_" + place_to_filename(loc.name)) + ".svg\" alt=\"" +
+            #               loc.trimmed_name + "\" title=\"Map of " + loc.trimmed_name + "\" />\n")
             outfile.write("        <img src=\"" + TMP_MAP_PATH +
-                          pointmap_name("location_" + place_to_filename(loc.name)) + ".svg\" alt=\"" +
+                          pointmap_name("location_" + place_to_filename(loc.name)) + ".png\" alt=\"" +
                           loc.trimmed_name + "\" title=\"Map of " + loc.trimmed_name + "\" />\n")
             outfile.write("      </figure>\n")
         else:
@@ -3259,10 +3270,14 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
     if not is_fossil:
         outfile.write("         <dd>\n")
         if do_print:
+            # outfile.write("           <img src=\"" + TMP_MAP_PATH + rangemap_name("u_" + species.species) +
+            #               ".svg\" alt=\"Map\" />\n")
+            # outfile.write("           <img src=\"" + TMP_MAP_PATH + pointmap_name("u_" + species.species) +
+            #               ".svg\" alt=\"Map\" />\n")
             outfile.write("           <img src=\"" + TMP_MAP_PATH + rangemap_name("u_" + species.species) +
-                          ".svg\" alt=\"Map\" />\n")
+                          ".png\" alt=\"Map\" />\n")
             outfile.write("           <img src=\"" + TMP_MAP_PATH + pointmap_name("u_" + species.species) +
-                          ".svg\" alt=\"Map\" />\n")
+                          ".png\" alt=\"Map\" />\n")
         else:
             outfile.write("           <div id=\"range_map_canvas\" class=\"sp_map\"></div>\n")
             outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
