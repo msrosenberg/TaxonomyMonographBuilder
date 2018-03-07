@@ -2395,8 +2395,8 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
         index_page = "locations/index.html"
     outfile.write("The second map shows approximate point locations where fiddler crabs "
                   "have been recorded in the scientific record. Red markers indicate points where fiddler crabs are "
-                  "found; blue indicate false location records. See the <a href=\"" + index_page +
-                  "\">location index</a> for a full list of all point locations.")
+                  "found; purple indicates fossil-only locations; blue indicate false location records. See "
+                  "the <a href=\"" + index_page + "\">location index</a> for a full list of all point locations.")
     outfile.write("\n      </p>\n")
     outfile.write("      <p>\n")
     outfile.write("        Specific ranges for a species or name can be found on its associated pages. "
@@ -2557,7 +2557,8 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
 
         outfile.write("        <div class=\"map_download\">\n")
         outfile.write("         The red marker indicates the coordinates used to represent this location, "
-                      "yellow markers all other locations contained within this location.\n")
+                      "yellow markers all other locations contained within this location. Purple markers indicate "
+                      "fossil-only locations or sub-locations.\n")
         outfile.write("        </div>\n")
 
         outfile.write("    </div>\n")

@@ -460,15 +460,25 @@ def write_point_map_kml(title: str, place_list: list, point_locations: dict, inv
         outfile.write("        </Icon >\n")
         outfile.write("      </IconStyle>\n")
         outfile.write("    </Style>\n")
+        outfile.write("    <Style id=\"fossil_location\">\n")
+        outfile.write("      <IconStyle>\n")
+        outfile.write("        <Icon>\n")
+        outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/purple-circle.png</href>\n")
+        outfile.write("        </Icon >\n")
+        outfile.write("      </IconStyle>\n")
+        outfile.write("    </Style>\n")
         for place in place_list:
             pnt = point_locations[place]
             if not pnt.unknown:
                 is_invalid = False
+                is_fossil = False
                 if invalid_places is not None:
                     if place in invalid_places:
                         is_invalid = True
                 if pnt.validity == "X":
                     is_invalid = True
+                elif pnt.validity == "FOSSIL":
+                    is_fossil = True
                 is_sub = False
                 if sub_locations is not None:
                     if pnt in sub_locations:
@@ -480,6 +490,8 @@ def write_point_map_kml(title: str, place_list: list, point_locations: dict, inv
                 outfile.write("      <styleUrl>\n")
                 if is_invalid:
                     outfile.write("        #bad_location\n")
+                elif is_fossil:
+                    outfile.write("        #fossil_location\n")
                 elif is_sub:
                     outfile.write("        #sub_location\n")
                 else:
@@ -541,11 +553,14 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
             point = point_locations[place]
             if not point.unknown:
                 is_invalid = False
+                is_fossil = False
                 if invalid_places is not None:
                     if place in invalid_places:
                         is_invalid = True
                 if point.validity == "X":
                     is_invalid = True
+                elif point.validity == "FOSSIL":
+                    is_fossil = True
                 is_sub = False
                 if sub_locations is not None:
                     if point in sub_locations:
@@ -555,6 +570,9 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
                 if is_invalid:
                     colors.append("blue")
                     edges.append("darkblue")
+                elif is_fossil:
+                    colors.append("mediumpurple")
+                    edges.append("indigo")
                 elif is_sub:
                     colors.append("yellow")
                     edges.append("goldenrod")
@@ -717,6 +735,7 @@ def create_all_location_maps(base_map: BaseMap, point_locations: dict,
             report += total / 20
         point = point_locations[loc]
         if not point.unknown and (("Pacific" in loc) or
+                                  ("Europe" in loc) or
                                   ("Samoa" in loc) or
                                   ("Fiji" in loc) or
                                   ("Kiribati" in loc)):  # for testing purposes
