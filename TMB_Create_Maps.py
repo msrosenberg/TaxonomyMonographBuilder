@@ -734,12 +734,13 @@ def create_all_location_maps(base_map: BaseMap, point_locations: dict,
             print(".........{}%".format(j*5))
             report += total / 20
         point = point_locations[loc]
-        if not point.unknown and (("Pacific" in loc) or
-                                  ("Europe" in loc) or
-                                  ("Samoa" in loc) or
-                                  ("Fiji" in loc) or
-                                  ("Kiribati" in loc)):  # for testing purposes
-        # if not point.unknown:
+        # the following was for testing certain new elements
+        # if not point.unknown and (("Pacific" in loc) or
+        #                           ("Europe" in loc) or
+        #                           ("Samoa" in loc) or
+        #                           ("Fiji" in loc) or
+        #                           ("Kiribati" in loc)):  # for testing purposes
+        if not point.unknown:
             place_list = []
             try:
                 sub_list = point.all_children()
