@@ -767,13 +767,19 @@ def create_species_link(species: str, do_print: bool, status: str = "", path: st
 
 
 def create_location_link(location: TMB_Classes.LocationClass, display_name: str, do_print: bool, path: str = "",
-                         mark_unknown: bool = False) -> str:
+                         mark_unknown: bool = False, mark_secondary: bool = False) -> str:
     if mark_unknown and location.unknown:
         suffix = DAGGER
+    elif mark_secondary:
+        suffix = STAR
     else:
         suffix = ""
+    if do_print:  # put the suffix inside the link when printing
+        endstr = suffix + "</a>"
+    else:
+        endstr = "</a>" + suffix
     return ("<a href=\"" + rel_link_prefix(do_print, path) + place_to_filename(location.name) + ".html\">" +
-            display_name + "</a>" + suffix)
+            display_name + endstr)
 
 
 def strip_location_subtext(x: str) -> str:
@@ -2469,7 +2475,7 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
     if loc.n_direct_children() > 0:
         outfile.write("  <section class=\"spsection\">\n")
         outfile.write("    <h3 class=\"nobookmark\">Includes Subareas</h3>\n")
-        outfile.write("    <ul class=\"splist\">\n")
+        outfile.write("    <ul class=\"locpagelist\">\n")
         for c in loc.direct_children():
             outfile.write("    <li>" + create_location_link(c, c.trimmed_name, do_print) + "</li>\n")
             all_species |= fetch_child_data(c, location_species)
@@ -2486,7 +2492,7 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
         is_error = False
         outfile.write("  <section class=\"spsection\">\n")
         outfile.write("    <h3 class=\"nobookmark\">Currently Recognized Species</h3>\n")
-        outfile.write("    <ul class=\"splist\">\n")
+        outfile.write("    <ul class=\"locpagelist\">\n")
         for s in sorted(list(all_species)):
             if s in location_species[loc.name]:
                 suffix = ""
@@ -2502,7 +2508,7 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
         is_error = False
         outfile.write("  <section class=\"spsection\">\n")
         outfile.write("    <h3 class=\"nobookmark\">Names Which Have Been Used in This Area</h3>\n")
-        outfile.write("    <ul class=\"splist\">\n")
+        outfile.write("    <ul class=\"locpagelist\">\n")
         for s in sorted(list(all_bi_names)):
             if s in location_bi_names[loc.name]:
                 suffix = ""
@@ -2518,7 +2524,7 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
         is_error = False
         outfile.write("  <section class=\"spsection\">\n")
         outfile.write("    <h3 class=\"nobookmark\">Specific Names Which Have Been Used in This Area</h3>\n")
-        outfile.write("    <ul class=\"splist\">\n")
+        outfile.write("    <ul class=\"locpagelist\">\n")
         for s in sorted(list(all_sp_names)):
             if s in location_sp_names[loc.name]:
                 suffix = ""
@@ -2569,9 +2575,9 @@ def write_location_index_entry(outfile: TextIO, do_print: bool, loc: TMB_Classes
     """
     print a location and all of its child locations
     """
-    outfile.write("<li>" + create_location_link(loc, loc.trimmed_name, do_print, mark_unknown=True))
-    if not is_primary:
-        outfile.write(STAR)
+    mark2 = not is_primary
+    outfile.write("<li>" + create_location_link(loc, loc.trimmed_name, do_print, mark_unknown=True,
+                                                mark_secondary=mark2))
     if is_primary and (loc.n_direct_children() > 0):
         child_list = []
         for child in loc.children:
@@ -2647,7 +2653,7 @@ def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict,
         if loc.parent is None:
             top_list.append(loc.name)
     top_list.sort()
-    outfile.write("    <ul class=\"namelist\">\n")
+    outfile.write("    <ul class=\"hlocationlist\">\n")
     for p in top_list:
         loc = point_locations[p]
         write_location_index_entry(outfile, do_print, loc, point_locations, True)
@@ -2659,10 +2665,10 @@ def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict,
                   "Names</h3>\n")
     full_list = list(location_dict.keys())
     full_list.sort()
-    outfile.write("    <ul class=\"namelist\">\n")
+    outfile.write("    <ul class=\"locationlist\">\n")
     for p in full_list:
         loc = location_dict[p]
-        outfile.write("   <li>" + create_location_link(loc, p, do_print, mark_unknown=True) + "</li>\n")
+        outfile.write("   <li>" + create_location_link(loc, p, do_print, mark_unknown=False) + "</li>\n")
     outfile.write("    </ul>\n")
     outfile.write("  </div>\n")
 
@@ -4902,13 +4908,7 @@ def print_table_of_contents(outfile: TextIO, species_list: list) -> None:
     outfile.write("         </ul>\n")
     outfile.write("       </li>\n")
     outfile.write("       <li><a href=\"#" + init_data().tree_url + "\">Phylogeny</a></li>\n")
-    outfile.write("       <li><a href=\"#" + init_data().map_url + "\">Geography</a>\n")
-    outfile.write("         <ul>\n")
-    outfile.write("           <li><a href=\"#location_index\">Location Index</a></li>\n")
-    outfile.write("         </ul>\n")
-    outfile.write("       </li>\n")
     outfile.write("       <li><a href=\"#" + init_data().lifecycle_url + "\">Life Cycle</a></li>\n")
-    outfile.write("       <li><a href=\"#" + init_data().morph_url + "\">Morphology</a></li>\n")
     outfile.write("       <li><a href=\"#" + init_data().species_url + "\">Species</a>\n")
     outfile.write("         <ul>\n")
     for species in species_list:
@@ -4923,6 +4923,12 @@ def print_table_of_contents(outfile: TextIO, species_list: list) -> None:
     outfile.write("           <li><a href=\"#" + init_data().name_sum_url + "\">Summary of Names</a>\n")
     outfile.write("         </ul>\n")
     outfile.write("       </li>\n")
+    outfile.write("       <li><a href=\"#" + init_data().map_url + "\">Geography</a>\n")
+    outfile.write("         <ul>\n")
+    outfile.write("           <li><a href=\"#location_index\">Location Index</a></li>\n")
+    outfile.write("         </ul>\n")
+    outfile.write("       </li>\n")
+    outfile.write("       <li><a href=\"#" + init_data().morph_url + "\">Morphology</a></li>\n")
     outfile.write("       <li><a href=\"#" + init_data().photo_url + "\">Photo Index</a></li>\n")
     outfile.write("       <li><a href=\"#" + init_data().video_url + "\">Video Index</a></li>\n")
     outfile.write("       <li>Art\n")
@@ -4965,6 +4971,9 @@ def start_print(outfile: TextIO) -> None:
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/uca_style.css\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/print.css\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/font-awesome/css/fontawesome.min.css\" />\n")
+    outfile.write("    <link rel=\"stylesheet\" href=\"resources/font-awesome/css/fa-solid.min.css\" />\n")
+    outfile.write("    <link rel=\"stylesheet\" href=\"resources/font-awesome/css/fa-brands.min.css\" />\n")
+    outfile.write("    <link rel=\"stylesheet\" href=\"resources/font-awesome/css/fa-regular.min.css\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/flag-icon-css/css/flag-icon.min.css\" />\n")
     outfile.write("  </head>\n")
     outfile.write("\n")
@@ -5116,12 +5125,7 @@ def build_site() -> None:
                     write_systematics_overview(printfile, True, subgenera, species, refdict, species_changes_new,
                                                species_changes_synonyms, species_changes_spelling)
                     write_phylogeny_pages(printfile, True, refdict)
-                    # write_geography_page(printfile, True, species)
-                    # write_location_index(printfile, True, point_locations, location_dict, location_species,
-                    #                      location_sp_names, location_bi_names, location_direct_refs,
-                    #                      location_cited_refs, references)
                     write_life_cycle_pages(printfile, True)
-                    write_main_morphology_pages(printfile, True, morphology)
                     print("......Writing Species Pages......")
                     write_species_info_pages(printfile, True, species, references, specific_names, all_names, photos,
                                              videos, art, species_refs, refdict, binomial_name_cnts, specific_name_cnts)
@@ -5129,11 +5133,17 @@ def build_site() -> None:
                     write_all_name_pages(printfile, True, refdict, citelist, all_names, specific_names, name_table,
                                          species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
                                          binomial_point_locations, specific_point_locations, point_locations)
-                    # print("......Writing Media Pages......")
+                    print("......Writing Location Pages......")
+                    write_geography_page(printfile, True, species)
+                    write_location_index(printfile, True, point_locations, location_dict, location_species,
+                                         location_sp_names, location_bi_names, location_direct_refs,
+                                         location_cited_refs, references)
+                    print("......Writing Media Pages......")
+                    write_main_morphology_pages(printfile, True, morphology)
                     # write_photo_index(printfile, True, species, photos)
                     # write_video_index(printfile, True, videos)
                     # write_all_art_pages(printfile, True, art)
-                    # print("......Writing Reference Pages......")
+                    print("......Writing Reference Pages......")
                     # write_reference_summary(printfile, True, len(references), yeardat, yeardat1900, citecount,
                     #                         languages)
                     # write_reference_bibliography(printfile, True, references)
