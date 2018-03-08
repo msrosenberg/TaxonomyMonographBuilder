@@ -22,6 +22,8 @@ from TMB_Common import *
 Number = Union[int, float]
 __TMP_PATH__ = "temp/"
 __OUTPUT_PATH__ = __TMP_PATH__ + "maps/"
+FIG_WIDTH = 6.5
+FIG_HEIGHT = 3.25
 
 
 class Point:
@@ -350,8 +352,7 @@ def adjust_map_boundaries(minlon: Number, maxlon: Number, minlat: Number, maxlat
         return minlon, maxlon, minlat, maxlat
 
 
-def add_line_to_map(faxes: mplpy.Axes, points: str, minlon: Number, maxlon: Number, minlat: Number, maxlat: Number,
-                    lw: int, a: Number) -> Tuple[Number, Number, Number, Number]:
+def add_line_to_map(faxes: mplpy.Axes, points: str, wrap_lons: bool=False, lw: int=1, a: Number=1) -> None:
     lons = []
     lats = []
     points = points.split(" ")
@@ -359,71 +360,118 @@ def add_line_to_map(faxes: mplpy.Axes, points: str, minlon: Number, maxlon: Numb
         coords = p.split(",")
         lon = float(coords[0])
         lat = float(coords[1])
+        if wrap_lons and lon < 0:
+            lon += 360
         lons.append(lon)
         lats.append(lat)
+    faxes.plot(lons, lats, color="red", linewidth=lw, alpha=a)
+
+
+def check_line_boundaries(points: str, minlon: Number, maxlon: Number, minlat: Number, maxlat: Number,
+                          mid_atlantic: bool, lons, lats: list) -> Tuple[Number, Number, Number, Number, bool,
+                                                                         list, list]:
+    points = points.split(" ")
+    for p in points:
+        coords = p.split(",")
+        lon = float(coords[0])
+        lat = float(coords[1])
         maxlon = max(maxlon, lon)
         minlon = min(minlon, lon)
         maxlat = max(maxlat, lat)
         minlat = min(minlat, lat)
-    faxes.plot(lons, lats, color="red", linewidth=lw, alpha=a)
-    return minlon, maxlon, minlat, maxlat
+        if 0 > lon > -50:
+            mid_atlantic = True
+        lons.append(lon)
+        lats.append(lat)
+    return minlon, maxlon, minlat, maxlat, mid_atlantic, lons, lats
 
 
 def write_species_range_map(base_map: BaseMap, species_map: list) -> None:
-    fig, faxes = mplpy.subplots(figsize=[6.5, 3.25])
-    draw_base_map(faxes, base_map)
+    fig, faxes = mplpy.subplots(figsize=[FIG_WIDTH, FIG_HEIGHT])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
     maxlat = -90
     minlat = 90
     maxlon = -180
     minlon = 180
+    mid_atlantic = False
     name = species_map[0]
     name = name[name.find("Uca")+4:name.find("</")]
     locs = species_map[1]
+    # find boundaries from range lines
+    all_lons = []
+    all_lats = []
     for loc in locs:
         if loc[1]:
             for x in loc[2]:
-                minlon, maxlon, minlat, maxlat = add_line_to_map(faxes, x, minlon, maxlon, minlat, maxlat, 1, 1)
+                (minlon, maxlon, minlat, maxlat,
+                 mid_atlantic, all_lons, all_lats) = check_line_boundaries(x, minlon, maxlon, minlat, maxlat,
+                                                                           mid_atlantic, all_lons, all_lats)
         else:
-            minlon, maxlon, minlat, maxlat = add_line_to_map(faxes, loc[2], minlon, maxlon, minlat, maxlat, 1, 1)
-
+            (minlon, maxlon, minlat, maxlat,
+             mid_atlantic, all_lons, all_lats) = check_line_boundaries(loc[2], minlon, maxlon, minlat, maxlat,
+                                                                       mid_atlantic, all_lons, all_lats)
     minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
+    draw_base_map(faxes, base_map)
+    wrap_lons = False
+    if (not mid_atlantic) and (maxlon == 180) and (minlon == -180):
+        # shift map focus so default center is international date line rather than Greenwich
+        draw_base_map(faxes, base_map, 360)
+        # adjust longitude of points and recalculate boundaries
+        maxlat = -90
+        minlat = 90
+        maxlon = 0
+        minlon = 360
+        for i in range(len(all_lons)):
+            if all_lons[i] < 0:
+                all_lons[i] += 360
+            maxlon = max(maxlon, all_lons[i])
+            minlon = min(minlon, all_lons[i])
+            maxlat = max(maxlat, all_lats[i])
+            minlat = min(minlat, all_lats[i])
+        minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
+        wrap_lons = True
+    else:  # if necessary, wrap map across international date line
+        if maxlon > 180:
+            draw_base_map(faxes, base_map, 360)
+        if minlon < -180:
+            draw_base_map(faxes, base_map, -360)
+    # draw range lines
+    for loc in locs:
+        if loc[1]:
+            for x in loc[2]:
+                add_line_to_map(faxes, x, wrap_lons)
+        else:
+            add_line_to_map(faxes, loc[2], wrap_lons)
+
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)
     mplpy.xlabel("longitude")
     mplpy.ylabel("latitude")
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
+    adjust_longitude_tick_values(faxes)
     # mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("u_" + name) + ".svg", format="svg")
     mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("u_" + name) + ".png", format="png", dpi=600)
     mplpy.close("all")
 
 
 def write_all_range_map(base_map: BaseMap, species_maps: list) -> None:
-    fig, faxes = mplpy.subplots(figsize=[6.5, 3.25])
-    draw_base_map(faxes, base_map)
+    fig, faxes = mplpy.subplots(figsize=[FIG_WIDTH, FIG_HEIGHT])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
-    maxlat = -90
-    minlat = 90
-    maxlon = -180
-    minlon = 180
+    draw_base_map(faxes, base_map)
     for species in species_maps:
         locs = species[1]
         for loc in locs:
             if loc[1]:
                 for x in loc[2]:
-                    minlon, maxlon, minlat, maxlat = add_line_to_map(faxes, x, minlon, maxlon, minlat, maxlat,
-                                                                     2, 0.1)
+                    add_line_to_map(faxes, x, lw=2, a=0.1)
             else:
-                minlon, maxlon, minlat, maxlat = add_line_to_map(faxes, loc[2], minlon, maxlon, minlat, maxlat,
-                                                                 2, 0.1)
+                add_line_to_map(faxes, loc[2], lw=2, a=0.1)
 
     mplpy.xlim(-180, 180)
     mplpy.ylim(-90, 90)
-    # mplpy.xlabel("longitude")
-    # mplpy.ylabel("latitude")
     faxes.axes.get_yaxis().set_visible(False)
     faxes.axes.get_xaxis().set_visible(False)
     mplpy.rcParams["svg.fonttype"] = "none"
@@ -536,7 +584,7 @@ def adjust_longitude_tick_values(faxes: mplpy.Axes) -> None:
 
 def write_point_map(title: str, place_list: list, point_locations: dict, invalid_places: Optional[set],
                     base_map: BaseMap, skip_axes: bool, set_bounds: bool, sub_locations: Optional[list]) -> None:
-    fig, faxes = mplpy.subplots(figsize=[6.5, 3.25])
+    fig, faxes = mplpy.subplots(figsize=[FIG_WIDTH, FIG_HEIGHT])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
     maxlat = -90

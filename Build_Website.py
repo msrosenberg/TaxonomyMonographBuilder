@@ -12,7 +12,6 @@ import re
 import math
 import subprocess
 from typing import Optional, Tuple, Union, TextIO
-# from io import TextIOWrapper
 # local dependencies
 import TMB_Import
 import TMB_Create_Maps
@@ -21,9 +20,7 @@ import TMB_Error
 from TMB_Common import *
 import TMB_Initialize
 import TMB_Classes
-# external dependencies
-import matplotlib.pyplot as mplpy
-from wordcloud import WordCloud
+import TMB_Create_Graphs
 
 
 WEBOUT_PATH = "webout/"
@@ -44,13 +41,13 @@ AUTHOR_NOPCOMMA = 2     # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = True
+DRAW_MAPS = False
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
-CHECK_LOCATIONS = True
+CHECK_LOCATIONS = False
 # these flags control creating print and web output, respectively
-OUTPUT_PRINT = False
+OUTPUT_PRINT = True
 OUTPUT_WEB = False
 
 
@@ -102,10 +99,7 @@ def common_header_part1(outfile: TextIO, title: str, indexpath: str = "") -> Non
                   "href=\"" + indexpath + "apple-touch-icon-114x114-precomposed.png\">\n")
     outfile.write("    <link rel=\"apple-touch-icon-precomposed\" sizes=\"144x144\" "
                   "href=\"" + indexpath + "apple-touch-icon-144x144-precomposed.png\">\n")
-    # outfile.write("    <link rel=\"stylesheet\" href=\"http://fonts.googleapis.com/css?family=Merienda+One|"
-    #               "Lora:400,700,400italic,700italic\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath + "uca_style.css\" />\n")
-    # outfile.write("    <script src=\"https://use.fontawesome.com/3669ad7c2b.js\"></script>\n")
     outfile.write("    <script defer src=\"" + indexpath + "js/fa-solid.min.js\"></script>\n")
     outfile.write("    <script defer src=\"" + indexpath + "js/fa-regular.min.js\"></script>\n")
     outfile.write("    <script defer src=\"" + indexpath + "js/fa-brands.min.js\"></script>\n")
@@ -177,31 +171,43 @@ def write_google_map_range_header(outfile: TextIO, map_name: str) -> None:
     outfile.write("        range_layer.setMap(range_map);\n")
 
 
-def write_google_map_point_header(outfile: TextIO, map_name: str,
-                                  location: Optional[TMB_Classes.LocationClass]) -> None:
+# def write_google_map_point_header(outfile: TextIO, map_name: str,
+#                                   location: Optional[TMB_Classes.LocationClass]) -> None:
+#     """
+#     common header entries for webout html files which contain Google maps elements - point map version
+#     """
+#     do_bounds = False
+#     preserve = ""
+#     if location is not None:
+#         if location.sw_lon is not None:
+#             do_bounds = True
+#             preserve = ", preserveViewport: true"
+#
+#     outfile.write("        var point_map = new google.maps.Map(document.getElementById(\"point_map_canvas\"),"
+#                   "mapOptions);\n")
+#     outfile.write("        var point_layer = "
+#                   "new google.maps.KmlLayer(\"" + init_data().site_url() + "/maps/" + pointmap_name(map_name) +
+#                   ".kmz\",{suppressInfoWindows: false" + preserve + "});\n")
+#     outfile.write("        point_layer.setMap(point_map);\n")
+#     if do_bounds:
+#         outfile.write("        var necorner = new google.maps.LatLng(" +
+#                       str(location.ne_lat) + ", " + str(location.ne_lon) + ");\n")
+#         outfile.write("        var swcorner = new google.maps.LatLng(" +
+#                       str(location.sw_lat) + ", " + str(location.sw_lon) + ");\n")
+#         outfile.write("        var bounds = new google.maps.LatLngBounds(swcorner, necorner);\n")
+#         outfile.write("        point_map.fitBounds(bounds);\n")
+
+
+def write_google_map_point_header(outfile: TextIO, map_name: str) -> None:
     """
     common header entries for webout html files which contain Google maps elements - point map version
     """
-    # do_bounds = False
-    preserve = ""
-    # if location is not None:
-    #     if location.sw_lon is not None:
-    #         do_bounds = True
-    #         preserve = ", preserveViewport: true"
-
     outfile.write("        var point_map = new google.maps.Map(document.getElementById(\"point_map_canvas\"),"
                   "mapOptions);\n")
     outfile.write("        var point_layer = "
                   "new google.maps.KmlLayer(\"" + init_data().site_url() + "/maps/" + pointmap_name(map_name) +
-                  ".kmz\",{suppressInfoWindows: false" + preserve + "});\n")
+                  ".kmz\",{suppressInfoWindows: false});\n")
     outfile.write("        point_layer.setMap(point_map);\n")
-    # if do_bounds:
-    #     outfile.write("        var necorner = new google.maps.LatLng(" +
-    #                   str(location.ne_lat) + ", " + str(location.ne_lon) + ");\n")
-    #     outfile.write("        var swcorner = new google.maps.LatLng(" +
-    #                   str(location.sw_lat) + ", " + str(location.sw_lon) + ");\n")
-    #     outfile.write("        var bounds = new google.maps.LatLngBounds(swcorner, necorner);\n")
-    #     outfile.write("        point_map.fitBounds(bounds);\n")
 
 
 def start_google_chart_header(outfile: TextIO) -> None:
@@ -237,9 +243,6 @@ def common_html_footer(outfile: TextIO, indexpath: str = "") -> None:
     """
     outfile.write("\n")
     outfile.write("    <footer>\n")
-    # outfile.write("       <figure id=\"footmap\"><script type=\"text/javascript\" "
-    #               "src=\"http://jf.revolvermaps.com/p.js\"></script><script type=\"text/javascript\">rm2d_ki101('0',"
-    #               "'150','75','5f9t1sywiez','ff0000',20);</script><figcaption>Visitors</figcaption></figure>\n")
     outfile.write("       <figure id=\"footmap\"><script type=\"text/javascript\" "
                   "src=\"//rf.revolvermaps.com/0/0/4.js?i=5f9t1sywiez&amp;m=0&amp;h=75&amp;c=ff0000&amp;r=30\" "
                   "async=\"async\"></script><figcaption>Visitors</figcaption></figure>\n")
@@ -315,11 +318,11 @@ def format_reference_full(ref: TMB_Classes.ReferenceClass, do_print: bool) -> st
 
 def format_reference_cite(ref: TMB_Classes.ReferenceClass, do_print: bool, author_style: CitationStyle,
                           path: str = "") -> str:
-    if author_style == AUTHOR_PAREN:
+    if author_style == AUTHOR_PAREN:  # Smith (1900)
         outstr = ref.citation
-    elif author_style == AUTHOR_NOPAREN:
+    elif author_style == AUTHOR_NOPAREN:  # Smith 1900
         outstr = ref.author() + " " + str(ref.year())
-    elif author_style == AUTHOR_NOPCOMMA:
+    elif author_style == AUTHOR_NOPCOMMA:  # Smith, 1900
         outstr = ref.author() + ", " + str(ref.year())
     else:
         outstr = ref.citation
@@ -409,124 +412,6 @@ def format_language(x: str) -> str:
     for r in language_replace_list:
         x = x.replace(r[0], r[1])
     return x
-
-
-def create_pie_chart_file(filename: str, data: dict) -> None:
-    datalist = list(data.keys())
-    datalist.sort()
-    sizes = []
-    for d in datalist:
-        sizes.append(data[d])
-    fig, faxes = mplpy.subplots(figsize=[6, 3])
-    # my approximation of the pygal color scheme
-    color_list = ["salmon", "royalblue", "lightseagreen", "gold", "darkorange", "mediumorchid", "deepskyblue",
-                  "lightgreen", "sandybrown", "palevioletred", "lightskyblue", "mediumaquamarine", "lemonchiffon"]
-    faxes.pie(sizes, colors=color_list, startangle=90, counterclock=False)
-    faxes.axis("equal")
-    faxes.legend(datalist, loc="upper left", frameon=False)
-    mplpy.rcParams["svg.fonttype"] = "none"
-    mplpy.tight_layout()
-    mplpy.savefig(TMP_PATH + filename)
-    mplpy.close("all")
-
-
-def create_bar_chart_file(filename: str, data: list, minx: int, maxx: int, y: int) -> None:
-    x_list = [x for x in range(minx, maxx+1)]
-    y_list = [d[y] for d in data]
-    fig, faxes = mplpy.subplots(figsize=[6.5, 2])
-    faxes.bar(x_list, y_list, color="blue", edgecolor="darkblue")
-    faxes.spines["right"].set_visible(False)
-    faxes.spines["top"].set_visible(False)
-    if maxx-minx > 200:
-        tick_step = 40
-    else:
-        tick_step = 20
-    mplpy.xticks([i for i in range(minx, maxx + 1, tick_step)])
-    mplpy.rcParams["svg.fonttype"] = "none"
-    mplpy.tight_layout()
-    mplpy.savefig(TMP_PATH + filename)
-    mplpy.close("all")
-
-
-def create_stacked_bar_chart_file(filename: str, data: list, minx: int, maxx: int, cols: list) -> None:
-    # currently assumes only two stacked bars
-    x_list = [x for x in range(minx, maxx+1)]
-    fig, faxes = mplpy.subplots(figsize=[6.5, 2])
-    col_names = [c[0] for c in cols]
-    y_list1 = [d[cols[0][1]] for d in data]
-    y_list2 = [d[cols[1][1]] for d in data]
-    faxes.bar(x_list, y_list1, color="blue", edgecolor="darkblue")
-    # faxes.bar(x_list, y_list1, fc=(0,0,1,0.8), edgecolor="darkblue")
-    faxes.bar(x_list, y_list2, bottom=y_list1, color="red", edgecolor="darkred")
-    faxes.spines["right"].set_visible(False)
-    faxes.spines["top"].set_visible(False)
-    faxes.legend(col_names, loc="upper left", frameon=False)
-    mplpy.rcParams["svg.fonttype"] = "none"
-    mplpy.tight_layout()
-    mplpy.savefig(TMP_PATH + filename)
-    mplpy.close("all")
-
-
-def create_qual_bar_chart_file(filename: str, label_list: list, data_dict: dict, max_value: int) -> None:
-    x_list = [x for x in range(len(label_list))]
-    y_list = [data_dict[x] for x in label_list]
-    fig, faxes = mplpy.subplots(figsize=[6.5, 2.5])
-    faxes.bar(x_list, y_list, color="blue", edgecolor="darkblue")
-    mplpy.xticks(rotation="vertical", style="italic")
-    # tick_list = x_list[::4]
-    # tick_labels = label_list[::4]
-    # faxes.set_xticks(tick_list)
-    # faxes.set_xticklabels(tick_labels)
-    faxes.set_xticks(x_list)
-    faxes.set_xticklabels(label_list)
-    faxes.spines["right"].set_visible(False)
-    faxes.spines["top"].set_visible(False)
-    mplpy.ylim(0, max_value)
-    mplpy.rcParams["svg.fonttype"] = "none"
-    mplpy.tight_layout()
-    mplpy.savefig(TMP_PATH + filename)
-    mplpy.close("all")
-
-
-def create_line_chart_file(filename: str, data: list, minx: int, maxx: int, y: int) -> None:
-    x_list = [x for x in range(minx, maxx+1)]
-    y_list = [d[y] for d in data]
-    fig, faxes = mplpy.subplots(figsize=[6.5, 2])
-    faxes.plot(x_list, y_list, "blue")
-    faxes.spines["right"].set_visible(False)
-    faxes.spines["top"].set_visible(False)
-    if maxx-minx > 200:
-        tick_step = 40
-    else:
-        tick_step = 20
-    mplpy.xticks([i for i in range(minx, maxx + 1, tick_step)])
-    mplpy.rcParams["svg.fonttype"] = "none"
-    mplpy.tight_layout()
-    mplpy.savefig(TMP_PATH + filename, format="svg")
-    mplpy.close("all")
-
-
-def create_chronology_chart_file(filename: str, miny: int, maxy: int, maxcnt: int, yearly_data: dict) -> None:
-    y_list = []
-    for y in range(miny, maxy + 1):
-        y_list.append(float(yearly_data[y]))
-
-    x = [y for y in range(miny, maxy+1)]
-    fig, faxes = mplpy.subplots(figsize=[6.5, 1.5])
-    mplpy.ylim(-maxcnt, maxcnt)
-    mplpy.xlim(miny, maxy)
-    # faxes.fill(x, y_list, "black")
-    # faxes.fill(x, y2_list, "black")
-    faxes.stackplot(x, y_list, baseline="sym", colors=["black"])
-    for spine in faxes.spines:
-        faxes.spines[spine].set_visible(False)
-    cur_axes = mplpy.gca()
-    cur_axes.axes.get_yaxis().set_visible(False)
-    mplpy.xticks([i for i in range(miny, maxy+1, 20)])
-    mplpy.rcParams["svg.fonttype"] = "none"
-    mplpy.tight_layout()
-    mplpy.savefig(TMP_PATH + filename)
-    mplpy.close("all")
 
 
 def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_data: list, year_data_1900: list,
@@ -661,7 +546,7 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
     if do_print:
         # pie chart of languages
         filename = "language_pie.svg"
-        create_pie_chart_file(filename, languages)
+        TMB_Create_Graphs.create_pie_chart_file(filename, languages)
         outfile.write("    <h3 class=\"nobookmark\">Primary Language of References</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"pie_chart\" />\n")
@@ -675,7 +560,7 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
             maxy = max(maxy, y[0])
 
         filename = "pubs_per_year_bar.svg"
-        create_bar_chart_file(filename, year_data, miny, maxy, 1)
+        TMB_Create_Graphs.create_bar_chart_file(filename, year_data, miny, maxy, 1)
         outfile.write("    <h3 class=\"nobookmark\">References by Year</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
@@ -683,7 +568,7 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
 
         # pubs per year since 1900 bar chart
         filename = "pubs_per_year_1900_bar.svg"
-        create_bar_chart_file(filename, year_data_1900, 1900, maxy, 1)
+        TMB_Create_Graphs.create_bar_chart_file(filename, year_data_1900, 1900, maxy, 1)
         outfile.write("    <h3 class=\"nobookmark\">References by Year (since 1900)</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
@@ -695,7 +580,7 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         for y in year_data_1900:
             tmp_dat.append([y[2], y[1] - y[2]])
         dat_info = [["Citations in DB", 0], ["Pending", 1]]
-        create_stacked_bar_chart_file(filename, tmp_dat, 1900, maxy, dat_info)
+        TMB_Create_Graphs.create_stacked_bar_chart_file(filename, tmp_dat, 1900, maxy, dat_info)
         outfile.write("    <h3 class=\"nobookmark\">References with Citation Data in Database (since 1900; all "
                       "pre-1900 literature is complete)</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
@@ -704,7 +589,7 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
 
         # cumulative publications line chart
         filename = "cumulative_pubs_line.svg"
-        create_line_chart_file(filename, year_data, miny, maxy, 2)
+        TMB_Create_Graphs.create_line_chart_file(filename, year_data, miny, maxy, 2)
         outfile.write("    <h3 class=\"nobookmark\">Cumulative References by Year</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"line_chart\" />\n")
@@ -1173,8 +1058,6 @@ def write_reference_page(outfile: TextIO, do_print: bool, ref: TMB_Classes.Refer
     else:
         common_html_header(outfile, ref.citation, indexpath="../")
     outfile.write("    <header id=\"" + ref.cite_key + ".html\">\n")
-    # if not do_print:
-    #     outfile.write("      <h1 class=\"nobookmark\">" + ref.citation + "</h1>\n")
     outfile.write("      <h2 class=\"nobookmark\">" + ref.formatted_html + "</h2>\n")
     if not do_print:
         outfile.write("      <nav>\n")
@@ -1293,12 +1176,12 @@ def calculate_binomial_yearly_cnts(name: str, refdict: dict, citelist: list) -> 
         clean = clean_name(c.name)
         if clean.lower() == name.lower():
             cites.append(c)
-    uniquecites = set()
+    unique_cites = set()
     for c in cites:
-        uniquecites |= {c.cite_key}
+        unique_cites |= {c.cite_key}
     name_by_year = {y: 0 for y in range(miny, maxy+1)}
     total = 0
-    for c in uniquecites:
+    for c in unique_cites:
         y = refdict[c].year()
         if y is not None:
             if miny <= y <= maxy:
@@ -1337,12 +1220,12 @@ def write_binomial_name_page(outfile: TextIO, do_print: bool, name: str, namefil
         start_page_division(outfile, "name_page")
         if maxcnt > 0:
             image_name = name_to_filename(name) + "_chronology.svg"
-            create_chronology_chart_file(image_name,  miny, maxy, maxcnt, name_by_year)
+            TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, name_by_year)
     else:
         common_header_part1(outfile, name, indexpath="../")
         if len(location_set) > 0:
             start_google_map_header(outfile)
-            write_google_map_point_header(outfile, "name_" + name, None)
+            write_google_map_point_header(outfile, "name_" + name)
             end_google_map_header(outfile)
 
         if maxcnt > 0:
@@ -1458,13 +1341,13 @@ def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB
         start_page_division(outfile, "base_page")
         if maxcnt > 0:
             image_name = name_to_filename(specific_name.name) + "_chronology.svg"
-            create_chronology_chart_file(image_name,  miny, maxy, maxcnt, byears)
+            TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, byears)
     else:
         common_header_part1(outfile, specific_name.name, indexpath="../")
 
         if len(location_set) > 0:
             start_google_map_header(outfile)
-            write_google_map_point_header(outfile, "sn_" + specific_name.name, None)
+            write_google_map_point_header(outfile, "sn_" + specific_name.name)
             end_google_map_header(outfile)
 
         if maxcnt > 0:
@@ -1569,17 +1452,17 @@ def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB
         common_html_footer(outfile, indexpath="../")
 
 
-def create_word_cloud_image(binomial_cnts: dict, specific_cnts: dict) -> None:
-    # fiddler_mask = np.array(Image.open("private/silhouette.png"))
-    # generate wordcloud image from binomials
-    wordcloud = WordCloud(width=2000, height=1500, background_color="white", max_words=1000,  normalize_plurals=False,
-                          collocations=False).generate_from_frequencies(binomial_cnts)
-    wordcloud.to_file(TMP_PATH + "binomial_word_cloud.png")
-
-    # generate wordcloud image from specific names
-    wordcloud = WordCloud(width=2000, height=1500, background_color="white", max_words=1000,  normalize_plurals=False,
-                          collocations=False).generate_from_frequencies(specific_cnts)
-    wordcloud.to_file(TMP_PATH + "specific_word_cloud.png")
+# def create_word_cloud_image(binomial_cnts: dict, specific_cnts: dict) -> None:
+#     # fiddler_mask = np.array(Image.open("private/silhouette.png"))
+#     # generate wordcloud image from binomials
+#     wordcloud = WordCloud(width=2000, height=1500, background_color="white", max_words=1000,  normalize_plurals=False,
+#                           collocations=False).generate_from_frequencies(binomial_cnts)
+#     wordcloud.to_file(TMP_PATH + "binomial_word_cloud.png")
+#
+#     # generate wordcloud image from specific names
+#     wordcloud = WordCloud(width=2000, height=1500, background_color="white", max_words=1000,  normalize_plurals=False,
+#                           collocations=False).generate_from_frequencies(specific_cnts)
+#     wordcloud.to_file(TMP_PATH + "specific_word_cloud.png")
 
 
 def setup_chronology_chart(outfile: TextIO, n: int, miny: int, maxy: int, maxcnt: int,
@@ -1661,7 +1544,9 @@ def write_chronology_chart_div(outfile: TextIO, do_print: bool, n: Union[str, in
 
 def create_synonym_chronology(outfile: TextIO, do_print: bool, species: str, binomial_synlist: list,
                               binomial_name_counts: dict, specific_synlist: list, specific_name_counts: dict) -> None:
-    """ create a page with the chronological history of a specific name and its synonyms """
+    """
+    create a page with the chronological history of a specific name and its synonyms
+    """
     miny = init_data().start_year
     maxy = init_data().current_year
     # --all totals and specific names--
@@ -1705,13 +1590,14 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species: str, bin
     if do_print:
         start_page_division(outfile, "synonym_page")
         image_name = "synonym_" + name_to_filename(species) + "_total_chronology.svg"
-        create_chronology_chart_file(image_name,  miny, maxy, maxcnt, total_cnts)
+        TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, total_cnts)
         for name in sp_order:
             image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
-            create_chronology_chart_file(image_name, miny, maxy, maxcnt, specific_name_counts[name])
+            TMB_Create_Graphs.create_chronology_chart_file(image_name, miny, maxy, maxcnt, specific_name_counts[name])
         for name in bi_order:
             image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
-            create_chronology_chart_file(image_name, miny, maxy, maxcnt, binomial_name_counts[clean_name(name)])
+            TMB_Create_Graphs.create_chronology_chart_file(image_name, miny, maxy, maxcnt,
+                                                           binomial_name_counts[clean_name(name)])
     else:
         common_header_part1(outfile, species, indexpath="../")
         start_google_chart_header(outfile)
@@ -1769,7 +1655,9 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species: str, bin
 
 
 def match_specific_name(name: str, specific_names: list) -> str:
-    """ match the specific name from a binomial to the list of accepted specific names """
+    """
+    match the specific name from a binomial to the list of accepted specific names
+    """
     c = clean_specific_name(name)
     if c == "":
         return c
@@ -1933,7 +1821,7 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
     outfile.write("    <h3 class=\"nobookmark\">Cumulative Unique Binomial/Compound Names by Year</h3>\n")
     if do_print:
         filename = "cumulative_binames_line.svg"
-        create_line_chart_file(filename, byears, init_data().start_year, init_data().current_year, 2)
+        TMB_Create_Graphs.create_line_chart_file(filename, byears, init_data().start_year, init_data().current_year, 2)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"line_chart\" />\n")
         outfile.write("    </figure>\n")
@@ -1943,7 +1831,7 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
     outfile.write("    <h3 class=\"nobookmark\">Unique Binomial/Compound Names by Year</h3>\n")
     if do_print:
         filename = "binames_per_year.svg_bar.svg"
-        create_bar_chart_file(filename, byears, init_data().start_year, init_data().current_year, 1)
+        TMB_Create_Graphs.create_bar_chart_file(filename, byears, init_data().start_year, init_data().current_year, 1)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
         outfile.write("    </figure>\n")
@@ -1953,7 +1841,7 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
     outfile.write("    <h3 class=\"nobookmark\">Cumulative Unique Specific Names by Year</h3>\n")
     if do_print:
         filename = "cumulative_spnames_line.svg"
-        create_line_chart_file(filename, syears, 1758, init_data().current_year, 2)
+        TMB_Create_Graphs.create_line_chart_file(filename, syears, 1758, init_data().current_year, 2)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"line_chart\" />\n")
         outfile.write("    </figure>\n")
@@ -1963,7 +1851,7 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
     outfile.write("    <h3 class=\"nobookmark\">Unique Specific Names by Year</h3>\n")
     if do_print:
         filename = "spnames_per_year_bar.svg"
-        create_bar_chart_file(filename, syears, 1758, init_data().current_year, 1)
+        TMB_Create_Graphs.create_bar_chart_file(filename, syears, 1758, init_data().current_year, 1)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
         outfile.write("    </figure>\n")
@@ -1980,20 +1868,13 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
             ref_cnts[""] = 0
             for j in range(len(sublist), per_graph):
                 sublist.append("")
-            create_qual_bar_chart_file(filename, sublist, ref_cnts, maxcnt)
+                TMB_Create_Graphs.create_qual_bar_chart_file(filename, sublist, ref_cnts, maxcnt)
             outfile.write("    <figure class=\"graph\">\n")
             outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
             outfile.write("    </figure>\n")
         else:
             outfile.write("    <div id=\"spcnt_chart" + str(c) + "_div\" class=\"name_bar_chart\"></div>\n")
 
-    # outfile.write("    <h3 class=\"nobookmark pagebreak\">Word Cloud of Names in Literature</h3>\n")
-    # outfile.write("    <figure class=\"graph\">\n")
-    # if do_print:
-    #     outfile.write("      <img src=\"" + TMP_PATH + "name_word_cloud.png\" class=\"word_cloud\" />\n")
-    # else:
-    #     outfile.write("      <img src=\"../images/name_word_cloud.png\" class=\"word_cloud\" />\n")
-    # outfile.write("    </figure>\n")
     outfile.write("    <h3 class=\"nobookmark pagebreak\">Word Cloud of Binomial/Compound Names in Literature</h3>\n")
     outfile.write("    <figure class=\"graph\">\n")
     if do_print:
@@ -2023,7 +1904,9 @@ def extract_genus(name: str) -> str:
 
 
 def create_genus_chronology(outfile: TextIO, do_print: bool, genus_cnts: dict) -> None:
-    """ create a page with the chronological history of the genera """
+    """
+    create a page with the chronological history of the genera
+    """
     miny = init_data().start_year
     maxy = init_data().current_year
     # --all totals and specific names--
@@ -2049,10 +1932,10 @@ def create_genus_chronology(outfile: TextIO, do_print: bool, genus_cnts: dict) -
     if do_print:
         start_page_division(outfile, "synonym_page")
         filename = "Genus_total_chronology.svg"
-        create_chronology_chart_file(filename, miny, maxy, maxcnt, total_cnts)
+        TMB_Create_Graphs.create_chronology_chart_file(filename, miny, maxy, maxcnt, total_cnts)
         for name in order:
             filename = "Genus_" + name + "_chronology.svg"
-            create_chronology_chart_file(filename, miny, maxy, maxcnt, genus_cnts[name])
+            TMB_Create_Graphs.create_chronology_chart_file(filename, miny, maxy, maxcnt, genus_cnts[name])
     else:
         common_header_part1(outfile, "Uca", indexpath="../")
         start_google_chart_header(outfile)
@@ -2079,10 +1962,11 @@ def create_genus_chronology(outfile: TextIO, do_print: bool, genus_cnts: dict) -
         filename = "Genus_total_chronology.svg"
     else:
         filename = 0
-    outfile.write("    <p>Chronological charts of different generic names for fiddler crabs. Strictly speaking"
+    outfile.write("    <p>Chronological charts of different generic names for fiddler crabs. Strictly speaking "
                   "not all of these are synonyms; the charts include instances when fiddler crabs were placed in "
                   "other, valid, genera (<em>e.g.,</em> <em class=\"species\">Cancer</em>) as well as cases in the "
-                  "19th century when the genus <em class=\"species\">Uca</em> was used for non-fiddler crabs.</p>\n")
+                  "19<sup>th</sup> century when the genus <em class=\"species\">Uca</em> was used for non-fiddler "
+                  "crabs.</p>\n")
     write_chronology_chart_div(outfile, do_print, filename, None, "All Genera", False, True)
     adjust = 1
     outfile.write("    <p style=\"clear: both\">Accepted name is listed first, followed by synonyms in decreasing "
@@ -2138,7 +2022,9 @@ def clean_genus(genus: str) -> str:
 def calculate_name_index_data(refdict: dict, citelist: list, specific_names: list) -> Tuple[list, dict, dict, dict,
                                                                                             dict, dict, dict, dict,
                                                                                             dict, dict]:
-    """ calculate all the data associated with binomials and specific names """
+    """
+    calculate all the data associated with binomials and specific names
+    """
     name_table = create_name_table(citelist)
     unique_names = list()
     nameset = set()
@@ -2217,7 +2103,9 @@ def write_all_name_pages(outfile: TextIO, do_print: bool, refdict: dict, citelis
                          specific_names: list, name_table: dict, species_refs: dict, genus_cnts: dict,
                          binomial_usage_cnts_by_year: dict, total_binomial_year_cnts: dict, binomial_locations: dict,
                          specific_locations: dict, point_locations: dict) -> None:
-    """ create an index of binomials and specific names """
+    """
+    create an index of binomials and specific names
+    """
     if do_print:
         start_page_division(outfile, "index_page")
     else:
@@ -2315,7 +2203,9 @@ def write_all_name_pages(outfile: TextIO, do_print: bool, refdict: dict, citelis
 
 
 def check_specific_names(citelist: list, specific_names: list) -> None:
-    """ checks all specific names used to confirm they are accounted for in the full synonymy list """
+    """
+    checks all specific names used to confirm they are accounted for in the full synonymy list
+    """
     unique_names = list()
     nameset = set()
     for c in citelist:
@@ -2335,7 +2225,9 @@ def check_specific_names(citelist: list, specific_names: list) -> None:
 
 
 def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None:
-    """ output geographic ranges to HTML """
+    """
+    output geographic ranges to HTML
+    """
     regions = ("Eastern Atlantic",
                "Western Atlantic",
                "Eastern Pacific",
@@ -2346,7 +2238,7 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
         common_header_part1(outfile, "Fiddler Crab Geographic Ranges")
         start_google_map_header(outfile)
         write_google_map_range_header(outfile, "uca_all")
-        write_google_map_point_header(outfile, "uca_all", None)
+        write_google_map_point_header(outfile, "uca_all")
         end_google_map_header(outfile)
         common_header_part2(outfile, include_map=True)
 
@@ -2424,7 +2316,9 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
 
 
 def create_location_hierarchy(point_locations: dict) -> dict:
-    """ got through all locations and add children to the parent locations """
+    """
+    go through all locations and add children to the parent locations
+    """
     loc_dict = {}
     for p in point_locations:
         loc = point_locations[p]
@@ -2496,7 +2390,7 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
         common_header_part1(outfile, loc.trimmed_name, indexpath="../")
         if not loc.unknown:
             start_google_map_header(outfile)
-            write_google_map_point_header(outfile, "location_" + place_to_filename(loc.name), loc)
+            write_google_map_point_header(outfile, "location_" + place_to_filename(loc.name))
             end_google_map_header(outfile)
         common_header_part2(outfile, indexpath="../", include_map=True)
 
@@ -2695,7 +2589,9 @@ def write_location_index_entry(outfile: TextIO, do_print: bool, loc: TMB_Classes
 def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict, location_dict: dict,
                          location_species: dict, location_sp_names: dict, location_bi_names: dict,
                          location_direct_refs: dict, location_cited_refs: dict, references: list) -> None:
-    """ output observation location index to HTML """
+    """
+    output observation location index to HTML
+    """
     if do_print:
         start_page_division(outfile, "index_page")
     else:
@@ -2911,7 +2807,9 @@ def match_names_to_locations(species: list, specific_point_locations: dict,  bin
 
 
 def write_common_names_pages(outfile: TextIO, do_print: bool, common_name_data: list) -> None:
-    """ output common names to HTML """
+    """
+    output common names to HTML
+    """
     if do_print:
         start_page_division(outfile, "base_page")
     else:
@@ -3180,7 +3078,7 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
             common_header_part1(outfile, "Uca " + species.species + " / " + species.common)
             start_google_map_header(outfile)
             write_google_map_range_header(outfile, "u_" + species.species)
-            write_google_map_point_header(outfile, "u_" + species.species, None)
+            write_google_map_point_header(outfile, "u_" + species.species)
             end_google_map_header(outfile)
             common_header_part2(outfile, include_map=True)
 
@@ -3300,25 +3198,26 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
                                    ".html\">" + mref.citation+"</a>")
             else:
                 mapcitelist.append(m)
-        outfile.write("           Map data derived from: " + "; ".join(mapcitelist) + "\n")
+        outfile.write("           Range map data derived from: " + "; ".join(mapcitelist) + "\n")
         outfile.write("         </dd>\n")
 
     # External links
-    outfile.write("       <dt>External Links</dt>\n")
-    if species.eolid != ".":
-        outfile.write("         <dd><a href=\"http://eol.org/pages/" + species.eolid +
-                      "/overview\">Encyclopedia of Life</a></dd>\n")
-    outfile.write("         <dd><a href=\"http://en.wikipedia.org/wiki/Uca_" + species.species +
-                  "\">Wikipedia</a></dd>\n")
-    if species.inatid != ".":
-        outfile.write("         <dd><a href=\"http://www.inaturalist.org/taxa/" + species.inatid +
-                      "\">iNaturalist</a></dd>\n")
-    if species.taxonid != ".":
-        outfile.write("         <dd><a href=\"http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=" +
-                      species.taxonid + "\">NCBI Taxonomy Browser/Genbank</a></dd>\n")
-    if species.gbifid != ".":
-        outfile.write("         <dd><a href=\"http://www.gbif.org/species/" + species.gbifid +
-                      "\">GBIF</a></dd>\n")
+    if not do_print:
+        outfile.write("       <dt>External Links</dt>\n")
+        if species.eolid != ".":
+            outfile.write("         <dd><a href=\"http://eol.org/pages/" + species.eolid +
+                          "/overview\">Encyclopedia of Life</a></dd>\n")
+        outfile.write("         <dd><a href=\"http://en.wikipedia.org/wiki/Uca_" + species.species +
+                      "\">Wikipedia</a></dd>\n")
+        if species.inatid != ".":
+            outfile.write("         <dd><a href=\"http://www.inaturalist.org/taxa/" + species.inatid +
+                          "\">iNaturalist</a></dd>\n")
+        if species.taxonid != ".":
+            outfile.write("         <dd><a href=\"http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=" +
+                          species.taxonid + "\">NCBI Taxonomy Browser/Genbank</a></dd>\n")
+        if species.gbifid != ".":
+            outfile.write("         <dd><a href=\"http://www.gbif.org/species/" + species.gbifid +
+                          "\">GBIF</a></dd>\n")
 
     outfile.write("      </dl>\n")
     outfile.write("    </section>\n")
@@ -3423,20 +3322,6 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
         outfile.write("\n")
 
     write_reference_list(outfile, do_print, references, sprefs)
-    # outfile.write("    <section class=\"spsection\">\n")
-    # if do_print:
-    #     outfile.write("      <h2 class=\"nobookmark\"><span class=\"fa fa-book\"></span> References</h2>\n")
-    # else:
-    #     outfile.write("      <h2 id=\"references\" class=\"nobookmark\"><span class=\"fa fa-book\"></span> "
-    #                   "References</h2>\n")
-    # outfile.write("      <p>\n")
-    # reflist = []
-    # for ref in references:
-    #     if ref.cite_key in sprefs:
-    #         reflist.append(format_reference_cite(ref, do_print, AUTHOR_PAREN, logfile))
-    # outfile.write(", \n".join(reflist))
-    # outfile.write("      </p>\n")
-    # outfile.write("    </section>\n")
     if do_print:
         end_page_division(outfile)
     else:
@@ -3562,9 +3447,6 @@ def write_video_index(outfile: TextIO, do_print: bool, videos: list) -> None:
     outfile.write("\n")
     if do_print:
         outfile.write("    <p>\n")
-        # outfile.write("      Videos are available on the web at "
-        #               "<a href=\"http://www.fiddlercrab.info/uca_videos.html\">"
-        #               "http://www.fiddlercrab.info/uca_videos.html</a> or by following the embedded links.")
         outfile.write("      Videos are available on the web at <a href=\"" + init_data().site_url() +
                       "/uca_videos.html\">" + init_data().site_url() +
                       "/uca_videos.html</a> or by following the embedded links.")
@@ -4236,7 +4118,9 @@ def summarize_languages(refs: list) -> dict:
 
 
 def write_life_cycle_pages(outfile: TextIO, do_print: bool) -> None:
-    """ create the life cycle page """
+    """
+    create the life cycle page
+    """
     if do_print:
         start_page_division(outfile, "base_page")
         media_path = MEDIA_PATH
@@ -4348,7 +4232,9 @@ def write_life_cycle_pages(outfile: TextIO, do_print: bool) -> None:
 
 
 def write_phylogeny_pages(outfile: TextIO, do_print: bool, refdict: dict) -> None:
-    """ create the phylogeny page """
+    """
+    create the phylogeny page
+    """
     treelist = {"tree_species.svg", "tree_subgenera.svg"}
     if do_print:
         start_page_division(outfile, "base_page")
@@ -4416,7 +4302,9 @@ def find_morphology_parent(p: str, mlist: list) -> str:
 
 def write_morphology_page(outfile: TextIO, do_print: bool, morph: TMB_Classes.MorphologyClass,
                           morphlist: list) -> None:
-    """ create individual pages for morphology descriptions """
+    """
+    create individual pages for morphology descriptions
+    """
     if morph.parent == ".":
         p = ""
     else:
@@ -4493,7 +4381,9 @@ def write_morphology_page(outfile: TextIO, do_print: bool, morph: TMB_Classes.Mo
 
 
 def write_morphology_index(outfile: TextIO, do_print: bool, morphlist: list) -> None:
-    """ create index for morphology pages """
+    """
+    create index for morphology pages
+    """
     if do_print:
         start_page_division(outfile, "index_page")
     else:
@@ -4540,7 +4430,9 @@ def write_morphology_index(outfile: TextIO, do_print: bool, morphlist: list) -> 
 
 
 def write_main_morphology_pages(outfile: TextIO, do_print: bool, morphology: list) -> None:
-    """ create page for general morphology descriptions """
+    """
+    create page for general morphology descriptions
+    """
     if do_print:
         start_page_division(outfile, "base_page")
         media_path = MEDIA_PATH
@@ -4564,7 +4456,7 @@ def write_main_morphology_pages(outfile: TextIO, do_print: bool, morphology: lis
     outfile.write("\n")
     outfile.write("    <div class=\"morphdesc\">\n")
     outfile.write("     <p>\n")
-    outfile.write("      Fiddler crabs are decapod &ldquo;true crabs&rdquo; which much of the standard morphology "
+    outfile.write("      Fiddler crabs are decapod &ldquo;true crabs&rdquo; with much of the standard morphology "
                   "found within this group. The following sections briefly describe major morphological features "
                   "as well as characteristics that are often used to distinguish among species.\n")
     outfile.write("     </p>\n")
@@ -4611,7 +4503,9 @@ def write_main_morphology_pages(outfile: TextIO, do_print: bool, morphology: lis
 
 
 def write_citation_page(refdict: dict) -> None:
-    """ create page with site citation info """
+    """
+    create page with site citation info
+    """
     with open(WEBOUT_PATH + init_data().cite_url, "w", encoding="utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Website Citation")
         outfile.write("    <header id=\"" + init_data().cite_url + "\">\n")
@@ -4640,7 +4534,9 @@ def write_citation_page(refdict: dict) -> None:
 
 
 def write_introduction(outfile: TextIO, do_print: bool, species: list) -> None:
-    """ create the site index """
+    """
+    create the site index
+    """
     if do_print:
         start_page_division(outfile, "base_page")
         outfile.write("    <header id=\"introduction\">\n")
@@ -4709,7 +4605,11 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list) -> None:
         outfile.write("      <li><span class=\"fa-li far fa-comments\"></span><a href=\"" + init_data().common_url +
                       "\">Common Names</a></li>\n")
         outfile.write("      <li><span class=\"fa-li far fa-map\"></span><a href=\"" + init_data().map_url +
-                      "\">Geographic Ranges and Locations</a></li>\n")
+                      "\">Geographic Ranges</a>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("           <li><a href=\"locations\">Location Index</a></li>\n")
+        outfile.write("        </ul>\n")
+        outfile.write("      </li>\n")
         outfile.write("      <li><span class=\"fa-li fa fa-sync\"></span><a href=\"" + init_data().lifecycle_url +
                       "\">Life Cycle</a></li>\n")
         outfile.write("      <li><span class=\"fa-li far fa-heart\"></span><a href=\"" + init_data().morph_url +
@@ -4767,7 +4667,6 @@ def create_web_output_paths() -> None:
     create_path_and_index("images/flag-icon-css/flags/4x3/")
     create_path_and_index("locations/")
     create_path_and_index("js/")
-    # create_path_and_index("js/packs/")
 
 
 def create_temp_output_paths() -> None:
@@ -4822,20 +4721,6 @@ def copy_support_files() -> None:
         except FileNotFoundError:
             report_error("Missing file: " + TMP_PATH + filename)
     # font-awesome files
-    # filelist = {"fontawesome.js"}
-    # for filename in filelist:
-    #     try:
-    #         shutil.copy2("resources/font-awesome/js/" + filename, WEBOUT_PATH + "js/")
-    #     except FileNotFoundError:
-    #         report_error("Missing file: resources/font-awesome/js/" + TMP_PATH + filename)
-    # filelist = {"brands.js",
-    #             "regular.js",
-    #             "solid.js"}
-    # for filename in filelist:
-    #     try:
-    #         shutil.copy2("resources/font-awesome/js/packs/" + filename, WEBOUT_PATH + "js/packs/")
-    #     except FileNotFoundError:
-    #         report_error("Missing file: resources/font-awesome/js/packs/" + TMP_PATH + filename)
     filelist = {"fontawesome.min.js",
                 "fa-brands.min.js",
                 "fa-regular.min.js",
@@ -5079,8 +4964,8 @@ def start_print(outfile: TextIO) -> None:
     outfile.write("    <title>Fiddler Crabs</title>\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/uca_style.css\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/print.css\" />\n")
-    outfile.write("    <link rel=\"stylesheet\" href=\"resources/images/font-awesome/css/font-awesome.min.css\" />\n")
-    outfile.write("    <link rel=\"stylesheet\" href=\"resources/images/flag-icon-css/css/flag-icon.min.css\" />\n")
+    outfile.write("    <link rel=\"stylesheet\" href=\"resources/font-awesome/css/fontawesome.min.css\" />\n")
+    outfile.write("    <link rel=\"stylesheet\" href=\"resources/flag-icon-css/css/flag-icon.min.css\" />\n")
     outfile.write("  </head>\n")
     outfile.write("\n")
     outfile.write("  <body>\n")
@@ -5127,7 +5012,7 @@ def build_site() -> None:
         common_name_data = TMB_Import.read_common_name_data(init_data().common_names_file)
         subgenera = TMB_Import.read_subgenera_data(init_data().subgenera_file)
         # create_word_cloud_image(word_cloud_str)
-        create_word_cloud_image(binomial_usage_cnts, specific_usage_cnts)
+        TMB_Create_Graphs.create_word_cloud_image(binomial_usage_cnts, specific_usage_cnts)
 
         print("...Reading Photos and Videos...")
         photos = TMB_Import.read_photo_data(init_data().photo_file)
@@ -5231,10 +5116,10 @@ def build_site() -> None:
                     write_systematics_overview(printfile, True, subgenera, species, refdict, species_changes_new,
                                                species_changes_synonyms, species_changes_spelling)
                     write_phylogeny_pages(printfile, True, refdict)
-                    write_geography_page(printfile, True, species)
-                    write_location_index(printfile, True, point_locations, location_dict, location_species,
-                                         location_sp_names, location_bi_names, location_direct_refs,
-                                         location_cited_refs, references)
+                    # write_geography_page(printfile, True, species)
+                    # write_location_index(printfile, True, point_locations, location_dict, location_species,
+                    #                      location_sp_names, location_bi_names, location_direct_refs,
+                    #                      location_cited_refs, references)
                     write_life_cycle_pages(printfile, True)
                     write_main_morphology_pages(printfile, True, morphology)
                     print("......Writing Species Pages......")
@@ -5244,15 +5129,15 @@ def build_site() -> None:
                     write_all_name_pages(printfile, True, refdict, citelist, all_names, specific_names, name_table,
                                          species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
                                          binomial_point_locations, specific_point_locations, point_locations)
-                    print("......Writing Media Pages......")
-                    write_photo_index(printfile, True, species, photos)
-                    write_video_index(printfile, True, videos)
-                    write_all_art_pages(printfile, True, art)
-                    print("......Writing Reference Pages......")
-                    write_reference_summary(printfile, True, len(references), yeardat, yeardat1900, citecount,
-                                            languages)
-                    write_reference_bibliography(printfile, True, references)
-                    write_reference_pages(printfile, True, references, refdict, citelist, name_table, point_locations)
+                    # print("......Writing Media Pages......")
+                    # write_photo_index(printfile, True, species, photos)
+                    # write_video_index(printfile, True, videos)
+                    # write_all_art_pages(printfile, True, art)
+                    # print("......Writing Reference Pages......")
+                    # write_reference_summary(printfile, True, len(references), yeardat, yeardat1900, citecount,
+                    #                         languages)
+                    # write_reference_bibliography(printfile, True, references)
+                    # write_reference_pages(printfile, True, references, refdict, citelist, name_table, point_locations)
                     end_print(printfile)
 
     print("done")
