@@ -545,7 +545,8 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
     outfile.write("    </p>\n")
     if do_print:
         # pie chart of languages
-        filename = "language_pie.svg"
+        # filename = "language_pie.svg"
+        filename = "language_pie.png"
         TMB_Create_Graphs.create_pie_chart_file(filename, languages)
         outfile.write("    <h3 class=\"nobookmark\">Primary Language of References</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
@@ -559,7 +560,8 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
             miny = min(miny, y[0])
             maxy = max(maxy, y[0])
 
-        filename = "pubs_per_year_bar.svg"
+        # filename = "pubs_per_year_bar.svg"
+        filename = "pubs_per_year_bar.png"
         TMB_Create_Graphs.create_bar_chart_file(filename, year_data, miny, maxy, 1)
         outfile.write("    <h3 class=\"nobookmark\">References by Year</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
@@ -567,7 +569,8 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         outfile.write("    </figure>\n")
 
         # pubs per year since 1900 bar chart
-        filename = "pubs_per_year_1900_bar.svg"
+        # filename = "pubs_per_year_1900_bar.svg"
+        filename = "pubs_per_year_1900_bar.png"
         TMB_Create_Graphs.create_bar_chart_file(filename, year_data_1900, 1900, maxy, 1)
         outfile.write("    <h3 class=\"nobookmark\">References by Year (since 1900)</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
@@ -575,7 +578,8 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         outfile.write("    </figure>\n")
 
         # citation data in database
-        filename = "pubs_per_year_1900_complete_bar.svg"
+        # filename = "pubs_per_year_1900_complete_bar.svg"
+        filename = "pubs_per_year_1900_complete_bar.png"
         tmp_dat = []
         for y in year_data_1900:
             tmp_dat.append([y[2], y[1] - y[2]])
@@ -588,7 +592,8 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         outfile.write("    </figure>\n")
 
         # cumulative publications line chart
-        filename = "cumulative_pubs_line.svg"
+        # filename = "cumulative_pubs_line.svg"
+        filename = "cumulative_pubs_line.png"
         TMB_Create_Graphs.create_line_chart_file(filename, year_data, miny, maxy, 2)
         outfile.write("    <h3 class=\"nobookmark\">Cumulative References by Year</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
@@ -1225,7 +1230,8 @@ def write_binomial_name_page(outfile: TextIO, do_print: bool, name: str, namefil
     if do_print:
         start_page_division(outfile, "name_page")
         if maxcnt > 0:
-            image_name = name_to_filename(name) + "_chronology.svg"
+            # image_name = name_to_filename(name) + "_chronology.svg"
+            image_name = name_to_filename(name) + "_chronology.png"
             TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, name_by_year)
     else:
         common_header_part1(outfile, name, indexpath="../")
@@ -1346,7 +1352,8 @@ def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB
     if do_print:
         start_page_division(outfile, "base_page")
         if maxcnt > 0:
-            image_name = name_to_filename(specific_name.name) + "_chronology.svg"
+            # image_name = name_to_filename(specific_name.name) + "_chronology.svg"
+            image_name = name_to_filename(specific_name.name) + "_chronology.png"
             TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, byears)
     else:
         common_header_part1(outfile, specific_name.name, indexpath="../")
@@ -1595,13 +1602,16 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species: str, bin
 
     if do_print:
         start_page_division(outfile, "synonym_page")
-        image_name = "synonym_" + name_to_filename(species) + "_total_chronology.svg"
+        # image_name = "synonym_" + name_to_filename(species) + "_total_chronology.svg"
+        image_name = "synonym_" + name_to_filename(species) + "_total_chronology.png"
         TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, total_cnts)
         for name in sp_order:
-            image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
+            # image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
+            image_name = "synonym_" + name_to_filename(name) + "_chronology.png"
             TMB_Create_Graphs.create_chronology_chart_file(image_name, miny, maxy, maxcnt, specific_name_counts[name])
         for name in bi_order:
-            image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
+            # image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
+            image_name = "synonym_" + name_to_filename(name) + "_chronology.png"
             TMB_Create_Graphs.create_chronology_chart_file(image_name, miny, maxy, maxcnt,
                                                            binomial_name_counts[clean_name(name)])
     else:
@@ -1631,7 +1641,8 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species: str, bin
     outfile.write("    </header>\n")
     outfile.write("\n")
     if do_print:
-        image_name = "synonym_" + name_to_filename(species) + "_total_chronology.svg"
+        # image_name = "synonym_" + name_to_filename(species) + "_total_chronology.svg"
+        image_name = "synonym_" + name_to_filename(species) + "_total_chronology.png"
     else:
         image_name = 0
     write_chronology_chart_div(outfile, do_print, image_name, None, "All Names", False, True)
@@ -1641,7 +1652,8 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species: str, bin
     outfile.write("    <h2 class=\"nobookmark\">Specific Synonyms</h2>\n")
     for i, name in enumerate(sp_order):
         if do_print:
-            image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
+            # image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
+            image_name = "synonym_" + name_to_filename(name) + "_chronology.png"
         else:
             image_name = i + adjust
         write_chronology_chart_div(outfile, do_print, image_name, "sn_" + name, name, True, True)
@@ -1649,7 +1661,8 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species: str, bin
     outfile.write("    <h2  class=\"nobookmark\" style=\"clear: both\">Binomial Synonyms</h2>\n")
     for i, name in enumerate(bi_order):
         if do_print:
-            image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
+            # image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
+            image_name = "synonym_" + name_to_filename(name) + "_chronology.png"
         else:
             image_name = i + adjust
         write_chronology_chart_div(outfile, do_print, image_name, name, name, True, True)
@@ -1826,7 +1839,8 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
 
     outfile.write("    <h3 class=\"nobookmark\">Cumulative Unique Binomial/Compound Names by Year</h3>\n")
     if do_print:
-        filename = "cumulative_binames_line.svg"
+        # filename = "cumulative_binames_line.svg"
+        filename = "cumulative_binames_line.png"
         TMB_Create_Graphs.create_line_chart_file(filename, byears, init_data().start_year, init_data().current_year, 2)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"line_chart\" />\n")
@@ -1836,7 +1850,8 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
 
     outfile.write("    <h3 class=\"nobookmark\">Unique Binomial/Compound Names by Year</h3>\n")
     if do_print:
-        filename = "binames_per_year.svg_bar.svg"
+        # filename = "binames_per_year_bar.svg"
+        filename = "binames_per_year_bar.png"
         TMB_Create_Graphs.create_bar_chart_file(filename, byears, init_data().start_year, init_data().current_year, 1)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
@@ -1846,7 +1861,8 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
 
     outfile.write("    <h3 class=\"nobookmark\">Cumulative Unique Specific Names by Year</h3>\n")
     if do_print:
-        filename = "cumulative_spnames_line.svg"
+        # filename = "cumulative_spnames_line.svg"
+        filename = "cumulative_spnames_line.png"
         TMB_Create_Graphs.create_line_chart_file(filename, syears, 1758, init_data().current_year, 2)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"line_chart\" />\n")
@@ -1856,7 +1872,8 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
 
     outfile.write("    <h3 class=\"nobookmark\">Unique Specific Names by Year</h3>\n")
     if do_print:
-        filename = "spnames_per_year_bar.svg"
+        # filename = "spnames_per_year_bar.svg"
+        filename = "spnames_per_year_bar.png"
         TMB_Create_Graphs.create_bar_chart_file(filename, syears, 1758, init_data().current_year, 1)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
@@ -1869,7 +1886,8 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
     for i in range(ngraph):
         c += 1
         if do_print:
-            filename = "refs_per_species_bar" + str(c) + ".svg"
+            # filename = "refs_per_species_bar" + str(c) + ".svg"
+            filename = "refs_per_species_bar" + str(c) + ".png"
             sublist = tmpslist[i*per_graph:(i+1)*per_graph]
             ref_cnts[""] = 0
             for j in range(len(sublist), per_graph):
@@ -1937,10 +1955,12 @@ def create_genus_chronology(outfile: TextIO, do_print: bool, genus_cnts: dict) -
             order.append(x[1])
     if do_print:
         start_page_division(outfile, "synonym_page")
-        filename = "Genus_total_chronology.svg"
+        # filename = "Genus_total_chronology.svg"
+        filename = "Genus_total_chronology.png"
         TMB_Create_Graphs.create_chronology_chart_file(filename, miny, maxy, maxcnt, total_cnts)
         for name in order:
-            filename = "Genus_" + name + "_chronology.svg"
+            # filename = "Genus_" + name + "_chronology.svg"
+            filename = "Genus_" + name + "_chronology.png"
             TMB_Create_Graphs.create_chronology_chart_file(filename, miny, maxy, maxcnt, genus_cnts[name])
     else:
         common_header_part1(outfile, "Uca", indexpath="../")
@@ -1965,7 +1985,8 @@ def create_genus_chronology(outfile: TextIO, do_print: bool, genus_cnts: dict) -
     outfile.write("    </header>\n")
     outfile.write("\n")
     if do_print:
-        filename = "Genus_total_chronology.svg"
+        # filename = "Genus_total_chronology.svg"
+        filename = "Genus_total_chronology.png"
     else:
         filename = 0
     outfile.write("    <p>Chronological charts of different generic names for fiddler crabs. Strictly speaking "
@@ -1980,7 +2001,8 @@ def create_genus_chronology(outfile: TextIO, do_print: bool, genus_cnts: dict) -
     outfile.write("    <h2 class=\"nobookmark\">Genus Synonyms</h2>\n")
     for i, name in enumerate(order):
         if do_print:
-            filename = "Genus_" + name + "_chronology.svg"
+            # filename = "Genus_" + name + "_chronology.svg"
+            filename = "Genus_" + name + "_chronology.png"
         else:
             filename = i + adjust
         write_chronology_chart_div(outfile, do_print, filename, None, name, True, True)
@@ -2278,10 +2300,14 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
         outfile.write("        <div id=\"range_map_canvas\"></div>\n")
         outfile.write("        <div id=\"point_map_canvas\"></div>\n")
         outfile.write("        <div class=\"map_download\">\n")
-        outfile.write("          <a href=\"maps/" + rangemap_name("uca_all") + ".svgz\">"
-                      "<span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
-        outfile.write("          <a href=\"maps/" + pointmap_name("uca_all") + ".svgz\">"
-                      "<span class=\"fa fa-download\"></span> Download SVG line map of point locations.</a>\n")
+        # outfile.write("          <a href=\"maps/" + rangemap_name("uca_all") + ".svgz\">"
+        #               "<span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
+        # outfile.write("          <a href=\"maps/" + pointmap_name("uca_all") + ".svgz\">"
+        #               "<span class=\"fa fa-download\"></span> Download SVG line map of point locations.</a>\n")
+        outfile.write("          <a href=\"maps/" + rangemap_name("uca_all") + ".png\">"
+                      "<span class=\"fa fa-download\"></span> Download PNG line map of ranges.</a> \n")
+        outfile.write("          <a href=\"maps/" + pointmap_name("uca_all") + ".png\">"
+                      "<span class=\"fa fa-download\"></span> Download PNG line map of point locations.</a>\n")
         outfile.write("        </div>\n")
     outfile.write("      </div>\n")
     outfile.write("      <p>\n")
@@ -3187,10 +3213,14 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
             outfile.write("           <div id=\"range_map_canvas\" class=\"sp_map\"></div>\n")
             outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
             outfile.write("           <div class=\"map_download\">\n")
-            outfile.write("             <a href=\"maps/" + rangemap_name("u_" + species.species) + ".svgz\">"
-                          "<span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
-            outfile.write("             <a href=\"maps/" + pointmap_name("u_" + species.species) + ".svgz\">"
-                          "<span class=\"fa fa-download\"></span> Download SVG line map of point locations.</a>\n")
+            # outfile.write("             <a href=\"maps/" + rangemap_name("u_" + species.species) + ".svgz\">"
+            #               "<span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
+            # outfile.write("             <a href=\"maps/" + pointmap_name("u_" + species.species) + ".svgz\">"
+            #               "<span class=\"fa fa-download\"></span> Download SVG line map of point locations.</a>\n")
+            outfile.write("             <a href=\"maps/" + rangemap_name("u_" + species.species) + ".png\">"
+                          "<span class=\"fa fa-download\"></span> Download PNG line map of ranges.</a> \n")
+            outfile.write("             <a href=\"maps/" + pointmap_name("u_" + species.species) + ".png\">"
+                          "<span class=\"fa fa-download\"></span> Download PNG line map of point locations.</a>\n")
             outfile.write("           </div>\n")
         outfile.write("         </dd>\n")
         outfile.write("         <dd class=\"map_data\">\n")
@@ -4791,28 +4821,34 @@ def copy_map_files(species: list, all_names: list, specific_names: list, point_l
         if s.status != "fossil":
             copy_file(TMP_MAP_PATH + rangemap_name("u_" + s.species) + ".kmz")
             copy_file(TMP_MAP_PATH + pointmap_name("u_" + s.species) + ".kmz")
-            scour_svg(TMP_MAP_PATH + rangemap_name("u_" + s.species) + ".svg")
-            scour_svg(TMP_MAP_PATH + pointmap_name("u_" + s.species) + ".svg")
-            copy_file(TMP_MAP_PATH + rangemap_name("u_" + s.species) + ".svgz")
-            copy_file(TMP_MAP_PATH + pointmap_name("u_" + s.species) + ".svgz")
+            # scour_svg(TMP_MAP_PATH + rangemap_name("u_" + s.species) + ".svg")
+            # scour_svg(TMP_MAP_PATH + pointmap_name("u_" + s.species) + ".svg")
+            # copy_file(TMP_MAP_PATH + rangemap_name("u_" + s.species) + ".svgz")
+            # copy_file(TMP_MAP_PATH + pointmap_name("u_" + s.species) + ".svgz")
+            copy_file(TMP_MAP_PATH + rangemap_name("u_" + s.species) + ".png")
+            copy_file(TMP_MAP_PATH + pointmap_name("u_" + s.species) + ".png")
     # combined map
     copy_file(TMP_MAP_PATH + rangemap_name("uca_all") + ".kmz")
     copy_file(TMP_MAP_PATH + pointmap_name("uca_all") + ".kmz")
-    scour_svg(TMP_MAP_PATH + rangemap_name("uca_all") + ".svg")
-    scour_svg(TMP_MAP_PATH + pointmap_name("uca_all") + ".svg")
-    copy_file(TMP_MAP_PATH + rangemap_name("uca_all") + ".svgz")
-    copy_file(TMP_MAP_PATH + pointmap_name("uca_all") + ".svgz")
+    # scour_svg(TMP_MAP_PATH + rangemap_name("uca_all") + ".svg")
+    # scour_svg(TMP_MAP_PATH + pointmap_name("uca_all") + ".svg")
+    # copy_file(TMP_MAP_PATH + rangemap_name("uca_all") + ".svgz")
+    # copy_file(TMP_MAP_PATH + pointmap_name("uca_all") + ".svgz")
+    copy_file(TMP_MAP_PATH + rangemap_name("uca_all") + ".png")
+    copy_file(TMP_MAP_PATH + pointmap_name("uca_all") + ".png")
 
     # binomial maps
     for n in all_names:
         copy_file(TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".kmz")
-        scour_svg(TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".svg")
-        copy_file(TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".svgz")
+        # scour_svg(TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".svg")
+        # copy_file(TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".svgz")
+        copy_file(TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(n)) + ".png")
     # specific name maps
     for n in specific_names:
         copy_file(TMP_MAP_PATH + pointmap_name("sn_" + n.name) + ".kmz")
-        scour_svg(TMP_MAP_PATH + pointmap_name("sn_" + n.name) + ".svg")
-        copy_file(TMP_MAP_PATH + pointmap_name("sn_" + n.name) + ".svgz")
+        # scour_svg(TMP_MAP_PATH + pointmap_name("sn_" + n.name) + ".svg")
+        # copy_file(TMP_MAP_PATH + pointmap_name("sn_" + n.name) + ".svgz")
+        copy_file(TMP_MAP_PATH + pointmap_name("sn_" + n.name) + ".png")
     # point location maps
     for p in point_locations:
         if not point_locations[p].unknown:
@@ -5140,14 +5176,14 @@ def build_site() -> None:
                                          location_cited_refs, references)
                     print("......Writing Media Pages......")
                     write_main_morphology_pages(printfile, True, morphology)
-                    # write_photo_index(printfile, True, species, photos)
-                    # write_video_index(printfile, True, videos)
-                    # write_all_art_pages(printfile, True, art)
+                    write_photo_index(printfile, True, species, photos)
+                    write_video_index(printfile, True, videos)
+                    write_all_art_pages(printfile, True, art)
                     print("......Writing Reference Pages......")
-                    # write_reference_summary(printfile, True, len(references), yeardat, yeardat1900, citecount,
-                    #                         languages)
-                    # write_reference_bibliography(printfile, True, references)
-                    # write_reference_pages(printfile, True, references, refdict, citelist, name_table, point_locations)
+                    write_reference_summary(printfile, True, len(references), yeardat, yeardat1900, citecount,
+                                            languages)
+                    write_reference_bibliography(printfile, True, references)
+                    write_reference_pages(printfile, True, references, refdict, citelist, name_table, point_locations)
                     end_print(printfile)
 
     print("done")

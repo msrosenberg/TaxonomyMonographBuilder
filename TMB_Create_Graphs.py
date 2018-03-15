@@ -24,7 +24,8 @@ def create_pie_chart_file(filename: str, data: dict) -> None:
     faxes.legend(datalist, loc="upper left", frameon=False)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    mplpy.savefig(__TMP_PATH__ + filename)
+    # mplpy.savefig(__TMP_PATH__ + filename)
+    mplpy.savefig(__TMP_PATH__ + filename, format="png", dpi=600)
     mplpy.close("all")
 
 
@@ -42,7 +43,8 @@ def create_bar_chart_file(filename: str, data: list, minx: int, maxx: int, y: in
     mplpy.xticks([i for i in range(minx, maxx + 1, tick_step)])
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    mplpy.savefig(__TMP_PATH__ + filename)
+    # mplpy.savefig(__TMP_PATH__ + filename)
+    mplpy.savefig(__TMP_PATH__ + filename, format="png", dpi=600)
     mplpy.close("all")
 
 
@@ -61,7 +63,8 @@ def create_stacked_bar_chart_file(filename: str, data: list, minx: int, maxx: in
     faxes.legend(col_names, loc="upper left", frameon=False)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    mplpy.savefig(__TMP_PATH__ + filename)
+    # mplpy.savefig(__TMP_PATH__ + filename)
+    mplpy.savefig(__TMP_PATH__ + filename, format="png", dpi=600)
     mplpy.close("all")
 
 
@@ -82,7 +85,8 @@ def create_qual_bar_chart_file(filename: str, label_list: list, data_dict: dict,
     mplpy.ylim(0, max_value)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    mplpy.savefig(__TMP_PATH__ + filename)
+    # mplpy.savefig(__TMP_PATH__ + filename)
+    mplpy.savefig(__TMP_PATH__ + filename, format="png", dpi=600)
     mplpy.close("all")
 
 
@@ -100,7 +104,8 @@ def create_line_chart_file(filename: str, data: list, minx: int, maxx: int, y: i
     mplpy.xticks([i for i in range(minx, maxx + 1, tick_step)])
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    mplpy.savefig(__TMP_PATH__ + filename, format="svg")
+    # mplpy.savefig(__TMP_PATH__ + filename, format="svg")
+    mplpy.savefig(__TMP_PATH__ + filename, format="png", dpi=600)
     mplpy.close("all")
 
 
@@ -123,7 +128,8 @@ def create_chronology_chart_file(filename: str, miny: int, maxy: int, maxcnt: in
     mplpy.xticks([i for i in range(miny, maxy+1, 20)])
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    mplpy.savefig(__TMP_PATH__ + filename)
+    # mplpy.savefig(__TMP_PATH__ + filename)
+    mplpy.savefig(__TMP_PATH__ + filename, format="png", dpi=600)
     mplpy.close("all")
 
 
