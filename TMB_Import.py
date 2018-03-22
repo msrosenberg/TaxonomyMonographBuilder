@@ -319,15 +319,15 @@ def read_location_data(filename: str) -> dict:
         if loc[8] != ".":
             newloc.secondary_parents = list(loc[8].split(";"))
         newloc.validity = loc[9]
-        if loc[10] != ".":
-            newloc.ne_lat = float(loc[10])
-            newloc.ne_lon = float(loc[11])
-            newloc.sw_lat = float(loc[12])
-            newloc.sw_lon = float(loc[13])
-        else:  # set default boundaries if they are not loaded
-            newloc.ne_lat = newloc.latitude + 7.5
-            newloc.ne_lon = newloc.longitude + 15
-            newloc.sw_lat = newloc.latitude - 7.5
-            newloc.sw_lon = newloc.longitude - 15
+        # if loc[10] != ".":
+        #     newloc.ne_lat = float(loc[10])
+        #     newloc.ne_lon = float(loc[11])
+        #     newloc.sw_lat = float(loc[12])
+        #     newloc.sw_lon = float(loc[13])
+        # else:  # set default boundaries if they are not loaded
+        #     newloc.ne_lat = newloc.latitude + 7.5
+        #     newloc.ne_lon = newloc.longitude + 15
+        #     newloc.sw_lat = newloc.latitude - 7.5
+        #     newloc.sw_lon = newloc.longitude - 15
         locdict[newloc.name] = newloc
     return locdict

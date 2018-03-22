@@ -5071,7 +5071,7 @@ def build_site() -> None:
         # a dict of locations, keys = trimmed location names and aliases
         location_dict = create_location_hierarchy(point_locations)
         # location_species is a dict of sets of species objects, key = location full names
-        # location_sp_names is a dict of sets of specific name ojbets, key = location full names
+        # location_sp_names is a dict of sets of specific name objects, key = location full names
         # location_bi_names is a dict of sets of names (strings), keys = location full names
         (species_plot_locations, invalid_species_locations, binomial_plot_locations,
          specific_plot_locations, location_species, location_sp_names, location_bi_names,
