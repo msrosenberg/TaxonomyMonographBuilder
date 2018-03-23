@@ -27,9 +27,8 @@ def create_pie_chart_file(filename: str, data: dict, graph_font: Optional[str] =
     # create legend in second panel
     panel2.axis("off")  # hide axes in second plot
     panel2.legend(pie[0], datalist, loc="center", frameon=False, ncol=2, prop={"family": graph_font})
-    # mplpy.rcParams["svg.fonttype"] = "none"
+    mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    # mplpy.savefig(__TMP_PATH__ + filename)
     mplpy.savefig(__TMP_PATH__ + filename, format="png", dpi=600)
     mplpy.close("all")
 
@@ -50,7 +49,6 @@ def create_bar_chart_file(filename: str, data: list, minx: int, maxx: int, y: in
     mplpy.xticks([i for i in range(minx, maxx + 1, tick_step)], fontname=graph_font)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    # mplpy.savefig(__TMP_PATH__ + filename)
     mplpy.savefig(__TMP_PATH__ + filename, format="png", dpi=600)
     mplpy.close("all")
 
@@ -64,7 +62,6 @@ def create_stacked_bar_chart_file(filename: str, data: list, minx: int, maxx: in
     y_list1 = [d[cols[0][1]] for d in data]
     y_list2 = [d[cols[1][1]] for d in data]
     faxes.bar(x_list, y_list1, color="blue", edgecolor="darkblue")
-    # faxes.bar(x_list, y_list1, fc=(0,0,1,0.8), edgecolor="darkblue")
     faxes.bar(x_list, y_list2, bottom=y_list1, color="red", edgecolor="darkred")
     faxes.spines["right"].set_visible(False)
     faxes.spines["top"].set_visible(False)
@@ -73,7 +70,6 @@ def create_stacked_bar_chart_file(filename: str, data: list, minx: int, maxx: in
     mplpy.yticks(fontname=graph_font)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    # mplpy.savefig(__TMP_PATH__ + filename)
     mplpy.savefig(__TMP_PATH__ + filename, format="png", dpi=600)
     mplpy.close("all")
 
@@ -86,10 +82,6 @@ def create_qual_bar_chart_file(filename: str, label_list: list, data_dict: dict,
     faxes.bar(x_list, y_list, color="blue", edgecolor="darkblue")
     mplpy.yticks(fontname=graph_font)
     mplpy.xticks(rotation="vertical", style="italic", fontname=graph_font)
-    # tick_list = x_list[::4]
-    # tick_labels = label_list[::4]
-    # faxes.set_xticks(tick_list)
-    # faxes.set_xticklabels(tick_labels)
     faxes.set_xticks(x_list)
     faxes.set_xticklabels(label_list)
     faxes.spines["right"].set_visible(False)
@@ -97,7 +89,6 @@ def create_qual_bar_chart_file(filename: str, label_list: list, data_dict: dict,
     mplpy.ylim(0, max_value)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    # mplpy.savefig(__TMP_PATH__ + filename)
     mplpy.savefig(__TMP_PATH__ + filename, format="png", dpi=600)
     mplpy.close("all")
 
@@ -118,7 +109,6 @@ def create_line_chart_file(filename: str, data: list, minx: int, maxx: int, y: i
     mplpy.xticks([i for i in range(minx, maxx + 1, tick_step)], fontname=graph_font)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    # mplpy.savefig(__TMP_PATH__ + filename, format="svg")
     mplpy.savefig(__TMP_PATH__ + filename, format="png", dpi=600)
     mplpy.close("all")
 
@@ -133,8 +123,6 @@ def create_chronology_chart_file(filename: str, miny: int, maxy: int, maxcnt: in
     fig, faxes = mplpy.subplots(figsize=[6.5, 1.5])
     mplpy.ylim(-maxcnt, maxcnt)
     mplpy.xlim(miny, maxy)
-    # faxes.fill(x, y_list, "black")
-    # faxes.fill(x, y2_list, "black")
     faxes.stackplot(x, y_list, baseline="sym", colors=["black"])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
@@ -143,7 +131,6 @@ def create_chronology_chart_file(filename: str, miny: int, maxy: int, maxcnt: in
     mplpy.xticks([i for i in range(miny, maxy+1, 20)], fontname=graph_font)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    # mplpy.savefig(__TMP_PATH__ + filename)
     mplpy.savefig(__TMP_PATH__ + filename, format="png", dpi=600)
     mplpy.close("all")
 

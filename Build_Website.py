@@ -1232,7 +1232,8 @@ def write_binomial_name_page(outfile: TextIO, do_print: bool, name: str, namefil
         if maxcnt > 0:
             # image_name = name_to_filename(name) + "_chronology.svg"
             image_name = name_to_filename(name) + "_chronology.png"
-            TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, name_by_year, init_data().graph_font)
+            TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, name_by_year,
+                                                           init_data().graph_font)
     else:
         common_header_part1(outfile, name, indexpath="../")
         if len(location_set) > 0:
@@ -1354,7 +1355,8 @@ def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB
         if maxcnt > 0:
             # image_name = name_to_filename(specific_name.name) + "_chronology.svg"
             image_name = name_to_filename(specific_name.name) + "_chronology.png"
-            TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, byears, init_data().graph_font)
+            TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, byears,
+                                                           init_data().graph_font)
     else:
         common_header_part1(outfile, specific_name.name, indexpath="../")
 
@@ -1591,16 +1593,19 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species: str, bin
         start_page_division(outfile, "synonym_page")
         # image_name = "synonym_" + name_to_filename(species) + "_total_chronology.svg"
         image_name = "synonym_" + name_to_filename(species) + "_total_chronology.png"
-        TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, total_cnts, init_data().graph_font)
+        TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, total_cnts,
+                                                       init_data().graph_font)
         for name in sp_order:
             # image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
             image_name = "synonym_" + name_to_filename(name) + "_chronology.png"
-            TMB_Create_Graphs.create_chronology_chart_file(image_name, miny, maxy, maxcnt, specific_name_counts[name], init_data().graph_font)
+            TMB_Create_Graphs.create_chronology_chart_file(image_name, miny, maxy, maxcnt, specific_name_counts[name],
+                                                           init_data().graph_font)
         for name in bi_order:
             # image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
             image_name = "synonym_" + name_to_filename(name) + "_chronology.png"
             TMB_Create_Graphs.create_chronology_chart_file(image_name, miny, maxy, maxcnt,
-                                                           binomial_name_counts[clean_name(name)], init_data().graph_font)
+                                                           binomial_name_counts[clean_name(name)],
+                                                           init_data().graph_font)
     else:
         common_header_part1(outfile, species, indexpath="../")
         start_google_chart_header(outfile)
@@ -1828,7 +1833,8 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
     if do_print:
         # filename = "cumulative_binames_line.svg"
         filename = "cumulative_binames_line.png"
-        TMB_Create_Graphs.create_line_chart_file(filename, byears, init_data().start_year, init_data().current_year, 2, init_data().graph_font)
+        TMB_Create_Graphs.create_line_chart_file(filename, byears, init_data().start_year, init_data().current_year, 2,
+                                                 init_data().graph_font)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"line_chart\" />\n")
         outfile.write("    </figure>\n")
@@ -1839,7 +1845,8 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
     if do_print:
         # filename = "binames_per_year_bar.svg"
         filename = "binames_per_year_bar.png"
-        TMB_Create_Graphs.create_bar_chart_file(filename, byears, init_data().start_year, init_data().current_year, 1, init_data().graph_font)
+        TMB_Create_Graphs.create_bar_chart_file(filename, byears, init_data().start_year, init_data().current_year, 1,
+                                                init_data().graph_font)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
         outfile.write("    </figure>\n")
@@ -1850,7 +1857,8 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
     if do_print:
         # filename = "cumulative_spnames_line.svg"
         filename = "cumulative_spnames_line.png"
-        TMB_Create_Graphs.create_line_chart_file(filename, syears, 1758, init_data().current_year, 2, init_data().graph_font)
+        TMB_Create_Graphs.create_line_chart_file(filename, syears, 1758, init_data().current_year, 2,
+                                                 init_data().graph_font)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"line_chart\" />\n")
         outfile.write("    </figure>\n")
@@ -1861,7 +1869,8 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
     if do_print:
         # filename = "spnames_per_year_bar.svg"
         filename = "spnames_per_year_bar.png"
-        TMB_Create_Graphs.create_bar_chart_file(filename, syears, 1758, init_data().current_year, 1, init_data().graph_font)
+        TMB_Create_Graphs.create_bar_chart_file(filename, syears, 1758, init_data().current_year, 1,
+                                                init_data().graph_font)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
         outfile.write("    </figure>\n")
@@ -1879,7 +1888,8 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
             ref_cnts[""] = 0
             for j in range(len(sublist), per_graph):
                 sublist.append("")
-                TMB_Create_Graphs.create_qual_bar_chart_file(filename, sublist, ref_cnts, maxcnt, init_data().graph_font)
+                TMB_Create_Graphs.create_qual_bar_chart_file(filename, sublist, ref_cnts, maxcnt,
+                                                             init_data().graph_font)
             outfile.write("    <figure class=\"graph\">\n")
             outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
             outfile.write("    </figure>\n")
@@ -1948,7 +1958,8 @@ def create_genus_chronology(outfile: TextIO, do_print: bool, genus_cnts: dict) -
         for name in order:
             # filename = "Genus_" + name + "_chronology.svg"
             filename = "Genus_" + name + "_chronology.png"
-            TMB_Create_Graphs.create_chronology_chart_file(filename, miny, maxy, maxcnt, genus_cnts[name], init_data().graph_font)
+            TMB_Create_Graphs.create_chronology_chart_file(filename, miny, maxy, maxcnt, genus_cnts[name],
+                                                           init_data().graph_font)
     else:
         common_header_part1(outfile, "Uca", indexpath="../")
         start_google_chart_header(outfile)
