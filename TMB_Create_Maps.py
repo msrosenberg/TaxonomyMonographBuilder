@@ -386,7 +386,7 @@ def check_line_boundaries(points: str, minlon: Number, maxlon: Number, minlat: N
     return minlon, maxlon, minlat, maxlat, mid_atlantic, lons, lats
 
 
-def write_species_range_map(base_map: BaseMap, species_map: list) -> None:
+def write_species_range_map(base_map: BaseMap, species_map: list, graph_font: Optional[str] = None) -> None:
     fig, faxes = mplpy.subplots(figsize=[FIG_WIDTH, FIG_HEIGHT])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
@@ -446,8 +446,10 @@ def write_species_range_map(base_map: BaseMap, species_map: list) -> None:
 
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)
-    mplpy.xlabel("longitude")
-    mplpy.ylabel("latitude")
+    mplpy.xlabel("longitude", fontname=graph_font)
+    mplpy.ylabel("latitude", fontname=graph_font)
+    mplpy.xticks(fontname=graph_font)
+    mplpy.yticks(fontname=graph_font)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     adjust_longitude_tick_values(faxes)
@@ -583,7 +585,8 @@ def adjust_longitude_tick_values(faxes: mplpy.Axes) -> None:
 
 
 def write_point_map(title: str, place_list: list, point_locations: dict, invalid_places: Optional[set],
-                    base_map: BaseMap, skip_axes: bool, set_bounds: bool, sub_locations: Optional[list]) -> None:
+                    base_map: BaseMap, skip_axes: bool, sub_locations: Optional[list],
+                    graph_font: Optional[str] = None) -> None:
     fig, faxes = mplpy.subplots(figsize=[FIG_WIDTH, FIG_HEIGHT])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
@@ -634,20 +637,6 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
                 if 0 > point.longitude > -50:
                     mid_atlantic = True
 
-    # if set_bounds:
-    #     place = place_list[0]
-    #     if place in point_locations:
-    #         point = point_locations[place]
-    #         if point.sw_lon is None:
-    #             minlon = point.longitude - 15
-    #             maxlon = point.longitude + 15
-    #             minlat = point.latitude - 7.5
-    #             maxlat = point.latitude + 7.5
-    #         else:
-    #             minlon = point.sw_lon
-    #             maxlon = point.ne_lon
-    #             minlat = point.sw_lat
-    #             maxlat = point.ne_lat
     minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
     draw_base_map(faxes, base_map)
     if (not mid_atlantic) and (maxlon == 180) and (minlon == -180):
@@ -686,8 +675,10 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
         faxes.axes.get_yaxis().set_visible(False)
         faxes.axes.get_xaxis().set_visible(False)
     else:
-        mplpy.xlabel("longitude")
-        mplpy.ylabel("latitude")
+        mplpy.xlabel("longitude", fontname=graph_font)
+        mplpy.ylabel("latitude", fontname=graph_font)
+    mplpy.xticks(fontname=graph_font)
+    mplpy.yticks(fontname=graph_font)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     adjust_longitude_tick_values(faxes)
@@ -713,11 +704,12 @@ def create_all_point_maps(species: list, point_locations: dict, species_plot_loc
         if s.status != "fossil":
             places = species_plot_locations[s]
             invalid_places = invalid_species_locations[s]
-            write_point_map("u_" + s.species, places, point_locations, invalid_places, base_map, False, False, None)
+            write_point_map("u_" + s.species, places, point_locations, invalid_places, base_map, False, None,
+                            init_data.graph_font)
             write_point_map_kml("u_" + s.species, places, point_locations, invalid_places, init_data, None)
             all_places |= set(places)
     all_list = sorted(list(all_places))
-    write_point_map("uca_all", all_list, point_locations, None, base_map, True, False, None)
+    write_point_map("uca_all", all_list, point_locations, None, base_map, True, None, init_data.graph_font)
     write_point_map_kml("uca_all", all_list, point_locations, None, init_data, None)
 
 
@@ -736,7 +728,7 @@ def create_all_species_maps(base_map: BaseMap, init_data: TMB_Initialize.Initial
             print("............{}%".format(j*5))
             report += total / 20
         write_species_range_map_kml(m)
-        write_species_range_map(base_map, m)
+        write_species_range_map(base_map, m, init_data.graph_font)
     write_all_range_map_kml(species_maps)
     write_all_range_map(base_map, species_maps)
 
@@ -758,7 +750,7 @@ def create_all_name_maps(base_map: BaseMap, all_names: list, specific_names: lis
             report += total / 20
         namefile = "name_" + name_to_filename(name)
         place_list = binomial_plot_locations[name]
-        write_point_map(namefile, place_list, point_locations, None, base_map, False, False, None)
+        write_point_map(namefile, place_list, point_locations, None, base_map, False, None, init_data.graph_font)
         write_point_map_kml(namefile, place_list, point_locations, None, init_data, None)
     for i, name in enumerate(specific_names):
         if i + len(all_names) >= report:
@@ -767,7 +759,7 @@ def create_all_name_maps(base_map: BaseMap, all_names: list, specific_names: lis
             report += total / 20
         namefile = "sn_" + name.name
         place_list = specific_plot_locations[name]
-        write_point_map(namefile, place_list, point_locations, None, base_map, False, False, None)
+        write_point_map(namefile, place_list, point_locations, None, base_map, False, None, init_data.graph_font)
         write_point_map_kml(namefile, place_list, point_locations, None, init_data, None)
 
 
@@ -799,7 +791,8 @@ def create_all_location_maps(base_map: BaseMap, point_locations: dict,
                 place_list.append(p.name)
             place_list.append(loc)  # put the primary location at end so it is drawn above children
             namefile = "location_" + place_to_filename(loc)
-            write_point_map(namefile, place_list, point_locations, None, base_map, False, True, sub_list)
+            write_point_map(namefile, place_list, point_locations, None, base_map, False, sub_list,
+                            init_data.graph_font)
             write_point_map_kml(namefile, place_list, point_locations, None, init_data, sub_list)
 
 

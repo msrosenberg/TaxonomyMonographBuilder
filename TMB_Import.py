@@ -51,33 +51,6 @@ def read_citation_file(filename: str) -> list:
         newcite.general_note = cite[11]
         cite_list.append(newcite)
     return cite_list
-    # with codecs.open(citation_filename, "r", "utf-8") as reffile:
-    #     cite_list = []
-    #     got_header = False
-    #     for line in reffile:
-    #         if not got_header:
-    #             got_header = True
-    #         else:
-    #             line = line.replace("\"\"", "\"")
-    #             cite = line.strip().split("\t")
-    #             for i, x in enumerate(cite):
-    #                 if x.startswith("\"") and x.endswith("\""):
-    #                     cite[i] = x[1:len(x)-1]
-    #             newcite = TMB_Classes.CitationClass()
-    #             newcite.cite_key = cite[0]
-    #             newcite.name_key = cite[1]
-    #             newcite.name = cite[2]
-    #             newcite.common = cite[3]
-    #             newcite.where = cite[4]
-    #             newcite.context = cite[5]
-    #             newcite.application = cite[6]
-    #             newcite.cite_n = cite[7]
-    #             newcite.actual = cite[8]
-    #             newcite.source = cite[9]
-    #             newcite.name_note = cite[10]
-    #             newcite.general_note = cite[11]
-    #             cite_list.append(newcite)
-    # return cite_list
 
 
 def read_reference_data(ref_filename: str, formatref_filename: str,

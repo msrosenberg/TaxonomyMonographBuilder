@@ -10,7 +10,7 @@ import os
 import shutil
 import re
 import math
-import subprocess
+# import subprocess
 from typing import Optional, Tuple, Union, TextIO
 # local dependencies
 import TMB_Import
@@ -547,7 +547,7 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         # pie chart of languages
         # filename = "language_pie.svg"
         filename = "language_pie.png"
-        TMB_Create_Graphs.create_pie_chart_file(filename, languages)
+        TMB_Create_Graphs.create_pie_chart_file(filename, languages, init_data().graph_font)
         outfile.write("    <h3 class=\"nobookmark\">Primary Language of References</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"pie_chart\" />\n")
@@ -562,7 +562,7 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
 
         # filename = "pubs_per_year_bar.svg"
         filename = "pubs_per_year_bar.png"
-        TMB_Create_Graphs.create_bar_chart_file(filename, year_data, miny, maxy, 1)
+        TMB_Create_Graphs.create_bar_chart_file(filename, year_data, miny, maxy, 1, init_data().graph_font)
         outfile.write("    <h3 class=\"nobookmark\">References by Year</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
@@ -571,7 +571,7 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         # pubs per year since 1900 bar chart
         # filename = "pubs_per_year_1900_bar.svg"
         filename = "pubs_per_year_1900_bar.png"
-        TMB_Create_Graphs.create_bar_chart_file(filename, year_data_1900, 1900, maxy, 1)
+        TMB_Create_Graphs.create_bar_chart_file(filename, year_data_1900, 1900, maxy, 1, init_data().graph_font)
         outfile.write("    <h3 class=\"nobookmark\">References by Year (since 1900)</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
@@ -584,7 +584,7 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         for y in year_data_1900:
             tmp_dat.append([y[2], y[1] - y[2]])
         dat_info = [["Citations in DB", 0], ["Pending", 1]]
-        TMB_Create_Graphs.create_stacked_bar_chart_file(filename, tmp_dat, 1900, maxy, dat_info)
+        TMB_Create_Graphs.create_stacked_bar_chart_file(filename, tmp_dat, 1900, maxy, dat_info, init_data().graph_font)
         outfile.write("    <h3 class=\"nobookmark\">References with Citation Data in Database (since 1900; all "
                       "pre-1900 literature is complete)</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
@@ -594,7 +594,7 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         # cumulative publications line chart
         # filename = "cumulative_pubs_line.svg"
         filename = "cumulative_pubs_line.png"
-        TMB_Create_Graphs.create_line_chart_file(filename, year_data, miny, maxy, 2)
+        TMB_Create_Graphs.create_line_chart_file(filename, year_data, miny, maxy, 2, init_data().graph_font)
         outfile.write("    <h3 class=\"nobookmark\">Cumulative References by Year</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"line_chart\" />\n")
@@ -1232,7 +1232,7 @@ def write_binomial_name_page(outfile: TextIO, do_print: bool, name: str, namefil
         if maxcnt > 0:
             # image_name = name_to_filename(name) + "_chronology.svg"
             image_name = name_to_filename(name) + "_chronology.png"
-            TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, name_by_year)
+            TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, name_by_year, init_data().graph_font)
     else:
         common_header_part1(outfile, name, indexpath="../")
         if len(location_set) > 0:
@@ -1354,7 +1354,7 @@ def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB
         if maxcnt > 0:
             # image_name = name_to_filename(specific_name.name) + "_chronology.svg"
             image_name = name_to_filename(specific_name.name) + "_chronology.png"
-            TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, byears)
+            TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, byears, init_data().graph_font)
     else:
         common_header_part1(outfile, specific_name.name, indexpath="../")
 
@@ -1463,19 +1463,6 @@ def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB
         end_page_division(outfile)
     else:
         common_html_footer(outfile, indexpath="../")
-
-
-# def create_word_cloud_image(binomial_cnts: dict, specific_cnts: dict) -> None:
-#     # fiddler_mask = np.array(Image.open("private/silhouette.png"))
-#     # generate wordcloud image from binomials
-#     wordcloud = WordCloud(width=2000, height=1500, background_color="white", max_words=1000,  normalize_plurals=False,
-#                           collocations=False).generate_from_frequencies(binomial_cnts)
-#     wordcloud.to_file(TMP_PATH + "binomial_word_cloud.png")
-#
-#     # generate wordcloud image from specific names
-#     wordcloud = WordCloud(width=2000, height=1500, background_color="white", max_words=1000,  normalize_plurals=False,
-#                           collocations=False).generate_from_frequencies(specific_cnts)
-#     wordcloud.to_file(TMP_PATH + "specific_word_cloud.png")
 
 
 def setup_chronology_chart(outfile: TextIO, n: int, miny: int, maxy: int, maxcnt: int,
@@ -1604,16 +1591,16 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species: str, bin
         start_page_division(outfile, "synonym_page")
         # image_name = "synonym_" + name_to_filename(species) + "_total_chronology.svg"
         image_name = "synonym_" + name_to_filename(species) + "_total_chronology.png"
-        TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, total_cnts)
+        TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, total_cnts, init_data().graph_font)
         for name in sp_order:
             # image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
             image_name = "synonym_" + name_to_filename(name) + "_chronology.png"
-            TMB_Create_Graphs.create_chronology_chart_file(image_name, miny, maxy, maxcnt, specific_name_counts[name])
+            TMB_Create_Graphs.create_chronology_chart_file(image_name, miny, maxy, maxcnt, specific_name_counts[name], init_data().graph_font)
         for name in bi_order:
             # image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
             image_name = "synonym_" + name_to_filename(name) + "_chronology.png"
             TMB_Create_Graphs.create_chronology_chart_file(image_name, miny, maxy, maxcnt,
-                                                           binomial_name_counts[clean_name(name)])
+                                                           binomial_name_counts[clean_name(name)], init_data().graph_font)
     else:
         common_header_part1(outfile, species, indexpath="../")
         start_google_chart_header(outfile)
@@ -1841,7 +1828,7 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
     if do_print:
         # filename = "cumulative_binames_line.svg"
         filename = "cumulative_binames_line.png"
-        TMB_Create_Graphs.create_line_chart_file(filename, byears, init_data().start_year, init_data().current_year, 2)
+        TMB_Create_Graphs.create_line_chart_file(filename, byears, init_data().start_year, init_data().current_year, 2, init_data().graph_font)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"line_chart\" />\n")
         outfile.write("    </figure>\n")
@@ -1852,7 +1839,7 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
     if do_print:
         # filename = "binames_per_year_bar.svg"
         filename = "binames_per_year_bar.png"
-        TMB_Create_Graphs.create_bar_chart_file(filename, byears, init_data().start_year, init_data().current_year, 1)
+        TMB_Create_Graphs.create_bar_chart_file(filename, byears, init_data().start_year, init_data().current_year, 1, init_data().graph_font)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
         outfile.write("    </figure>\n")
@@ -1863,7 +1850,7 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
     if do_print:
         # filename = "cumulative_spnames_line.svg"
         filename = "cumulative_spnames_line.png"
-        TMB_Create_Graphs.create_line_chart_file(filename, syears, 1758, init_data().current_year, 2)
+        TMB_Create_Graphs.create_line_chart_file(filename, syears, 1758, init_data().current_year, 2, init_data().graph_font)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"line_chart\" />\n")
         outfile.write("    </figure>\n")
@@ -1874,7 +1861,7 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
     if do_print:
         # filename = "spnames_per_year_bar.svg"
         filename = "spnames_per_year_bar.png"
-        TMB_Create_Graphs.create_bar_chart_file(filename, syears, 1758, init_data().current_year, 1)
+        TMB_Create_Graphs.create_bar_chart_file(filename, syears, 1758, init_data().current_year, 1, init_data().graph_font)
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
         outfile.write("    </figure>\n")
@@ -1892,7 +1879,7 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
             ref_cnts[""] = 0
             for j in range(len(sublist), per_graph):
                 sublist.append("")
-                TMB_Create_Graphs.create_qual_bar_chart_file(filename, sublist, ref_cnts, maxcnt)
+                TMB_Create_Graphs.create_qual_bar_chart_file(filename, sublist, ref_cnts, maxcnt, init_data().graph_font)
             outfile.write("    <figure class=\"graph\">\n")
             outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
             outfile.write("    </figure>\n")
@@ -1957,11 +1944,11 @@ def create_genus_chronology(outfile: TextIO, do_print: bool, genus_cnts: dict) -
         start_page_division(outfile, "synonym_page")
         # filename = "Genus_total_chronology.svg"
         filename = "Genus_total_chronology.png"
-        TMB_Create_Graphs.create_chronology_chart_file(filename, miny, maxy, maxcnt, total_cnts)
+        TMB_Create_Graphs.create_chronology_chart_file(filename, miny, maxy, maxcnt, total_cnts, init_data().graph_font)
         for name in order:
             # filename = "Genus_" + name + "_chronology.svg"
             filename = "Genus_" + name + "_chronology.png"
-            TMB_Create_Graphs.create_chronology_chart_file(filename, miny, maxy, maxcnt, genus_cnts[name])
+            TMB_Create_Graphs.create_chronology_chart_file(filename, miny, maxy, maxcnt, genus_cnts[name], init_data().graph_font)
     else:
         common_header_part1(outfile, "Uca", indexpath="../")
         start_google_chart_header(outfile)
@@ -4807,14 +4794,14 @@ def copy_map_files(species: list, all_names: list, specific_names: list, point_l
         except FileNotFoundError:
             report_error("Missing file: " + filename)
 
-    def scour_svg(filename: str) -> None:
-        """
-        run scour to reduce size of svg maps
-
-        theoretically scour could be imported and run from within the code, but it is really not designed
-        to be run that way
-        """
-        subprocess.Popen("scour -i " + filename + " -o " + filename + "z").wait()
+    # def scour_svg(filename: str) -> None:
+    #     """
+    #     run scour to reduce size of svg maps
+    #
+    #     theoretically scour could be imported and run from within the code, but it is really not designed
+    #     to be run that way
+    #     """
+    #     subprocess.Popen("scour -i " + filename + " -o " + filename + "z").wait()
 
     # individual species maps
     for s in species:
@@ -5056,8 +5043,7 @@ def build_site() -> None:
          specific_usage_cnts) = calculate_name_index_data(refdict, citelist, specific_names)
         common_name_data = TMB_Import.read_common_name_data(init_data().common_names_file)
         subgenera = TMB_Import.read_subgenera_data(init_data().subgenera_file)
-        # create_word_cloud_image(word_cloud_str)
-        TMB_Create_Graphs.create_word_cloud_image(binomial_usage_cnts, specific_usage_cnts)
+        TMB_Create_Graphs.create_word_cloud_image(binomial_usage_cnts, specific_usage_cnts, init_data().wc_font_path)
 
         print("...Reading Photos and Videos...")
         photos = TMB_Import.read_photo_data(init_data().photo_file)

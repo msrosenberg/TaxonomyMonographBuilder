@@ -1,3 +1,7 @@
+"""
+Module containing miscellaneous functions used by a variety of other modules
+"""
+
 
 def indent(n: int) -> str:
     return n * " "

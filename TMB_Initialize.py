@@ -58,6 +58,10 @@ class InitializationData:
         self.cite_url = "citation.html"
         self.name_sum_url = "name_graphs.html"
 
+        # customization of fonts on graphs and charts
+        self.graph_font = "Noto Serif"  # font to use for PNG versions of graphs
+        self.wc_font_path = r"C:\Windows\Fonts\NotoSerif-regular.ttf"  # wordcloud requires a path to the font
+
         # general data
         self.version = datetime.datetime.now().strftime("%Y.%m.%d.%H.%M")
         self.start_year = 1758  # Start with Linnean taxonomy
