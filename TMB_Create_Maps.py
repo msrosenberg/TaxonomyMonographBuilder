@@ -11,11 +11,12 @@ completion of the code.
 
 # import codecs
 import zipfile
-import TMB_Initialize
+# import multiprocessing
 from typing import Tuple, Union, Optional, TextIO
 import matplotlib.pyplot as mplpy
 from matplotlib.collections import PatchCollection
 import matplotlib.patches as mplp
+import TMB_Initialize
 from TMB_Error import report_error
 from TMB_Common import *
 
@@ -677,8 +678,9 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
     else:
         mplpy.xlabel("longitude", fontname=graph_font)
         mplpy.ylabel("latitude", fontname=graph_font)
-    mplpy.xticks(fontname=graph_font)
-    mplpy.yticks(fontname=graph_font)
+    # temporarily disabled because the font I want to use is missing the negative symbol ?!?
+    # mplpy.xticks(fontname=graph_font)
+    # mplpy.yticks(fontname=graph_font)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     adjust_longitude_tick_values(faxes)
@@ -688,14 +690,14 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
     mplpy.close("all")
 
 
-def create_all_point_maps(species: list, point_locations: dict, species_plot_locations: dict,
-                          invalid_species_locations: dict, base_map: BaseMap,
-                          init_data: TMB_Initialize.InitializationData) -> None:
+def create_all_species_point_maps(species: list, point_locations: dict, species_plot_locations: dict,
+                                  invalid_species_locations: dict, base_map: BaseMap,
+                                  init_data: TMB_Initialize.InitializationData) -> None:
     all_places = set()
     total = len(species)
     report = total / 20
     j = 0
-    print(".........Point Maps.........")
+    print(".........Species Point Maps.........")
     for i, s in enumerate(species):
         if i >= report:
             j += 1
@@ -729,12 +731,27 @@ def create_all_species_maps(base_map: BaseMap, init_data: TMB_Initialize.Initial
             report += total / 20
         write_species_range_map_kml(m)
         write_species_range_map(base_map, m, init_data.graph_font)
+
+    # # test code for using multiple processors for map creation
+    # pool = multiprocessing.Pool(2)
+    # inputs = []
+    # for i, m in enumerate(species_maps):
+    #     # if i >= report:
+    #     #     j += 1
+    #     #     print("............{}%".format(j*5))
+    #     #     report += total / 20
+    #     inputs.append((base_map, m, init_data.graph_font))
+    # pool.map_async(write_species_range_map_kml, species_maps)
+    # pool.map_async(write_species_range_map, inputs)
+    # pool.close()
+    # pool.join()
+
     write_all_range_map_kml(species_maps)
     write_all_range_map(base_map, species_maps)
 
     # create point maps
-    create_all_point_maps(species, point_locations, species_plot_locations, invalid_species_locations, base_map,
-                          init_data)
+    create_all_species_point_maps(species, point_locations, species_plot_locations, invalid_species_locations, base_map,
+                                  init_data)
 
 
 def create_all_name_maps(base_map: BaseMap, all_names: list, specific_names: list, point_locations: dict,
@@ -762,6 +779,29 @@ def create_all_name_maps(base_map: BaseMap, all_names: list, specific_names: lis
         write_point_map(namefile, place_list, point_locations, None, base_map, False, None, init_data.graph_font)
         write_point_map_kml(namefile, place_list, point_locations, None, init_data, None)
 
+    # # test code for using multiple processors for map creation
+    # pool = multiprocessing.Pool(2)
+    # all_inputs_png = []
+    # all_inputs_kml = []
+    # for i, name in enumerate(all_names):
+    #     namefile = "name_" + name_to_filename(name)
+    #     place_list = binomial_plot_locations[name]
+    #     all_inputs_png.append((namefile, place_list, point_locations, None, base_map, False, None, init_data.graph_font))
+    #     all_inputs_kml.append((namefile, place_list, point_locations, None, init_data, None))
+    # pool.map_async(write_point_map, all_inputs_png)
+    # pool.map_async(write_point_map, all_inputs_kml)
+    # sp_inputs_png = []
+    # sp_inputs_kml = []
+    # for i, name in enumerate(specific_names):
+    #     namefile = "sn_" + name.name
+    #     place_list = specific_plot_locations[name]
+    #     sp_inputs_png.append((namefile, place_list, point_locations, None, base_map, False, None, init_data.graph_font))
+    #     sp_inputs_kml.append((namefile, place_list, point_locations, None, init_data, None))
+    # pool.map_async(write_point_map, sp_inputs_png)
+    # pool.map_async(write_point_map, sp_inputs_kml)
+    # pool.close()
+    # pool.join()
+
 
 def create_all_location_maps(base_map: BaseMap, point_locations: dict,
                              init_data: TMB_Initialize.InitializationData) -> None:
@@ -782,6 +822,7 @@ def create_all_location_maps(base_map: BaseMap, point_locations: dict,
         #                           ("Kiribati" in loc)):  # for testing purposes
         if not point.unknown:
             place_list = []
+            sub_list = []
             try:
                 sub_list = point.all_children()
             except RecursionError:
@@ -794,6 +835,31 @@ def create_all_location_maps(base_map: BaseMap, point_locations: dict,
             write_point_map(namefile, place_list, point_locations, None, base_map, False, sub_list,
                             init_data.graph_font)
             write_point_map_kml(namefile, place_list, point_locations, None, init_data, sub_list)
+
+    # # test code for using multiple processors for map creation
+    # pool = multiprocessing.Pool(2)
+    # png_inputs = []
+    # kml_inputs = []
+    # for i, loc in enumerate(point_locations):
+    #     if not point.unknown:
+    #         place_list = []
+    #         sub_list = []
+    #         try:
+    #             sub_list = point.all_children()
+    #         except RecursionError:
+    #             report_error("Recursion Error on location: " + loc)
+    #             quit()
+    #         for p in sub_list:
+    #             place_list.append(p.name)
+    #         place_list.append(loc)  # put the primary location at end so it is drawn above children
+    #         namefile = "location_" + place_to_filename(loc)
+    #         png_inputs.append((namefile, place_list, point_locations, None, base_map, False, sub_list,
+    #                            init_data.graph_font))
+    #         kml_inputs.append((namefile, place_list, point_locations, None, init_data, sub_list))
+    # pool.map_async(write_point_map_kml, kml_inputs)
+    # pool.map_async(write_point_map, png_inputs)
+    # pool.close()
+    # pool.join()
 
 
 def create_all_maps(init_data: TMB_Initialize.InitializationData, point_locations: dict, species: Optional[list] = None,
