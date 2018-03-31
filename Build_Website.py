@@ -718,6 +718,7 @@ def compute_species_from_citation_linking(citelist: list) -> None:
     """ function to update correct species citations through cross-references to earlier works """
     for i, cite in enumerate(citelist):
         if cite.actual == "=":
+            cname = ""
             crossnames = {}
             for j in range(i):  # only look at entries up to the current one
                 tmp = citelist[j]
@@ -852,7 +853,9 @@ def clean_specific_name(x: str) -> str:
                  "cordimana",
                  "spec.",
                  "5",
-                 "6")
+                 "6",
+                 "afruca",
+                 "gelasimus")
 
     if (" " not in x) or ("(" in x):
         return ""
@@ -1888,8 +1891,7 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
             ref_cnts[""] = 0
             for j in range(len(sublist), per_graph):
                 sublist.append("")
-                TMB_Create_Graphs.create_qual_bar_chart_file(filename, sublist, ref_cnts, maxcnt,
-                                                             init_data().graph_font)
+            TMB_Create_Graphs.create_qual_bar_chart_file(filename, sublist, ref_cnts, maxcnt, init_data().graph_font)
             outfile.write("    <figure class=\"graph\">\n")
             outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
             outfile.write("    </figure>\n")
