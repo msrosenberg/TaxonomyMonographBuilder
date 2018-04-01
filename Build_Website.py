@@ -41,14 +41,14 @@ AUTHOR_NOPCOMMA = 2     # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = False
+DRAW_MAPS = True
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
 CHECK_LOCATIONS = False
 # these flags control creating print and web output, respectively
 OUTPUT_PRINT = True
-OUTPUT_WEB = False
+OUTPUT_WEB = True
 
 
 # randSeed = random.randint(0, 10000)
@@ -5026,6 +5026,8 @@ def end_print(outfile: TextIO) -> None:
 
 # def build_site(init_data):
 def build_site() -> None:
+    start_time = datetime.datetime.now()
+    print("Start Time:", start_time)
     create_temp_output_paths()
     with open(init_data().error_log, "w", encoding="utf-8") as TMB_Error.LOGFILE:
         # read data and do computation
@@ -5094,9 +5096,14 @@ def build_site() -> None:
         else:
             if DRAW_MAPS:
                 print("...Creating Maps...")
+                map_start_time = datetime.datetime.now()
+                print("......Map Start Time:", map_start_time)
                 TMB_Create_Maps.create_all_maps(init_data(), point_locations, species, species_plot_locations,
                                                 invalid_species_locations, all_names, binomial_plot_locations,
                                                 specific_names, specific_plot_locations)
+                map_end_time = datetime.datetime.now()
+                print("......Map End Time:", map_end_time)
+                print("...Total Map Creation Time:", map_end_time - map_start_time)
 
             # output website version
             if OUTPUT_WEB:
@@ -5184,7 +5191,9 @@ def build_site() -> None:
                     write_reference_bibliography(printfile, True, references)
                     write_reference_pages(printfile, True, references, refdict, citelist, name_table, point_locations)
                     end_print(printfile)
-
+    end_time = datetime.datetime.now()
+    print("End Time:", end_time)
+    print("Total Run Time:", end_time - start_time)
     print("done")
 
 
