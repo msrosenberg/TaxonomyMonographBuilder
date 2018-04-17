@@ -122,9 +122,9 @@ def common_header_part2(outfile: TextIO, indexpath: str ="", include_map: bool =
     outfile.write("    <div id=\"home\">\n")
     outfile.write("      <a href=\"" + indexpath + "index.html\" class=\"home-title\">Fiddler Crabs</a>\n")
     outfile.write("      <a href=\"" + indexpath +
-                  "index.html\" class=\"home-link\"><span class =\"fa fa-home\"></span> Home</a>\n")
+                  "index.html\" class=\"home-link\">" + fetch_fa_glyph("home") + "Home</a>\n")
     outfile.write("      <a href=\"" + indexpath +
-                  "blog\" class=\"home-link\"><span class =\"fa fa-pencil-alt\"></span> Blog</a>\n")
+                  "blog\" class=\"home-link\">" + fetch_fa_glyph("blog") + "Blog</a>\n")
     outfile.write("    </div>\n")
 
 
@@ -247,9 +247,9 @@ def common_html_footer(outfile: TextIO, indexpath: str = "") -> None:
                   "src=\"//rf.revolvermaps.com/0/0/4.js?i=5f9t1sywiez&amp;m=0&amp;h=75&amp;c=ff0000&amp;r=30\" "
                   "async=\"async\"></script><figcaption>Visitors</figcaption></figure>\n")
     outfile.write("       <p id=\"citation\"><a href=\"" + indexpath + init_data().cite_url +
-                  "\"><span class=\"fa fa-pencil-alt\"></span> How to cite this site</a></p>\n")
+                  "\">" + fetch_fa_glyph("site cite") + "How to cite this site</a></p>\n")
     outfile.write("       <p id=\"contact\">Questions or comments about the site? Contact "
-                  "<a href=\"mailto:msr@asu.edu\"><span class=\"fa fa-envelope\"></span> "
+                  "<a href=\"mailto:msr@asu.edu\">" + fetch_fa_glyph("mail") +
                   "Dr. Michael S. Rosenberg</a></p>\n")
     outfile.write("       <p id=\"copyright\">Release: " + init_data().version +
                   " &mdash; Copyright &copy; 2003&ndash;" + str(init_data().current_year) +
@@ -288,6 +288,85 @@ def create_blank_index(fname: str) -> None:
         outfile.write("  <body>\n")
         outfile.write("  </body>\n")
         outfile.write("</html>\n")
+
+
+def fetch_fa_glyph(glyph: Optional[str]) -> str:
+    if glyph is None:
+        return ""
+    elif glyph is "home":
+        return "<span class=\"fa fa-home\"></span> "
+    elif glyph is "blog":
+        return "<span class=\"fa fa-pencil-alt\"></span> "
+    elif glyph is "mail":
+        return "<span class=\"fa fa-envelope\"></span> "
+    elif glyph is "site cite":
+        return "<span class=\"fa fa-pencil-alt\"></span> "
+    elif glyph is "index":
+        return "<span class=\"fa fa-list\"></span> "
+    elif glyph is "summary charts":
+        return "<span class=\"fa fa-chart-line\"></span> "
+    elif glyph is "location":
+        return "<span class=\"fa fa-map-marker-alt\"></span> "
+    elif glyph is "citation":
+        return "<span class=\"fa fa-edit\"></span> "
+    elif glyph is "specimen":
+        return "<span class=\"fa fa-flask\"></span> "
+    elif glyph is "original":
+        return "<span class=\"fa fa-arrow-alt-left\"></span> "
+    elif glyph is "computed":
+        return "<span class=\"fa fa-cogs\"></span> "
+    elif glyph is "geography":
+        return "<span class=\"far fa-map\"></span> "
+    elif glyph is "synonymy":
+        return "<span class=\"fa fa-exchange\"></span> "
+    elif glyph is "specific name":
+        return "<span class=\"fa fa-window-minimize\"></span> "
+    elif glyph is "info":
+        return "<span class=\"fa fa-info-circle\"></span> "
+    elif glyph is "accepted species":
+        return "<span class=\"fa fa-check-circle\"></span> "
+    elif glyph is "download":
+        return "<span class=\"fa fa-download\"></span> "
+    elif glyph is "maps":
+        return "<span class=\"far fa-map\"></span> "
+    elif glyph is "photo":
+        return "<span class=\"fa fa-camera-alt\"></span> "
+    elif glyph is "video":
+        return "<span class=\"fa fa-video\"></span> "
+    elif glyph is "references":
+        return "<span class=\"fa fa-book\"></span> "
+    elif glyph is "art":
+        return "<span class=\"fa fa-paint-brush\"></span> "
+    elif glyph is "list pdf":
+        return "<span class=\"fa-li far fa-file-pdf\"></span>"
+    elif glyph is "list github":
+        return "<span class=\"fa-li fab fa-github\"></span>"
+    elif glyph is "list systematics":
+        return "<span class=\"fa-li fa fa-signal fa-rotate-270\"></span>"
+    elif glyph is "list phylogeny":
+        return "<span class=\"fa-li fa fa-share-alt fa-rotate-270\"></span>"
+    elif glyph is "list species":
+        return "<span class=\"fa-li fa fa-list\"></span>"
+    elif glyph is "list common":
+        return "<span class=\"fa-li far fa-comments\"></span>"
+    elif glyph is "list ranges":
+        return "<span class=\"fa-li far fa-map\"></span>"
+    elif glyph is "list morphology":
+        return "<span class=\"fa-li far fa-heart\"></span>"
+    elif glyph is "list references":
+        return "<span class=\"fa-li fa fa-book\"></span>"
+    elif glyph is "list lifecycle":
+        return "<span class=\"fa-li fa fa-sync\"></span>"
+    elif glyph is "list photo":
+        return "<span class=\"fa-li fa fa-camera-alt\"></span>"
+    elif glyph is "list video":
+        return "<span class=\"fa-li fa fa-video\"></span>"
+    elif glyph is "list art":
+        return "<span class=\"fa-li fa fa-paint-brush\"></span>"
+    elif glyph is "list site cite":
+        return " <span class=\"fa-li fa fa-pencil-alt\"></span>"
+    else:
+        return ""
 
 
 def rel_link_prefix(do_print: bool, prefix: str = "") -> str:
@@ -530,7 +609,7 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + init_data().ref_url +
-                      "\"><span class=\"fa fa-list\"></span> Full Reference List</a></li>\n")
+                      "\">" + fetch_fa_glyph("index") + "Full Reference List</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -622,7 +701,7 @@ def write_reference_bibliography(outfile: TextIO, do_print: bool, reflist: list)
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + init_data().ref_sum_url +
-                      "\"><span class=\"fa fa-chart-line\"></span> Reference/Citation Summary</a></li>\n")
+                      "\">" + fetch_fa_glyph("summary charts") + "Reference/Citation Summary</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -940,14 +1019,14 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
         # applies to...
         if n.context == "location":
             outstr = create_location_sublink(n.application)
-            outfile.write("      <td><span class=\"fa fa-map-marker-alt\"></span> location: " + outstr + "</td>\n")
+            outfile.write("      <td>" + fetch_fa_glyph("location") + "location: " + outstr + "</td>\n")
         elif n.context == "citation":
             if n.application in refdict:
                 crossref = refdict[n.application]
                 if n.application in name_table:
                     nstr = n.cite_n
                     if nstr == "0":
-                        outfile.write("      <td><span class=\"fa fa-edit\"></span> citation: "
+                        outfile.write("      <td>" + fetch_fa_glyph("citation") + "citation: "
                                       "<a href=\"" + rel_link_prefix(do_print, "../references/") + crossref.cite_key +
                                       ".html\">" + crossref.citation + "</a></td>\n")
                     else:
@@ -969,25 +1048,25 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
                                 report_error("Citation " + n.cite_key + " tried to cite " + n.application +
                                              " #" + nstr)
                                 refname = ""
-                        outfile.write("      <td><span class=\"fa fa-edit\"></span> citation: "
+                        outfile.write("      <td>" + fetch_fa_glyph("citation") + "citation: "
                                       "<a href=\"" + rel_link_prefix(do_print, "../references/") + crossref.cite_key +
                                       ".html\">" + crossref.citation + "</a> → " + format_name_string(refname) +
                                       extraref + "</td>\n")
                 else:
-                    outfile.write("      <td><span class=\"fa fa-edit\"></span> citation: "
+                    outfile.write("      <td>" + fetch_fa_glyph("citation") + "citation: "
                                   "<a href=\"" + rel_link_prefix(do_print, "../references/") + crossref.cite_key +
                                   ".html\">" + crossref.citation + "</a></td>\n")
             else:
-                outfile.write("      <td><span class=\"fa fa-edit\"></span> citation: " + n.application +
+                outfile.write("      <td>" + fetch_fa_glyph("citation") + "citation: " + n.application +
                               "</td>\n")
                 if is_name and not do_print:  # only print on one pass
                     report_error("Citation not in DB: " + n.cite_key + " cites " + n.application)
         elif n.context == "specimen":
             if n.application == "?":
-                outfile.write("      <td><span class=\"fa fa-flask\"></span> specimen: unknown locality</td>\n")
+                outfile.write("      <td>" + fetch_fa_glyph("specimen") + "specimen: unknown locality</td>\n")
             else:
                 outstr = create_location_sublink(n.application)
-                outfile.write("      <td><span class=\"fa fa-flask\"></span> specimen: " + outstr + "</td>\n")
+                outfile.write("      <td>" + fetch_fa_glyph("specimen") + "specimen: " + outstr + "</td>\n")
         elif n.context == "unpublished":
             outfile.write("      <td>unpublished name <em class=\"species\">" +
                           n.application + "</em></td>\n")
@@ -1011,11 +1090,11 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
 
         # source of accepted species
         if n.source == ".":  # currently not listed
-            outfile.write("      <td>&nbsp;</td>\n")                   
+            outfile.write("      <td>&nbsp;</td>\n")
         elif n.source == "<":  # original name retained
-            outfile.write("      <td><span class=\"fa fa-arrow-left\"></span> Original</td>\n")
+            outfile.write("      <td>" + fetch_fa_glyph("original") + "Original</td>\n")
         elif n.source == "=":  # automatically computer
-            outfile.write("      <td><span class=\"fa fa-cogs\"></span> Computed</td>\n")
+            outfile.write("      <td>" + fetch_fa_glyph("computed") + "Computed</td>\n")
         else:
             if ";" in n.source:
                 source_list = n.source.split(";")
@@ -1031,8 +1110,8 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
                     tmpsource = source[1:]
                     tmpsource = tmpsource.replace("MSR:", "")
                     tmpsource = tmpsource.replace("/", "/<br />")
-                    tmpsource = tmpsource.replace("geography", "<span class=\"far fa-map\"></span> Geography")
-                    tmpsource = tmpsource.replace("synonymy", "<span class=\"fa fa-exchange\"></span> Synonymy")
+                    tmpsource = tmpsource.replace("geography", fetch_fa_glyph("geography") + "Geography")
+                    tmpsource = tmpsource.replace("synonymy", fetch_fa_glyph("synonymy") + "Synonymy")
                     source_strs.append(tmpsource)
             outfile.write("      <td>" + ", ".join(source_strs) + "</td>\n")
 
@@ -1087,7 +1166,7 @@ def write_reference_page(outfile: TextIO, do_print: bool, ref: TMB_Classes.Refer
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
         outfile.write("          <li><a href=\"../" + init_data().ref_url +
-                      "\"><span class=\"fa fa-list\"></span> Full Reference List</a></li>\n")
+                      "\">" + fetch_fa_glyph("index") + "Full Reference List</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -1267,10 +1346,10 @@ def write_binomial_name_page(outfile: TextIO, do_print: bool, name: str, namefil
     outfile.write("        <ul>\n")
     if species_name != "":
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + "sn_" + species_name +
-                      ".html\"><span class=\"fa fa-window-minimize\"></span> " + format_name_string(species_name) +
+                      ".html\">" + fetch_fa_glyph("specific name") + format_name_string(species_name) +
                       "</a></li>\n")
         if not do_print:
-            outfile.write("          <li><a href=\"index.html\"><span class=\"fa fa-list\"></span> Full Name "
+            outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("index") + "Full Name "
                           "Index</a></li>\n")
     outfile.write("        </ul>\n")
     outfile.write("      </nav>\n")
@@ -1390,8 +1469,7 @@ def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"index.html\"><span class=\"fa fa-list\"></span> "
-                      "Full Name Index</a></li>\n")
+        outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("index") + "Full Name Index</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -1640,7 +1718,7 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species: str, bin
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + species +
-                      ".html\"><span class=\"fa fa-info-circle\"></span> Species page</a></li>\n")
+                      ".html\">" + fetch_fa_glyph("info") + "Species page</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -1828,9 +1906,9 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\".\"><span class=\"fa fa-list\"></span> Name Index</a></li>\n")
+        outfile.write("          <li><a href=\".\">" + fetch_fa_glyph("index") + "Name Index</a></li>\n")
         outfile.write("          <li><a href=\"../" + init_data().species_url +
-                      "\"><span class=\"fa fa-check-circle\"></span> Accepted Species</a></li>\n")
+                      "\">" + fetch_fa_glyph("accepted species") + "Accepted Species</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -1989,7 +2067,7 @@ def create_genus_chronology(outfile: TextIO, do_print: bool, genus_cnts: dict) -
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) +
-                      "index.html\"><span class=\"fa fa-list\"></span> Full Name Index</a></li>\n")
+                      "index.html\">" + fetch_fa_glyph("index") + "Full Name Index</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -2154,9 +2232,9 @@ def write_all_name_pages(outfile: TextIO, do_print: bool, refdict: dict, citelis
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + init_data().name_sum_url +
-                      "\"><span class=\"fa fa-chart-line\"></span> Name Summary</a></li>\n")
+                      "\">" + fetch_fa_glyph("summary charts") + "Name Summary</a></li>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + init_data().species_url +
-                      "\"><span class=\"fa fa-check-circle\"></span> Accepted Species</a></li>\n")
+                      "\">" + fetch_fa_glyph("accepted species") + "Accepted Species</a></li>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) +
                       "synonyms_uca.html\">Synonyms of <em class=\"species\">Uca</em></a></li>\n")
         outfile.write("        </ul>\n")
@@ -2285,7 +2363,7 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"locations\index.html\"><span class=\"fa fa-list\"></span> Location "
+        outfile.write("          <li><a href=\"locations\index.html\">" + fetch_fa_glyph("index") + "Location "
                       "Index</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
@@ -2314,10 +2392,10 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
         #               "<span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
         # outfile.write("          <a href=\"maps/" + pointmap_name("uca_all") + ".svgz\">"
         #               "<span class=\"fa fa-download\"></span> Download SVG line map of point locations.</a>\n")
-        outfile.write("          <a href=\"maps/" + rangemap_name("uca_all") + ".png\">"
-                      "<span class=\"fa fa-download\"></span> Download PNG line map of ranges.</a> \n")
-        outfile.write("          <a href=\"maps/" + pointmap_name("uca_all") + ".png\">"
-                      "<span class=\"fa fa-download\"></span> Download PNG line map of point locations.</a>\n")
+        outfile.write("          <a href=\"maps/" + rangemap_name("uca_all") + ".png\">" + fetch_fa_glyph("download") +
+                      "Download PNG line map of ranges.</a> \n")
+        outfile.write("          <a href=\"maps/" + pointmap_name("uca_all") + ".png\">" + fetch_fa_glyph("download") +
+                      "Download PNG line map of point locations.</a>\n")
         outfile.write("        </div>\n")
     outfile.write("      </div>\n")
     outfile.write("      <p>\n")
@@ -2441,7 +2519,7 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"index.html\"><span class=\"fa fa-list\"></span> Location "
+        outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("index") + "Location "
                       "Index</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
@@ -2644,7 +2722,7 @@ def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict,
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
         outfile.write("          <li><a href=\"../" + init_data().map_url +
-                      "\"><span class=\"far fa-map\"></span> Range Maps</a></li>\n")
+                      "\">" + fetch_fa_glyph("maps") + "Range Maps</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -2975,14 +3053,14 @@ def write_species_photo_page(outfile: TextIO, do_print: bool, fname: str, specie
         splist = pspecies.split(";")
         for s in splist:
             outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + s +
-                          ".html\"><span class=\"fa fa-info-circle\"></span> <em class=\"species\">Uca " + s +
+                          ".html\">" + fetch_fa_glyph("info") + "<em class=\"species\">Uca " + s +
                           "</em> page</a></li>\n")
     else:
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + species +
-                      ".html\"><span class=\"fa fa-info-circle\"></span> Species page</a></li>\n")
+                      ".html\">" + fetch_fa_glyph("info") + "Species page</a></li>\n")
     if not do_print:
-        outfile.write("          <li><a href=\"../" + init_data().photo_url +
-                      "\"><span class=\"fa fa-camera-alt\"></span> All species photos</a></li>\n")
+        outfile.write("          <li><a href=\"../" + init_data().photo_url + "\">" + fetch_fa_glyph("photo") +
+                      "All species photos</a></li>\n")
     outfile.write("        </ul>\n")
     outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -3020,13 +3098,13 @@ def write_species_video_page(fname: str, video: TMB_Classes.VideoClass, vn: int)
             splist = video.species.split(";")
             for s in splist:
                 outfile.write("          <li><a href=\"../u_" + s +
-                              ".html\"><span class=\"fa fa-info-circle\"></span> <em class=\"species\">Uca " + s +
+                              ".html\">" + fetch_fa_glyph("info") + "<em class=\"species\">Uca " + s +
                               "</em> page</a></li>\n")
         else:
             outfile.write("          <li><a href=\"../u_" + video.species +
-                          ".html\"><span class=\"fa fa-info-circle\"></span> Species page</a></li>\n")
-        outfile.write("          <li><a href=\"../" + init_data().video_url +
-                      "\"><span class=\"fa fa-video\"></span> All species videos</a></li>\n")
+                          ".html\">" + fetch_fa_glyph("info") + "Species page</a></li>\n")
+        outfile.write("          <li><a href=\"../" + init_data().video_url + "\">" + fetch_fa_glyph("video") +
+                      "All species videos</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
         outfile.write("    </header>\n")
@@ -3059,9 +3137,9 @@ def write_annotated_reference_list(outfile: TextIO, do_print: bool, references: 
                                    dir_citations: list, cited_citations: list, path: str) -> None:
     outfile.write("    <section class=\"spsection\">\n")
     if do_print:
-        outfile.write("      <h3 class=\"nobookmark\"><span class=\"fa fa-book\"></span> References</h3>\n")
+        outfile.write("      <h3 class=\"nobookmark\">" + fetch_fa_glyph("references") + "References</h3>\n")
     else:
-        outfile.write("      <h3 id=\"references\" class=\"nobookmark\"><span class=\"fa fa-book\"></span> "
+        outfile.write("      <h3 id=\"references\" class=\"nobookmark\">" + fetch_fa_glyph("references") +
                       "References</h3>\n")
     outfile.write("      <p>\n")
     reflist = []
@@ -3082,9 +3160,9 @@ def write_annotated_reference_list(outfile: TextIO, do_print: bool, references: 
 def write_reference_list(outfile: TextIO, do_print: bool, references: list, citations: dict) -> None:
     outfile.write("    <section class=\"spsection\">\n")
     if do_print:
-        outfile.write("      <h2 class=\"nobookmark\"><span class=\"fa fa-book\"></span> References</h2>\n")
+        outfile.write("      <h2 class=\"nobookmark\">" + fetch_fa_glyph("references") + "References</h2>\n")
     else:
-        outfile.write("      <h2 id=\"references\" class=\"nobookmark\"><span class=\"fa fa-book\"></span> "
+        outfile.write("      <h2 id=\"references\" class=\"nobookmark\">" + fetch_fa_glyph("references") +
                       "References</h2>\n")
     outfile.write("      <p>\n")
     reflist = []
@@ -3138,15 +3216,13 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
         outfile.write("          <li><a href=\"#type\">Type</a></li>\n")
-        outfile.write("          <li><a href=\"#info\"><span class=\"fa fa-info-circle\"></span> "
-                      "Information</a></li>\n")
-        outfile.write("          <li><a href=\"#pics\"><span class=\"fa fa-camera-alt\"></span> Photos</a></li>\n")
+        outfile.write("          <li><a href=\"#info\">" + fetch_fa_glyph("info") + "Information</a></li>\n")
+        outfile.write("          <li><a href=\"#pics\">" + fetch_fa_glyph("photo") + "Photos</a></li>\n")
         if not is_fossil:
-            outfile.write("          <li><a href=\"#video\"><span class=\"fa fa-video\"></span> "
-                          "Video</a></li>\n")
-            outfile.write("          <li><a href=\"#art\"><span class=\"fa fa-paint-brush\"></span> Art</a></li>\n")
-        outfile.write("          <li><a href=\"#references\"><span class=\"fa fa-book\"></span> References</a></li>\n")
-        outfile.write("          <li><a href=\"uca_species.html\"><span class=\"fa fa-list\"></span> "
+            outfile.write("          <li><a href=\"#video\">" + fetch_fa_glyph("video") + "Video</a></li>\n")
+            outfile.write("          <li><a href=\"#art\">" + fetch_fa_glyph("art") + "Art</a></li>\n")
+        outfile.write("          <li><a href=\"#references\">" + fetch_fa_glyph("references") + "References</a></li>\n")
+        outfile.write("          <li><a href=\"uca_species.html\">" + fetch_fa_glyph("index") +
                       "Species List</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
@@ -3166,10 +3242,9 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
     outfile.write("\n")
     outfile.write("    <section class=\"spsection\">\n")
     if do_print:
-        outfile.write("      <h2 class=\"nobookmark\"><span class=\"fa fa-info-circle\"></span> Information</h2>\n")
+        outfile.write("      <h2 class=\"nobookmark\">" + fetch_fa_glyph("info") + "Information</h2>\n")
     else:
-        outfile.write("      <h2 id=\"info\" class=\"nobookmark\"><span class=\"fa fa-info-circle\"></span> "
-                      "Information</h2>\n")
+        outfile.write("      <h2 id=\"info\" class=\"nobookmark\">" + fetch_fa_glyph("info") + "Information</h2>\n")
     outfile.write("      <dl>\n")
     outfile.write("       <dt>Subgenus</dt>\n")
     outfile.write("         <dd><a href=\"" + rel_link_prefix(do_print) + init_data().syst_url + "#" +
@@ -3226,10 +3301,10 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
             #               "<span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
             # outfile.write("             <a href=\"maps/" + pointmap_name("u_" + species.species) + ".svgz\">"
             #               "<span class=\"fa fa-download\"></span> Download SVG line map of point locations.</a>\n")
-            outfile.write("             <a href=\"maps/" + rangemap_name("u_" + species.species) + ".png\">"
-                          "<span class=\"fa fa-download\"></span> Download PNG line map of ranges.</a> \n")
-            outfile.write("             <a href=\"maps/" + pointmap_name("u_" + species.species) + ".png\">"
-                          "<span class=\"fa fa-download\"></span> Download PNG line map of point locations.</a>\n")
+            outfile.write("             <a href=\"maps/" + rangemap_name("u_" + species.species) + ".png\">" +
+                          fetch_fa_glyph("download") + "Download PNG line map of ranges.</a> \n")
+            outfile.write("             <a href=\"maps/" + pointmap_name("u_" + species.species) + ".png\">" +
+                          fetch_fa_glyph("download") + "Download PNG line map of point locations.</a>\n")
             outfile.write("           </div>\n")
         outfile.write("         </dd>\n")
         outfile.write("         <dd class=\"map_data\">\n")
@@ -3269,10 +3344,9 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
     outfile.write("\n")
     outfile.write("    <section class=\"spsection\">\n")
     if do_print:
-        outfile.write("      <h2 class=\"nobookmark\"><span class=\"fa fa-camera-alt\"></span> Photos</h2>\n")
+        outfile.write("      <h2 class=\"nobookmark\">" + fetch_fa_glyph("photo") + "Photos</h2>\n")
     else:
-        outfile.write("      <h2 id=\"pics\" class=\"nobookmark\"><span class=\"fa fa-camera-alt\"></span> "
-                      "Photos</h2>\n")
+        outfile.write("      <h2 id=\"pics\" class=\"nobookmark\">" + fetch_fa_glyph("photo") + "Photos</h2>\n")
     photo_n = 0
     for photo in photos:
         slist = photo.species.split(";")
@@ -3302,10 +3376,9 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
     if not is_fossil:
         outfile.write("    <section class=\"spsection\">\n")
         if do_print:
-            outfile.write("      <h2 class=\"nobookmark\"><span class=\"fa fa-video\"></span> Video</h2>\n")
+            outfile.write("      <h2 class=\"nobookmark\">" + fetch_fa_glyph("video") + "Video</h2>\n")
         else:
-            outfile.write("      <h2 id=\"video\" class=\"nobookmark\"><span class=\"fa fa-video\"></span> "
-                          "Video</h2>\n")
+            outfile.write("      <h2 id=\"video\" class=\"nobookmark\">" + fetch_fa_glyph("video") + "Video</h2>\n")
         video_n = 0
         for video in videos:
             slist = video.species.split(";")
@@ -3344,10 +3417,9 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
 
         outfile.write("    <section class=\"spsection\">\n")
         if do_print:
-            outfile.write("      <h2 class=\"nobookmark\"><span class=\"fa fa-paint-brush\"></span> Art</h2>\n")
+            outfile.write("      <h2 class=\"nobookmark\">" + fetch_fa_glyph("art") + "Art</h2>\n")
         else:
-            outfile.write("      <h2 id=\"art\" class=\"nobookmark\"><span class=\"fa fa-paint-brush\"></span> "
-                          "Art</h2>\n")
+            outfile.write("      <h2 id=\"art\" class=\"nobookmark\">" + fetch_fa_glyph("art") + "Art</h2>\n")
         artn = 0
         for art in artlist:
             slist = art.species.split(";")
@@ -4377,8 +4449,8 @@ def write_morphology_page(outfile: TextIO, do_print: bool, morph: TMB_Classes.Mo
             index_page = "#morphology_index.html"
         else:
             index_page = "."
-        outfile.write("          <li><a href=\"" + index_page +
-                      "\"><span class=\"fa fa-list\"></span> Morphology Index</a></li>\n")
+        outfile.write("          <li><a href=\"" + index_page + "\">" + fetch_fa_glyph("index") +
+                      "Morphology Index</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -4493,8 +4565,7 @@ def write_main_morphology_pages(outfile: TextIO, do_print: bool, morphology: lis
             index_page = "#morphology_index.html"
         else:
             index_page = "morphology/index.html"
-        outfile.write("          <li><a href=\"" + index_page + "\"><span class=\"fa fa-list\"></span> "
-                      "Index</a></li>\n")
+        outfile.write("          <li><a href=\"" + index_page + "\">" + fetch_fa_glyph("index") + "Index</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -4568,10 +4639,10 @@ def write_citation_page(refdict: dict) -> None:
         outfile.write("      </ul>\n")
         outfile.write("    </div>\n")
         outfile.write("    <ul class=\"fa-ul\">\n")
-        outfile.write("      <li><span class=\"fa-li far fa-file-pdf\"></span>"
+        outfile.write("      <li>" + fetch_fa_glyph("list pdf") +
                       "<a href=\"http://dx.plos.org/10.1371/journal.pone.0101704\">Read paper online at "
                       "PLoS ONE</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fab fa-github\"></span>"
+        outfile.write("      <li>" + fetch_fa_glyph("list github") +
                       "<a href=\"https://github.com/msrosenberg/fiddlercrab.info\">Website data repository on "
                       "GitHub</a></li>\n")
         outfile.write("    </ul>\n")
@@ -4637,38 +4708,38 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list) -> None:
     else:
         outfile.write("    <h2>Information</h2>\n")
         outfile.write("    <ul class=\"fa-ul\">\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-signal fa-rotate-270\"></span><a href=\"" +
-                      init_data().syst_url + "\">Systematics</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-share-alt fa-rotate-270\"></span><a href=\"" +
-                      init_data().tree_url + "\">Phylogeny</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-list\"></span><a href=\"" + init_data().species_url +
+        outfile.write("      <li>" + fetch_fa_glyph("list systematics") + "<a href=\"" + init_data().syst_url +
+                      "\">Systematics</a></li>\n")
+        outfile.write("      <li>" + fetch_fa_glyph("list phylogeny") + "<a href=\"" + init_data().tree_url +
+                      "\">Phylogeny</a></li>\n")
+        outfile.write("      <li>" + fetch_fa_glyph("list species") + "<a href=\"" + init_data().species_url +
                       "\">Species</a>\n")
         outfile.write("        <ul>\n")
         outfile.write("           <li><a href=\"names\">Name Index</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </li>\n")
-        outfile.write("      <li><span class=\"fa-li far fa-comments\"></span><a href=\"" + init_data().common_url +
+        outfile.write("      <li>" + fetch_fa_glyph("list common") + "<a href=\"" + init_data().common_url +
                       "\">Common Names</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li far fa-map\"></span><a href=\"" + init_data().map_url +
+        outfile.write("      <li>" + fetch_fa_glyph("list ranges") + "<a href=\"" + init_data().map_url +
                       "\">Geographic Ranges</a>\n")
         outfile.write("        <ul>\n")
         outfile.write("           <li><a href=\"locations\">Location Index</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-sync\"></span><a href=\"" + init_data().lifecycle_url +
+        outfile.write("      <li>" + fetch_fa_glyph("list lifecycle") + "<a href=\"" + init_data().lifecycle_url +
                       "\">Life Cycle</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li far fa-heart\"></span><a href=\"" + init_data().morph_url +
+        outfile.write("      <li>" + fetch_fa_glyph("list morphology") + "<a href=\"" + init_data().morph_url +
                       "\">Morphology</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-book\"></span><a href=\"" + init_data().ref_url +
+        outfile.write("      <li>" + fetch_fa_glyph("list references") + "<a href=\"" + init_data().ref_url +
                       "\">Comprehensive Reference List</a></li>\n")
         outfile.write("    </ul>\n")
         outfile.write("    <h2>Multimedia</h2>\n")
         outfile.write("    <ul class=\"fa-ul\">\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-camera-alt\"></span><a href=\"" + init_data().photo_url +
+        outfile.write("      <li>" + fetch_fa_glyph("list photo") + "<a href=\"" + init_data().photo_url +
                       "\">Photos</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-video\"></span><a href=\"" + init_data().video_url +
+        outfile.write("      <li>" + fetch_fa_glyph("list video") + "<a href=\"" + init_data().video_url +
                       "\">Videos</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-paint-brush\"></span>Art\n")
+        outfile.write("      <li>" + fetch_fa_glyph("list art") + "Art\n")
         outfile.write("        <ul>\n")
         outfile.write("          <li><a href=\"" + init_data().art_sci_url + "\">Scientific Art</a></li>\n")
         outfile.write("          <li><a href=\"" + init_data().art_stamp_url + "\">Postage Stamps</a></li>\n")
@@ -4678,9 +4749,9 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list) -> None:
         outfile.write("    </ul>\n")
         outfile.write("    <h2>Miscellania</h2>\n")
         outfile.write("    <ul class=\"fa-ul\">\n")
-        outfile.write("      <li><span class=\"fa-li fa fa-pencil-alt\"></span>"
-                      "<a href=\"" + init_data().cite_url + "\">Citation info for this website</a></li>\n")
-        outfile.write("      <li><span class=\"fa-li fab fa-github\"></span>"
+        outfile.write("      <li>" + fetch_fa_glyph("list site cite") + "<a href=\"" + init_data().cite_url +
+                      "\">Citation info for this website</a></li>\n")
+        outfile.write("      <li>" + fetch_fa_glyph("github") +
                       "<a href=\"https://github.com/msrosenberg/fiddlercrab.info\">Website data on GitHub</a></li>\n")
         outfile.write("    </ul>\n")
         common_html_footer(outfile)
