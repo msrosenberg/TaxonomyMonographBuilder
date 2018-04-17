@@ -629,9 +629,8 @@ def write_reference_bibliography(outfile: TextIO, do_print: bool, reflist: list)
     outfile.write("\n")
     outfile.write("    <p>\n")
     outfile.write("      Following is a fairly comprehensive list of papers, books, and theses that deal or refer "
-                  "to fiddler crabs. The list currently contains {:0,} references (last updated {}). Many of these "
-                  "papers (particularly the older ones) are primarily "
-                  "taxonomic lists.\n".format(len(reflist), datetime.date.isoformat(datetime.date.today())))
+                  "to fiddler crabs. The list currently contains {:0,} references "
+                  "(last updated {}).\n".format(len(reflist), datetime.date.isoformat(datetime.date.today())))
     outfile.write("    </p>\n")
     outfile.write("    <p>\n")
     outfile.write("      The references can also be downloaded as "
@@ -692,7 +691,9 @@ def match_num_ref(x: str, y: str) -> bool:
 
 
 def compute_applied_name_contexts(citelist: list) -> None:
-    """ function to gather list of primary contexts referred to by other citation entries  """
+    """
+    function to gather list of primary contexts referred to by other citation entries
+    """
     for i, cite in enumerate(citelist):
         if (cite.context == "specimen") or (cite.context == "location"):
             cite.applied_cites = {cite}
@@ -715,7 +716,9 @@ def compute_applied_name_contexts(citelist: list) -> None:
 
 
 def compute_species_from_citation_linking(citelist: list) -> None:
-    """ function to update correct species citations through cross-references to earlier works """
+    """
+    function to update correct species citations through cross-references to earlier works
+    """
     for i, cite in enumerate(citelist):
         if cite.actual == "=":
             cname = ""
@@ -782,7 +785,7 @@ def create_location_link(location: TMB_Classes.LocationClass, display_name: str,
         suffix = ""
     if do_print:  # put the suffix inside the link when printing
         endstr = suffix + "</a>"
-    else:
+    else:  # put the suffix outside the link for the web
         endstr = "</a>" + suffix
     return ("<a href=\"" + rel_link_prefix(do_print, path) + place_to_filename(location.name) + ".html\">" +
             display_name + endstr)
@@ -843,7 +846,6 @@ def clean_specific_name(x: str) -> str:
                  "quadratus",
                  "albidus",
                  "vociferans",
-                 # "(gelasimus)",
                  "raniformis",
                  "nigra",
                  "albicans",
@@ -872,9 +874,14 @@ def clean_specific_name(x: str) -> str:
 
 def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: list, uniquelist: list,
                       notecnt: int, comcnt: int, refdict: dict, name_table: dict, point_locations: dict) -> None:
-    """ create output name table """
+    """
+    create output name table for reference and name pages
+    """
+
     def create_location_sublink(x: str) -> str:
-        """ create a link to location pages, preserving [] info when applicable """
+        """
+        create a link to location pages, preserving [] info when applicable
+        """
         tmpname = strip_location_subtext(x)
         if tmpname in point_locations:
             loc = point_locations[tmpname]
@@ -1067,6 +1074,9 @@ def check_citation_cross_references(citelist: list, refdict: dict, name_table: d
 
 def write_reference_page(outfile: TextIO, do_print: bool, ref: TMB_Classes.ReferenceClass, citelist: list,
                          refdict: dict, name_table: dict, point_locations: dict) -> None:
+    """
+    create output page for a reference
+    """
     if do_print:
         start_page_division(outfile, "ref_page")
     else:
@@ -1208,7 +1218,7 @@ def write_binomial_name_page(outfile: TextIO, do_print: bool, name: str, namefil
                              refdict: dict, citelist: list, name_table: dict, species_name: str, location_set: set,
                              point_locations: dict) -> None:
     """
-    create a page listing all citations using, and other information about, a specific binomial or compound name
+    create a page listing all citations using (and other information about) a specific binomial or compound name
     """
     # find citations for this name
     cites = []
@@ -2896,7 +2906,6 @@ def connect_refs_to_species(species: list, citelist: list) -> dict:
         if c.actual in species_refs:
             reflist = species_refs[c.actual]
             reflist |= {c.cite_key}
-            # species_refs[c.actual] = reflist  # note: this line is probably not necessary
     return species_refs
 
 
