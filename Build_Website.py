@@ -291,82 +291,91 @@ def create_blank_index(fname: str) -> None:
 
 
 def fetch_fa_glyph(glyph: Optional[str]) -> str:
+    """
+    decorate text with a fontawesome glyph
+
+    centralized function to create fontawesome decoration based on specified glyph keyword/style
+    """
     if glyph is None:
         return ""
-    elif glyph is "home":
-        return "<span class=\"fa fa-home\"></span> "
-    elif glyph is "blog":
-        return "<span class=\"fa fa-pencil-alt\"></span> "
-    elif glyph is "mail":
-        return "<span class=\"fa fa-envelope\"></span> "
-    elif glyph is "site cite":
-        return "<span class=\"fa fa-pencil-alt\"></span> "
-    elif glyph is "index":
-        return "<span class=\"fa fa-list\"></span> "
-    elif glyph is "summary charts":
-        return "<span class=\"fa fa-chart-line\"></span> "
-    elif glyph is "location":
-        return "<span class=\"fa fa-map-marker-alt\"></span> "
-    elif glyph is "citation":
-        return "<span class=\"fa fa-edit\"></span> "
-    elif glyph is "specimen":
-        return "<span class=\"fa fa-flask\"></span> "
-    elif glyph is "original":
-        return "<span class=\"fa fa-arrow-alt-left\"></span> "
-    elif glyph is "computed":
-        return "<span class=\"fa fa-cogs\"></span> "
-    elif glyph is "geography":
-        return "<span class=\"far fa-map\"></span> "
-    elif glyph is "synonymy":
-        return "<span class=\"fa fa-exchange\"></span> "
-    elif glyph is "specific name":
-        return "<span class=\"fa fa-window-minimize\"></span> "
-    elif glyph is "info":
-        return "<span class=\"fa fa-info-circle\"></span> "
-    elif glyph is "accepted species":
-        return "<span class=\"fa fa-check-circle\"></span> "
-    elif glyph is "download":
-        return "<span class=\"fa fa-download\"></span> "
-    elif glyph is "maps":
-        return "<span class=\"far fa-map\"></span> "
-    elif glyph is "photo":
-        return "<span class=\"fa fa-camera-alt\"></span> "
-    elif glyph is "video":
-        return "<span class=\"fa fa-video\"></span> "
-    elif glyph is "references":
-        return "<span class=\"fa fa-book\"></span> "
-    elif glyph is "art":
-        return "<span class=\"fa fa-paint-brush\"></span> "
-    elif glyph is "list pdf":
-        return "<span class=\"fa-li far fa-file-pdf\"></span>"
-    elif glyph is "list github":
-        return "<span class=\"fa-li fab fa-github\"></span>"
-    elif glyph is "list systematics":
-        return "<span class=\"fa-li fa fa-signal fa-rotate-270\"></span>"
-    elif glyph is "list phylogeny":
-        return "<span class=\"fa-li fa fa-share-alt fa-rotate-270\"></span>"
-    elif glyph is "list species":
-        return "<span class=\"fa-li fa fa-list\"></span>"
-    elif glyph is "list common":
-        return "<span class=\"fa-li far fa-comments\"></span>"
-    elif glyph is "list ranges":
-        return "<span class=\"fa-li far fa-map\"></span>"
-    elif glyph is "list morphology":
-        return "<span class=\"fa-li far fa-heart\"></span>"
-    elif glyph is "list references":
-        return "<span class=\"fa-li fa fa-book\"></span>"
-    elif glyph is "list lifecycle":
-        return "<span class=\"fa-li fa fa-sync\"></span>"
-    elif glyph is "list photo":
-        return "<span class=\"fa-li fa fa-camera-alt\"></span>"
-    elif glyph is "list video":
-        return "<span class=\"fa-li fa fa-video\"></span>"
-    elif glyph is "list art":
-        return "<span class=\"fa-li fa fa-paint-brush\"></span>"
-    elif glyph is "list site cite":
-        return " <span class=\"fa-li fa fa-pencil-alt\"></span>"
     else:
-        return ""
+        x = "<span class=\"fa"
+        if glyph is "home":
+            x += " fa-home"
+        elif glyph is "blog":
+            x += " fa-pencil-alt"
+        elif glyph is "mail":
+            x += " fa-envelope"
+        elif glyph is "site cite":
+            x += " fa-pencil-alt"
+        elif glyph is "index":
+            x += " fa-list"
+        elif glyph is "summary charts":
+            x += " fa-chart-line"
+        elif glyph is "location":
+            x += " fa-map-marker-alt"
+        elif glyph is "citation":
+            x += " fa-edit"
+        elif glyph is "specimen":
+            x += " fa-flask"
+        elif glyph is "original":
+            x += " fa-arrow-alt-left"
+        elif glyph is "computed":
+            x += " fa-cogs"
+        elif glyph is "geography":
+            x += "r fa-map"
+        elif glyph is "synonymy":
+            x += " fa-exchange"
+        elif glyph is "specific name":
+            x += " fa-window-minimize"
+        elif glyph is "info":
+            x += " fa-info-circle"
+        elif glyph is "accepted species":
+            x += " fa-check-circle"
+        elif glyph is "download":
+            x += " fa-download"
+        elif glyph is "maps":
+            x += "r fa-map"
+        elif glyph is "photo":
+            x += " fa-camera-alt"
+        elif glyph is "video":
+            x += " fa-video"
+        elif glyph is "references":
+            x += " fa-book"
+        elif glyph is "art":
+            x += " fa-paint-brush"
+        elif glyph is "list pdf":
+            x += "-li far fa-file-pdf"
+        elif glyph is "list github":
+            x += "-li fab fa-github"
+        elif glyph is "list systematics":
+            x += "-li fa fa-signal fa-rotate-270"
+        elif glyph is "list phylogeny":
+            x += "-li fa fa-share-alt fa-rotate-270"
+        elif glyph is "list species":
+            x += "-li fa fa-list"
+        elif glyph is "list common":
+            x += "-li far fa-comments"
+        elif glyph is "list ranges":
+            x += "-li far fa-map"
+        elif glyph is "list morphology":
+            x += "-li far fa-heart"
+        elif glyph is "list references":
+            x += "-li fa fa-book"
+        elif glyph is "list lifecycle":
+            x += "-li fa fa-sync"
+        elif glyph is "list photo":
+            x += "-li fa fa-camera-alt"
+        elif glyph is "list video":
+            x += "-li fa fa-video"
+        elif glyph is "list art":
+            x += "-li fa fa-paint-brush"
+        elif glyph is "list site cite":
+            x += "-li fa fa-pencil-alt"
+        else:
+            report_error("missing glyph: " + glyph)
+            return ""
+        return x + "\"></span> "
 
 
 def rel_link_prefix(do_print: bool, prefix: str = "") -> str:
