@@ -300,77 +300,77 @@ def fetch_fa_glyph(glyph: Optional[str]) -> str:
         return ""
     else:
         x = "<span class=\"fa"
-        if glyph is "home":
+        if glyph == "home":
             x += " fa-home"
-        elif glyph is "blog":
+        elif glyph == "blog":
             x += " fa-pencil-alt"
-        elif glyph is "mail":
+        elif glyph == "mail":
             x += " fa-envelope"
-        elif glyph is "site cite":
+        elif glyph == "site cite":
             x += " fa-pencil-alt"
-        elif glyph is "index":
+        elif glyph == "index":
             x += " fa-list"
-        elif glyph is "summary charts":
+        elif glyph == "summary charts":
             x += " fa-chart-line"
-        elif glyph is "location":
+        elif glyph == "location":
             x += " fa-map-marker-alt"
-        elif glyph is "citation":
+        elif glyph == "citation":
             x += " fa-edit"
-        elif glyph is "specimen":
+        elif glyph == "specimen":
             x += " fa-flask"
-        elif glyph is "original":
+        elif glyph == "original":
             x += " fa-arrow-alt-left"
-        elif glyph is "computed":
+        elif glyph == "computed":
             x += " fa-cogs"
-        elif glyph is "geography":
+        elif glyph == "geography":
             x += "r fa-map"
-        elif glyph is "synonymy":
+        elif glyph == "synonymy":
             x += " fa-exchange"
-        elif glyph is "specific name":
+        elif glyph == "specific name":
             x += " fa-window-minimize"
-        elif glyph is "info":
+        elif glyph == "info":
             x += " fa-info-circle"
-        elif glyph is "accepted species":
+        elif glyph == "accepted species":
             x += " fa-check-circle"
-        elif glyph is "download":
+        elif glyph == "download":
             x += " fa-download"
-        elif glyph is "maps":
+        elif glyph == "maps":
             x += "r fa-map"
-        elif glyph is "photo":
+        elif glyph == "photo":
             x += " fa-camera-alt"
-        elif glyph is "video":
+        elif glyph == "video":
             x += " fa-video"
-        elif glyph is "references":
+        elif glyph == "references":
             x += " fa-book"
-        elif glyph is "art":
+        elif glyph == "art":
             x += " fa-paint-brush"
-        elif glyph is "list pdf":
+        elif glyph == "list pdf":
             x += "-li far fa-file-pdf"
-        elif glyph is "list github":
+        elif glyph == "list github":
             x += "-li fab fa-github"
-        elif glyph is "list systematics":
+        elif glyph == "list systematics":
             x += "-li fa fa-signal fa-rotate-270"
-        elif glyph is "list phylogeny":
+        elif glyph == "list phylogeny":
             x += "-li fa fa-share-alt fa-rotate-270"
-        elif glyph is "list species":
+        elif glyph == "list species":
             x += "-li fa fa-list"
-        elif glyph is "list common":
+        elif glyph == "list common":
             x += "-li far fa-comments"
-        elif glyph is "list ranges":
+        elif glyph == "list ranges":
             x += "-li far fa-map"
-        elif glyph is "list morphology":
+        elif glyph == "list morphology":
             x += "-li far fa-heart"
-        elif glyph is "list references":
+        elif glyph == "list references":
             x += "-li fa fa-book"
-        elif glyph is "list lifecycle":
+        elif glyph == "list lifecycle":
             x += "-li fa fa-sync"
-        elif glyph is "list photo":
+        elif glyph == "list photo":
             x += "-li fa fa-camera-alt"
-        elif glyph is "list video":
+        elif glyph == "list video":
             x += "-li fa fa-video"
-        elif glyph is "list art":
+        elif glyph == "list art":
             x += "-li fa fa-paint-brush"
-        elif glyph is "list site cite":
+        elif glyph == "list site cite":
             x += "-li fa fa-pencil-alt"
         else:
             report_error("missing glyph: " + glyph)
@@ -4760,7 +4760,7 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list) -> None:
         outfile.write("    <ul class=\"fa-ul\">\n")
         outfile.write("      <li>" + fetch_fa_glyph("list site cite") + "<a href=\"" + init_data().cite_url +
                       "\">Citation info for this website</a></li>\n")
-        outfile.write("      <li>" + fetch_fa_glyph("github") +
+        outfile.write("      <li>" + fetch_fa_glyph("list github") +
                       "<a href=\"https://github.com/msrosenberg/fiddlercrab.info\">Website data on GitHub</a></li>\n")
         outfile.write("    </ul>\n")
         common_html_footer(outfile)
