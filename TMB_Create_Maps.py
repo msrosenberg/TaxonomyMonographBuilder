@@ -694,7 +694,7 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
 def create_all_species_point_maps(species: list, point_locations: dict, species_plot_locations: dict,
                                   invalid_species_locations: dict, base_map: BaseMap,
                                   init_data: TMB_Initialize.InitializationData) -> None:
-    all_places = set()
+    # all_places = set()
     # total = len(species)
     # report = total / 20
     # j = 0
@@ -715,61 +715,103 @@ def create_all_species_point_maps(species: list, point_locations: dict, species_
     # write_point_map("uca_all", all_list, point_locations, None, base_map, True, None, init_data.graph_font)
     # write_point_map_kml("uca_all", all_list, point_locations, None, init_data, None)
 
-    # test code for using multiple processors for map creation
+    # # test code for using multiple processors for map creation
+    # print(".........Species Point Maps.........")
+    # pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
+    # png_inputs = []
+    # kml_inputs = []
+    # for i, s in enumerate(species):
+    #     if s.status != "fossil":
+    #         places = species_plot_locations[s]
+    #         invalid_places = invalid_species_locations[s]
+    #         png_inputs.append(("u_" + s.species, places, point_locations, invalid_places, base_map, False, None,
+    #                            init_data.graph_font))
+    #         kml_inputs.append(("u_" + s.species, places, point_locations, invalid_places, init_data, None))
+    #         all_places |= set(places)
+    # pool.starmap_async(write_point_map, png_inputs)
+    # pool.starmap_async(write_point_map_kml, kml_inputs)
+    # all_list = sorted(list(all_places))
+    # # pool.starmap_async(write_point_map, ("uca_all", all_list, point_locations, None, base_map, True, None,
+    # #                                      init_data.graph_font))
+    # # pool.starmap_async(write_point_map_kml, ("uca_all", all_list, point_locations, None, init_data, None))
+    # pool.close()
+    # pool.join()
+    # write_point_map("uca_all", all_list, point_locations, None, base_map, True, None, init_data.graph_font)
+    # write_point_map_kml("uca_all", all_list, point_locations, None, init_data, None)
+
+    all_places = set()
     print(".........Species Point Maps.........")
     pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
     png_inputs = []
-    kml_inputs = []
     for i, s in enumerate(species):
         if s.status != "fossil":
             places = species_plot_locations[s]
             invalid_places = invalid_species_locations[s]
             png_inputs.append(("u_" + s.species, places, point_locations, invalid_places, base_map, False, None,
                                init_data.graph_font))
-            kml_inputs.append(("u_" + s.species, places, point_locations, invalid_places, init_data, None))
+            write_point_map_kml("u_" + s.species, places, point_locations, invalid_places, init_data, None)
             all_places |= set(places)
-    pool.starmap_async(write_point_map, png_inputs)
-    pool.starmap_async(write_point_map_kml, kml_inputs)
+    pool.starmap(write_point_map, png_inputs)
     all_list = sorted(list(all_places))
-    pool.starmap_async(write_point_map, ("uca_all", all_list, point_locations, None, base_map, True, None,
-                                         init_data.graph_font))
-    pool.starmap_async(write_point_map_kml, ("uca_all", all_list, point_locations, None, init_data, None))
     pool.close()
     pool.join()
+    write_point_map("uca_all", all_list, point_locations, None, base_map, True, None, init_data.graph_font)
+    write_point_map_kml("uca_all", all_list, point_locations, None, init_data, None)
 
 
 def create_all_species_maps(base_map: BaseMap, init_data: TMB_Initialize.InitializationData, species: list,
                             point_locations: dict, species_plot_locations: dict,
                             invalid_species_locations: dict) -> None:
     # create range maps
-    species_maps = read_raw_kml(init_data.map_kml_file)
-
+    # species_maps = read_raw_kml(init_data.map_kml_file)
+    #
     # total = len(species_maps)
     # report = total / 20
     # j = 0
     # print(".........Species Range Maps.........")
     # for i, m in enumerate(species_maps):
-    #     # if i >= report:
-    #     #     j += 1
-    #     #     print("............{}%".format(j*5))
-    #     #     report += total / 20
+    #     if i >= report:
+    #         j += 1
+    #         print("............{}%".format(j*5))
+    #         report += total / 20
     #     write_species_range_map_kml(m)
     #     write_species_range_map(base_map, m, init_data.graph_font)
     # write_all_range_map_kml(species_maps)
     # write_all_range_map(base_map, species_maps)
 
-    # test code for using multiple processors for map creation
+    # # test code for using multiple processors for map creation
+    # print(".........Species Range Maps.........")
+    # pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
+    # inputs = []
+    # for i, m in enumerate(species_maps):
+    #     inputs.append((base_map, m, init_data.graph_font))
+    #     write_species_range_map_kml(m)
+    # # pool.map_async(write_species_range_map_kml, species_maps)
+    # pool.starmap(write_species_range_map, inputs)
+    # # pool.map_async(write_all_range_map_kml, species_maps)
+    # pool.starmap_async(write_all_range_map, (base_map, species_maps))
+    # pool.close()
+    # pool.join()
+    # write_all_range_map_kml(species_maps)
+    # # write_all_range_map(base_map, species_maps)
+    # create point maps
+    # create_all_species_point_maps(species, point_locations, species_plot_locations, invalid_species_locations,
+    #                               base_map, init_data)
+
+    # create range maps
+    species_maps = read_raw_kml(init_data.map_kml_file)
+
     print(".........Species Range Maps.........")
     pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
     inputs = []
     for i, m in enumerate(species_maps):
+        write_species_range_map_kml(m)
         inputs.append((base_map, m, init_data.graph_font))
-    pool.map_async(write_species_range_map_kml, species_maps)
-    pool.starmap_async(write_species_range_map, inputs)
-    pool.starmap_async(write_all_range_map_kml, [species_maps])
-    pool.starmap_async(write_all_range_map, (base_map, species_maps))
+    pool.starmap(write_species_range_map, inputs)
     pool.close()
     pool.join()
+    write_all_range_map_kml(species_maps)
+    write_all_range_map(base_map, species_maps)
 
     # create point maps
     create_all_species_point_maps(species, point_locations, species_plot_locations, invalid_species_locations, base_map,
@@ -789,7 +831,7 @@ def create_all_name_maps(base_map: BaseMap, all_names: list, specific_names: lis
     #         report += total / 20
     #     namefile = "name_" + name_to_filename(name)
     #     place_list = binomial_plot_locations[name]
-    #     write_point_map(namefile, place_list, point_locations, None, base_map, False, None, init_data.graph_font)
+    #     # write_point_map(namefile, place_list, point_locations, None, base_map, False, None, init_data.graph_font)
     #     write_point_map_kml(namefile, place_list, point_locations, None, init_data, None)
     # for i, name in enumerate(specific_names):
     #     if i + len(all_names) >= report:
@@ -801,27 +843,46 @@ def create_all_name_maps(base_map: BaseMap, all_names: list, specific_names: lis
     #     write_point_map(namefile, place_list, point_locations, None, base_map, False, None, init_data.graph_font)
     #     write_point_map_kml(namefile, place_list, point_locations, None, init_data, None)
 
-    # test code for using multiple processors for map creation
+    # # test code for using multiple processors for map creation
+    # pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
+    # all_inputs_png = []
+    # all_inputs_kml = []
+    # for i, name in enumerate(all_names):
+    #     namefile = "name_" + name_to_filename(name)
+    #     place_list = binomial_plot_locations[name]
+    #     all_inputs_png.append((namefile, place_list, point_locations, None, base_map, False, None,
+    #                            init_data.graph_font))
+    #     all_inputs_kml.append((namefile, place_list, point_locations, None, init_data, None))
+    # pool.starmap_async(write_point_map, all_inputs_png)
+    # pool.starmap_async(write_point_map_kml, all_inputs_kml)
+    # sp_inputs_png = []
+    # sp_inputs_kml = []
+    # for i, name in enumerate(specific_names):
+    #     namefile = "sn_" + name.name
+    #     place_list = specific_plot_locations[name]
+    #     sp_inputs_png.append((namefile, place_list, point_locations, None, base_map, False, None,
+    #                           init_data.graph_font))
+    #     sp_inputs_kml.append((namefile, place_list, point_locations, None, init_data, None))
+    # pool.starmap_async(write_point_map, sp_inputs_png)
+    # pool.starmap_async(write_point_map_kml, sp_inputs_kml)
+    # pool.close()
+    # pool.join()
+
     pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
-    all_inputs_png = []
-    all_inputs_kml = []
+    bi_inputs_png = []
+    sp_inputs_png = []
     for i, name in enumerate(all_names):
         namefile = "name_" + name_to_filename(name)
         place_list = binomial_plot_locations[name]
-        all_inputs_png.append((namefile, place_list, point_locations, None, base_map, False, None,
-                               init_data.graph_font))
-        all_inputs_kml.append((namefile, place_list, point_locations, None, init_data, None))
-    pool.starmap_async(write_point_map, all_inputs_png)
-    pool.starmap_async(write_point_map_kml, all_inputs_kml)
-    sp_inputs_png = []
-    sp_inputs_kml = []
+        bi_inputs_png.append((namefile, place_list, point_locations, None, base_map, False, None, init_data.graph_font))
+        write_point_map_kml(namefile, place_list, point_locations, None, init_data, None)
     for i, name in enumerate(specific_names):
         namefile = "sn_" + name.name
         place_list = specific_plot_locations[name]
         sp_inputs_png.append((namefile, place_list, point_locations, None, base_map, False, None, init_data.graph_font))
-        sp_inputs_kml.append((namefile, place_list, point_locations, None, init_data, None))
-    pool.starmap_async(write_point_map, sp_inputs_png)
-    pool.starmap_async(write_point_map_kml, sp_inputs_kml)
+        write_point_map_kml(namefile, place_list, point_locations, None, init_data, None)
+    pool.starmap(write_point_map, bi_inputs_png)
+    pool.starmap(write_point_map, sp_inputs_png)
     pool.close()
     pool.join()
 
@@ -853,10 +914,34 @@ def create_all_location_maps(base_map: BaseMap, point_locations: dict,
     #                         init_data.graph_font)
     #         write_point_map_kml(namefile, place_list, point_locations, None, init_data, sub_list)
 
-    # test code for using multiple processors for map creation
+    # # test code for using multiple processors for map creation
+    # pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
+    # png_inputs = []
+    # kml_inputs = []
+    # for i, loc in enumerate(point_locations):
+    #     point = point_locations[loc]
+    #     if not point.unknown:
+    #         place_list = []
+    #         sub_list = []
+    #         try:
+    #             sub_list = point.all_children()
+    #         except RecursionError:
+    #             report_error("Recursion Error on location: " + loc)
+    #             quit()
+    #         for p in sub_list:
+    #             place_list.append(p.name)
+    #         place_list.append(loc)  # put the primary location at end so it is drawn above children
+    #         namefile = "location_" + place_to_filename(loc)
+    #         png_inputs.append((namefile, place_list, point_locations, None, base_map, False, sub_list,
+    #                            init_data.graph_font))
+    #         kml_inputs.append((namefile, place_list, point_locations, None, init_data, sub_list))
+    # pool.starmap_async(write_point_map_kml, kml_inputs)
+    # pool.starmap_async(write_point_map, png_inputs)
+    # pool.close()
+    # pool.join()
+
     pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
     png_inputs = []
-    kml_inputs = []
     for i, loc in enumerate(point_locations):
         point = point_locations[loc]
         if not point.unknown:
@@ -873,9 +958,8 @@ def create_all_location_maps(base_map: BaseMap, point_locations: dict,
             namefile = "location_" + place_to_filename(loc)
             png_inputs.append((namefile, place_list, point_locations, None, base_map, False, sub_list,
                                init_data.graph_font))
-            kml_inputs.append((namefile, place_list, point_locations, None, init_data, sub_list))
-    pool.starmap_async(write_point_map_kml, kml_inputs)
-    pool.starmap_async(write_point_map, png_inputs)
+            write_point_map_kml(namefile, place_list, point_locations, None, init_data, sub_list)
+    pool.starmap(write_point_map, png_inputs)
     pool.close()
     pool.join()
 
