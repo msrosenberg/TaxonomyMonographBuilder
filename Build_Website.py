@@ -106,7 +106,7 @@ def common_header_part1(outfile: TextIO, title: str, indexpath: str = "") -> Non
     outfile.write("    <script defer src=\"" + indexpath + "js/fontawesome.min.js\"></script>\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath +
                   "images/flag-icon-css/css/flag-icon.min.css\" />\n")
-    outfile.write("    <link rel=\"author\" href=\"mailto:msr@asu.edu\" />\n")
+    outfile.write("    <link rel=\"author\" href=\"mailto:msrosenberg@vcu.edu\" />\n")
 
 
 def common_header_part2(outfile: TextIO, indexpath: str ="", include_map: bool = False) -> None:
@@ -249,7 +249,7 @@ def common_html_footer(outfile: TextIO, indexpath: str = "") -> None:
     outfile.write("       <p id=\"citation\"><a href=\"" + indexpath + init_data().cite_url +
                   "\">" + fetch_fa_glyph("site cite") + "How to cite this site</a></p>\n")
     outfile.write("       <p id=\"contact\">Questions or comments about the site? Contact "
-                  "<a href=\"mailto:msr@asu.edu\">" + fetch_fa_glyph("mail") +
+                  "<a href=\"mailto:msrosenberg@vcu.edu\">" + fetch_fa_glyph("mail") +
                   "Dr. Michael S. Rosenberg</a></p>\n")
     outfile.write("       <p id=\"copyright\">Release: " + init_data().version +
                   " &mdash; Copyright &copy; 2003&ndash;" + str(init_data().current_year) +
