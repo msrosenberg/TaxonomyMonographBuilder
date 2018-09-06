@@ -8,6 +8,10 @@ from wordcloud import WordCloud
 from typing import Optional
 
 __TMP_PATH__ = "temp/"
+# my approximation of the pygal color scheme
+__COLOR_LIST__ = ["salmon", "royalblue", "lightseagreen", "gold", "darkorange", "mediumorchid", "deepskyblue",
+                  "lightgreen", "sandybrown", "palevioletred", "lightskyblue", "mediumaquamarine", "lemonchiffon",
+                  "red", "green"]
 
 
 def create_pie_chart_file(filename: str, data: dict, graph_font: Optional[str] = None) -> None:
@@ -16,9 +20,7 @@ def create_pie_chart_file(filename: str, data: dict, graph_font: Optional[str] =
     sizes = []
     for d in datalist:
         sizes.append(data[d])
-    # my approximation of the pygal color scheme
-    color_list = ["salmon", "royalblue", "lightseagreen", "gold", "darkorange", "mediumorchid", "deepskyblue",
-                  "lightgreen", "sandybrown", "palevioletred", "lightskyblue", "mediumaquamarine", "lemonchiffon"]
+    color_list = __COLOR_LIST__
     # create a two-panel plot, one for pie, one for legend
     fig, (panel1, panel2) = mplpy.subplots(1, 2, figsize=[6, 3])
     # create pie chart in first panel
@@ -27,6 +29,65 @@ def create_pie_chart_file(filename: str, data: dict, graph_font: Optional[str] =
     # create legend in second panel
     panel2.axis("off")  # hide axes in second plot
     panel2.legend(pie[0], datalist, loc="center", frameon=False, ncol=2, prop={"family": graph_font})
+    mplpy.rcParams["svg.fonttype"] = "none"
+    mplpy.tight_layout()
+    mplpy.savefig(__TMP_PATH__ + filename, format="png", dpi=600)
+    mplpy.close("all")
+
+
+def create_language_bar_chart_file(filename: str, lang_by_year: dict, graph_font: Optional[str] = None) -> None:
+    color_list = __COLOR_LIST__
+    langlist = list(lang_by_year.keys())
+    langlist.sort()
+    yearlist = list(lang_by_year[langlist[0]].keys())
+    minyear = min(yearlist)
+    maxyear = max(yearlist)
+    year_cnts = {y: 0 for y in range(minyear, maxyear+1)}
+    for lang in lang_by_year:
+        dat = lang_by_year[lang]
+        for y in dat:
+            year_cnts[y] += dat[y]
+    x_list = [x for x in range(minyear, maxyear+1)]
+    y_lists = []
+    for lang in langlist:
+        ylist = []
+        dat = lang_by_year[lang]
+        for y in range(minyear, maxyear+1):
+            if year_cnts[y] > 0:
+                ylist.append(dat[y] / year_cnts[y])
+            else:
+                ylist.append(0)
+        y_lists.append(ylist)
+    # create a three-panel plot, two for bar graphs, one for legend
+    fig, (panel1, panel2, panel3) = mplpy.subplots(3, 1, figsize=[6.5, 6])
+    split_year = 1850
+    split_index = x_list.index(split_year)
+    bottoms = [0 for _ in range(split_index)]
+    bars = []
+    for j, ylist in enumerate(y_lists):
+        bars.append(panel1.bar(x_list[:split_index], ylist[:split_index], bottom=bottoms, color=color_list[j],
+                               edgecolor="black", linewidth=0.25))
+        for i in range(len(ylist[:split_index])):
+            bottoms[i] += ylist[i]
+    panel1.spines["right"].set_visible(False)
+    panel1.spines["top"].set_visible(False)
+
+    bottoms = [0 for _ in range(len(x_list) - split_index)]
+    # bars = []
+    for j, ylist in enumerate(y_lists):
+        panel2.bar(x_list[split_index:], ylist[split_index:], bottom=bottoms, color=color_list[j], edgecolor="black",
+                   linewidth=0.25)
+        for i, v in enumerate(ylist[split_index:]):
+            bottoms[i] += v
+    panel2.spines["right"].set_visible(False)
+    panel2.spines["top"].set_visible(False)
+
+    panel3.axis("off")  # hide axes in second plot
+    panel3.legend(bars, langlist, loc="center", frameon=False, ncol=4, prop={"family": graph_font})
+
+    mplpy.xticks(fontname=graph_font)
+    mplpy.yticks(fontname=graph_font)
+
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     mplpy.savefig(__TMP_PATH__ + filename, format="png", dpi=600)

@@ -41,14 +41,14 @@ AUTHOR_NOPCOMMA = 2     # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = True
+DRAW_MAPS = False
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
 CHECK_LOCATIONS = False
 # these flags control creating print and web output, respectively
 OUTPUT_PRINT = True
-OUTPUT_WEB = True
+OUTPUT_WEB = False
 
 
 # randSeed = random.randint(0, 10000)
@@ -503,7 +503,7 @@ def format_language(x: str) -> str:
 
 
 def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_data: list, year_data_1900: list,
-                            cite_count: int, languages: dict) -> None:
+                            cite_count: int, languages, languages_by_year: dict) -> None:
     if do_print:
         start_page_division(outfile, "")
     else:
@@ -639,6 +639,14 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         outfile.write("    <h3 class=\"nobookmark\">Primary Language of References</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"pie_chart\" />\n")
+        outfile.write("    </figure>\n")
+
+        # bar chart of languages by year
+        filename = "year_language_bar.png"
+        TMB_Create_Graphs.create_language_bar_chart_file(filename, languages_by_year, init_data().graph_font)
+        outfile.write("    <h3 class=\"nobookmark\">Primary Language of References by Year</h3>\n")
+        outfile.write("    <figure class=\"graph\">\n")
+        outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
         outfile.write("    </figure>\n")
 
         # pubs per year bar chart
@@ -4205,10 +4213,12 @@ def summarize_year(yeardict: dict) -> Tuple[list, list]:
     miny = init_data().current_year
     maxy = 0
     for y in yeardict:
-        if y < miny:
-            miny = y
-        elif y > maxy:
-            maxy = y
+        miny = min(y, miny)
+        maxy = max(y, maxy)
+        # if y < miny:
+        #     miny = y
+        # elif y > maxy:
+        #     maxy = y
     datalist = []
     c = 0
     # year, total pubs, cumulative pubs, pubs with cite info
@@ -4228,19 +4238,42 @@ def summarize_year(yeardict: dict) -> Tuple[list, list]:
     return datalist, datalist1900
 
 
-def summarize_languages(refs: list) -> dict:
+def summarize_languages(refs: list) -> Tuple[dict, dict]:
+    def primary_language(x: str) -> str:
+        """
+        remove abstract and summary and secondary language notations
+        """
+        s = x.find(" ")
+        if s > -1:
+            x = x[:s]
+        return x
+
     languages = {}
+    miny = init_data().current_year
+    maxy = 0
+    language_set = set()
+    for ref in refs:
+        # print(ref.year())
+        if ref.year() is not None:
+            miny = min(miny, ref.year())
+            maxy = max(maxy, ref.year())
+            if ref.language != "":
+                lang = primary_language(ref.language)
+                language_set.add(lang)
+    languages_by_year = {lang: {y: 0 for y in range(miny, maxy+1)} for lang in language_set}
+
     for ref in refs:
         lang = ref.language
         if lang != "":
-            s = lang.find(" ")
-            if s > -1:
-                lang = lang[:s]
+            lang = primary_language(lang)
             if lang in languages:
                 languages[lang] += 1
             else:
                 languages[lang] = 1
-    return languages
+            if ref.year() is not None:
+                lyear = languages_by_year[lang]
+                lyear[ref.year()] += 1
+    return languages, languages_by_year
 
 
 def write_life_cycle_pages(outfile: TextIO, do_print: bool) -> None:
@@ -5127,7 +5160,7 @@ def build_site() -> None:
                                                                init_data().citation_info_file)
         clean_references(references)
         yeardat, yeardat1900 = summarize_year(yeardict)
-        languages = summarize_languages(references)
+        languages, languages_by_year = summarize_languages(references)
         print("...Reading Species...")
         species = TMB_Import.read_species_data(init_data().species_data_file)
         species_changes_new = TMB_Import.read_simple_file(init_data().species_changes_new)
@@ -5203,7 +5236,8 @@ def build_site() -> None:
                 with open(WEBOUT_PATH + init_data().ref_url, "w", encoding="utf-8") as outfile:
                     write_reference_bibliography(outfile, False, references)
                 with open(WEBOUT_PATH + init_data().ref_sum_url, "w", encoding="utf-8") as outfile:
-                    write_reference_summary(outfile, False, len(references), yeardat, yeardat1900, citecount, languages)
+                    write_reference_summary(outfile, False, len(references), yeardat, yeardat1900, citecount,
+                                            languages, languages_by_year)
                 write_reference_pages(None, False, references, refdict, citelist, name_table, point_locations)
                 print("......Writing Names Info......")
                 with open(WEBOUT_PATH + "names/index.html", "w", encoding="utf-8") as outfile:
@@ -5276,7 +5310,7 @@ def build_site() -> None:
                     write_all_art_pages(printfile, True, art)
                     print("......Writing Reference Pages......")
                     write_reference_summary(printfile, True, len(references), yeardat, yeardat1900, citecount,
-                                            languages)
+                                            languages, languages_by_year)
                     write_reference_bibliography(printfile, True, references)
                     write_reference_pages(printfile, True, references, refdict, citelist, name_table, point_locations)
                     end_print(printfile)
