@@ -644,7 +644,7 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         # bar chart of languages by year
         filename = "year_language_bar.png"
         TMB_Create_Graphs.create_language_bar_chart_file(filename, languages_by_year, init_data().graph_font)
-        outfile.write("    <h3 class=\"nobookmark\">Primary Language of References by Year</h3>\n")
+        outfile.write("    <h3 class=\"nobookmark\">Proportion of References in Primary Language each Year</h3>\n")
         outfile.write("    <figure class=\"graph\">\n")
         outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
         outfile.write("    </figure>\n")
