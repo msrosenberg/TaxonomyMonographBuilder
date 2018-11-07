@@ -3,6 +3,7 @@ General Data Classes for the Taxonomy Manuscript Builder
 """
 
 from typing import Optional
+from TMB_Common import Number
 
 
 # ----classes----
@@ -204,3 +205,9 @@ class LocationClass:
         else:
             cnt = 1
         return cnt + self.n_secondary_parents()
+
+
+class Point:
+    def __init__(self, lat: Number = 0, lon: Number = 0):
+        self.lat = lat
+        self.lon = lon

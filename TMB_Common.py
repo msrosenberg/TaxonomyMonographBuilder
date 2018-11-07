@@ -2,6 +2,10 @@
 Module containing miscellaneous functions used by a variety of other modules
 """
 
+from typing import Union
+
+Number = Union[int, float]
+
 
 def indent(n: int) -> str:
     return n * " "

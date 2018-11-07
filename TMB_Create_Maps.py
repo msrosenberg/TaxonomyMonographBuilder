@@ -11,15 +11,19 @@ completion of the code.
 
 import zipfile
 import multiprocessing
-from typing import Tuple, Union, Optional, TextIO
+# from typing import Tuple, Union, Optional, TextIO
+from typing import Tuple, Optional, TextIO
 import matplotlib.pyplot as mplpy
 from matplotlib.collections import PatchCollection
 import matplotlib.patches as mplp
 import TMB_Initialize
 from TMB_Error import report_error
 from TMB_Common import *
+# from TMB_Classes import Point
+import TMB_ImportShape
 
-Number = Union[int, float]
+
+# Number = Union[int, float]
 __TMP_PATH__ = "temp/"
 __OUTPUT_PATH__ = __TMP_PATH__ + "maps/"
 FIG_WIDTH = 6.5
@@ -27,27 +31,21 @@ FIG_HEIGHT = 3.25
 MAX_PROCESSOR_COUNT = 2  # maximum number of processors which can be used for map creation
 
 
-class Point:
-    def __init__(self, lat: Number = 0, lon: Number = 0):
-        self.lat = lat
-        self.lon = lon
-
-
-class Polygon:
-    def __init__(self):
-        self.points = []
-
-    def n(self) -> int:
-        return len(self.points)
+# class Polygon:
+#     def __init__(self):
+#         self.points = []
+#
+#     def n(self) -> int:
+#         return len(self.points)
 
 
 class BaseMap:
     def __init__(self):
-        self.primary_polygons = []
-        self.secondary_polygons = []
+        self.primary_parts = []
+        self.secondary_parts = []
 
     def has_secondary(self) -> bool:
-        if len(self.secondary_polygons) > 0:
+        if len(self.secondary_parts) > 0:
             return True
         else:
             return False
@@ -207,34 +205,39 @@ def write_all_range_map_kml(species_maps: list) -> None:
         myzip.close()
 
 
-def read_polygons_from_file(filename: str, outlist: list) -> None:
-    with open(filename, "r") as infile:
-        line = infile.readline()
-        while line != "":
-            if line.startswith("Polygon"):
-                data = line.strip().split("\t")
-                new_polygon = Polygon()
-                outlist.append(new_polygon)
-                n = abs(int(data[1]))
-                new_point = Point(lat=float(data[3]), lon=float(data[2]))
-                new_polygon.points.append(new_point)
-                for i in range(n - 1):
-                    line = infile.readline()
-                    data = line.strip().split("\t")
-                    new_point = Point(lat=float(data[1]), lon=float(data[0]))
-                    new_polygon.points.append(new_point)
-            else:
-                line = infile.readline()
+# def read_polygons_from_file(filename: str, outlist: list) -> None:
+#     with open(filename, "r") as infile:
+#         line = infile.readline()
+#         while line != "":
+#             if line.startswith("Polygon"):
+#                 data = line.strip().split("\t")
+#                 new_polygon = Polygon()
+#                 outlist.append(new_polygon)
+#                 n = abs(int(data[1]))
+#                 new_point = Point(lat=float(data[3]), lon=float(data[2]))
+#                 new_polygon.points.append(new_point)
+#                 for i in range(n - 1):
+#                     line = infile.readline()
+#                     data = line.strip().split("\t")
+#                     new_point = Point(lat=float(data[1]), lon=float(data[0]))
+#                     new_polygon.points.append(new_point)
+#             else:
+#                 line = infile.readline()
 
 
 def read_base_map(primary_file: str, secondary_file: Optional[str] = None,
                   island_file: Optional[str] = None) -> BaseMap:
     basemap = BaseMap()
-    read_polygons_from_file(primary_file, basemap.primary_polygons)
+    basemap.primary_parts = TMB_ImportShape.import_arcinfo_shp(primary_file)
     if island_file is not None:
-        read_polygons_from_file(island_file, basemap.primary_polygons)
+        basemap.primary_parts.extend(TMB_ImportShape.import_arcinfo_shp(island_file))
     if secondary_file is not None:
-        read_polygons_from_file(secondary_file, basemap.secondary_polygons)
+        basemap.secondary_parts = TMB_ImportShape.import_arcinfo_shp(secondary_file)
+    # read_polygons_from_file(primary_file, basemap.primary_parts)
+    # if island_file is not None:
+    #     read_polygons_from_file(island_file, basemap.primary_parts)
+    # if secondary_file is not None:
+    #     read_polygons_from_file(secondary_file, basemap.secondary_parts)
     return basemap
 
 
@@ -244,8 +247,33 @@ def draw_base_map(faxes: mplpy.Axes, base_map: BaseMap, adj_lon: int=0) -> None:
     """
     if base_map.has_secondary():
         # if data present, draw internal 1st level boundaries within countries (states, provinces, etc.)
+        parts_list = []
+        for part in base_map.secondary_parts:
+            plist = []
+            for p in part:
+                plist.append([p.lon + adj_lon, p.lat])
+            newp = mplp.Polygon(plist, True)
+            parts_list.append(newp)
+        pc = PatchCollection(parts_list, alpha=1, facecolor="gainsboro", edgecolor="silver", zorder=1, linewidths=0.3)
+        faxes.add_collection(pc)
+
+    parts_list = []
+    for part in base_map.primary_parts:
+        plist = []
+        for p in part:
+            plist.append([p.lon + adj_lon, p.lat])
+        newp = mplp.Polygon(plist, True)
+        parts_list.append(newp)
+    if base_map.has_secondary():
+        pc = PatchCollection(parts_list, alpha=1, facecolor="none", edgecolor="darkgrey", zorder=1, linewidths=0.5)
+    else:
+        pc = PatchCollection(parts_list, alpha=1, facecolor="gainsboro", edgecolor="darkgrey", zorder=1, linewidths=0.5)
+    faxes.add_collection(pc)
+    """
+    if base_map.has_secondary():
+        # if data present, draw internal 1st level boundaries within countries (states, provinces, etc.)
         poly_list = []
-        for polygon in base_map.secondary_polygons:
+        for polygon in base_map.secondary_parts:
             plist = []
             for p in polygon.points:
                 plist.append([p.lon + adj_lon, p.lat])
@@ -255,7 +283,7 @@ def draw_base_map(faxes: mplpy.Axes, base_map: BaseMap, adj_lon: int=0) -> None:
         faxes.add_collection(pc)
 
     poly_list = []
-    for polygon in base_map.primary_polygons:
+    for polygon in base_map.primary_parts:
         plist = []
         for p in polygon.points:
             plist.append([p.lon + adj_lon, p.lat])
@@ -269,6 +297,7 @@ def draw_base_map(faxes: mplpy.Axes, base_map: BaseMap, adj_lon: int=0) -> None:
     # pc = PatchCollection(poly_list, alpha=0.2, facecolor="silver", edgecolor="darkgray", zorder=1, linewidths=0.5)
     # pc = PatchCollection(poly_list, alpha=0.2, facecolor="white", edgecolor="darkgray", zorder=1)
     faxes.add_collection(pc)
+    """
 
 
 def adjust_map_boundaries(minlon: Number, maxlon: Number, minlat: Number, maxlat: Number) -> Tuple[Number, Number,

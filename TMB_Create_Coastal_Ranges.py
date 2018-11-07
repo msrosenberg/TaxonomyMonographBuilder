@@ -107,6 +107,9 @@ def get_overlap(blocks: list, coastline: list):
 
 
 def test_draw(species, ranges, base_map):
+    """
+    only for testing purposes
+    """
     fig, faxes = mplpy.subplots(figsize=[6, 3])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
@@ -118,9 +121,6 @@ def test_draw(species, ranges, base_map):
         for p in line:
             lons.append(p.lon)
             lats.append(p.lat)
-        # p1, p2 = pair[0], pair[1]
-        # lons = [p1.lon, p2.lon]
-        # lats = [p1.lat, p2.lat]
         faxes.plot(lons, lats, color="red", linewidth=0.5)
 
     mplpy.xlim(-180, 180)
@@ -129,15 +129,14 @@ def test_draw(species, ranges, base_map):
     faxes.axes.get_xaxis().set_visible(False)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    # mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("uca_all") + ".svg", format="svg")
     mplpy.savefig(species + "_test.png", format="png", dpi=600)
     mplpy.close("all")
 
 
 def calculate_ranges(init_data: TMB_Initialize.InitializationData):
     base_map = TMB_Create_Maps.read_base_map(init_data.map_primary, None, init_data.map_islands)
-    coastline_map = TMB_ImportShape.import_arcinfo_shp(TMB_Initialize.INIT_DATA.shp_coastline)
-    coastline_map.extend(TMB_ImportShape.import_arcinfo_shp(TMB_Initialize.INIT_DATA.shp_islands))
+    coastline_map = TMB_ImportShape.import_arcinfo_shp(TMB_Initialize.INIT_DATA.map_coastline)
+    coastline_map.extend(TMB_ImportShape.import_arcinfo_shp(TMB_Initialize.INIT_DATA.map_islands))
     print("Number of coastline elements:", len(coastline_map))
 
     species_blocks = import_species_blocks(init_data.species_range_blocks)
@@ -161,5 +160,5 @@ def calculate_ranges(init_data: TMB_Initialize.InitializationData):
 
 if __name__ == "__main__":
     TMB_Initialize.initialize()
-    init_data = TMB_Initialize.INIT_DATA
-    calculate_ranges(init_data)
+    t_init_data = TMB_Initialize.INIT_DATA
+    calculate_ranges(t_init_data)
