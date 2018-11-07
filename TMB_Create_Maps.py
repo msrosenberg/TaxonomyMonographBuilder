@@ -968,10 +968,7 @@ def create_all_maps(init_data: TMB_Initialize.InitializationData, point_location
                     species_plot_locations: Optional[dict] = None, invalid_species_locations: Optional[dict] = None,
                     all_names: Optional[list] = None, binomial_plot_locations: Optional[dict] = None,
                     specific_names: Optional[list] = None, specific_plot_locations: Optional[dict] = None) -> None:
-    # base_map = read_base_map("resources/ne_10m_admin_1_states_provinces.txt", "resources/ne_10m_minor_islands.txt")
-    base_map = read_base_map("resources/ne_10m_admin_0_countries.txt", "resources/ne_10m_admin_1_states_provinces.txt",
-                             "resources/ne_10m_minor_islands.txt")
-    # base_map = read_base_map("resources/ne_50m_admin_0_countries.txt")
+    base_map = read_base_map(init_data.map_primary, init_data.map_secondary, init_data.map_islands)
     if species is not None:
         print("......Creating Species Maps......")
         create_all_species_maps(base_map, init_data, species, point_locations, species_plot_locations,

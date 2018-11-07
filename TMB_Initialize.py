@@ -30,8 +30,16 @@ class InitializationData:
         self.species_changes_new = "data/species_changes_new.txt"
         self.species_changes_spelling = "data/species_changes_spelling.txt"
         self.species_changes_synonyms = "data/species_changes_synonyms.txt"
+        self.species_range_blocks = "data/species_range_blocks.txt"
 
         self.error_log = "errorlog.txt"
+
+        # map data
+        self.map_primary = "resources/ne_10m_admin_0_countries.txt"
+        self.map_secondary = "resources/ne_10m_admin_1_states_provinces.txt"
+        self.map_islands = "resources/ne_10m_minor_islands.txt"
+        self.shp_coastline = "resources/ne_10m_coastline.shp"
+        self.shp_islands = "resources/ne_10m_minor_islands.shp"
 
         # site information
         self.site_title = "Fiddler Crabs"
