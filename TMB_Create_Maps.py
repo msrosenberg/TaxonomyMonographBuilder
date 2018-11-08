@@ -416,6 +416,36 @@ def check_line_boundaries(points: str, minlon: Number, maxlon: Number, minlat: N
     return minlon, maxlon, minlat, maxlat, mid_atlantic, lons, lats
 
 
+def draw_and_adjust_basemap(faxes: mplpy.Axes, base_map: BaseMap, mid_atlantic: bool, minlon: float, maxlon: float,
+                            minlat: float, maxlat: float, all_lons: list, all_lats: list) -> Tuple[float, float, float,
+                                                                                                   float, bool]:
+    draw_base_map(faxes, base_map)
+    wrap_lons = False
+    if (not mid_atlantic) and (maxlon == 180) and (minlon == -180):
+        # shift map focus so default center is international date line rather than Greenwich
+        draw_base_map(faxes, base_map, 360)
+        # adjust longitude of points and recalculate boundaries
+        maxlat = -90
+        minlat = 90
+        maxlon = 0
+        minlon = 360
+        for i in range(len(all_lons)):
+            if all_lons[i] < 0:
+                all_lons[i] += 360
+            maxlon = max(maxlon, all_lons[i])
+            minlon = min(minlon, all_lons[i])
+            maxlat = max(maxlat, all_lats[i])
+            minlat = min(minlat, all_lats[i])
+        minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
+        wrap_lons = True
+    else:  # if necessary, wrap map across international date line
+        if maxlon > 180:
+            draw_base_map(faxes, base_map, 360)
+        if minlon < -180:
+            draw_base_map(faxes, base_map, -360)
+    return minlon, maxlon, minlat, maxlat, wrap_lons
+
+
 def write_species_range_map(base_map: BaseMap, species_map: list, graph_font: Optional[str] = None) -> None:
     fig, faxes = mplpy.subplots(figsize=[FIG_WIDTH, FIG_HEIGHT])
     for spine in faxes.spines:
@@ -442,31 +472,34 @@ def write_species_range_map(base_map: BaseMap, species_map: list, graph_font: Op
              mid_atlantic, all_lons, all_lats) = check_line_boundaries(loc[2], minlon, maxlon, minlat, maxlat,
                                                                        mid_atlantic, all_lons, all_lats)
     minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
-    draw_base_map(faxes, base_map)
-    wrap_lons = False
-    if (not mid_atlantic) and (maxlon == 180) and (minlon == -180):
-        # shift map focus so default center is international date line rather than Greenwich
-        draw_base_map(faxes, base_map, 360)
-        # adjust longitude of points and recalculate boundaries
-        maxlat = -90
-        minlat = 90
-        maxlon = 0
-        minlon = 360
-        for i in range(len(all_lons)):
-            if all_lons[i] < 0:
-                all_lons[i] += 360
-            maxlon = max(maxlon, all_lons[i])
-            minlon = min(minlon, all_lons[i])
-            maxlat = max(maxlat, all_lats[i])
-            minlat = min(minlat, all_lats[i])
-        minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
-        wrap_lons = True
-    else:  # if necessary, wrap map across international date line
-        if maxlon > 180:
-            draw_base_map(faxes, base_map, 360)
-        if minlon < -180:
-            draw_base_map(faxes, base_map, -360)
+    (minlon, maxlon, minlat, maxlat, wrap_lons) = draw_and_adjust_basemap(faxes, base_map, mid_atlantic, minlon,
+                                                                          maxlon, minlat, maxlat, all_lons, all_lats)
+    # draw_base_map(faxes, base_map)
+    # wrap_lons = False
+    # if (not mid_atlantic) and (maxlon == 180) and (minlon == -180):
+    #     # shift map focus so default center is international date line rather than Greenwich
+    #     draw_base_map(faxes, base_map, 360)
+    #     # adjust longitude of points and recalculate boundaries
+    #     maxlat = -90
+    #     minlat = 90
+    #     maxlon = 0
+    #     minlon = 360
+    #     for i in range(len(all_lons)):
+    #         if all_lons[i] < 0:
+    #             all_lons[i] += 360
+    #         maxlon = max(maxlon, all_lons[i])
+    #         minlon = min(minlon, all_lons[i])
+    #         maxlat = max(maxlat, all_lats[i])
+    #         minlat = min(minlat, all_lats[i])
+    #     minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
+    #     wrap_lons = True
+    # else:  # if necessary, wrap map across international date line
+    #     if maxlon > 180:
+    #         draw_base_map(faxes, base_map, 360)
+    #     if minlon < -180:
+    #         draw_base_map(faxes, base_map, -360)
     # draw range lines
+
     for loc in locs:
         if loc[1]:
             for x in loc[2]:
@@ -669,28 +702,31 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
                     mid_atlantic = True
 
     minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
-    draw_base_map(faxes, base_map)
-    if (not mid_atlantic) and (maxlon == 180) and (minlon == -180):
-        # shift map focus so default center is international date line rather than Greenwich
-        draw_base_map(faxes, base_map, 360)
-        # adjust longitude of points and recalculate boundaries
-        maxlat = -90
-        minlat = 90
-        maxlon = 0
-        minlon = 360
-        for i in range(len(lons)):
-            if lons[i] < 0:
-                lons[i] += 360
-            maxlon = max(maxlon, lons[i])
-            minlon = min(minlon, lons[i])
-            maxlat = max(maxlat, lats[i])
-            minlat = min(minlat, lats[i])
-        minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
-    else:  # if necessary, wrap map across international date line
-        if maxlon > 180:
-            draw_base_map(faxes, base_map, 360)
-        if minlon < -180:
-            draw_base_map(faxes, base_map, -360)
+
+    (minlon, maxlon, minlat, maxlat, _) = draw_and_adjust_basemap(faxes, base_map, mid_atlantic, minlon, maxlon,
+                                                                  minlat, maxlat, lons, lats)
+    # draw_base_map(faxes, base_map)
+    # if (not mid_atlantic) and (maxlon == 180) and (minlon == -180):
+    #     # shift map focus so default center is international date line rather than Greenwich
+    #     draw_base_map(faxes, base_map, 360)
+    #     # adjust longitude of points and recalculate boundaries
+    #     maxlat = -90
+    #     minlat = 90
+    #     maxlon = 0
+    #     minlon = 360
+    #     for i in range(len(lons)):
+    #         if lons[i] < 0:
+    #             lons[i] += 360
+    #         maxlon = max(maxlon, lons[i])
+    #         minlon = min(minlon, lons[i])
+    #         maxlat = max(maxlat, lats[i])
+    #         minlat = min(minlat, lats[i])
+    #     minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
+    # else:  # if necessary, wrap map across international date line
+    #     if maxlon > 180:
+    #         draw_base_map(faxes, base_map, 360)
+    #     if minlon < -180:
+    #         draw_base_map(faxes, base_map, -360)
 
     # faxes.scatter(lons, lats, s=20, color=colors, edgecolors=edges, alpha=1, zorder=2, clip_on=False)
     faxes.scatter(lons, lats, s=20, color=colors, edgecolors=edges, alpha=1, zorder=2, clip_on=False, linewidth=0.5)

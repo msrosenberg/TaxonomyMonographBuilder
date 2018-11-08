@@ -10,6 +10,10 @@ from TMB_Common import Number
 import matplotlib.pyplot as mplpy
 
 
+__TMP_PATH__ = "temp/"
+__OUTPUT_PATH__ = __TMP_PATH__ + "maps/"
+
+
 class Rectangle:
     def __init__(self, startlat=0, startlon=0, endlat=0, endlon=0):
         self.lower_left_lat = startlat
@@ -88,18 +92,66 @@ def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseM
     fig, faxes = mplpy.subplots(figsize=[6, 3])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
-    TMB_Create_Maps.draw_base_map(faxes, base_map)
+    maxlat = -90
+    minlat = 90
+    maxlon = -180
+    minlon = 180
+    mid_atlantic = False
+    all_lons = []
+    all_lats = []
+    for line in ranges:
+        for p in line:
+            maxlon = max(maxlon, p.lon)
+            maxlat = max(maxlat, p.lat)
+            minlon = min(minlon, p.lon)
+            minlat = min(minlat, p.lat)
+            if 0 > p.lon > -50:
+                mid_atlantic = True
+            all_lons.append(p.lon)
+            all_lats.append(p.lat)
+    minlon, maxlon, minlat, maxlat = TMB_Create_Maps.adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
+
+    (minlon, maxlon, minlat, maxlat,
+     wrap_lons) = TMB_Create_Maps.draw_and_adjust_basemap(faxes, base_map, mid_atlantic, minlon, maxlon, minlat,
+                                                          maxlat, all_lons, all_lats)
+    # TMB_Create_Maps.draw_base_map(faxes, base_map)
+    # wrap_lons = False
+    # if (not mid_atlantic) and (maxlon == 180) and (minlon == -180):
+    #     # shift map focus so default center is international date line rather than Greenwich
+    #     TMB_Create_Maps.draw_base_map(faxes, base_map, 360)
+    #     # adjust longitude of points and recalculate boundaries
+    #     maxlat = -90
+    #     minlat = 90
+    #     maxlon = 0
+    #     minlon = 360
+    #     for i in range(len(all_lons)):
+    #         if all_lons[i] < 0:
+    #             all_lons[i] += 360
+    #         maxlon = max(maxlon, all_lons[i])
+    #         minlon = min(minlon, all_lons[i])
+    #         maxlat = max(maxlat, all_lats[i])
+    #         minlat = min(minlat, all_lats[i])
+    #     minlon, maxlon, minlat, maxlat = TMB_Create_Maps.adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
+    #     wrap_lons = True
+    # else:  # if necessary, wrap map across international date line
+    #     if maxlon > 180:
+    #         TMB_Create_Maps.draw_base_map(faxes, base_map, 360)
+    #     if minlon < -180:
+    #         TMB_Create_Maps.draw_base_map(faxes, base_map, -360)
 
     for line in ranges:
         lons = []
         lats = []
         for p in line:
-            lons.append(p.lon)
+            lon = p.lon
+            if wrap_lons and lon < 0:
+                lon += 360
+            lons.append(lon)
             lats.append(p.lat)
         faxes.plot(lons, lats, color="red", linewidth=0.5)
 
-    mplpy.xlim(-180, 180)
-    mplpy.ylim(-90, 90)
+    mplpy.xlim(minlon, maxlon)
+    mplpy.ylim(minlat, maxlat)
     faxes.axes.get_yaxis().set_visible(False)
     faxes.axes.get_xaxis().set_visible(False)
     mplpy.rcParams["svg.fonttype"] = "none"
@@ -110,27 +162,77 @@ def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseM
 
 def test_draw_blocks(species: str, blocks: list, base_map: TMB_Create_Maps.BaseMap) -> None:
     """
-    only for testing purposes
+    only for cross-checking purposes
     """
     fig, faxes = mplpy.subplots(figsize=[6, 3])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
-    TMB_Create_Maps.draw_base_map(faxes, base_map)
+
+    maxlat = -90
+    minlat = 90
+    maxlon = -180
+    minlon = 180
+    mid_atlantic = False
+    all_lons = []
+    all_lats = []
+    for block in blocks:
+        maxlon = max(maxlon, block.lower_left_lon, block.upper_right_lon)
+        maxlat = max(maxlat, block.lower_left_lat, block.upper_right_lat)
+        minlon = min(minlon, block.lower_left_lon, block.upper_right_lon)
+        minlat = min(minlat, block.lower_left_lat, block.upper_right_lat)
+        if 0 > block.lower_left_lon > -50:
+            mid_atlantic = True
+        all_lons.extend([block.lower_left_lon, block.upper_right_lon])
+        all_lats.extend([block.lower_left_lat, block.upper_right_lat])
+    minlon, maxlon, minlat, maxlat = TMB_Create_Maps.adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
+    (minlon, maxlon, minlat, maxlat,
+     wrap_lons) = TMB_Create_Maps.draw_and_adjust_basemap(faxes, base_map, mid_atlantic, minlon, maxlon, minlat,
+                                                          maxlat, all_lons, all_lats)
+    # TMB_Create_Maps.draw_base_map(faxes, base_map)
+    # wrap_lons = False
+    # if (not mid_atlantic) and (maxlon == 180) and (minlon == -180):
+    #     # shift map focus so default center is international date line rather than Greenwich
+    #     TMB_Create_Maps.draw_base_map(faxes, base_map, 360)
+    #     # adjust longitude of points and recalculate boundaries
+    #     maxlat = -90
+    #     minlat = 90
+    #     maxlon = 0
+    #     minlon = 360
+    #     for i in range(len(all_lons)):
+    #         if all_lons[i] < 0:
+    #             all_lons[i] += 360
+    #         maxlon = max(maxlon, all_lons[i])
+    #         minlon = min(minlon, all_lons[i])
+    #         maxlat = max(maxlat, all_lats[i])
+    #         minlat = min(minlat, all_lats[i])
+    #     minlon, maxlon, minlat, maxlat = TMB_Create_Maps.adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
+    #     wrap_lons = True
+    # else:  # if necessary, wrap map across international date line
+    #     if maxlon > 180:
+    #         TMB_Create_Maps.draw_base_map(faxes, base_map, 360)
+    #     if minlon < -180:
+    #         TMB_Create_Maps.draw_base_map(faxes, base_map, -360)
 
     for block in blocks:
-        lons = [block.lower_left_lon, block.upper_right_lon, block.upper_right_lon, block.lower_left_lon,
-                block.lower_left_lon]
+        ll = block.lower_left_lon
+        ur = block.upper_right_lon
+        if wrap_lons and ll < 0:
+            ll += 360
+        if wrap_lons and ur < 0:
+            ur += 360
+        lons = [ll, ur, ur, ll, ll]
         lats = [block.lower_left_lat, block.lower_left_lat, block.upper_right_lat, block.upper_right_lat,
                 block.lower_left_lat]
         faxes.plot(lons, lats, color="red", linewidth=0.3)
 
-    mplpy.xlim(-180, 180)
-    mplpy.ylim(-90, 90)
-    faxes.axes.get_yaxis().set_visible(False)
-    faxes.axes.get_xaxis().set_visible(False)
+    mplpy.xlim(minlon, maxlon)
+    mplpy.ylim(minlat, maxlat)
+
+    # faxes.axes.get_yaxis().set_visible(False)
+    # faxes.axes.get_xaxis().set_visible(False)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    mplpy.savefig(species + "_blocks.png", format="png", dpi=600)
+    mplpy.savefig(__OUTPUT_PATH__ + "blocks_" + species + ".png", format="png", dpi=600)
     mplpy.close("all")
 
 
@@ -144,20 +246,10 @@ def calculate_ranges(init_data: TMB_Initialize.InitializationData) -> None:
     for species in species_blocks:
         test_draw_blocks(species, species_blocks[species], base_map)
 
-    # for species in species_blocks:
-    #     print(species)
-    #     for rect in species_blocks[species]:
-    #         print(rect)
     ranges = {}
     for species in species_blocks:
         print("Determining {} range".format(species))
         ranges[species] = get_overlap(species_blocks[species], coastline_map)
-
-    # for species in ranges:
-    #     print(species)
-    #     for r in ranges[species]:
-    #         print(len(r))
-
     for species in ranges:
         test_draw_ranges(species, ranges[species], base_map)
 
