@@ -301,83 +301,84 @@ def fetch_fa_glyph(glyph: Optional[str]) -> str:
     else:
         x = "<span class=\"fa"
         if glyph == "home":
-            x += " fa-home"
+            x += " fa-home\" aria-hidden"
         elif glyph == "blog":
-            x += " fa-pencil-alt"
+            x += " fa-pencil-alt\" aria-hidden"
         elif glyph == "mail":
-            x += " fa-envelope"
+            x += " fa-envelope\" aria-hidden"
         elif glyph == "site cite":
-            x += " fa-pencil-alt"
+            x += " fa-pencil-alt\" aria-hidden"
         elif glyph == "index":
-            x += " fa-list"
+            x += " fa-list\" aria-hidden"
         elif glyph == "summary charts":
-            x += " fa-chart-line"
+            x += " fa-chart-line\" aria-hidden"
         elif glyph == "location":
-            x += " fa-map-marker-alt"
+            x += " fa-map-marker-alt\" aria-hidden"
         elif glyph == "citation":
-            x += " fa-edit"
+            x += " fa-edit\" aria-hidden"
         elif glyph == "specimen":
-            x += " fa-flask"
+            x += " fa-flask\" aria-hidden"
         elif glyph == "original":
-            x += " fa-arrow-alt-left"
+            x += " fa-arrow-alt-left\" aria-hidden"
         elif glyph == "computed":
-            x += " fa-cogs"
+            x += " fa-cogs\" aria-hidden"
         elif glyph == "geography":
-            x += "r fa-map"
+            x += "r fa-map\" aria-hidden"
         elif glyph == "synonymy":
-            x += " fa-exchange"
+            x += " fa-exchange\" aria-hidden"
         elif glyph == "specific name":
-            x += " fa-window-minimize"
+            x += " fa-window-minimize\" aria-hidden"
         elif glyph == "info":
-            x += " fa-info-circle"
+            x += " fa-info-circle\" aria-hidden"
         elif glyph == "accepted species":
-            x += " fa-check-circle"
+            x += " fa-check-circle\" aria-hidden"
         elif glyph == "download":
-            x += " fa-download"
+            x += " fa-download\" aria-hidden"
         elif glyph == "maps":
-            x += "r fa-map"
+            x += "r fa-map\" aria-hidden"
         elif glyph == "photo":
-            x += " fa-camera-alt"
+            x += " fa-camera-alt\" aria-hidden"
         elif glyph == "video":
-            x += " fa-video"
+            x += " fa-video\" aria-hidden"
         elif glyph == "references":
-            x += " fa-book"
+            x += " fa-book\" aria-hidden"
         elif glyph == "art":
-            x += " fa-paint-brush"
+            x += " fa-paint-brush\" aria-hidden"
         elif glyph == "list pdf":
-            x += "-li far fa-file-pdf"
+            x += "-li far fa-file-pdf\" aria-hidden"
         elif glyph == "list github":
-            x += "-li fab fa-github"
+            x += "-li fab fa-github\" aria-hidden"
         elif glyph == "list systematics":
-            x += "-li fa fa-signal fa-rotate-270"
+            x += "-li fa fa-signal fa-rotate-270\" aria-hidden"
         elif glyph == "list phylogeny":
-            x += "-li fa fa-share-alt fa-rotate-270"
+            x += "-li fa fa-share-alt fa-rotate-270\" aria-hidden"
         elif glyph == "list species":
-            x += "-li fa fa-list"
+            x += "-li fa fa-list\" aria-hidden"
         elif glyph == "list common":
-            x += "-li far fa-comments"
+            x += "-li far fa-comments\" aria-hidden"
         elif glyph == "list ranges":
-            x += "-li far fa-map"
+            x += "-li far fa-map\" aria-hidden"
         elif glyph == "list morphology":
-            x += "-li far fa-heart"
+            x += "-li far fa-heart\" aria-hidden"
         elif glyph == "list references":
-            x += "-li fa fa-book"
+            x += "-li fa fa-book\" aria-hidden"
         elif glyph == "list lifecycle":
-            x += "-li fa fa-sync"
+            x += "-li fa fa-sync\" aria-hidden"
         elif glyph == "list photo":
-            x += "-li fa fa-camera-alt"
+            x += "-li fa fa-camera-alt\" aria-hidden"
         elif glyph == "list video":
-            x += "-li fa fa-video"
+            x += "-li fa fa-video\" aria-hidden"
         elif glyph == "list art":
-            x += "-li fa fa-paint-brush"
+            x += "-li fa fa-paint-brush\" aria-hidden"
         elif glyph == "list site cite":
-            x += "-li fa fa-pencil-alt"
+            x += "-li fa fa-pencil-alt\" aria-hidden"
         elif glyph == "bad location":
-            x += " fa-exclamation-triangle\" style=\"color: red\" title=\"Problematic Location"
+            x += " fa-exclamation-triangle\" style=\"color: red\" title=\"Problematic Location: Outside range of " \
+                 "all fiddler crabs or this particular species.\""
         else:
             report_error("missing glyph: " + glyph)
             return ""
-        return x + "\"></span> "
+        return x + "></span> "
 
 
 def rel_link_prefix(do_print: bool, prefix: str = "") -> str:
