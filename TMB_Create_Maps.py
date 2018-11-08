@@ -307,43 +307,6 @@ def adjust_map_boundaries(minlon: Number, maxlon: Number, minlat: Number, maxlat
     Do not allow the boundaries to exceed 180/-180 in lon or 90/-90 in lat
     Force small areas to have a minimum size of 30x15 degrees
     """
-    # min_width = 30  # mininmum width of map in degrees
-    # min_height = min_width / 2
-    # buffer = 5
-    #
-    # maxlon += buffer
-    # minlon -= buffer
-    # maxlat += buffer
-    # minlat -= buffer
-    # lon_range = maxlon - minlon
-    # lat_range = maxlat - minlat
-    # if lon_range < min_width:
-    #     maxlon += min_width/2 - lon_range/2
-    #     minlon -= min_width/2 - lon_range/2
-    # if lat_range < min_height:
-    #     maxlat += min_height/2 - lat_range/2
-    #     minlat -= min_height/2 - lat_range/2
-    # if lon_range > 2 * lat_range:
-    #     d = lon_range - 2 * lat_range
-    #     minlat -= d / 2
-    #     maxlat += d / 2
-    # else:
-    #     d = 2 * lat_range - lon_range
-    #     minlon -= d / 2
-    #     maxlon += d / 2
-    # if maxlon > 180:
-    #     maxlon, minlon = 180, minlon - (maxlon-180)
-    # if minlon < -180:
-    #     maxlon, minlon = maxlon + (-180 - minlon), -180
-    # if maxlat > 90:
-    #     maxlat, minlat = 90, minlat - (maxlat-90)
-    # if minlat < -90:
-    #     maxlat, minlat = maxlat + (-90 - minlat), -90
-    # if (maxlon > 180) or (minlon < -180) or (maxlat > 90) or (minlat < -90):
-    #     return -180, 180, -90, 90
-    # else:
-    #     return minlon, maxlon, minlat, maxlat
-
     min_width = 10  # mininmum width of map in degrees
     min_height = min_width / 2
     buffer = 2  # buffer around points in degrees
@@ -368,10 +331,6 @@ def adjust_map_boundaries(minlon: Number, maxlon: Number, minlat: Number, maxlat
         d = 2 * lat_range - lon_range
         minlon -= d / 2
         maxlon += d / 2
-    # if maxlon > 180:
-    #     maxlon, minlon = 180, minlon - (maxlon-180)
-    # if minlon < -180:
-    #     maxlon, minlon = maxlon + (-180 - minlon), -180
     if maxlat > 90:
         maxlat, minlat = 90, minlat - (maxlat-90)
     if minlat < -90:
