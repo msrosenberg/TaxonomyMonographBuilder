@@ -7,24 +7,29 @@ both z and m elements if present.
 """
 
 import struct
-import TMB_Initialize
+from typing import Tuple
 import matplotlib.pyplot as mplpy
+import TMB_Initialize
 from TMB_Classes import Point
 
 
 VALIDSHAPES = {0, 1, 3, 5, 8, 11, 13, 15, 18, 21, 23, 25, 28, 31}
 
 
-def read_double_value(x, fpos: int):
-    """ extract an 8-byte floating point number from bytestream and increase position counter by 8 """
+def read_double_value(x: bytes, fpos: int) -> Tuple[float, int]:
+    """
+    extract an 8-byte floating point number from bytestream and increase position counter by 8
+    """
     dval = struct.unpack("d", x[fpos:fpos + 8])[0]
     fpos += 8
     return dval, fpos
 
 
-def read_int_value(x, bo, fpos: int):
-    """ extract a 4-byte integer from bytestream and increase position counter by 4 """
-    lval = int.from_bytes(x[fpos:fpos + 4], byteorder=bo)
+def read_int_value(x: bytes, byteorder: str, fpos: int) -> Tuple[int, int]:
+    """
+    extract a 4-byte integer from bytestream and increase position counter by 4
+    """
+    lval = int.from_bytes(x[fpos:fpos + 4], byteorder=byteorder)
     fpos += 4
     return lval, fpos
 
@@ -242,7 +247,7 @@ def import_arcinfo_shp(filename: str) -> list:
     return imported_data
 
 
-def test_draw(map_data):
+def test_draw(map_data: list) -> None:
     """
     Only meant to be used internally to test whether the maps are importing correctly. Creates a PNG
     of the imported line segments
