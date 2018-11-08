@@ -372,6 +372,8 @@ def fetch_fa_glyph(glyph: Optional[str]) -> str:
             x += "-li fa fa-paint-brush"
         elif glyph == "list site cite":
             x += "-li fa fa-pencil-alt"
+        elif glyph == "bad location":
+            x += " fa-exclamation-triangle\" style=\"color: red\" title=\"Problematic Location"
         else:
             report_error("missing glyph: " + glyph)
             return ""
@@ -983,8 +985,8 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
             loc = point_locations[tmpname]
             tmpstr = create_location_link(loc, tmpname, do_print, path="../locations/")
             if tmpname != x:
-                print(tmpname, x)
                 tmpstr += x[len(tmpname):]
+                tmpstr = tmpstr.replace("<!>", fetch_fa_glyph("bad location"))
         else:
             tmpstr = x
         return tmpstr
