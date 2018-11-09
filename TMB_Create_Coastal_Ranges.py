@@ -36,15 +36,16 @@ class Rectangle:
 def import_species_blocks(filename: str) -> dict:
     blocks = {}
     with open(filename, "r") as infile:
-        for line in infile:
-            if line.strip() != "":
-                species, startlat, startlon, endlat, endlon = line.strip().split("\t")
-                if species in blocks:
-                    block_data = blocks[species]
-                else:
-                    block_data = []
-                    blocks[species] = block_data
-                block_data.append(Rectangle(eval(startlat), eval(startlon), eval(endlat), eval(endlon)))
+        lines = infile.readlines()
+    for line in lines[1:]:
+        if line.strip() != "":
+            species, startlat, startlon, endlat, endlon = line.strip().split("\t")
+            if species in blocks:
+                block_data = blocks[species]
+            else:
+                block_data = []
+                blocks[species] = block_data
+            block_data.append(Rectangle(eval(startlat), eval(startlon), eval(endlat), eval(endlon)))
     return blocks
 
 
