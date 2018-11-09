@@ -499,6 +499,7 @@ def format_language(x: str) -> str:
         ["Vietnamese", "<span class=\"flag-icon flag-icon-vn\"></span> Vietnamese"],
         ["Korean", "<span class=\"flag-icon flag-icon-kr\"></span> Korean"],
         ["Polish", "<span class=\"flag-icon flag-icon-pl\"></span> Polish"]
+        ["Burmese", "<span class=\"flag-icon flag-icon-mm\"></span> Burmese"],
     ]
     for r in language_replace_list:
         x = x.replace(r[0], r[1])
