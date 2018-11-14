@@ -11,7 +11,6 @@ completion of the code.
 
 import zipfile
 import multiprocessing
-# from typing import Tuple, Union, Optional, TextIO
 from typing import Tuple, Optional, TextIO
 import matplotlib.pyplot as mplpy
 from matplotlib.collections import PatchCollection
@@ -23,7 +22,6 @@ from TMB_Common import *
 import TMB_ImportShape
 
 
-# Number = Union[int, float]
 __TMP_PATH__ = "temp/"
 __OUTPUT_PATH__ = __TMP_PATH__ + "maps/"
 FIG_WIDTH = 6.5

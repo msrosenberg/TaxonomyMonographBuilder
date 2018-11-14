@@ -20,6 +20,10 @@ class Rectangle:
         self.lower_left_lon = startlon
         self.upper_right_lat = endlat
         self.upper_right_lon = endlon
+        if endlon < startlon:
+            self.wrap = True
+        else:
+            self.wrap = False
 
     def __str__(self):
         return "{}, {}, {}, {}".format(self.lower_left_lat, self.lower_left_lon, self.upper_right_lat,
@@ -29,6 +33,14 @@ class Rectangle:
         if (self.lower_left_lat <= lat <= self.upper_right_lat) and \
                 (self.lower_left_lon <= lon <= self.upper_right_lon):
             return True
+        elif self.wrap:
+            if lon < 0:
+                lon += 360
+            if (self.lower_left_lat <= lat <= self.upper_right_lat) and \
+                    (self.lower_left_lon <= lon <= self.upper_right_lon + 360):
+                return True
+            else:
+                return False
         else:
             return False
 
@@ -131,7 +143,7 @@ def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseM
     mplpy.ylim(minlat, maxlat)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    mplpy.savefig(species + "_test_range.png", format="png", dpi=600)
+    mplpy.savefig(__OUTPUT_PATH__ + "blocks_" + species + "_test_range.png", format="png", dpi=600)
     mplpy.close("all")
 
 
@@ -164,7 +176,7 @@ def test_draw_blocks(species: str, blocks: list, base_map: TMB_Create_Maps.BaseM
      wrap_lons) = TMB_Create_Maps.draw_and_adjust_basemap(faxes, base_map, mid_atlantic, minlon, maxlon, minlat,
                                                           maxlat, all_lons, all_lats)
 
-    for block in blocks:
+    for i, block in enumerate(blocks):
         ll = block.lower_left_lon
         ur = block.upper_right_lon
         if wrap_lons and ll < 0:
@@ -172,9 +184,12 @@ def test_draw_blocks(species: str, blocks: list, base_map: TMB_Create_Maps.BaseM
         if wrap_lons and ur < 0:
             ur += 360
         lons = [ll, ur, ur, ll, ll]
+        midx = ll + (ur - ll)/2
+        midy = block.lower_left_lat + (block.upper_right_lat - block.lower_left_lat)/2
         lats = [block.lower_left_lat, block.lower_left_lat, block.upper_right_lat, block.upper_right_lat,
                 block.lower_left_lat]
         faxes.plot(lons, lats, color="red", linewidth=0.3)
+        faxes.text(midx, midy, str(i+1), fontsize=6, color="blue")
 
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)
