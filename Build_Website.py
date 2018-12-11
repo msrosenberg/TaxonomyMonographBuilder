@@ -41,13 +41,15 @@ AUTHOR_NOPCOMMA = 2     # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = False
+DRAW_MAPS = True
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
 CHECK_LOCATIONS = False
+# this flag controls whether additional location data should be fetched from iNaturalist
+INCLUDE_INAT = True
 # these flags control creating print and web output, respectively
-OUTPUT_PRINT = False
+OUTPUT_PRINT = True
 OUTPUT_WEB = True
 
 
@@ -100,9 +102,9 @@ def common_header_part1(outfile: TextIO, title: str, indexpath: str = "") -> Non
     outfile.write("    <link rel=\"apple-touch-icon-precomposed\" sizes=\"144x144\" "
                   "href=\"" + indexpath + "apple-touch-icon-144x144-precomposed.png\">\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath + "uca_style.css\" />\n")
-    outfile.write("    <script defer src=\"" + indexpath + "js/fa-solid.min.js\"></script>\n")
-    outfile.write("    <script defer src=\"" + indexpath + "js/fa-regular.min.js\"></script>\n")
-    outfile.write("    <script defer src=\"" + indexpath + "js/fa-brands.min.js\"></script>\n")
+    outfile.write("    <script defer src=\"" + indexpath + "js/solid.min.js\"></script>\n")
+    outfile.write("    <script defer src=\"" + indexpath + "js/regular.min.js\"></script>\n")
+    outfile.write("    <script defer src=\"" + indexpath + "js/brands.min.js\"></script>\n")
     outfile.write("    <script defer src=\"" + indexpath + "js/fontawesome.min.js\"></script>\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath +
                   "images/flag-icon-css/css/flag-icon.min.css\" />\n")
@@ -4886,9 +4888,9 @@ def copy_support_files() -> None:
             report_error("Missing file: " + TMP_PATH + filename)
     # font-awesome files
     filelist = {"fontawesome.min.js",
-                "fa-brands.min.js",
-                "fa-regular.min.js",
-                "fa-solid.min.js"}
+                "brands.min.js",
+                "regular.min.js",
+                "solid.min.js"}
     for filename in filelist:
         try:
             shutil.copy2("resources/font-awesome/js/" + filename, WEBOUT_PATH + "js/")
@@ -5209,6 +5211,12 @@ def build_site() -> None:
          location_direct_refs, location_cited_refs) = match_names_to_locations(species, specific_point_locations,
                                                                                binomial_point_locations,
                                                                                point_locations, citelist)
+        if INCLUDE_INAT:
+            species_inat = TMB_Import.fetch_inat_data(species)
+            for s in species:
+                if s.species in species_inat:
+                    print("{}: {} iNat observations".format(s.species, len(species_inat[s.species])))
+            input()
 
         if CHECK_DATA:
             # run functions that cross check data but skip the output

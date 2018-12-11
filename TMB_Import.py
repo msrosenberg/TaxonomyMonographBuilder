@@ -4,6 +4,8 @@ Functions to read data from files
 
 # import codecs
 from typing import Tuple
+import urllib.request
+import csv
 import TMB_Classes
 from TMB_Error import report_error
 
@@ -292,15 +294,37 @@ def read_location_data(filename: str) -> dict:
         if loc[8] != ".":
             newloc.secondary_parents = list(loc[8].split(";"))
         newloc.validity = loc[9]
-        # if loc[10] != ".":
-        #     newloc.ne_lat = float(loc[10])
-        #     newloc.ne_lon = float(loc[11])
-        #     newloc.sw_lat = float(loc[12])
-        #     newloc.sw_lon = float(loc[13])
-        # else:  # set default boundaries if they are not loaded
-        #     newloc.ne_lat = newloc.latitude + 7.5
-        #     newloc.ne_lon = newloc.longitude + 15
-        #     newloc.sw_lat = newloc.latitude - 7.5
-        #     newloc.sw_lon = newloc.longitude - 15
         locdict[newloc.name] = newloc
     return locdict
+
+
+def get_webpage(url: str, encoding: str) -> list:
+    """
+    function to fetch the webpage specifed by url and return a list containing the contents of the page
+    """
+    webpage = urllib.request.urlopen(url)
+    page = webpage.read()
+    page = page.decode(encoding)
+    lines = page.split('\n')
+    return lines
+
+
+def fetch_inat_data(species: list) -> dict:
+    """
+    function to fetch species observation data from iNaturalist
+    """
+    inat_data = {}
+    for s in species:
+        if s.inatid != ".":
+            coords = []
+            raw_data = get_webpage("https://www.inaturalist.org/observations.csv?taxon_id=" + s.inatid +
+                                   "?per_page=200", "utf-8")
+            for data in csv.reader(raw_data[1:]):
+                if len(data) > 0:
+                    try:
+                        point = TMB_Classes.Point(eval(data[4]), eval(data[5]))
+                        coords.append(point)
+                    except SyntaxError:
+                        pass
+            inat_data[s.species] = coords
+    return inat_data
