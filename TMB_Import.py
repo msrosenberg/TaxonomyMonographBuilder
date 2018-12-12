@@ -317,14 +317,21 @@ def fetch_inat_data(species: list) -> dict:
     for s in species:
         if s.inatid != ".":
             coords = []
-            raw_data = get_webpage("https://www.inaturalist.org/observations.csv?taxon_id=" + s.inatid +
-                                   "?per_page=200", "utf-8")
-            for data in csv.reader(raw_data[1:]):
-                if len(data) > 0:
-                    try:
-                        point = TMB_Classes.Point(eval(data[4]), eval(data[5]))
-                        coords.append(point)
-                    except SyntaxError:
-                        pass
+            page = 0
+            next_page = True
+            while next_page:
+                page += 1
+                raw_data = get_webpage("https://www.inaturalist.org/observations.csv?taxon_id=" + s.inatid +
+                                       "&per_page=200&quality_grade=research&page=" + str(page), "utf-8")
+                if len(raw_data) > 2:  # header plus the blank line at the end; data would require at least 3 lines
+                    for data in csv.reader(raw_data[1:]):
+                        if len(data) > 0:
+                            try:
+                                point = TMB_Classes.Point(eval(data[4]), eval(data[5]))
+                                coords.append(point)
+                            except SyntaxError:
+                                pass
+                else:
+                    next_page = False
             inat_data[s.species] = coords
     return inat_data

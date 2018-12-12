@@ -869,7 +869,7 @@ def compute_species_from_citation_linking(citelist: list) -> None:
                     cite.name_note = "in part; " + cite.name_note
 
 
-def create_species_link(species: str, do_print: bool, status: str = "", path: str ="") -> str:
+def create_species_link(species: str, do_print: bool, status: str = "", path: str = "") -> str:
     if status == "fossil":
         sc = FOSSIL_IMAGE
     else:
@@ -2388,7 +2388,7 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"locations\index.html\">" + fetch_fa_glyph("index") + "Location "
+        outfile.write("          <li><a href=\"locations/index.html\">" + fetch_fa_glyph("index") + "Location "
                       "Index</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
@@ -5213,10 +5213,12 @@ def build_site() -> None:
                                                                                point_locations, citelist)
         if INCLUDE_INAT:
             species_inat = TMB_Import.fetch_inat_data(species)
-            for s in species:
-                if s.species in species_inat:
-                    print("{}: {} iNat observations".format(s.species, len(species_inat[s.species])))
-            input()
+            # for s in species:
+            #     if s.species in species_inat:
+            #         print("{}: {} iNat observations".format(s.species, len(species_inat[s.species])))
+            # input()
+        else:
+            species_inat = None
 
         if CHECK_DATA:
             # run functions that cross check data but skip the output
@@ -5238,7 +5240,7 @@ def build_site() -> None:
                 print("......Map Start Time:", map_start_time)
                 TMB_Create_Maps.create_all_maps(init_data(), point_locations, species, species_plot_locations,
                                                 invalid_species_locations, all_names, binomial_plot_locations,
-                                                specific_names, specific_plot_locations)
+                                                specific_names, specific_plot_locations, species_inat)
                 map_end_time = datetime.datetime.now()
                 print("......Map End Time:", map_end_time)
                 print("...Total Map Creation Time:", map_end_time - map_start_time)
