@@ -135,7 +135,7 @@ def start_google_map_header(outfile: TextIO) -> None:
     start of common header entries for webout html files which contain Google maps elements
     """
     outfile.write("    <script type=\"text/javascript\"\n")
-    outfile.write("      src=\"http://maps.googleapis.com/maps/api/js?"
+    outfile.write("      src=\"https://maps.googleapis.com/maps/api/js?"
                   "key=AIzaSyAaITaFdh_own-ULkURNKtyeh2ZR_cpR74&sensor=false\">\n")
     outfile.write("    </script>\n")
     outfile.write("    <script type=\"text/javascript\">\n")
@@ -3332,6 +3332,18 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
                           fetch_fa_glyph("download") + "Download PNG line map of point locations.</a>\n")
             outfile.write("           </div>\n")
         outfile.write("         </dd>\n")
+
+        outfile.write("         <dd class=\"map_data\">\n")
+        if species.inatid != ".":
+            x = "/taxa/" + species.inatid
+        else:
+            x = ""
+        outfile.write("           Red markers indicate locations where this species is found according to the "
+                      "scientific record; blue markers represent false or mistaken observations from the scientific "
+                      "record; green markers represent &ldquo;research grade&rdquo; observations imported from "
+                      "<a href=\"https://www.inaturalist.org" + x + "\">iNaturalist</a>.\n")
+        outfile.write("         </dd>\n")
+
         outfile.write("         <dd class=\"map_data\">\n")
         maprefkeylist = species.range_references.split(";")
         maprefkeylist.sort(key=lambda s: s.lower())
@@ -3350,18 +3362,18 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
     if not do_print:
         outfile.write("       <dt>External Links</dt>\n")
         if species.eolid != ".":
-            outfile.write("         <dd><a href=\"http://eol.org/pages/" + species.eolid +
+            outfile.write("         <dd><a href=\"https://eol.org/pages/" + species.eolid +
                           "/overview\">Encyclopedia of Life</a></dd>\n")
-        outfile.write("         <dd><a href=\"http://en.wikipedia.org/wiki/Uca_" + species.species +
+        outfile.write("         <dd><a href=\"https://en.wikipedia.org/wiki/Uca_" + species.species +
                       "\">Wikipedia</a></dd>\n")
         if species.inatid != ".":
-            outfile.write("         <dd><a href=\"http://www.inaturalist.org/taxa/" + species.inatid +
+            outfile.write("         <dd><a href=\"https://www.inaturalist.org/taxa/" + species.inatid +
                           "\">iNaturalist</a></dd>\n")
         if species.taxonid != ".":
-            outfile.write("         <dd><a href=\"http://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=" +
+            outfile.write("         <dd><a href=\"https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=" +
                           species.taxonid + "\">NCBI Taxonomy Browser/Genbank</a></dd>\n")
         if species.gbifid != ".":
-            outfile.write("         <dd><a href=\"http://www.gbif.org/species/" + species.gbifid +
+            outfile.write("         <dd><a href=\"https://www.gbif.org/species/" + species.gbifid +
                           "\">GBIF</a></dd>\n")
 
     outfile.write("      </dl>\n")
@@ -4690,7 +4702,7 @@ def write_citation_page(refdict: dict) -> None:
         outfile.write("    </div>\n")
         outfile.write("    <ul class=\"fa-ul\">\n")
         outfile.write("      <li>" + fetch_fa_glyph("list pdf") +
-                      "<a href=\"http://dx.plos.org/10.1371/journal.pone.0101704\">Read paper online at "
+                      "<a href=\"https://dx.plos.org/10.1371/journal.pone.0101704\">Read paper online at "
                       "PLoS ONE</a></li>\n")
         outfile.write("      <li>" + fetch_fa_glyph("list github") +
                       "<a href=\"https://github.com/msrosenberg/fiddlercrab.info\">Website data repository on "

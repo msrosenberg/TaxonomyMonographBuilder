@@ -45,7 +45,7 @@ class InitializationData:
         self.site_subtitle = "A Comprehensive Compendium and Guide to the Fiddler Crabs of the World"
         self.site_author = "Michael S. Rosenberg"
         self.site_address = "www.fiddlercrab.info"
-        self.site_http = "http://"  # this leaves open the option of quick switching to https
+        self.site_http = "https://"  # this leaves open the option of quick switching between http and https
 
         # major web output file names
         self.species_url = "uca_species.html"
