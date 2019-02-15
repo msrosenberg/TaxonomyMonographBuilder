@@ -6,6 +6,7 @@ Functions to read data from files
 from typing import Tuple
 import urllib.request
 import csv
+from tqdm import tqdm
 import TMB_Classes
 from TMB_Error import report_error
 
@@ -314,7 +315,8 @@ def fetch_inat_data(species: list) -> dict:
     function to fetch species observation data from iNaturalist
     """
     inat_data = {}
-    for s in species:
+    print("...Importing iNaturalist Data...")
+    for s in tqdm(species):
         if s.inatid != ".":
             coords = []
             page = 0
