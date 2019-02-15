@@ -12,6 +12,7 @@ import re
 import math
 # import subprocess
 from typing import Optional, Tuple, Union, TextIO
+# from tqdm import tqdm
 # local dependencies
 import TMB_Import
 import TMB_Create_Maps
@@ -111,7 +112,7 @@ def common_header_part1(outfile: TextIO, title: str, indexpath: str = "") -> Non
     outfile.write("    <link rel=\"author\" href=\"mailto:msrosenberg@vcu.edu\" />\n")
 
 
-def common_header_part2(outfile: TextIO, indexpath: str ="", include_map: bool = False) -> None:
+def common_header_part2(outfile: TextIO, indexpath: str = "", include_map: bool = False) -> None:
     """
     part 2 of the common header for all webout html files
     """
@@ -755,6 +756,7 @@ def write_reference_bibliography(outfile: TextIO, do_print: bool, reflist: list)
     outfile.write("    <section class=\"spsection\">\n")
     outfile.write("      <div class=\"reference_list\">\n")
     outfile.write("        <ul>\n")
+    # for ref in tqdm(reflist):
     for ref in reflist:
         outfile.write("          <li>" + format_reference_full(ref, do_print) + "</li>\n")
     outfile.write("        </ul>\n")
@@ -822,6 +824,7 @@ def compute_species_from_citation_linking(citelist: list) -> None:
     """
     function to update correct species citations through cross-references to earlier works
     """
+    # for i, cite in enumerate(tqdm(citelist)):
     for i, cite in enumerate(citelist):
         if cite.actual == "=":
             cname = ""
@@ -1276,6 +1279,7 @@ def write_reference_pages(printfile: Optional[TextIO], do_print: bool, reflist: 
     """
     control function to loop through creating a page for every reference
     """
+    # for ref in tqdm(reflist):
     for ref in reflist:
         if ref.cite_key != "<pending>":
             if do_print:
@@ -2323,6 +2327,8 @@ def write_all_name_pages(outfile: TextIO, do_print: bool, refdict: dict, citelis
             create_genus_chronology(suboutfile, do_print, genus_cnts)
 
     # write out individual pages for each binomial name and specific name
+    print("..........Unique/Binomial Names..........")
+    # for name in tqdm(unique_names):
     for name in unique_names:
         sname = match_specific_name(name, specific_names)
         namefile = name_to_filename(name)
@@ -2333,6 +2339,8 @@ def write_all_name_pages(outfile: TextIO, do_print: bool, refdict: dict, citelis
             with open(WEBOUT_PATH + "names/" + namefile + ".html", "w", encoding="utf-8") as suboutfile:
                 write_binomial_name_page(suboutfile, False, name, namefile, binomial_usage_cnts_by_year[name], refdict,
                                          citelist, name_table, sname, binomial_locations[name], point_locations)
+    print("..........Specific Names..........")
+    # for name in tqdm(specific_names):
     for name in specific_names:
         if do_print:
             write_specific_name_page(outfile, True, name, unique_names, refdict, binomial_usage_cnts_by_year,
@@ -2816,6 +2824,7 @@ def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict,
     else:
         common_html_footer(outfile)
 
+    # for p in tqdm(top_list):
     for p in top_list:
         loc = point_locations[p]
         if do_print:
@@ -3005,6 +3014,7 @@ def connect_refs_to_species(species: list, citelist: list) -> dict:
     # create a dictionary with empty reference lists
     species_refs = {s.species: set() for s in species}
     # go through all citations
+    # for c in tqdm(citelist):
     for c in citelist:
         if c.actual in species_refs:
             reflist = species_refs[c.actual]
@@ -3549,6 +3559,7 @@ def write_photo_index(outfile: TextIO, do_print: bool, specieslist: list, photos
     # output individual photo pages
     for sp in specieslist:
         species = sp.species
+        # for photo in tqdm(photos):
         for photo in photos:
             splist = photo.species.split(";")
             if species == splist[0]:  # only output one time
@@ -3641,6 +3652,7 @@ def write_video_index(outfile: TextIO, do_print: bool, videos: list) -> None:
         end_page_division(outfile)
     else:
         common_html_footer(outfile)
+        # for video in tqdm(videos):
         for video in videos:
             vn = int(video.n)
             if ";" in video.species:
@@ -3921,6 +3933,7 @@ def write_species_info_pages(outfile: Optional[TextIO], do_print: bool, speciesl
     else:
         with open(WEBOUT_PATH + init_data().species_url, "w", encoding="utf-8") as suboutfile:
             write_species_list(suboutfile, False, specieslist)
+    # for species in tqdm(specieslist):
     for species in specieslist:
         sprefs = species_refs[species.species]
         if do_print:
@@ -5190,8 +5203,11 @@ def build_site() -> None:
         species_changes_spelling = TMB_Import.read_simple_file(init_data().species_changes_spelling)
 
         print("...Connecting References...")
+        print("......Computing Species from Citation Linking......")
         compute_species_from_citation_linking(citelist)
+        # print("......Computing Applied Name Contexts......")
         compute_applied_name_contexts(citelist)
+        print("......Connecting References to Species......")
         species_refs = connect_refs_to_species(species, citelist)
 
         print("...Reading Species Names...")
@@ -5202,6 +5218,7 @@ def build_site() -> None:
          specific_usage_cnts) = calculate_name_index_data(refdict, citelist, specific_names)
         common_name_data = TMB_Import.read_common_name_data(init_data().common_names_file)
         subgenera = TMB_Import.read_subgenera_data(init_data().subgenera_file)
+        print("...Creating Wordclouds...")
         TMB_Create_Graphs.create_word_cloud_image(binomial_usage_cnts, specific_usage_cnts, init_data().wc_font_path)
 
         print("...Reading Photos and Videos...")
