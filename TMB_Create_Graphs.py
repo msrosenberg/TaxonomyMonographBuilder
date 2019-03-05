@@ -11,7 +11,7 @@ __TMP_PATH__ = "temp/"
 # my approximation of the pygal color scheme
 __COLOR_LIST__ = ["salmon", "royalblue", "lightseagreen", "gold", "darkorange", "mediumorchid", "deepskyblue",
                   "lightgreen", "sandybrown", "palevioletred", "lightskyblue", "mediumaquamarine", "lemonchiffon",
-                  "red", "green"]
+                  "red", "green", "blue", "yellow"]
 
 
 def create_pie_chart_file(filename: str, data: dict, graph_font: Optional[str] = None) -> None:
