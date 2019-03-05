@@ -963,6 +963,7 @@ def clean_specific_name(x: str) -> str:
                  "spec.",
                  "5",
                  "6",
+                 "1",
                  "afruca",
                  "gelasimus")
 
@@ -5242,7 +5243,7 @@ def build_site() -> None:
          location_direct_refs, location_cited_refs) = match_names_to_locations(species, specific_point_locations,
                                                                                binomial_point_locations,
                                                                                point_locations, citelist)
-        if INCLUDE_INAT:
+        if INCLUDE_INAT and (not CHECK_DATA):
             species_inat = TMB_Import.fetch_inat_data(species)
             # for s in species:
             #     if s.species in species_inat:
