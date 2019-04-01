@@ -197,13 +197,13 @@ def read_subgenera_data(filename: str) -> list:
     tmplist = read_simple_file(filename)
     genlist = []
     for g in tmplist:
-        newsubgenus = TMB_Classes.SubgenusClass()
+        newsubgenus = TMB_Classes.RankedTaxonClass()
         newsubgenus.subgenus = g[0]
-        newsubgenus.author = g[1]
-        newsubgenus.type_species = g[2]
-        newsubgenus.notes = g[3]
-        newsubgenus.taxonid = g[4]
-        newsubgenus.eolid = g[5]
+        newsubgenus.author = g[3]
+        newsubgenus.type_species = g[4]
+        newsubgenus.notes = g[5]
+        newsubgenus.taxonid = g[6]
+        newsubgenus.eolid = g[7]
         genlist.append(newsubgenus)
     return genlist
 

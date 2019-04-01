@@ -47,7 +47,7 @@ class SpecificNameClass:
         return self.name < x.name
 
 
-class SubgenusClass:
+class RankedTaxonClass:
     """ a class to hold subgenera """
     def __init__(self):
         self.subgenus = ""
@@ -56,6 +56,8 @@ class SubgenusClass:
         self.notes = ""
         self.taxonid = ""
         self.eolid = ""
+        self.parent = None
+        self.taxon_level = ""
 
 
 class VideoClass:
