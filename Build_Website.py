@@ -5253,7 +5253,7 @@ def build_site() -> None:
          name_table, specific_point_locations, binomial_point_locations, binomial_usage_cnts,
          specific_usage_cnts) = calculate_name_index_data(refdict, citelist, specific_names)
         common_name_data = TMB_Import.read_common_name_data(init_data().common_names_file)
-        ranked_taxa = TMB_Import.read_subgenera_data(init_data().subgenera_file)
+        ranked_taxa = TMB_Import.read_ranked_taxa_data(init_data().subgenera_file)
         print("...Creating Wordclouds...")
         TMB_Create_Graphs.create_word_cloud_image(binomial_usage_cnts, specific_usage_cnts, init_data().wc_font_path)
 

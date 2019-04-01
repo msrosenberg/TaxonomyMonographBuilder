@@ -190,9 +190,9 @@ def read_video_data(filename: str) -> list:
     return video_list
 
 
-def read_subgenera_data(filename: str) -> list:
+def read_ranked_taxa_data(filename: str) -> list:
     """
-    read subgenera data
+    read data on taxa of ranks other than species
     """
     tmplist = read_simple_file(filename)
     genlist = []
