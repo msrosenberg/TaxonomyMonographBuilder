@@ -4755,7 +4755,7 @@ def write_citation_page(refdict: dict) -> None:
         common_html_footer(outfile)
 
 
-def write_introduction(outfile: TextIO, do_print: bool, species: list) -> None:
+def write_introduction(outfile: TextIO, do_print: bool, species: list, ranked_taxa: list) -> None:
     """
     create the site index
     """
@@ -4800,7 +4800,15 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list) -> None:
     outfile.write("      <tr><td class=\"classcol1\">Superfamily</td><td>Ocypodoidea</td></tr>\n")
     outfile.write("      <tr><td class=\"classcol1\">Family</td><td>Ocypodidae</td></tr>\n")
     outfile.write("      <tr><td class=\"classcol1\">Subfamily</td><td>Ocypodinae</td>\n")
-    outfile.write("      <tr><td class=\"classcol1\">Genus</td><td><em class=\"species\">Uca</em></td>\n")
+    # outfile.write("      <tr><td class=\"classcol1\">Genus</td><td><em class=\"species\">Uca</em></td>\n")
+    genera = []
+    for t in ranked_taxa:
+        if t.taxon_rank == "genus":
+            genera.append(t.name)
+    genera.sort()
+    outfile.write("      <tr><td class=\"classcol1\">Genera</td><td><em class=\"species\">" +
+                  ", ".join(genera) + "</em></td>\n")
+
     outfile.write("    </table>\n")
     outfile.write("\n")
     outfile.write("    <p>\n")
@@ -5351,7 +5359,7 @@ def build_site() -> None:
                 with open(WEBOUT_PATH + init_data().morph_url, "w", encoding="utf-8") as outfile:
                     write_main_morphology_pages(outfile, False, morphology)
                 with open(WEBOUT_PATH + "index.html", "w", encoding="utf-8") as outfile:
-                    write_introduction(outfile, False, species)
+                    write_introduction(outfile, False, species, ranked_taxa)
                 write_citation_page(refdict)
 
             # output print version
@@ -5360,7 +5368,7 @@ def build_site() -> None:
                 with open("print.html", "w", encoding="utf-8") as printfile:
                     start_print(printfile)
                     write_print_only_pages(printfile, species, refdict)
-                    write_introduction(printfile, True, species)
+                    write_introduction(printfile, True, species, ranked_taxa)
                     write_common_names_pages(printfile, True, replace_references(common_name_data, refdict, True))
                     write_systematics_overview(printfile, True, ranked_taxa, species, refdict, species_changes_new,
                                                species_changes_synonyms, species_changes_spelling)
