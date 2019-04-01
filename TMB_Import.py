@@ -177,7 +177,7 @@ def read_video_data(filename: str) -> list:
         newvideo.activity = v[2]
         newvideo.caption = v[3]
         newvideo.length = v[4]
-        newvideo.width = int(v(5))
+        newvideo.width = int(v[5])
         newvideo.height = int(v[6])
         newvideo.format = v[7]
         newvideo.date_location = v[8]
