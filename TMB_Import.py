@@ -148,6 +148,7 @@ def read_species_data(filename: str) -> list:
         newspecies.inatid = s[13]
         newspecies.gbifid = s[14]
         species_list.append(newspecies)
+    species_list.sort()  # sort into alphabetical order
     return species_list
 
 
