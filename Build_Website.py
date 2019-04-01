@@ -53,6 +53,7 @@ INCLUDE_INAT = True
 OUTPUT_PRINT = True
 OUTPUT_WEB = True
 
+SPECIES_XREF = {}
 
 # randSeed = random.randint(0, 10000)
 
@@ -873,14 +874,15 @@ def compute_species_from_citation_linking(citelist: list) -> None:
                     cite.name_note = "in part; " + cite.name_note
 
 
-def prepare_species_crossref(species: list) -> dict:
-    species_xref = {}
+def prepare_species_crossref(species: list):
+    global SPECIES_XREF
+    SPECIES_XREF = {}
     for s in species:
-        species_xref[s.species] = s
-    return species_xref
+        SPECIES_XREF[s.species] = s
 
 
-def find_species_by_name(x: str, sp_dict) -> TMB_Classes.SpeciesClass:
+def find_species_by_name(x: str) -> TMB_Classes.SpeciesClass:
+    sp_dict = SPECIES_XREF
     if x in sp_dict:
         return sp_dict[x]
     else:
@@ -1129,9 +1131,9 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
             outfile.write("      <td><em class=\"species\">" + n.actual[1:] +
                           "</em></td>\n")
         else:
+            s = find_species_by_name(n.actual)
             outfile.write("      <td><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + n.actual +
-                          ".html\"><em class=\"species\">Uca " + n.actual +
-                          "</em></a></td>\n")
+                          ".html\"><em class=\"species\">" + s.fullname() + "</em></a></td>\n")
 
         # source of accepted species
         if n.source == ".":  # currently not listed
@@ -1473,8 +1475,7 @@ def calculate_specific_locations(specific_name: TMB_Classes.SpecificNameClass, b
 
 
 def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB_Classes.SpecificNameClass,
-                             binomial_names: list, refdict: dict, binomial_cnts: dict, location_set: set,
-                             species_crossref: dict) -> None:
+                             binomial_names: list, refdict: dict, binomial_cnts: dict, location_set: set) -> None:
     """ create a page with the history of a specific name """
     miny = init_data().start_year
     maxy = init_data().current_year
@@ -1535,7 +1536,7 @@ def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB
             outfile.write("          <dd><em class=\"species\">" +
                           specific_name.synonym[1:] + "</em></dd>\n")
         else:
-            s = find_species_by_name(specific_name.synonym, species_crossref)
+            s = find_species_by_name(specific_name.synonym)
             outfile.write("          <dd>" + create_species_link(s.genus, s.species, do_print, path="../") +
                           "</dd>\n")
     outfile.write("        <dt>Original Usage</dt>\n")
@@ -1683,7 +1684,7 @@ def write_chronology_chart_div(outfile: TextIO, do_print: bool, n: Union[str, in
     outfile.write("    </div>\n")
 
 
-def create_synonym_chronology(outfile: TextIO, do_print: bool, species: str, binomial_synlist: list,
+def create_synonym_chronology(outfile: TextIO, do_print: bool, species_name: str, binomial_synlist: list,
                               binomial_name_counts: dict, specific_synlist: list, specific_name_counts: dict) -> None:
     """
     create a page with the chronological history of a specific name and its synonyms
@@ -1703,9 +1704,9 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species: str, bin
     maxcnt = max(total_cnts.values())
     name_cnts.sort(reverse=True)
     # put accepted name first, followed by the rest in decreasing frequency
-    sp_order = [species]
+    sp_order = [species_name]
     for x in name_cnts:
-        if x[1] != species:
+        if x[1] != species_name:
             sp_order.append(x[1])
 
     # --binomials--
@@ -1720,18 +1721,21 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species: str, bin
         name_cnts.append([total, name])
     name_cnts.sort(reverse=True)
     # put accepted name first, followed by the rest in decreasing frequency
-    if ("Uca " + species) in binomial_synlist:
-        bi_order = ["Uca " + species]
+    species = find_species_by_name(species_name)
+    # if ("Uca " + species) in binomial_synlist:
+    if (species.fullname()) in binomial_synlist:
+        bi_order = [species.fullname()]
     else:
         bi_order = []
     for x in name_cnts:
-        if x[1] != "Uca " + species:
+        # if x[1] != "Uca " + species:
+        if x[1] != species.fullname():
             bi_order.append(x[1])
 
     if do_print:
         start_page_division(outfile, "synonym_page")
         # image_name = "synonym_" + name_to_filename(species) + "_total_chronology.svg"
-        image_name = "synonym_" + name_to_filename(species) + "_total_chronology.png"
+        image_name = "synonym_" + name_to_filename(species_name) + "_total_chronology.png"
         TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, total_cnts,
                                                        init_data().graph_font)
         for name in sp_order:
@@ -1746,7 +1750,7 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species: str, bin
                                                            binomial_name_counts[clean_name(name)],
                                                            init_data().graph_font)
     else:
-        common_header_part1(outfile, species, indexpath="../")
+        common_header_part1(outfile, species_name, indexpath="../")
         start_google_chart_header(outfile)
         image_name = 0
         setup_chronology_chart(outfile, image_name, miny, maxy, maxcnt, total_cnts)
@@ -1760,12 +1764,13 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species: str, bin
         common_header_part2(outfile)
 
     outfile.write("    <header>\n")
-    outfile.write("      <h1 class=\"nobookmark\">Synonym Chronology of " + format_name_string("Uca " + species) +
+    # outfile.write("      <h1 class=\"nobookmark\">Synonym Chronology of " + format_name_string("Uca " + species) +
+    outfile.write("      <h1 class=\"nobookmark\">Synonym Chronology of " + format_name_string(species.fullname()) +
                   "</h1>\n")
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + species +
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + species_name +
                       ".html\">" + fetch_fa_glyph("info") + "Species page</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
@@ -1773,7 +1778,7 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species: str, bin
     outfile.write("\n")
     if do_print:
         # image_name = "synonym_" + name_to_filename(species) + "_total_chronology.svg"
-        image_name = "synonym_" + name_to_filename(species) + "_total_chronology.png"
+        image_name = "synonym_" + name_to_filename(species_name) + "_total_chronology.png"
     else:
         image_name = 0
     write_chronology_chart_div(outfile, do_print, image_name, None, "All Names", False, True)
@@ -2266,7 +2271,7 @@ def calculate_name_index_data(refdict: dict, citelist: list, specific_names: lis
 def write_all_name_pages(outfile: TextIO, do_print: bool, refdict: dict, citelist: list, unique_names: list,
                          specific_names: list, name_table: dict, species_refs: dict, genus_cnts: dict,
                          binomial_usage_cnts_by_year: dict, total_binomial_year_cnts: dict, binomial_locations: dict,
-                         specific_locations: dict, point_locations: dict, species_crossref: dict) -> None:
+                         specific_locations: dict, point_locations: dict) -> None:
     """
     create an index of binomials and specific names
     """
@@ -2363,11 +2368,11 @@ def write_all_name_pages(outfile: TextIO, do_print: bool, refdict: dict, citelis
     for name in specific_names:
         if do_print:
             write_specific_name_page(outfile, True, name, unique_names, refdict, binomial_usage_cnts_by_year,
-                                     specific_locations[name], species_crossref)
+                                     specific_locations[name])
         else:
             with open(WEBOUT_PATH + "names/sn_" + name.name + ".html", "w", encoding="utf-8") as suboutfile:
                 write_specific_name_page(suboutfile, False, name, unique_names, refdict, binomial_usage_cnts_by_year,
-                                         specific_locations[name], species_crossref)
+                                         specific_locations[name])
 
 
 def check_specific_names(citelist: list, specific_names: list) -> None:
@@ -2983,9 +2988,8 @@ def write_common_names_pages(outfile: TextIO, do_print: bool, common_name_data: 
     outfile.write("    </header>\n")
     outfile.write("\n")
     outfile.write("    <p>\n")
-    outfile.write("      Following is a summary of common names for crabs in the genus "
-                  "<em class=\"species\">Uca</em>. See <a href=\"" + rel_link_prefix(do_print) +
-                  init_data().species_url +
+    outfile.write("      Following is a summary of common names for fiddler crabs. See <a href=\"" +
+                  rel_link_prefix(do_print) + init_data().species_url +
                   "\">individual species</a> for more information on the common names of a particular species.\n")
     outfile.write("    </p>\n")
     outfile.write("    <dl class=\"common\">\n")
@@ -3069,18 +3073,25 @@ def write_species_list(outfile: TextIO, do_print: bool, specieslist: list) -> No
         common_html_footer(outfile)
 
 
-def write_species_photo_page(outfile: TextIO, do_print: bool, fname: str, species: str, common_name: str,
+def write_species_photo_page(outfile: TextIO, do_print: bool, fname: str, species_name: str, common_name: str,
                              caption: str, pn: int, pspecies: str) -> None:
     """
     create a page for a specific photo
     """
     if ";" in pspecies:
         spname = pspecies.replace(";", "_")
-        ptitle = "Uca " + pspecies.replace(";", " & Uca ")
+        tmplist = pspecies.split(";")
+        slist = []
+        for t in tmplist:
+            tmps = find_species_by_name(t)
+            slist.append(tmps.fullname())
+        ptitle = " & ".join(slist)
+        # ptitle = "Uca " + pspecies.replace(";", " & Uca ")
         is_multi = True
     else:
-        spname = species
-        ptitle = "Uca " + species
+        spname = species_name
+        species = find_species_by_name(species_name)
+        ptitle = species.fullname()
         is_multi = False
     if do_print:
         start_page_division(outfile, "photo_page")
@@ -3098,11 +3109,12 @@ def write_species_photo_page(outfile: TextIO, do_print: bool, fname: str, specie
     if is_multi:
         splist = pspecies.split(";")
         for s in splist:
+            sp = find_species_by_name(s)
             outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + s +
-                          ".html\">" + fetch_fa_glyph("info") + "<em class=\"species\">Uca " + s +
+                          ".html\">" + fetch_fa_glyph("info") + "<em class=\"species\">" + sp.fullname() +
                           "</em> page</a></li>\n")
     else:
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + species +
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + species_name +
                       ".html\">" + fetch_fa_glyph("info") + "Species page</a></li>\n")
     if not do_print:
         outfile.write("          <li><a href=\"../" + init_data().photo_url + "\">" + fetch_fa_glyph("photo") +
@@ -3112,8 +3124,8 @@ def write_species_photo_page(outfile: TextIO, do_print: bool, fname: str, specie
     outfile.write("    </header>\n")
     outfile.write("\n")
     outfile.write("    <figure class=\"fullpic\">\n")
-    outfile.write("      <img src=\"" + media_path + "U_" + spname + format(pn, "0>2") + ".jpg\" alt=\"Uca " +
-                  species + " photo\" title=\"Uca " + species + "\" />\n")
+    outfile.write("      <img src=\"" + media_path + "U_" + spname + format(pn, "0>2") + ".jpg\" alt=\"" +
+                  ptitle + " photo\" title=\"" + ptitle + " photo\" />\n")
     outfile.write("      <figcaption>" + caption + "</figcaption>\n")
     outfile.write("    </figure>\n")
     if do_print:
@@ -3129,11 +3141,18 @@ def write_species_video_page(fname: str, video: TMB_Classes.VideoClass, vn: int)
     with open(fname, "w", encoding="utf-8") as outfile:
         if ";" in video.species:
             spname = video.species.replace(";", "_")
-            vtitle = "Uca " + video.species.replace(";", " & Uca ")
+            tmplist = video.species.split(";")
+            slist = []
+            for t in tmplist:
+                tmps = find_species_by_name(t)
+                slist.append(tmps.fullname())
+            vtitle = " & ".join(slist)
+            # vtitle = "Uca " + video.species.replace(";", " & Uca ")
             is_multi = True
         else:
             spname = video.species
-            vtitle = "Uca " + video.species
+            species = find_species_by_name(spname)
+            vtitle = species.fullname()
             is_multi = False
         common_html_header(outfile, vtitle + " Video", indexpath="../")
         outfile.write("    <header>\n")
@@ -3143,8 +3162,9 @@ def write_species_video_page(fname: str, video: TMB_Classes.VideoClass, vn: int)
         if is_multi:
             splist = video.species.split(";")
             for s in splist:
+                sp = find_species_by_name(s)
                 outfile.write("          <li><a href=\"../u_" + s +
-                              ".html\">" + fetch_fa_glyph("info") + "<em class=\"species\">Uca " + s +
+                              ".html\">" + fetch_fa_glyph("info") + "<em class=\"species\">" + sp.fullname() +
                               "</em> page</a></li>\n")
         else:
             outfile.write("          <li><a href=\"../u_" + video.species +
@@ -3238,9 +3258,11 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
         start_page_division(outfile, "species_page")
     else:
         if is_fossil:
-            common_html_header(outfile, "Uca " + species.species + " / Fossil")
+            common_html_header(outfile, species.fullname() + " / Fossil")
+            # common_html_header(outfile, "Uca " + species.species + " / Fossil")
         else:
-            common_header_part1(outfile, "Uca " + species.species + " / " + species.common)
+            # common_header_part1(outfile, "Uca " + species.species + " / " + species.common)
+            common_header_part1(outfile, species.fullname() + " / " + species.common)
             start_google_map_header(outfile)
             write_google_map_range_header(outfile, "u_" + species.species)
             write_google_map_point_header(outfile, "u_" + species.species)
@@ -3252,7 +3274,8 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
         sc = FOSSIL_IMAGE
     else:
         sc = ""
-    outfile.write("      <h1 class=\"species bookmark2\">Uca " + species.species + sc + "</h1>\n")
+    # outfile.write("      <h1 class=\"species bookmark2\">Uca " + species.species + sc + "</h1>\n")
+    outfile.write("      <h1 class=\"species bookmark2\">" + species.fullname() + sc + "</h1>\n")
     if is_fossil:
         outfile.write("      <h2 class=\"nobookmark\">Fossil</h2>\n")
     else:
@@ -3420,8 +3443,8 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
             outfile.write("      <figure class=\"sppic\">\n")
             outfile.write("        <a href=\"" + rel_link_prefix(do_print, "photos/") + pfname +
                           "\"><img class=\"thumbnail\" src=\"" + media_path + "photos/U_" + tname +
-                          format(pn, "0>2") + "tn.jpg\" alt=\"Uca " + species.species + " thumbnail\" title=\"Uca " +
-                          species.species + "\" /></a>\n")
+                          format(pn, "0>2") + "tn.jpg\" alt=\"" + species.fullname() + " thumbnail\" title=\"" +
+                          species.fullname() + "\" /></a>\n")
             outfile.write("      </figure>\n")
             photo_n += 1
     if photo_n == 0:
@@ -3549,7 +3572,7 @@ def write_photo_index(outfile: TextIO, do_print: bool, specieslist: list, photos
                 outfile.write("      <figure class=\"sppic\">\n")
                 outfile.write("        <a href=\"" + rel_link_prefix(do_print, "photos/") + pfname +
                               "\"><img class=\"thumbnail\" src=\"" + media_path + "photos/U_" + spname +
-                              format(pn, "0>2") + "tn.jpg\" alt=\"Uca " + spname + " thumbnail\" title=\"Uca " +
+                              format(pn, "0>2") + "tn.jpg\" alt=\"" + spname + " thumbnail\" title=\"" +
                               spname + "\" /></a>\n")
                 outfile.write("      </figure>\n")
                 photo_n += 1
@@ -3954,7 +3977,7 @@ def write_species_info_pages(outfile: Optional[TextIO], do_print: bool, speciesl
 
 def write_systematics_overview(outfile: TextIO, do_print: bool, subgenlist: list, specieslist: list,
                                refdict: dict, species_changes_new: list, species_changes_synonyms: list,
-                               species_changes_spelling: list, species_crossref: dict) -> None:
+                               species_changes_spelling: list) -> None:
     """
     create the systematics page
     """
@@ -4183,7 +4206,7 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, subgenlist: list
                       format_reference_cite(refdict[subgen.author], do_print, AUTHOR_NOPCOMMA) + "</h3>\n")
         outfile.write("      <dl>\n")
         outfile.write("        <dt>Type</dt>\n")
-        s = find_species_by_name(subgen.type_species, species_crossref)
+        s = find_species_by_name(subgen.type_species)
         outfile.write("        <dd>" + create_species_link(s.genus, s.species, do_print) + "</dd>\n")
         outfile.write("        <dt>All Species</dt>\n")
         splist = []
@@ -4748,10 +4771,9 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list) -> None:
     for s in species:
         if s.status != "fossil":
             scnt += 1
-    outfile.write("      Fiddler crabs are small, semi-terrestrial crabs of the genus <em "
-                  "class=\"species\">Uca</em> that are characterized by extreme cheliped asymmetry in males.  "
-                  "They are most closely related to the <em class=\"species\">Ocypode</em> (ghost crabs). "
-                  "<a href=\"" + rel_link_prefix(do_print) + init_data().species_url +
+    outfile.write("      Fiddler crabs are small, semi-terrestrial crabs are characterized by extreme cheliped "
+                  "asymmetry in males. They are most closely related to the <em class=\"species\">Ocypode</em> "
+                  "(ghost crabs). <a href=\"" + rel_link_prefix(do_print) + init_data().species_url +
                   "\">There are currently {} recognized extant species</a>.\n".format(scnt))
     outfile.write("    </p>\n")
     if do_print:
@@ -4760,11 +4782,11 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list) -> None:
         media_path = ""
     outfile.write("    <div class=\"indeximages\">\n")
     outfile.write("      <img class=\"thumbnail\" src=\"" + media_path +
-                  "photos/U_mjoebergi04tn.jpg\" alt=\"Uca mjoebergi photo\" />\n")
+                  "photos/U_mjoebergi04tn.jpg\" alt=\"Austruca mjoebergi photo\" />\n")
     outfile.write("      <img class=\"thumbnail\" src=\"" + media_path +
-                  "photos/U_minax07tn.jpg\" alt=\"Uca minax photo\" />\n")
+                  "photos/U_minax07tn.jpg\" alt=\"Minuca minax photo\" />\n")
     outfile.write("      <img class=\"thumbnail\" src=\"" + media_path +
-                  "photos/U_crassipes19tn.jpg\" alt=\"Uca crassipes photo\" />\n")
+                  "photos/U_crassipes19tn.jpg\" alt=\"Paraleptuca crassipes photo\" />\n")
     outfile.write("    </div>\n")
     outfile.write("\n")
     outfile.write("    <h2 class=\"nobookmark\">Classification</h2>\n")
@@ -5206,7 +5228,7 @@ def build_site() -> None:
         species_changes_new = TMB_Import.read_simple_file(init_data().species_changes_new)
         species_changes_synonyms = TMB_Import.read_simple_file(init_data().species_changes_synonyms)
         species_changes_spelling = TMB_Import.read_simple_file(init_data().species_changes_spelling)
-        species_crossref = prepare_species_crossref(species)
+        prepare_species_crossref(species)
 
         print("...Connecting References...")
         print("......Computing Species from Citation Linking......")
@@ -5296,8 +5318,7 @@ def build_site() -> None:
                 with open(WEBOUT_PATH + "names/index.html", "w", encoding="utf-8") as outfile:
                     write_all_name_pages(outfile, False, refdict, citelist, all_names, specific_names, name_table,
                                          species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
-                                         binomial_point_locations, specific_point_locations, point_locations,
-                                         species_crossref)
+                                         binomial_point_locations, specific_point_locations, point_locations)
                 print("......Writing Species......")
                 write_species_info_pages(None, False, species, references, specific_names, all_names, photos, videos,
                                          art, species_refs, refdict, binomial_name_cnts, specific_name_cnts)
@@ -5320,7 +5341,7 @@ def build_site() -> None:
                 print("......Writing Misc......")
                 with open(WEBOUT_PATH + init_data().syst_url, "w", encoding="utf-8") as outfile:
                     write_systematics_overview(outfile, False, subgenera, species, refdict, species_changes_new,
-                                               species_changes_synonyms, species_changes_spelling, species_crossref)
+                                               species_changes_synonyms, species_changes_spelling)
                 with open(WEBOUT_PATH + init_data().common_url, "w", encoding="utf-8") as outfile:
                     write_common_names_pages(outfile, False, replace_references(common_name_data, refdict, False))
                 with open(WEBOUT_PATH + init_data().lifecycle_url, "w", encoding="utf-8") as outfile:
@@ -5342,7 +5363,7 @@ def build_site() -> None:
                     write_introduction(printfile, True, species)
                     write_common_names_pages(printfile, True, replace_references(common_name_data, refdict, True))
                     write_systematics_overview(printfile, True, subgenera, species, refdict, species_changes_new,
-                                               species_changes_synonyms, species_changes_spelling, species_crossref)
+                                               species_changes_synonyms, species_changes_spelling)
                     write_phylogeny_pages(printfile, True, refdict)
                     write_life_cycle_pages(printfile, True)
                     print("......Writing Species Pages......")
@@ -5351,8 +5372,7 @@ def build_site() -> None:
                     print("......Writing Name Pages......")
                     write_all_name_pages(printfile, True, refdict, citelist, all_names, specific_names, name_table,
                                          species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
-                                         binomial_point_locations, specific_point_locations, point_locations,
-                                         species_crossref)
+                                         binomial_point_locations, specific_point_locations, point_locations)
                     print("......Writing Location Pages......")
                     write_geography_page(printfile, True, species)
                     write_location_index(printfile, True, point_locations, location_dict, location_species,

@@ -128,6 +128,9 @@ class SpeciesClass:
     def __lt__(self, x):
         return self.species < x.species
 
+    def fullname(self) -> str:
+        return self.genus + " " + self.species
+
 
 class CitationClass:
     """ a class to hold citation data """
