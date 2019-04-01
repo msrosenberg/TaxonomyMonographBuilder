@@ -42,15 +42,15 @@ AUTHOR_NOPCOMMA = 2     # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = True
+DRAW_MAPS = False
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
 CHECK_LOCATIONS = False
 # this flag controls whether additional location data should be fetched from iNaturalist
-INCLUDE_INAT = True
+INCLUDE_INAT = False
 # these flags control creating print and web output, respectively
-OUTPUT_PRINT = True
+OUTPUT_PRINT = False
 OUTPUT_WEB = True
 
 SPECIES_XREF = {}
@@ -4195,14 +4195,14 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, subgenlist: list
     outfile.write("      </p>\n")
     outfile.write("      <ul>\n")
     for subgen in subgenlist:
-        outfile.write("        <li><a href=\"#"+subgen.subgenus + "\">Subgenus <em class=\"species\">" +
-                      subgen.subgenus + "</em></a></li>\n")
+        outfile.write("        <li><a href=\"#"+subgen.name + "\">Subgenus <em class=\"species\">" +
+                      subgen.name + "</em></a></li>\n")
     outfile.write("      </ul>\n")
 
     for subgen in subgenlist:
         outfile.write("      <hr />\n")
-        outfile.write("      <h3 id=\"" + subgen.subgenus + "\" class=\"bookmark3\">Subgenus <em class=\"species\">" +
-                      subgen.subgenus + "</em> " +
+        outfile.write("      <h3 id=\"" + subgen.name + "\" class=\"bookmark3\">Subgenus <em class=\"species\">" +
+                      subgen.name + "</em> " +
                       format_reference_cite(refdict[subgen.author], do_print, AUTHOR_NOPCOMMA) + "</h3>\n")
         outfile.write("      <dl>\n")
         outfile.write("        <dt>Type</dt>\n")
@@ -4211,7 +4211,7 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, subgenlist: list
         outfile.write("        <dt>All Species</dt>\n")
         splist = []
         for s in specieslist:
-            if s.subgenus == subgen.subgenus:
+            if s.subgenus == subgen.name:
                 splist.append(create_species_link(s.genus, s.species, do_print, status=s.status))
         outfile.write("        <dd>" + ", ".join(splist) + "</dd>\n")
         outfile.write("      </dl>\n")
