@@ -195,25 +195,25 @@ def read_ranked_taxa_data(filename: str) -> list:
     read data on taxa of ranks other than species
     """
     tmplist = read_simple_file(filename)
-    genlist = []
+    taxon_list = []
     tmpdict = {}
     for g in tmplist:
-        newsubgenus = TMB_Classes.RankedTaxonClass()
-        newsubgenus.name = g[0]
-        newsubgenus.taxon_rank = g[1]
+        new_taxon = TMB_Classes.RankedTaxonClass()
+        new_taxon.name = g[0]
+        new_taxon.taxon_rank = g[1]
         if g[2] != ".":
             if g[2] in tmpdict:
-                newsubgenus.parent = tmpdict[g[2]]
+                new_taxon.parent = tmpdict[g[2]]
             else:
                 report_error("Import Error: Taxon Parent Not Found: " + g[2])
-        newsubgenus.author = g[3]
-        newsubgenus.type_species = g[4]
-        newsubgenus.notes = g[5]
-        newsubgenus.taxonid = g[6]
-        newsubgenus.eolid = g[7]
-        genlist.append(newsubgenus)
-        tmpdict[newsubgenus.name] = newsubgenus
-    return genlist
+        new_taxon.author = g[3]
+        new_taxon.type_species = g[4]
+        new_taxon.notes = g[5]
+        new_taxon.taxonid = g[6]
+        new_taxon.eolid = g[7]
+        taxon_list.append(new_taxon)
+        tmpdict[new_taxon.name] = new_taxon
+    return taxon_list
 
 
 def read_specific_names_data(filename: str) -> list:
