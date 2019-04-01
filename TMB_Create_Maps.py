@@ -198,7 +198,7 @@ def write_all_range_map_kml(species_maps: list) -> None:
             outfile.write("    </Placemark>\n")
         outfile.write("  </Document>\n")
         outfile.write("</kml>\n")
-    with zipfile.ZipFile(__OUTPUT_PATH__ + rangemap_name("uca_all") + ".kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
+    with zipfile.ZipFile(__OUTPUT_PATH__ + rangemap_name("fiddlers_all") + ".kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
         myzip.write(__TMP_PATH__ + "doc.kml")
         myzip.close()
 
@@ -499,8 +499,7 @@ def write_all_range_map(base_map: BaseMap, species_maps: list) -> None:
     faxes.axes.get_xaxis().set_visible(False)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    # mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("uca_all") + ".svg", format="svg")
-    mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("uca_all") + ".png", format="png", dpi=600)
+    mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("fiddlers_all") + ".png", format="png", dpi=600)
     mplpy.close("all")
 
 
@@ -757,8 +756,8 @@ def create_all_species_point_maps(species: list, point_locations: dict, species_
     all_list = sorted(list(all_places))
     pool.close()
     pool.join()
-    write_point_map("uca_all", all_list, point_locations, None, None, base_map, True, None, init_data.graph_font)
-    write_point_map_kml("uca_all", all_list, point_locations, None, None, init_data, None)
+    write_point_map("fiddlers_all", all_list, point_locations, None, None, base_map, True, None, init_data.graph_font)
+    write_point_map_kml("fiddlers_all", all_list, point_locations, None, None, init_data, None)
 
 
 def create_all_species_maps(base_map: BaseMap, init_data: TMB_Initialize.InitializationData, species: list,

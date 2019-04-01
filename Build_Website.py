@@ -2388,8 +2388,8 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
     else:
         common_header_part1(outfile, "Fiddler Crab Geographic Ranges")
         start_google_map_header(outfile)
-        write_google_map_range_header(outfile, "uca_all")
-        write_google_map_point_header(outfile, "uca_all")
+        write_google_map_range_header(outfile, "fiddlers_all")
+        write_google_map_point_header(outfile, "fiddlers_all")
         end_google_map_header(outfile)
         common_header_part2(outfile, include_map=True)
 
@@ -2408,28 +2408,20 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
     outfile.write("      <div class=\"map_section\">\n")
     if do_print:
         outfile.write("      <figure>\n")
-        # outfile.write("        <img src=\"" + TMP_MAP_PATH + rangemap_name("uca_all") + ".svg\" alt=\"Map\" "
-        #               "title=\"Map of fiddler crab distribution\" />\n")
-        outfile.write("        <img src=\"" + TMP_MAP_PATH + rangemap_name("uca_all") + ".png\" alt=\"Map\" "
+        outfile.write("        <img src=\"" + TMP_MAP_PATH + rangemap_name("fiddlers_all") + ".png\" alt=\"Map\" "
                       "title=\"Map of fiddler crab distribution\" />\n")
         outfile.write("      </figure>\n")
         outfile.write("      <figure>\n")
-        # outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("uca_all") + ".svg\" alt=\"Point Map\" "
-        #               "title=\"Point map of fiddler crab distribution\" />\n")
-        outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("uca_all") + ".png\" alt=\"Point Map\" "
+        outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("fiddlers_all") + ".png\" alt=\"Point Map\" "
                       "title=\"Point map of fiddler crab distribution\" />\n")
         outfile.write("      </figure>\n")
     else:
         outfile.write("        <div id=\"range_map_canvas\"></div>\n")
         outfile.write("        <div id=\"point_map_canvas\"></div>\n")
         outfile.write("        <div class=\"map_download\">\n")
-        # outfile.write("          <a href=\"maps/" + rangemap_name("uca_all") + ".svgz\">"
-        #               "<span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
-        # outfile.write("          <a href=\"maps/" + pointmap_name("uca_all") + ".svgz\">"
-        #               "<span class=\"fa fa-download\"></span> Download SVG line map of point locations.</a>\n")
-        outfile.write("          <a href=\"maps/" + rangemap_name("uca_all") + ".png\">" + fetch_fa_glyph("download") +
+        outfile.write("          <a href=\"maps/" + rangemap_name("fiddlers_all") + ".png\">" + fetch_fa_glyph("download") +
                       "Download PNG line map of ranges.</a> \n")
-        outfile.write("          <a href=\"maps/" + pointmap_name("uca_all") + ".png\">" + fetch_fa_glyph("download") +
+        outfile.write("          <a href=\"maps/" + pointmap_name("fiddlers_all") + ".png\">" + fetch_fa_glyph("download") +
                       "Download PNG line map of point locations.</a>\n")
         outfile.write("        </div>\n")
     outfile.write("      </div>\n")
@@ -4984,14 +4976,10 @@ def copy_map_files(species: list, all_names: list, specific_names: list, point_l
             copy_file(TMP_MAP_PATH + rangemap_name("u_" + s.species) + ".png")
             copy_file(TMP_MAP_PATH + pointmap_name("u_" + s.species) + ".png")
     # combined map
-    copy_file(TMP_MAP_PATH + rangemap_name("uca_all") + ".kmz")
-    copy_file(TMP_MAP_PATH + pointmap_name("uca_all") + ".kmz")
-    # scour_svg(TMP_MAP_PATH + rangemap_name("uca_all") + ".svg")
-    # scour_svg(TMP_MAP_PATH + pointmap_name("uca_all") + ".svg")
-    # copy_file(TMP_MAP_PATH + rangemap_name("uca_all") + ".svgz")
-    # copy_file(TMP_MAP_PATH + pointmap_name("uca_all") + ".svgz")
-    copy_file(TMP_MAP_PATH + rangemap_name("uca_all") + ".png")
-    copy_file(TMP_MAP_PATH + pointmap_name("uca_all") + ".png")
+    copy_file(TMP_MAP_PATH + rangemap_name("fiddlers_all") + ".kmz")
+    copy_file(TMP_MAP_PATH + pointmap_name("fiddlers_all") + ".kmz")
+    copy_file(TMP_MAP_PATH + rangemap_name("fiddlers_all") + ".png")
+    copy_file(TMP_MAP_PATH + pointmap_name("fiddlers_all") + ".png")
 
     # binomial maps
     for n in all_names:
