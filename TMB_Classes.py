@@ -66,7 +66,8 @@ class VideoClass:
         self.activity = ""
         self.caption = ""
         self.length = ""
-        self.size = ""
+        self.height = 0
+        self.width = 0
         self.format = ""
         self.date_location = ""
         self.author = ""

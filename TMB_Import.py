@@ -177,11 +177,12 @@ def read_video_data(filename: str) -> list:
         newvideo.activity = v[2]
         newvideo.caption = v[3]
         newvideo.length = v[4]
-        newvideo.size = v[5]
-        newvideo.format = v[6]
-        newvideo.date_location = v[7]
-        newvideo.author = v[8]
-        newvideo.notes = v[9]
+        newvideo.width = int(v(5))
+        newvideo.height = int(v[6])
+        newvideo.format = v[7]
+        newvideo.date_location = v[8]
+        newvideo.author = v[9]
+        newvideo.notes = v[10]
         video_list.append(newvideo)
     return video_list
 

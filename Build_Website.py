@@ -3147,7 +3147,7 @@ def write_species_video_page(fname: str, video: TMB_Classes.VideoClass, vn: int)
         outfile.write("    </header>\n")
         outfile.write("\n")
         outfile.write("    <h2>" + video.caption + "</h2>\n")
-        outfile.write("    <video width=\"352\" height=\"240\" controls>\n")
+        outfile.write("    <video width=\"{:d}\" height=\"{:d}\" controls>\n".format(video.width, video.height))
         outfile.write("      <source src=\"U_" + spname + format(vn, "0>2") + "." + video.format.lower() +
                       "\" type=\"video/mp4\">\n")
         outfile.write("      Your browser does not support the video tag.\n")
@@ -3160,7 +3160,7 @@ def write_species_video_page(fname: str, video: TMB_Classes.VideoClass, vn: int)
         outfile.write("      <dt>Length</dt>\n")
         outfile.write("        <dd>" + video.length + "</dd>\n")
         outfile.write("      <dt>Size</dt>\n")
-        outfile.write("        <dd>" + video.size + "</dd>\n")
+        outfile.write("        <dd>{:d} &times; {:d}</dd>\n".format(video.width, video.height))
         outfile.write("      <dt>Format</dt>\n")
         outfile.write("        <dd>" + video.format + "</dd>\n")
         if video.notes != "#":
@@ -3442,10 +3442,6 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
                 if video_n == 1:
                     if do_print:
                         outfile.write("    <p>\n")
-                        # outfile.write("      Videos are available on the web at "
-                        #               "<a href=\"http://www.fiddlercrab.info/uca_videos.html\">"
-                        #               "http://www.fiddlercrab.info/uca_videos.html</a> or by following the embedded "
-                        #               "links.")
                         outfile.write("      Videos are available on the web at <a href=\"" + init_data().site_url() +
                                       "/uca_videos.html\">" + init_data().site_url() +
                                       "/uca_videos.html</a> or by following the embedded links.")
@@ -3453,8 +3449,8 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
                     outfile.write("      <dl class=\"vidlist\">\n")
                 outfile.write("            <dt><a class=\"vidlink\" href=\"" + abs_link_prefix(do_print) + vfname +
                               "\">" + video.caption + "</a></dt>\n")
-                outfile.write("              <dd>" + video.length + ", " + video.size + ", " +
-                              video.format + "</dd>\n")
+                outfile.write("              <dd>{}, {:d} &times; {:d}, {}</dd>\n".format(video.length, video.width,
+                                                                                          video.height, video.format))
         if video_n == 0:
             outfile.write("      <p>\n")
             outfile.write("        <em>No videos available at this time.</em>\n")
@@ -3645,8 +3641,8 @@ def write_video_index(outfile: TextIO, do_print: bool, videos: list) -> None:
                 vfname = "video/video_u_" + spname + format(vn, "0>2") + ".html"
                 outfile.write("            <dt><a class=\"vidlink\" href=\"" + abs_link_prefix(do_print) + vfname +
                               "\">" + video.caption + "</a></dt>\n")
-                outfile.write("              <dd>" + video.length + ", " + video.size + ", " + video.format +
-                              "</dd>\n")
+                outfile.write("              <dd>{}, {:d} &times; {:d}, {}</dd>\n".format(video.length, video.width,
+                                                                                          video.height, video.format))
         outfile.write("      </dl>\n")
         outfile.write("    </section>\n")
     # write individual video pages
