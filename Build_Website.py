@@ -873,13 +873,28 @@ def compute_species_from_citation_linking(citelist: list) -> None:
                     cite.name_note = "in part; " + cite.name_note
 
 
-def create_species_link(species: str, do_print: bool, status: str = "", path: str = "") -> str:
+def prepare_species_crossref(species: list) -> dict:
+    species_xref = {}
+    for s in species:
+        species_xref[s.species] = s
+    return species_xref
+
+
+def find_species_by_name(x: str, sp_dict) -> TMB_Classes.SpeciesClass:
+    if x in sp_dict:
+        return sp_dict[x]
+    else:
+        report_error("Crossref Error: Cannot find species " + x)
+        return sp_dict["vocans"]  # default to keep the program from crashing
+
+
+def create_species_link(genus: str, species: str, do_print: bool, status: str = "", path: str = "") -> str:
     if status == "fossil":
         sc = FOSSIL_IMAGE
     else:
         sc = ""
-    return ("<a href=\"" + rel_link_prefix(do_print, path) + "u_" + species + ".html\"><em class=\"species\">Uca " +
-            species + "</em>" + sc + "</a>")
+    return ("<a href=\"" + rel_link_prefix(do_print, path) + "u_" + species + ".html\"><em class=\"species\">" + genus +
+            " " + species + "</em>" + sc + "</a>")
 
 
 def create_location_link(location: TMB_Classes.LocationClass, display_name: str, do_print: bool, path: str = "",
@@ -1458,7 +1473,8 @@ def calculate_specific_locations(specific_name: TMB_Classes.SpecificNameClass, b
 
 
 def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB_Classes.SpecificNameClass,
-                             binomial_names: list, refdict: dict, binomial_cnts: dict, location_set: set) -> None:
+                             binomial_names: list, refdict: dict, binomial_cnts: dict, location_set: set,
+                             species_crossref: dict) -> None:
     """ create a page with the history of a specific name """
     miny = init_data().start_year
     maxy = init_data().current_year
@@ -1519,7 +1535,8 @@ def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB
             outfile.write("          <dd><em class=\"species\">" +
                           specific_name.synonym[1:] + "</em></dd>\n")
         else:
-            outfile.write("          <dd>" + create_species_link(specific_name.synonym, do_print, path="../") +
+            s = find_species_by_name(specific_name.synonym, species_crossref)
+            outfile.write("          <dd>" + create_species_link(s.genus, s.species, do_print, path="../") +
                           "</dd>\n")
     outfile.write("        <dt>Original Usage</dt>\n")
     outfile.write("          <dd>" + format_name_string(specific_name.original_binomial) + "</dd>\n")
@@ -2249,7 +2266,7 @@ def calculate_name_index_data(refdict: dict, citelist: list, specific_names: lis
 def write_all_name_pages(outfile: TextIO, do_print: bool, refdict: dict, citelist: list, unique_names: list,
                          specific_names: list, name_table: dict, species_refs: dict, genus_cnts: dict,
                          binomial_usage_cnts_by_year: dict, total_binomial_year_cnts: dict, binomial_locations: dict,
-                         specific_locations: dict, point_locations: dict) -> None:
+                         specific_locations: dict, point_locations: dict, species_crossref: dict) -> None:
     """
     create an index of binomials and specific names
     """
@@ -2346,11 +2363,11 @@ def write_all_name_pages(outfile: TextIO, do_print: bool, refdict: dict, citelis
     for name in specific_names:
         if do_print:
             write_specific_name_page(outfile, True, name, unique_names, refdict, binomial_usage_cnts_by_year,
-                                     specific_locations[name])
+                                     specific_locations[name], species_crossref)
         else:
             with open(WEBOUT_PATH + "names/sn_" + name.name + ".html", "w", encoding="utf-8") as suboutfile:
                 write_specific_name_page(suboutfile, False, name, unique_names, refdict, binomial_usage_cnts_by_year,
-                                         specific_locations[name])
+                                         specific_locations[name], species_crossref)
 
 
 def check_specific_names(citelist: list, specific_names: list) -> None:
@@ -2419,10 +2436,10 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
         outfile.write("        <div id=\"range_map_canvas\"></div>\n")
         outfile.write("        <div id=\"point_map_canvas\"></div>\n")
         outfile.write("        <div class=\"map_download\">\n")
-        outfile.write("          <a href=\"maps/" + rangemap_name("fiddlers_all") + ".png\">" + fetch_fa_glyph("download") +
-                      "Download PNG line map of ranges.</a> \n")
-        outfile.write("          <a href=\"maps/" + pointmap_name("fiddlers_all") + ".png\">" + fetch_fa_glyph("download") +
-                      "Download PNG line map of point locations.</a>\n")
+        outfile.write("          <a href=\"maps/" + rangemap_name("fiddlers_all") + ".png\">" +
+                      fetch_fa_glyph("download") + "Download PNG line map of ranges.</a> \n")
+        outfile.write("          <a href=\"maps/" + pointmap_name("fiddlers_all") + ".png\">" +
+                      fetch_fa_glyph("download") + "Download PNG line map of point locations.</a>\n")
         outfile.write("        </div>\n")
     outfile.write("      </div>\n")
     outfile.write("      <p>\n")
@@ -2451,9 +2468,7 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
         for s in species:
             if s.region == r:
                 if s.status != "fossil":
-                    outfile.write("        <li>" +
-                                  create_species_link(s.species, do_print) +
-                                  "</li>\n")
+                    outfile.write("        <li>" + create_species_link(s.genus, s.species, do_print) + "</li>\n")
         outfile.write("      </ul>\n")
         outfile.write("    </section>\n")
     if do_print:
@@ -2640,7 +2655,8 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
             else:
                 suffix = STAR
                 print_star = True
-            outfile.write("      <li>" + create_species_link(s.species, do_print, status=s.status, path="../") +
+            outfile.write("      <li>" +
+                          create_species_link(s.genus, s.species, do_print, status=s.status, path="../") +
                           suffix + "</li>\n")
         outfile.write("    </ul>\n")
         outfile.write("  </section>\n")
@@ -3044,7 +3060,8 @@ def write_species_list(outfile: TextIO, do_print: bool, specieslist: list) -> No
     outfile.write("\n")
     outfile.write("    <ul class=\"splist\">\n")
     for species in specieslist:
-        outfile.write("      <li>" + create_species_link(species.species, do_print, status=species.status) + "</li>\n")
+        outfile.write("      <li>" + create_species_link(species.genus, species.species, do_print,
+                                                         status=species.status) + "</li>\n")
     outfile.write("    </ul>\n")
     if do_print:
         end_page_division(outfile)
@@ -3517,8 +3534,8 @@ def write_photo_index(outfile: TextIO, do_print: bool, specieslist: list, photos
         species = sp.species
         status = sp.status
         outfile.write("    <section class=\"photosection\">\n")
-        outfile.write("      <h2 class=\"nobookmark\">" + create_species_link(species, do_print, status=status) +
-                      "</h2>\n")
+        outfile.write("      <h2 class=\"nobookmark\">" +
+                      create_species_link(sp.genus, species, do_print, status=status) + "</h2>\n")
         photo_n = 0
         for photo in photos:
             splist = photo.species.split(";")
@@ -3937,7 +3954,7 @@ def write_species_info_pages(outfile: Optional[TextIO], do_print: bool, speciesl
 
 def write_systematics_overview(outfile: TextIO, do_print: bool, subgenlist: list, specieslist: list,
                                refdict: dict, species_changes_new: list, species_changes_synonyms: list,
-                               species_changes_spelling: list) -> None:
+                               species_changes_spelling: list, species_crossref: dict) -> None:
     """
     create the systematics page
     """
@@ -4166,12 +4183,13 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, subgenlist: list
                       format_reference_cite(refdict[subgen.author], do_print, AUTHOR_NOPCOMMA) + "</h3>\n")
         outfile.write("      <dl>\n")
         outfile.write("        <dt>Type</dt>\n")
-        outfile.write("        <dd>" + create_species_link(subgen.type_species, do_print) + "</dd>\n")
+        s = find_species_by_name(subgen.type_species, species_crossref)
+        outfile.write("        <dd>" + create_species_link(s.genus, s.species, do_print) + "</dd>\n")
         outfile.write("        <dt>All Species</dt>\n")
         splist = []
         for s in specieslist:
             if s.subgenus == subgen.subgenus:
-                splist.append(create_species_link(s.species, do_print, status=s.status))
+                splist.append(create_species_link(s.genus, s.species, do_print, status=s.status))
         outfile.write("        <dd>" + ", ".join(splist) + "</dd>\n")
         outfile.write("      </dl>\n")
         outfile.write("      <p>\n")
@@ -5092,7 +5110,7 @@ def print_table_of_contents(outfile: TextIO, species_list: list) -> None:
     outfile.write("       <li><a href=\"#" + init_data().species_url + "\">Species</a>\n")
     outfile.write("         <ul>\n")
     for species in species_list:
-        outfile.write("           <li>" + create_species_link(species.species, True) + "</li>\n")
+        outfile.write("           <li>" + create_species_link(species.genus, species.species, True) + "</li>\n")
     outfile.write("         </ul>\n")
     outfile.write("       </li>\n")
 
@@ -5188,6 +5206,7 @@ def build_site() -> None:
         species_changes_new = TMB_Import.read_simple_file(init_data().species_changes_new)
         species_changes_synonyms = TMB_Import.read_simple_file(init_data().species_changes_synonyms)
         species_changes_spelling = TMB_Import.read_simple_file(init_data().species_changes_spelling)
+        species_crossref = prepare_species_crossref(species)
 
         print("...Connecting References...")
         print("......Computing Species from Citation Linking......")
@@ -5277,7 +5296,8 @@ def build_site() -> None:
                 with open(WEBOUT_PATH + "names/index.html", "w", encoding="utf-8") as outfile:
                     write_all_name_pages(outfile, False, refdict, citelist, all_names, specific_names, name_table,
                                          species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
-                                         binomial_point_locations, specific_point_locations, point_locations)
+                                         binomial_point_locations, specific_point_locations, point_locations,
+                                         species_crossref)
                 print("......Writing Species......")
                 write_species_info_pages(None, False, species, references, specific_names, all_names, photos, videos,
                                          art, species_refs, refdict, binomial_name_cnts, specific_name_cnts)
@@ -5300,7 +5320,7 @@ def build_site() -> None:
                 print("......Writing Misc......")
                 with open(WEBOUT_PATH + init_data().syst_url, "w", encoding="utf-8") as outfile:
                     write_systematics_overview(outfile, False, subgenera, species, refdict, species_changes_new,
-                                               species_changes_synonyms, species_changes_spelling)
+                                               species_changes_synonyms, species_changes_spelling, species_crossref)
                 with open(WEBOUT_PATH + init_data().common_url, "w", encoding="utf-8") as outfile:
                     write_common_names_pages(outfile, False, replace_references(common_name_data, refdict, False))
                 with open(WEBOUT_PATH + init_data().lifecycle_url, "w", encoding="utf-8") as outfile:
@@ -5322,7 +5342,7 @@ def build_site() -> None:
                     write_introduction(printfile, True, species)
                     write_common_names_pages(printfile, True, replace_references(common_name_data, refdict, True))
                     write_systematics_overview(printfile, True, subgenera, species, refdict, species_changes_new,
-                                               species_changes_synonyms, species_changes_spelling)
+                                               species_changes_synonyms, species_changes_spelling, species_crossref)
                     write_phylogeny_pages(printfile, True, refdict)
                     write_life_cycle_pages(printfile, True)
                     print("......Writing Species Pages......")
@@ -5331,7 +5351,8 @@ def build_site() -> None:
                     print("......Writing Name Pages......")
                     write_all_name_pages(printfile, True, refdict, citelist, all_names, specific_names, name_table,
                                          species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
-                                         binomial_point_locations, specific_point_locations, point_locations)
+                                         binomial_point_locations, specific_point_locations, point_locations,
+                                         species_crossref)
                     print("......Writing Location Pages......")
                     write_geography_page(printfile, True, species)
                     write_location_index(printfile, True, point_locations, location_dict, location_species,
