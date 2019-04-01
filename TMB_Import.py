@@ -132,19 +132,21 @@ def read_species_data(filename: str) -> list:
     for s in tmplist:
         newspecies = TMB_Classes.SpeciesClass()
         newspecies.species = s[0]
-        newspecies.subgenus = s[1]
-        newspecies.type_species = s[2]
-        newspecies.type_reference = s[3]
-        newspecies.common = s[4]
-        newspecies.commonext = s[5]
-        newspecies.range = s[6]
-        newspecies.range_references = s[7]
-        newspecies.region = s[8]
-        newspecies.status = s[9]
-        newspecies.taxonid = s[10]
-        newspecies.eolid = s[11]
-        newspecies.inatid = s[12]
-        newspecies.gbifid = s[13]
+        newspecies.genus = s[1]
+        # newspecies.subgenus = s[2]
+        newspecies.subgeus = newspecies.genus  # this is temporary until other pieces are in place
+        newspecies.type_species = s[3]
+        newspecies.type_reference = s[4]
+        newspecies.common = s[5]
+        newspecies.commonext = s[6]
+        newspecies.range = s[7]
+        newspecies.range_references = s[8]
+        newspecies.region = s[9]
+        newspecies.status = s[10]
+        newspecies.taxonid = s[11]
+        newspecies.eolid = s[12]
+        newspecies.inatid = s[13]
+        newspecies.gbifid = s[14]
         species_list.append(newspecies)
     return species_list
 

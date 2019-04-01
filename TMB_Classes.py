@@ -110,6 +110,7 @@ class SpeciesClass:
     """ a class to hold species information """
     def __init__(self):
         self.species = ""
+        self.genus = ""
         self.subgenus = ""
         self.type_species = ""
         self.type_reference = ""
