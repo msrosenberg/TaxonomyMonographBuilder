@@ -126,7 +126,8 @@ class SpeciesClass:
         self.gbifid = ""
 
     def __lt__(self, x):
-        return self.species < x.species
+        # return self.species < x.species
+        return self.fullname() < x.fullname()
 
     def fullname(self) -> str:
         return self.genus + " " + self.species
