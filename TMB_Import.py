@@ -196,15 +196,23 @@ def read_subgenera_data(filename: str) -> list:
     """
     tmplist = read_simple_file(filename)
     genlist = []
+    tmpdict = {}
     for g in tmplist:
         newsubgenus = TMB_Classes.RankedTaxonClass()
-        newsubgenus.subgenus = g[0]
+        newsubgenus.name = g[0]
+        newsubgenus.taxon_rank = g[1]
+        if g[2] != ".":
+            if g[2] in tmpdict:
+                newsubgenus.parent = tmpdict[g[2]]
+            else:
+                report_error("Import Error: Taxon Parent Not Found: " + g[2])
         newsubgenus.author = g[3]
         newsubgenus.type_species = g[4]
         newsubgenus.notes = g[5]
         newsubgenus.taxonid = g[6]
         newsubgenus.eolid = g[7]
         genlist.append(newsubgenus)
+        tmpdict[newsubgenus.name] = newsubgenus
     return genlist
 
 
