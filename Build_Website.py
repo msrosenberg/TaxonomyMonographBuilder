@@ -3,7 +3,6 @@ Taxonomy Monograph Builder
 """
 
 # built-in dependencies
-# import codecs
 import datetime
 # import random
 import os
@@ -11,7 +10,8 @@ import shutil
 import re
 import math
 # import subprocess
-from typing import Optional, Tuple, Union, TextIO
+# from typing import Optional, Tuple, Union, TextIO
+from typing import Optional, Tuple, TextIO
 # from tqdm import tqdm
 # local dependencies
 import TMB_Import
