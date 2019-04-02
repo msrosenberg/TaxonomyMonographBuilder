@@ -3355,10 +3355,6 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
     if not is_fossil:
         outfile.write("         <dd>\n")
         if do_print:
-            # outfile.write("           <img src=\"" + TMP_MAP_PATH + rangemap_name("u_" + species.species) +
-            #               ".svg\" alt=\"Map\" />\n")
-            # outfile.write("           <img src=\"" + TMP_MAP_PATH + pointmap_name("u_" + species.species) +
-            #               ".svg\" alt=\"Map\" />\n")
             outfile.write("           <img src=\"" + TMP_MAP_PATH + rangemap_name("u_" + species.species) +
                           ".png\" alt=\"Map\" />\n")
             outfile.write("           <img src=\"" + TMP_MAP_PATH + pointmap_name("u_" + species.species) +
@@ -3367,10 +3363,6 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
             outfile.write("           <div id=\"range_map_canvas\" class=\"sp_map\"></div>\n")
             outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
             outfile.write("           <div class=\"map_download\">\n")
-            # outfile.write("             <a href=\"maps/" + rangemap_name("u_" + species.species) + ".svgz\">"
-            #               "<span class=\"fa fa-download\"></span> Download SVG line map of ranges.</a> \n")
-            # outfile.write("             <a href=\"maps/" + pointmap_name("u_" + species.species) + ".svgz\">"
-            #               "<span class=\"fa fa-download\"></span> Download SVG line map of point locations.</a>\n")
             outfile.write("             <a href=\"maps/" + rangemap_name("u_" + species.species) + ".png\">" +
                           fetch_fa_glyph("download") + "Download PNG line map of ranges.</a> \n")
             outfile.write("             <a href=\"maps/" + pointmap_name("u_" + species.species) + ".png\">" +
@@ -3976,7 +3968,7 @@ def write_species_info_pages(outfile: Optional[TextIO], do_print: bool, speciesl
                                    art, sprefs, refdict, binomial_name_cnts, specific_name_cnts)
 
 
-def write_systematics_overview(outfile: TextIO, do_print: bool, subgenlist: list, specieslist: list,
+def write_systematics_overview(outfile: TextIO, do_print: bool, higher_taxa_list: list, specieslist: list,
                                refdict: dict, species_changes_new: list, species_changes_synonyms: list,
                                species_changes_spelling: list) -> None:
     """
@@ -4007,6 +3999,19 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, subgenlist: list
         outfile.write("        </tbody>\n")
         outfile.write("      </table>\n")
 
+    def write_taxon_item(taxon: TMB_Classes.RankedTaxonClass, indent: str) -> None:
+        outfile.write(indent + "<li>" + taxon.name)
+        if len(taxon.children) > 0:
+            outfile.write("\n" + indent + "  <ul>\n")
+            for c in taxon.children:
+                write_taxon_item(c, indent + 4 * " ")
+            outfile.write(indent + "  </ul>\n")
+        outfile.write(indent + "</li>\n")
+
+    # not all of these are currently used, but they are included now in case of expansion
+    RANK_ORDER = ["family", "subfamily", "supertribe", "tribe", "subtribe", "supergenus", "genus", "subgenus",
+                  "superspecies"]
+
     # main function code
     if do_print:
         start_page_division(outfile, "base_page")
@@ -4027,6 +4032,13 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, subgenlist: list
     outfile.write("    </header>\n")
     outfile.write("\n")
     outfile.write("    <div class=\"topsection\">\n")
+    outfile.write("      <h2>Systematic Hierarchy</h2>\n")
+    outfile.write("      <ul>\n")
+    for t in higher_taxa_list:
+        if t.parent is None:
+            write_taxon_item(t, 8*" ")
+    outfile.write("      </ul>\n")
+    outfile.write("\n")
     outfile.write("    <p>The following information is an expansion and update of that found in:</p>\n")
     outfile.write("    <blockquote>\n")
     outfile.write("      Rosenberg, M.S. 2001. The systematics and taxonomy of fiddler crabs: A phylogeny of the "
@@ -4195,12 +4207,12 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, subgenlist: list
                   " have continued to refine the subgenera as detailed below.\n")
     outfile.write("      </p>\n")
     outfile.write("      <ul>\n")
-    for subgen in subgenlist:
+    for subgen in higher_taxa_list:
         outfile.write("        <li><a href=\"#"+subgen.name + "\">Subgenus <em class=\"species\">" +
                       subgen.name + "</em></a></li>\n")
     outfile.write("      </ul>\n")
 
-    for subgen in subgenlist:
+    for subgen in higher_taxa_list:
         outfile.write("      <hr />\n")
         outfile.write("      <h3 id=\"" + subgen.name + "\" class=\"bookmark3\">Subgenus <em class=\"species\">" +
                       subgen.name + "</em> " +
