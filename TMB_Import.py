@@ -190,7 +190,7 @@ def read_video_data(filename: str) -> list:
     return video_list
 
 
-def read_ranked_taxa_data(filename: str) -> list:
+def read_higher_taxa_data(filename: str) -> list:
     """
     read data on taxa of ranks other than species
     """

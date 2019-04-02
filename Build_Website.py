@@ -5253,7 +5253,7 @@ def build_site() -> None:
          name_table, specific_point_locations, binomial_point_locations, binomial_usage_cnts,
          specific_usage_cnts) = calculate_name_index_data(refdict, citelist, specific_names)
         common_name_data = TMB_Import.read_common_name_data(init_data().common_names_file)
-        ranked_taxa = TMB_Import.read_ranked_taxa_data(init_data().higher_taxa_file)
+        higher_taxa = TMB_Import.read_higher_taxa_data(init_data().higher_taxa_file)
         print("...Creating Wordclouds...")
         TMB_Create_Graphs.create_word_cloud_image(binomial_usage_cnts, specific_usage_cnts, init_data().wc_font_path)
 
@@ -5348,7 +5348,7 @@ def build_site() -> None:
                     write_video_index(outfile, False, videos)
                 print("......Writing Misc......")
                 with open(WEBOUT_PATH + init_data().syst_url, "w", encoding="utf-8") as outfile:
-                    write_systematics_overview(outfile, False, ranked_taxa, species, refdict, species_changes_new,
+                    write_systematics_overview(outfile, False, higher_taxa, species, refdict, species_changes_new,
                                                species_changes_synonyms, species_changes_spelling)
                 with open(WEBOUT_PATH + init_data().common_url, "w", encoding="utf-8") as outfile:
                     write_common_names_pages(outfile, False, replace_references(common_name_data, refdict, False))
@@ -5359,7 +5359,7 @@ def build_site() -> None:
                 with open(WEBOUT_PATH + init_data().morph_url, "w", encoding="utf-8") as outfile:
                     write_main_morphology_pages(outfile, False, morphology)
                 with open(WEBOUT_PATH + "index.html", "w", encoding="utf-8") as outfile:
-                    write_introduction(outfile, False, species, ranked_taxa)
+                    write_introduction(outfile, False, species, higher_taxa)
                 write_citation_page(refdict)
 
             # output print version
@@ -5368,9 +5368,9 @@ def build_site() -> None:
                 with open("print.html", "w", encoding="utf-8") as printfile:
                     start_print(printfile)
                     write_print_only_pages(printfile, species, refdict)
-                    write_introduction(printfile, True, species, ranked_taxa)
+                    write_introduction(printfile, True, species, higher_taxa)
                     write_common_names_pages(printfile, True, replace_references(common_name_data, refdict, True))
-                    write_systematics_overview(printfile, True, ranked_taxa, species, refdict, species_changes_new,
+                    write_systematics_overview(printfile, True, higher_taxa, species, refdict, species_changes_new,
                                                species_changes_synonyms, species_changes_spelling)
                     write_phylogeny_pages(printfile, True, refdict)
                     write_life_cycle_pages(printfile, True)
