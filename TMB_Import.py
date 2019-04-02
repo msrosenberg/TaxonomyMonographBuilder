@@ -204,7 +204,9 @@ def read_higher_taxa_data(filename: str) -> list:
         new_taxon.taxon_rank = g[1]
         if g[2] != ".":
             if g[2] in tmpdict:
-                new_taxon.parent = tmpdict[g[2]]
+                p = tmpdict[g[2]]
+                new_taxon.parent = p
+                p.children.append(new_taxon)
             else:
                 report_error("Import Error: Taxon Parent Not Found: " + g[2])
         new_taxon.author = g[3]

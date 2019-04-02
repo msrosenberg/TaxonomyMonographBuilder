@@ -58,6 +58,7 @@ class RankedTaxonClass:
         self.eolid = ""
         self.parent = None
         self.taxon_rank = ""
+        self.children = []
 
 
 class VideoClass:
