@@ -4755,7 +4755,7 @@ def write_citation_page(refdict: dict) -> None:
         common_html_footer(outfile)
 
 
-def write_introduction(outfile: TextIO, do_print: bool, species: list, ranked_taxa: list) -> None:
+def write_introduction(outfile: TextIO, do_print: bool, species: list, higher_taxa: list) -> None:
     """
     create the site index
     """
@@ -4802,7 +4802,7 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list, ranked_ta
     outfile.write("      <tr><td class=\"classcol1\">Subfamily</td><td>Ocypodinae</td>\n")
     # outfile.write("      <tr><td class=\"classcol1\">Genus</td><td><em class=\"species\">Uca</em></td>\n")
     genera = []
-    for t in ranked_taxa:
+    for t in higher_taxa:
         if t.taxon_rank == "genus":
             genera.append(t.name)
     genera.sort()
