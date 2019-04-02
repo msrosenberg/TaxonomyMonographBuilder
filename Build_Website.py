@@ -4000,10 +4000,13 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, higher_taxa_list
         outfile.write("      </table>\n")
 
     def write_taxon_item(taxon: TMB_Classes.RankedTaxonClass, indent: str) -> None:
+        """
+        subfunction to write a hierarchical list of taxonomic names to html
+        """
         outfile.write(indent + "<li>" + taxon.name)
         if len(taxon.children) > 0:
             outfile.write("\n" + indent + "  <ul>\n")
-            for c in taxon.children:
+            for c in sorted(taxon.children):
                 write_taxon_item(c, indent + 4 * " ")
             outfile.write(indent + "  </ul>\n")
         outfile.write(indent + "</li>\n")
@@ -4034,7 +4037,7 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, higher_taxa_list
     outfile.write("    <div class=\"topsection\">\n")
     outfile.write("      <h2>Systematic Hierarchy</h2>\n")
     outfile.write("      <ul>\n")
-    for t in higher_taxa_list:
+    for t in sorted(higher_taxa_list):
         if t.parent is None:
             write_taxon_item(t, 8*" ")
     outfile.write("      </ul>\n")

@@ -60,6 +60,9 @@ class RankedTaxonClass:
         self.taxon_rank = ""
         self.children = []
 
+    def __lt__(self, x):
+        return self.name < x.name
+
 
 class VideoClass:
     """ a class to hold video information """
