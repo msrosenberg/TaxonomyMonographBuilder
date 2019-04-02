@@ -20,7 +20,7 @@ class InitializationData:
         self.species_data_file = "data/species_info.txt"
         self.specific_names_file = "data/specific_names.txt"
         self.common_names_file = "data/common_names.txt"
-        self.subgenera_file = "data/subgenera.txt"
+        self.higher_taxa_file = "data/higher_taxa.txt"
         self.photo_file = "data/photos.txt"
         self.video_file = "data/videos.txt"
         self.art_file = "data/art.txt"
