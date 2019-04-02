@@ -3315,9 +3315,10 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
     else:
         outfile.write("      <h2 id=\"info\" class=\"nobookmark\">" + fetch_fa_glyph("info") + "Information</h2>\n")
     outfile.write("      <dl>\n")
-    outfile.write("       <dt>Subgenus</dt>\n")
-    outfile.write("         <dd><a href=\"" + rel_link_prefix(do_print) + init_data().syst_url + "#" +
-                  species.subgenus + "\"><em class=\"species\">" + species.subgenus + "</em></a></dd>\n")
+    if species.subgenus != "":
+        outfile.write("       <dt>Subgenus</dt>\n")
+        outfile.write("         <dd><a href=\"" + rel_link_prefix(do_print) + init_data().syst_url + "#" +
+                      species.subgenus + "\"><em class=\"species\">" + species.subgenus + "</em></a></dd>\n")
     if not is_fossil:
         outfile.write("       <dt>Common Names</dt>\n")
         outfile.write("         <dd>" + species.commonext + "</dd>\n")
