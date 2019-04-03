@@ -4016,6 +4016,9 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
         outfile.write("        </tbody>\n")
         outfile.write("      </table>\n")
 
+    def replace_media_path(x: str, p: str) -> str:
+        return x.replace("%%MEDIA_PATH%%", p)
+
     def rank_tags(x: str) -> Tuple[str, str]:
         if ("genus" in x) or ("species" in x):
             return "<em>", "</em>"
@@ -4119,7 +4122,8 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
                                                                                      rank_title.capitalize()))
             if t_rank.notes != ".":
                 outfile.write("      <p>\n")
-                outfile.write("        " + replace_reference_in_string(t_rank.notes, refdict, do_print) + "\n")
+                outstr = replace_media_path(t_rank.notes, media_path)
+                outfile.write("        " + replace_reference_in_string(outstr, refdict, do_print) + "\n")
                 outfile.write("      </p>\n")
             # extract and alphabetically sort taxa at current rank
             rank_list = []
@@ -4148,7 +4152,9 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
                         children.append("<a href=\"#" + taxon_link(c) + "\">" + start_tag + c.name + end_tag + "</a>")
                     children.sort()
                     outfile.write("<strong>" + c_label + ":</strong> " + ", ".join(children) + "<br />\n")
-                outfile.write("      <p>" + replace_reference_in_string(taxon.notes, refdict, do_print) + "</p>\n")
+                if taxon.notes != ".":
+                    outstr = replace_media_path(taxon.notes, media_path)
+                    outfile.write("      <p>" + replace_reference_in_string(outstr, refdict, do_print) + "</p>\n")
             outfile.write("    </section>\n")
             outfile.write("\n")
 
