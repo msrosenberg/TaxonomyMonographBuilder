@@ -4039,19 +4039,7 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
             outfile.write(ind + "  </ul>\n")
         outfile.write(ind + "</li>\n")
 
-    # def pluralize_taxon_rank(x: str) -> str:
-    #     if "family" in x:
-    #         return x.replace("y", "ies")
-    #     elif "genus" in x:
-    #         return x.replace("us", "era")
-    #     elif "species" in x:
-    #         return x
-    #     else:
-    #         return x + "s"
-
-    # not all of these are currently used, but they are included now in case of expansion
-    # rank_order = ["family", "subfamily", "supertribe", "tribe", "subtribe", "supergenus", "genus", "subgenus",
-    #               "superspecies"]
+    # main function code
 
     # create list of present taxa ranks for navigation
     rank_cnts = {t.rank: 0 for t in taxon_ranks}
@@ -4062,10 +4050,8 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
         if rank_cnts[t.rank] == 1:
             nav_list.append(t.rank)
         elif rank_cnts[t.rank] > 1:
-            # nav_list.append(pluralize_taxon_rank(t))
             nav_list.append(t.plural)
 
-    # main function code
     if do_print:
         start_page_division(outfile, "base_page")
         media_path = MEDIA_PATH
@@ -4131,9 +4117,10 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
             outfile.write("    <section class=\"spsection\">\n")
             outfile.write("      <h2 id=\"{}\" class=\"bookmark2\">{}</h2>\n".format(rank_title,
                                                                                      rank_title.capitalize()))
-            outfile.write("      <p>\n")
-            outfile.write("        " + t_rank.notes + "\n")
-            outfile.write("      </p>\n")
+            if t_rank.notes != ".":
+                outfile.write("      <p>\n")
+                outfile.write("        " + replace_reference_in_string(t_rank.notes, refdict, do_print) + "\n")
+                outfile.write("      </p>\n")
             # extract and alphabetically sort taxa at current rank
             rank_list = []
             for taxon in higher_taxa_list:
@@ -4161,7 +4148,7 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
                         children.append("<a href=\"#" + taxon_link(c) + "\">" + start_tag + c.name + end_tag + "</a>")
                     children.sort()
                     outfile.write("<strong>" + c_label + ":</strong> " + ", ".join(children) + "<br />\n")
-                outfile.write("      <p>" + taxon.notes + "</p>\n")
+                outfile.write("      <p>" + replace_reference_in_string(taxon.notes, refdict, do_print) + "</p>\n")
             outfile.write("    </section>\n")
             outfile.write("\n")
 
@@ -5368,7 +5355,7 @@ def build_site() -> None:
          name_table, specific_point_locations, binomial_point_locations, binomial_usage_cnts,
          specific_usage_cnts) = calculate_name_index_data(refdict, citelist, specific_names)
         common_name_data = TMB_Import.read_common_name_data(init_data().common_names_file)
-        common_name_data = replace_references(common_name_data, refdict, True)
+        # common_name_data = replace_references(common_name_data, refdict, True)
         common_name_data = replace_species_references(common_name_data)
 
         taxon_ranks = TMB_Import.read_taxon_rank_data(init_data().taxon_ranks_file)
@@ -5459,24 +5446,24 @@ def build_site() -> None:
                 #                          location_cited_refs, references)
                 # with open(WEBOUT_PATH + init_data().map_url, "w", encoding="utf-8") as outfile:
                 #     write_geography_page(outfile, False, species)
-                print("......Writing Media Pages......")
-                with open(WEBOUT_PATH + init_data().photo_url, "w", encoding="utf-8") as outfile:
-                    write_photo_index(outfile, False, species, photos)
-                write_all_art_pages(None, False, art)
-                with open(WEBOUT_PATH + init_data().video_url, "w", encoding="utf-8") as outfile:
-                    write_video_index(outfile, False, videos)
+                # print("......Writing Media Pages......")
+                # with open(WEBOUT_PATH + init_data().photo_url, "w", encoding="utf-8") as outfile:
+                #     write_photo_index(outfile, False, species, photos)
+                # write_all_art_pages(None, False, art)
+                # with open(WEBOUT_PATH + init_data().video_url, "w", encoding="utf-8") as outfile:
+                #     write_video_index(outfile, False, videos)
                 print("......Writing Misc......")
                 with open(WEBOUT_PATH + init_data().syst_url, "w", encoding="utf-8") as outfile:
                     write_systematics_overview(outfile, False, taxon_ranks, higher_taxa, species, refdict,
                                                species_changes_new, species_changes_synonyms, species_changes_spelling)
-                with open(WEBOUT_PATH + init_data().common_url, "w", encoding="utf-8") as outfile:
-                    write_common_names_pages(outfile, False, common_name_data)
+                # with open(WEBOUT_PATH + init_data().common_url, "w", encoding="utf-8") as outfile:
+                #     write_common_names_pages(outfile, False, replace_references(common_name_data, refdict, False))
                 # with open(WEBOUT_PATH + init_data().lifecycle_url, "w", encoding="utf-8") as outfile:
                 #     write_life_cycle_pages(outfile, False)
                 # with open(WEBOUT_PATH + init_data().tree_url, "w", encoding="utf-8") as outfile:
                 #     write_phylogeny_pages(outfile, False, refdict)
-                with open(WEBOUT_PATH + init_data().morph_url, "w", encoding="utf-8") as outfile:
-                    write_main_morphology_pages(outfile, False, morphology)
+                # with open(WEBOUT_PATH + init_data().morph_url, "w", encoding="utf-8") as outfile:
+                #     write_main_morphology_pages(outfile, False, morphology)
                 # with open(WEBOUT_PATH + "index.html", "w", encoding="utf-8") as outfile:
                 #     write_introduction(outfile, False, species, higher_taxa)
                 # write_citation_page(refdict)
@@ -5488,7 +5475,7 @@ def build_site() -> None:
                     start_print(printfile)
                     write_print_only_pages(printfile, species, refdict)
                     write_introduction(printfile, True, species, higher_taxa)
-                    write_common_names_pages(printfile, True, common_name_data)
+                    write_common_names_pages(printfile, True, replace_references(common_name_data, refdict, True))
                     write_systematics_overview(printfile, True, taxon_ranks, higher_taxa, species, refdict,
                                                species_changes_new, species_changes_synonyms, species_changes_spelling)
                     write_phylogeny_pages(printfile, True, refdict)
