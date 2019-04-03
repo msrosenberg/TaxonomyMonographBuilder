@@ -219,6 +219,21 @@ def read_higher_taxa_data(filename: str) -> list:
     return taxon_list
 
 
+def read_taxon_rank_data(filename: str) -> list:
+    """
+    read data on type of taxonomic ranks
+    """
+    tmplist = read_simple_file(filename)
+    rank_list = []
+    for g in tmplist:
+        new_rank = TMB_Classes.TaxonTypeClass()
+        new_rank.rank = g[0]
+        new_rank.plural = g[1]
+        new_rank.notes = g[2]
+        rank_list.append(new_rank)
+    return rank_list
+
+
 def read_specific_names_data(filename: str) -> list:
     """
     read specific name data

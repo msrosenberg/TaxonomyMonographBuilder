@@ -48,7 +48,7 @@ class SpecificNameClass:
 
 
 class RankedTaxonClass:
-    """ a class to hold subgenera """
+    """ a class to hold ranked taxa """
     def __init__(self):
         self.name = ""
         self.author = ""
@@ -62,6 +62,17 @@ class RankedTaxonClass:
 
     def __lt__(self, x):
         return self.name < x.name
+
+    def n_children(self):
+        return len(self.children)
+
+
+class TaxonTypeClass:
+    """ a class to hold info about types of taxonomic ranks """
+    def __init__(self):
+        self.rank = ""
+        self.plural = ""
+        self.notes = ""
 
 
 class VideoClass:

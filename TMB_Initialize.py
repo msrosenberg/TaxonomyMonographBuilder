@@ -21,6 +21,7 @@ class InitializationData:
         self.specific_names_file = "data/specific_names.txt"
         self.common_names_file = "data/common_names.txt"
         self.higher_taxa_file = "data/higher_taxa.txt"
+        self.taxon_ranks_file = "data/taxon_ranks.txt"
         self.photo_file = "data/photos.txt"
         self.video_file = "data/videos.txt"
         self.art_file = "data/art.txt"
