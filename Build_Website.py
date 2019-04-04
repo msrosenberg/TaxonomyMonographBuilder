@@ -4361,50 +4361,51 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
     # outfile.write("    </section>\n")
     # outfile.write("\n")
 
-    # species section
-    outfile.write("    <section class=\"spsection\">\n")
-    outfile.write("      <h2 id=\"species\" class=\"bookmark2\">Species Level Systematics</h2>\n")
-    outfile.write("      <ul>\n")
-    outfile.write("        <li><a href=\"" + init_data().species_url + "\">Currently recognized species</a></li>\n")
-    outfile.write("      </ul>\n")
-    outfile.write("      <p>\n")
-    outfile.write("For an overview of all <em class=\"species\">Uca</em> species, the best reference is " +
-                  format_reference_cite(refdict["Crane1975"], do_print, AUTHOR_PAREN) +
-                  "; any earlier major work would be "
-                  "overridden by Crane's descriptions. For the most part, the taxa recognized by Crane are still "
-                  "accepted today. A number of new species have been described since the publication of her "
-                  "monograph, a few species has been discovered to be invalid, and two of her new species were "
-                  "previously described by " +
-                  format_reference_cite(refdict["Bott1973.2"], do_print, AUTHOR_PAREN) + "; as with the "
-                  "subgenera, his names have priority and take precedence. These changes are summarized below.\n")
-    outfile.write("      </p>\n")
-    outfile.write("      <h3 class=\"nobookmark\">Changes to the species level taxonomy of the genus "
-                  "<em class=\"species\">Uca</em> since Crane (1975)</h3>\n")
-    write_species_table(["New/Validated Extant Species", "Reference(s)"], species_changes_new)
-    write_species_table(["Junior Subsynonym", "Correct Name", "Reference(s)"], species_changes_synonyms)
-    write_species_table(["Incorrect Spelling", "Correct Spelling", "Reference(s)"], species_changes_spelling)
-    outfile.write("      <p>\n")
-    outfile.write(format_reference_cite(refdict["Crane1975"], do_print, AUTHOR_PAREN) +
-                  " tended to lump related taxa into "
-                  "subspecies rather than treat them as distinct species. A number of studies since that time "
-                  "have raised virtually all of her subspecies to specific status (<em>e.g.,</em> " +
-                  format_reference_cite(refdict["Barnwell1980"], do_print, AUTHOR_NOPAREN) + "; " +
-                  format_reference_cite(refdict["Barnwell1984.1"], do_print, AUTHOR_NOPAREN) + "; " +
-                  format_reference_cite(refdict["Collins1984"], do_print, AUTHOR_NOPAREN) + "; " +
-                  format_reference_cite(refdict["Green1980"], do_print, AUTHOR_NOPAREN) + "; " +
-                  format_reference_cite(refdict["Salmon1979.2"], do_print, AUTHOR_NOPAREN) + "; " +
-                  format_reference_cite(refdict["Salmon1987.2"], do_print, AUTHOR_NOPAREN) + "; " +
-                  format_reference_cite(refdict["Thurman1979"], do_print, AUTHOR_NOPAREN) + "; " +
-                  format_reference_cite(refdict["Thurman1982"], do_print, AUTHOR_NOPAREN) + "; " +
-                  format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_NOPAREN) + "). "
-                  "It has become common practice with many authors to ignore all of the subspecific designations "
-                  "and treat each as a separate species (<em>e.g.,</em> " +
-                  format_reference_cite(refdict["George1982"], do_print, AUTHOR_NOPAREN) + "; " +
-                  format_reference_cite(refdict["Jones1994"], do_print, AUTHOR_NOPAREN) + "; " +
-                  format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_NOPAREN) + "). "
-                  "I follow this practice throughout this website.\n")
-    outfile.write("      </p>\n")
-    outfile.write("    </section>\n")
+    # # species section
+    # outfile.write("    <section class=\"spsection\">\n")
+    # outfile.write("      <h2 id=\"species\" class=\"bookmark2\">Species Level Systematics</h2>\n")
+    # outfile.write("      <ul>\n")
+    # outfile.write("        <li><a href=\"" + init_data().species_url + "\">Currently recognized species</a></li>\n")
+    # outfile.write("      </ul>\n")
+    # outfile.write("      <p>\n")
+    # outfile.write("For an overview of all <em class=\"species\">Uca</em> species, the best reference is " +
+    #               format_reference_cite(refdict["Crane1975"], do_print, AUTHOR_PAREN) +
+    #               "; any earlier major work would be "
+    #               "overridden by Crane's descriptions. For the most part, the taxa recognized by Crane are still "
+    #               "accepted today. A number of new species have been described since the publication of her "
+    #               "monograph, a few species has been discovered to be invalid, and two of her new species were "
+    #               "previously described by " +
+    #               format_reference_cite(refdict["Bott1973.2"], do_print, AUTHOR_PAREN) + "; as with the "
+    #               "subgenera, his names have priority and take precedence. These changes are summarized below.\n")
+    # outfile.write("      </p>\n")
+    # outfile.write("      <h3 class=\"nobookmark\">Changes to the species level taxonomy of the genus "
+    #               "<em class=\"species\">Uca</em> since Crane (1975)</h3>\n")
+    # write_species_table(["New/Validated Extant Species", "Reference(s)"], species_changes_new)
+    # write_species_table(["Junior Subsynonym", "Correct Name", "Reference(s)"], species_changes_synonyms)
+    # write_species_table(["Incorrect Spelling", "Correct Spelling", "Reference(s)"], species_changes_spelling)
+    # outfile.write("      <p>\n")
+    # outfile.write(format_reference_cite(refdict["Crane1975"], do_print, AUTHOR_PAREN) +
+    #               " tended to lump related taxa into "
+    #               "subspecies rather than treat them as distinct species. A number of studies since that time "
+    #               "have raised virtually all of her subspecies to specific status (<em>e.g.,</em> " +
+    #               format_reference_cite(refdict["Barnwell1980"], do_print, AUTHOR_NOPAREN) + "; " +
+    #               format_reference_cite(refdict["Barnwell1984.1"], do_print, AUTHOR_NOPAREN) + "; " +
+    #               format_reference_cite(refdict["Collins1984"], do_print, AUTHOR_NOPAREN) + "; " +
+    #               format_reference_cite(refdict["Green1980"], do_print, AUTHOR_NOPAREN) + "; " +
+    #               format_reference_cite(refdict["Salmon1979.2"], do_print, AUTHOR_NOPAREN) + "; " +
+    #               format_reference_cite(refdict["Salmon1987.2"], do_print, AUTHOR_NOPAREN) + "; " +
+    #               format_reference_cite(refdict["Thurman1979"], do_print, AUTHOR_NOPAREN) + "; " +
+    #               format_reference_cite(refdict["Thurman1982"], do_print, AUTHOR_NOPAREN) + "; " +
+    #               format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_NOPAREN) + "). "
+    #               "It has become common practice with many authors to ignore all of the subspecific designations "
+    #               "and treat each as a separate species (<em>e.g.,</em> " +
+    #               format_reference_cite(refdict["George1982"], do_print, AUTHOR_NOPAREN) + "; " +
+    #               format_reference_cite(refdict["Jones1994"], do_print, AUTHOR_NOPAREN) + "; " +
+    #               format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_NOPAREN) + "). "
+    #               "I follow this practice throughout this website.\n")
+    # outfile.write("      </p>\n")
+    # outfile.write("    </section>\n")
+
     if do_print:
         end_page_division(outfile)
     else:
