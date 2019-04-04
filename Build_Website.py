@@ -4154,7 +4154,7 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
                                   start_tag + taxon.parent.name + end_tag + "</a></dd>\n")
                 c_label = "Contains "
                 if taxon.n_children() > 0:
-                    if taxon.n_children == 1:
+                    if taxon.n_children() == 1:
                         c_label += taxon.children[0].taxon_rank
                     else:
                         i = 0
