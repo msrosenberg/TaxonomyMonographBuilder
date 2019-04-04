@@ -4140,11 +4140,14 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
                     typestr = "Genus <em>" + taxon.type_species[1:] + "</em>"
                 else:
                     typestr = find_species_by_name(taxon.type_species).fullname()
-                outfile.write("<strong>Type: </strong> " + typestr + "<br />\n")
+                outfile.write("      <dl>\n")
+                outfile.write("        <dt>Type</dt>\n")
+                outfile.write("        <dd>" + typestr + "</dd>\n")
                 if taxon.parent is not None:
                     start_tag, end_tag = rank_tags(taxon.parent.taxon_rank)
-                    outfile.write("<strong>Parent:</strong> <a href=\"#" + taxon_link(taxon.parent) + "\">" +
-                                  start_tag + taxon.parent.name + end_tag + "</a><br />\n")
+                    outfile.write("        <dt>Parent</dt>\n")
+                    outfile.write("        <dd><a href=\"#" + taxon_link(taxon.parent) + "\">" +
+                                  start_tag + taxon.parent.name + end_tag + "</a></dd>\n")
                 if taxon.n_children() > 0:
                     if taxon.n_children == 1:
                         c_label = "Child"
@@ -4155,7 +4158,20 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
                         start_tag, end_tag = rank_tags(c.taxon_rank)
                         children.append("<a href=\"#" + taxon_link(c) + "\">" + start_tag + c.name + end_tag + "</a>")
                     children.sort()
-                    outfile.write("<strong>" + c_label + ":</strong> " + ", ".join(children) + "<br />\n")
+                    outfile.write("        <dt>" + c_label + "</dt>\n")
+                    outfile.write("        <dd>" + ", ".join(children) + "</dd>\n")
+                else:
+                    outfile.write("        <dt>Species</dt>\n")
+                    splist = []
+                    for s in specieslist:
+                        if taxon.taxon_rank == "genus":
+                            if s.genus == taxon.name:
+                                splist.append(create_species_link(s.genus, s.species, do_print, status=s.status))
+                        elif taxon.taxon_rank == "subgenus":
+                            if s.subgenus == taxon.name:
+                                splist.append(create_species_link(s.genus, s.species, do_print, status=s.status))
+                    outfile.write("        <dd>" + ", ".join(splist) + "</dd>\n")
+                outfile.write("      </dl>\n")
                 if taxon.notes != ".":
                     outstr = replace_media_path(taxon.notes, media_path)
                     outfile.write("      <p>" +
