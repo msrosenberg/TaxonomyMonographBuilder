@@ -4035,11 +4035,21 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
         starttag, endtag = rank_tags(tax.taxon_rank)
         outfile.write(ind + "<li><a href=\"#{}\">{} {}{}{}</a>".format(taxon_link(tax), tax.taxon_rank.capitalize(),
                                                                        starttag, tax.name, endtag))
+        outfile.write("\n" + ind + "  <ul>\n")
         if tax.n_children() > 0:
-            outfile.write("\n" + ind + "  <ul>\n")
             for cc in sorted(tax.children):
                 write_taxon_item(cc, ind + 4 * " ")
-            outfile.write(ind + "  </ul>\n")
+        else:
+            ssplist = []
+            for ss in specieslist:
+                if tax.taxon_rank == "genus":
+                    if ss.genus == tax.name:
+                        ssplist.append(create_species_link(ss.genus, ss.species, do_print, status=ss.status))
+                elif tax.taxon_rank == "subgenus":
+                    if ss.subgenus == tax.name:
+                        ssplist.append(create_species_link(ss.genus, ss.species, do_print, status=ss.status))
+            outfile.write(ind + "    <li>" + ", ".join(ssplist) + "</li>\n")
+        outfile.write(ind + "  </ul>\n")
         outfile.write(ind + "</li>\n")
 
     # main function code
