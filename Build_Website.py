@@ -4149,7 +4149,7 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
                 outfile.write("        <dd>" + typestr + "</dd>\n")
                 if taxon.parent is not None:
                     start_tag, end_tag = rank_tags(taxon.parent.taxon_rank)
-                    outfile.write("        <dt>Part of " + taxon.parent.taxon_rank.capitalize() + "</dt>\n")
+                    outfile.write("        <dt>Part of " + taxon.parent.taxon_rank + "</dt>\n")
                     outfile.write("        <dd><a href=\"#" + taxon_link(taxon.parent) + "\">" +
                                   start_tag + taxon.parent.name + end_tag + "</a></dd>\n")
                 c_label = "Contains "
