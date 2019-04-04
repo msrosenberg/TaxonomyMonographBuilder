@@ -4136,7 +4136,11 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
                 start_tag, end_tag = rank_tags(rank)
                 outfile.write("      <h3 id=\"" + taxon_link(taxon) + "\">" + start_tag + taxon.name + end_tag + " " +
                               format_reference_cite(refdict[taxon.author], do_print, AUTHOR_NOPCOMMA) + "</h2>\n")
-                outfile.write("<strong>Type: </strong> " + taxon.type_species + "<br />\n")
+                if ">" in taxon.type_species:
+                    typestr = "Genus <em>" + taxon.type_species[1:] + "</em>"
+                else:
+                    typestr = find_species_by_name(taxon.type_species).fullname()
+                outfile.write("<strong>Type: </strong> " + typestr + "<br />\n")
                 if taxon.parent is not None:
                     start_tag, end_tag = rank_tags(taxon.parent.taxon_rank)
                     outfile.write("<strong>Parent:</strong> <a href=\"#" + taxon_link(taxon.parent) + "\">" +
@@ -4154,7 +4158,9 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
                     outfile.write("<strong>" + c_label + ":</strong> " + ", ".join(children) + "<br />\n")
                 if taxon.notes != ".":
                     outstr = replace_media_path(taxon.notes, media_path)
-                    outfile.write("      <p>" + replace_reference_in_string(outstr, refdict, do_print) + "</p>\n")
+                    outfile.write("      <p>" +
+                                  replace_species_in_string(replace_reference_in_string(outstr, refdict, do_print)) +
+                                  "</p>\n")
             outfile.write("    </section>\n")
             outfile.write("\n")
 
