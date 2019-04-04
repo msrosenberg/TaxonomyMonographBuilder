@@ -133,9 +133,9 @@ def read_species_data(filename: str) -> list:
         newspecies = TMB_Classes.SpeciesClass()
         newspecies.species = s[0]
         newspecies.genus = s[1]
-        # if s[2] != ".":
-        #     newspecies.subgenus = s[2]
-        newspecies.subgenus = newspecies.genus  # this is temporary until other pieces are in place
+        if s[2] != ".":
+            newspecies.subgenus = s[2]
+        # newspecies.subgenus = newspecies.genus  # this is temporary until other pieces are in place
         newspecies.type_species = s[3]
         newspecies.type_reference = s[4]
         newspecies.common = s[5]
