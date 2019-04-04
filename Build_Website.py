@@ -4169,7 +4169,7 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
                     outfile.write("        <dt>" + c_label + "</dt>\n")
                     outfile.write("        <dd>" + ", ".join(children) + "</dd>\n")
                 else:
-                    outfile.write("        <dt>Species</dt>\n")
+                    outfile.write("        <dt>Contains species</dt>\n")
                     splist = []
                     for s in specieslist:
                         if taxon.taxon_rank == "genus":
