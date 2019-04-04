@@ -4139,8 +4139,8 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
                 if taxon.type_species.startswith(">>"):
                     typestr = "Genus <em>" + taxon.type_species[2:] + "</em>"
                 elif taxon.type_species.startswith(">"):
-                    typestr = "<a href=\"#genus_" + taxon.type_species[1:] + "\">Genus <em>" + taxon.type_species[1:] + \
-                              "</em></a>"
+                    typestr = "<a href=\"#genus_" + taxon.type_species[1:] + "\">Genus <em>" + \
+                              taxon.type_species[1:] + "</em></a>"
                 else:
                     s = find_species_by_name(taxon.type_species)
                     typestr = create_species_link(s.genus, s.species, do_print, status=s.status)
@@ -4149,14 +4149,18 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
                 outfile.write("        <dd>" + typestr + "</dd>\n")
                 if taxon.parent is not None:
                     start_tag, end_tag = rank_tags(taxon.parent.taxon_rank)
-                    outfile.write("        <dt>Parent</dt>\n")
+                    outfile.write("        <dt>Part of " + taxon.parent.taxon_rank.capitalize() + "</dt>\n")
                     outfile.write("        <dd><a href=\"#" + taxon_link(taxon.parent) + "\">" +
                                   start_tag + taxon.parent.name + end_tag + "</a></dd>\n")
+                c_label = "Contains "
                 if taxon.n_children() > 0:
                     if taxon.n_children == 1:
-                        c_label = "Child"
+                        c_label += taxon.children[0].taxon_rank
                     else:
-                        c_label = "Children"
+                        i = 0
+                        while taxon_ranks[i].rank != taxon.children[0].taxon_rank:
+                            i += 1
+                        c_label += taxon_ranks[i].plural
                     children = []
                     for c in taxon.children:
                         start_tag, end_tag = rank_tags(c.taxon_rank)
