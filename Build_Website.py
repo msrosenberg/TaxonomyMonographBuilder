@@ -4137,9 +4137,11 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
                 outfile.write("      <h3 id=\"" + taxon_link(taxon) + "\">" + start_tag + taxon.name + end_tag + " " +
                               format_reference_cite(refdict[taxon.author], do_print, AUTHOR_NOPCOMMA) + "</h2>\n")
                 if ">" in taxon.type_species:
-                    typestr = "Genus <em>" + taxon.type_species[1:] + "</em>"
+                    typestr = "<a href=\"genus_" + taxon.type_species[1:] + "\">Genus <em>" + taxon.type_species[1:] + \
+                              "</em></a>"
                 else:
-                    typestr = find_species_by_name(taxon.type_species).fullname()
+                    s = find_species_by_name(taxon.type_species)
+                    typestr = create_species_link(s.genus, s.species, do_print, status=s.status)
                 outfile.write("      <dl>\n")
                 outfile.write("        <dt>Type</dt>\n")
                 outfile.write("        <dd>" + typestr + "</dd>\n")
