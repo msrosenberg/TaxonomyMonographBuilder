@@ -3260,7 +3260,7 @@ def write_reference_list(outfile: TextIO, do_print: bool, references: list, cita
 def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.SpeciesClass, references: list,
                        specific_names: list, all_names: list, photos: list, videos: list, artlist: list,
                        sprefs: dict, refdict: dict, binomial_name_counts: dict, specific_name_cnts: dict,
-                       higher_order_taxa: list, higher_dict: dict) -> None:
+                       higher_dict: dict) -> None:
     """
     create the master page for a valid species
     """
@@ -3334,21 +3334,40 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
         outfile.write("      <h2 id=\"info\" class=\"nobookmark\">" + fetch_fa_glyph("info") + "Information</h2>\n")
     outfile.write("      <dl>\n")
     hlist = []
-    ctaxa = higher_dict["genus" + species.genus]
-    while ctaxa.parent is not None:
-        ctaxa = ctaxa.parent
-        hlist.append(ctaxa)
-    for ctaxa in hlist:
-        outfile.write("       <dt>" + ctaxa.taxon_rank.capitalize() + "</dt>\n")
-        outfile.write("         <dd><a href=\"" + rel_link_prefix(do_print) + init_data().syst_url +
-                      "#{0}_{1}\">{1}</a></dd>\n".format(ctaxa.taxon_rank, ctaxa.name))
-    outfile.write("       <dt>Genus</dt>\n")
-    outfile.write("         <dd><a href=\"" + rel_link_prefix(do_print) + init_data().syst_url + "#genus_" +
-                  species.genus + "\"><em class=\"species\">" + species.genus + "</em></a></dd>\n")
     if species.subgenus != "":
-        outfile.write("       <dt>Subgenus</dt>\n")
-        outfile.write("         <dd><a href=\"" + rel_link_prefix(do_print) + init_data().syst_url + "#subgenus_" +
-                      species.subgenus + "\"><em class=\"species\">" + species.subgenus + "</em></a></dd>\n")
+        ctaxa = higher_dict["subgenus" + species.subgenus]
+        hlist.append(ctaxa)
+    ctaxa = higher_dict["genus" + species.genus]
+    hlist.append(ctaxa)
+    ctaxa = ctaxa.parent
+    while ctaxa.parent is not None:
+        hlist.append(ctaxa)
+        ctaxa = ctaxa.parent
+    tlist = []
+    for ctaxa in hlist[::-1]:
+        if "genus" in ctaxa.taxon_rank:
+            starttag = "<em class=\"species\">"
+            endtag = "</em>"
+        else:
+            starttag = ""
+            endtag = ""
+        tlist.append("<a href=\"" + rel_link_prefix(do_print) + init_data().syst_url +
+                     "#{0}_{1}\">{2} {3}{1}{4}</a>".format(ctaxa.taxon_rank, ctaxa.name, ctaxa.taxon_rank.capitalize(),
+                                                           starttag, endtag))
+    outfile.write("       <dt>Taxonomy</dt>\n")
+    outfile.write("       <dd>" + " &rarr; ".join(tlist) + "</dd>\n")
+
+    # for ctaxa in hlist[::-1]:
+    #     outfile.write("       <dt>" + ctaxa.taxon_rank.capitalize() + "</dt>\n")
+    #     outfile.write("         <dd><a href=\"" + rel_link_prefix(do_print) + init_data().syst_url +
+    #                   "#{0}_{1}\">{1}</a></dd>\n".format(ctaxa.taxon_rank, ctaxa.name))
+    # outfile.write("       <dt>Genus</dt>\n")
+    # outfile.write("         <dd><a href=\"" + rel_link_prefix(do_print) + init_data().syst_url + "#genus_" +
+    #               species.genus + "\"><em class=\"species\">" + species.genus + "</em></a></dd>\n")
+    # if species.subgenus != "":
+    #     outfile.write("       <dt>Subgenus</dt>\n")
+    #     outfile.write("         <dd><a href=\"" + rel_link_prefix(do_print) + init_data().syst_url + "#subgenus_" +
+    #                   species.subgenus + "\"><em class=\"species\">" + species.subgenus + "</em></a></dd>\n")
     if not is_fossil:
         outfile.write("       <dt>Common Names</dt>\n")
         outfile.write("         <dd>" + species.commonext + "</dd>\n")
@@ -3977,7 +3996,7 @@ def write_all_art_pages(outfile: Optional[TextIO], do_print: bool, artlist: list
 def write_species_info_pages(outfile: Optional[TextIO], do_print: bool, specieslist: list, references: list,
                              specific_names: list, all_names: list, photos: list, videos: list, art: list,
                              species_refs: dict, refdict: dict, binomial_name_cnts: dict,
-                             specific_name_cnts: dict, higher_taxa: list, higher_dict: dict) -> None:
+                             specific_name_cnts: dict, higher_dict: dict) -> None:
     """
     create the species index and all individual species pages
     """
@@ -3991,12 +4010,11 @@ def write_species_info_pages(outfile: Optional[TextIO], do_print: bool, speciesl
         sprefs = species_refs[species.species]
         if do_print:
             write_species_page(outfile, True, species, references, specific_names, all_names, photos, videos, art,
-                               sprefs, refdict, binomial_name_cnts, specific_name_cnts, higher_taxa, higher_dict)
+                               sprefs, refdict, binomial_name_cnts, specific_name_cnts, higher_dict)
         else:
             with open(WEBOUT_PATH + "u_" + species.species + ".html", "w", encoding="utf-8") as suboutfile:
                 write_species_page(suboutfile, False, species, references, specific_names, all_names, photos, videos,
-                                   art, sprefs, refdict, binomial_name_cnts, specific_name_cnts, higher_taxa,
-                                   higher_dict)
+                                   art, sprefs, refdict, binomial_name_cnts, specific_name_cnts, higher_dict)
 
 
 def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: list, higher_taxa_list: list,
@@ -5501,7 +5519,7 @@ def build_site() -> None:
                 print("......Writing Species......")
                 write_species_info_pages(None, False, species, references, specific_names, all_names, photos, videos,
                                          art, species_refs, refdict, binomial_name_cnts, specific_name_cnts,
-                                         higher_taxa, higher_dict)
+                                         higher_dict)
                 # if DRAW_MAPS:
                 #     print("......Copying Maps......")
                 #     copy_map_files(species, all_names, specific_names, point_locations)
@@ -5549,7 +5567,7 @@ def build_site() -> None:
                     print("......Writing Species Pages......")
                     write_species_info_pages(printfile, True, species, references, specific_names, all_names, photos,
                                              videos, art, species_refs, refdict, binomial_name_cnts, specific_name_cnts,
-                                             higher_taxa, higher_dict)
+                                             higher_dict)
                     print("......Writing Name Pages......")
                     write_all_name_pages(printfile, True, refdict, citelist, all_names, specific_names, name_table,
                                          species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
