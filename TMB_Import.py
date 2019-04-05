@@ -191,7 +191,7 @@ def read_video_data(filename: str) -> list:
     return video_list
 
 
-def read_higher_taxa_data(filename: str) -> list:
+def read_higher_taxa_data(filename: str) -> Tuple[list, dict]:
     """
     read data on taxa of ranks other than species
     """
@@ -216,7 +216,7 @@ def read_higher_taxa_data(filename: str) -> list:
         new_taxon.eolid = g[7]
         taxon_list.append(new_taxon)
         tmpdict[new_taxon.taxon_rank + new_taxon.name] = new_taxon
-    return taxon_list
+    return taxon_list, tmpdict
 
 
 def read_taxon_rank_data(filename: str) -> list:
