@@ -438,7 +438,7 @@ def replace_species_in_string(instr: str) -> str:
     for match in re.finditer(search_str, instr):
         # look up full species name
         s = SPECIES_XREF[match.group("species")]
-        instr = re.sub(search_str, "<em class=\"species\">" + s.fullname() + "</em>", instr, 1)
+        instr = re.sub(search_str, "<em class=\"species\">" + s.binomial() + "</em>", instr, 1)
     return instr
 
 
@@ -1150,7 +1150,7 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
         else:
             s = find_species_by_name(n.actual)
             outfile.write("      <td><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + n.actual +
-                          ".html\"><em class=\"species\">" + s.fullname() + "</em></a></td>\n")
+                          ".html\"><em class=\"species\">" + s.binomial() + "</em></a></td>\n")
 
         # source of accepted species
         if n.source == ".":  # currently not listed
@@ -1740,13 +1740,13 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species_name: str
     # put accepted name first, followed by the rest in decreasing frequency
     species = find_species_by_name(species_name)
     # if ("Uca " + species) in binomial_synlist:
-    if (species.fullname()) in binomial_synlist:
-        bi_order = [species.fullname()]
+    if (species.binomial()) in binomial_synlist:
+        bi_order = [species.binomial()]
     else:
         bi_order = []
     for x in name_cnts:
         # if x[1] != "Uca " + species:
-        if x[1] != species.fullname():
+        if x[1] != species.binomial():
             bi_order.append(x[1])
 
     if do_print:
@@ -1782,7 +1782,7 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species_name: str
 
     outfile.write("    <header>\n")
     # outfile.write("      <h1 class=\"nobookmark\">Synonym Chronology of " + format_name_string("Uca " + species) +
-    outfile.write("      <h1 class=\"nobookmark\">Synonym Chronology of " + format_name_string(species.fullname()) +
+    outfile.write("      <h1 class=\"nobookmark\">Synonym Chronology of " + format_name_string(species.binomial()) +
                   "</h1>\n")
     if not do_print:
         outfile.write("      <nav>\n")
@@ -3101,14 +3101,14 @@ def write_species_photo_page(outfile: TextIO, do_print: bool, fname: str, specie
         slist = []
         for t in tmplist:
             tmps = find_species_by_name(t)
-            slist.append(tmps.fullname())
+            slist.append(tmps.binomial())
         ptitle = " & ".join(slist)
         # ptitle = "Uca " + pspecies.replace(";", " & Uca ")
         is_multi = True
     else:
         spname = species_name
         species = find_species_by_name(species_name)
-        ptitle = species.fullname()
+        ptitle = species.binomial()
         is_multi = False
     if do_print:
         start_page_division(outfile, "photo_page")
@@ -3128,7 +3128,7 @@ def write_species_photo_page(outfile: TextIO, do_print: bool, fname: str, specie
         for s in splist:
             sp = find_species_by_name(s)
             outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + s +
-                          ".html\">" + fetch_fa_glyph("info") + "<em class=\"species\">" + sp.fullname() +
+                          ".html\">" + fetch_fa_glyph("info") + "<em class=\"species\">" + sp.binomial() +
                           "</em> page</a></li>\n")
     else:
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + species_name +
@@ -3162,14 +3162,14 @@ def write_species_video_page(fname: str, video: TMB_Classes.VideoClass, vn: int)
             slist = []
             for t in tmplist:
                 tmps = find_species_by_name(t)
-                slist.append(tmps.fullname())
+                slist.append(tmps.binomial())
             vtitle = " & ".join(slist)
             # vtitle = "Uca " + video.species.replace(";", " & Uca ")
             is_multi = True
         else:
             spname = video.species
             species = find_species_by_name(spname)
-            vtitle = species.fullname()
+            vtitle = species.binomial()
             is_multi = False
         common_html_header(outfile, vtitle + " Video", indexpath="../")
         outfile.write("    <header>\n")
@@ -3181,7 +3181,7 @@ def write_species_video_page(fname: str, video: TMB_Classes.VideoClass, vn: int)
             for s in splist:
                 sp = find_species_by_name(s)
                 outfile.write("          <li><a href=\"../u_" + s +
-                              ".html\">" + fetch_fa_glyph("info") + "<em class=\"species\">" + sp.fullname() +
+                              ".html\">" + fetch_fa_glyph("info") + "<em class=\"species\">" + sp.binomial() +
                               "</em> page</a></li>\n")
         else:
             outfile.write("          <li><a href=\"../u_" + video.species +
@@ -3275,11 +3275,11 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
         start_page_division(outfile, "species_page")
     else:
         if is_fossil:
-            common_html_header(outfile, species.fullname() + " / Fossil")
+            common_html_header(outfile, species.binomial() + " / Fossil")
             # common_html_header(outfile, "Uca " + species.species + " / Fossil")
         else:
             # common_header_part1(outfile, "Uca " + species.species + " / " + species.common)
-            common_header_part1(outfile, species.fullname() + " / " + species.common)
+            common_header_part1(outfile, species.binomial() + " / " + species.common)
             start_google_map_header(outfile)
             write_google_map_range_header(outfile, "u_" + species.species)
             write_google_map_point_header(outfile, "u_" + species.species)
@@ -3292,7 +3292,7 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
     else:
         sc = ""
     # outfile.write("      <h1 class=\"species bookmark2\">Uca " + species.species + sc + "</h1>\n")
-    outfile.write("      <h1 class=\"species bookmark2\">" + species.fullname() + sc + "</h1>\n")
+    outfile.write("      <h1 class=\"species bookmark2\">" + species.binomial() + sc + "</h1>\n")
     if is_fossil:
         outfile.write("      <h2 class=\"nobookmark\">Fossil</h2>\n")
     else:
@@ -3453,8 +3453,8 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
             outfile.write("      <figure class=\"sppic\">\n")
             outfile.write("        <a href=\"" + rel_link_prefix(do_print, "photos/") + pfname +
                           "\"><img class=\"thumbnail\" src=\"" + media_path + "photos/U_" + tname +
-                          format(pn, "0>2") + "tn.jpg\" alt=\"" + species.fullname() + " thumbnail\" title=\"" +
-                          species.fullname() + "\" /></a>\n")
+                          format(pn, "0>2") + "tn.jpg\" alt=\"" + species.binomial() + " thumbnail\" title=\"" +
+                          species.binomial() + "\" /></a>\n")
             outfile.write("      </figure>\n")
             photo_n += 1
     if photo_n == 0:

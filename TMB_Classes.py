@@ -144,10 +144,16 @@ class SpeciesClass:
 
     def __lt__(self, x):
         # return self.species < x.species
-        return self.fullname() < x.fullname()
+        return self.binomial() < x.binomial()
+
+    def binomial(self) -> str:
+        return self.genus + " " + self.species
 
     def fullname(self) -> str:
-        return self.genus + " " + self.species
+        if self.subgenus == "":
+            return self.binomial()
+        else:
+            return self.genus + " (" + self.subgenus + ") " + self.species
 
 
 class CitationClass:
