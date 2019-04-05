@@ -4144,9 +4144,12 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
             for taxon in rank_list:
                 outfile.write("      <hr />\n")
                 start_tag, end_tag = rank_tags(rank)
+                if taxon.author == ".":
+                    authorstr = ""
+                else:
+                    authorstr = format_reference_cite(refdict[taxon.author], do_print, AUTHOR_NOPCOMMA)
                 outfile.write("      <h3 id=\"" + taxon_link(taxon) + "\">" + taxon.taxon_rank.capitalize() + " " +
-                              start_tag + taxon.name + end_tag + " " +
-                              format_reference_cite(refdict[taxon.author], do_print, AUTHOR_NOPCOMMA) + "</h2>\n")
+                              start_tag + taxon.name + end_tag + " " + authorstr + "</h2>\n")
                 if taxon.type_species.startswith(">>"):
                     typestr = "Genus <em>" + taxon.type_species[2:] + "</em>"
                 elif taxon.type_species.startswith(">"):
