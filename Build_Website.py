@@ -110,7 +110,7 @@ def common_header_part1(outfile: TextIO, title: str, indexpath: str = "") -> Non
     outfile.write("    <script defer src=\"" + indexpath + "js/fontawesome.min.js\"></script>\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath +
                   "images/flag-icon-css/css/flag-icon.min.css\" />\n")
-    outfile.write("    <link rel=\"author\" href=\"" + init_data().site_author_email  + "\" />\n")
+    outfile.write("    <link rel=\"author\" href=\"" + init_data().site_author_email + "\" />\n")
 
 
 def common_header_part2(outfile: TextIO, indexpath: str = "", include_map: bool = False) -> None:
@@ -660,7 +660,6 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
     outfile.write("    </p>\n")
     if do_print:
         # pie chart of languages
-        # filename = "language_pie.svg"
         filename = "language_pie.png"
         TMB_Create_Graphs.create_pie_chart_file(filename, languages, init_data().graph_font)
         outfile.write("    <h3 class=\"nobookmark\">Primary Language of References</h3>\n")
@@ -683,7 +682,6 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
             miny = min(miny, y[0])
             maxy = max(maxy, y[0])
 
-        # filename = "pubs_per_year_bar.svg"
         filename = "pubs_per_year_bar.png"
         TMB_Create_Graphs.create_bar_chart_file(filename, year_data, miny, maxy, 1, init_data().graph_font)
         outfile.write("    <h3 class=\"nobookmark\">References by Year</h3>\n")
@@ -692,7 +690,6 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         outfile.write("    </figure>\n")
 
         # pubs per year since 1900 bar chart
-        # filename = "pubs_per_year_1900_bar.svg"
         filename = "pubs_per_year_1900_bar.png"
         TMB_Create_Graphs.create_bar_chart_file(filename, year_data_1900, 1900, maxy, 1, init_data().graph_font)
         outfile.write("    <h3 class=\"nobookmark\">References by Year (since 1900)</h3>\n")
@@ -701,7 +698,6 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         outfile.write("    </figure>\n")
 
         # citation data in database
-        # filename = "pubs_per_year_1900_complete_bar.svg"
         filename = "pubs_per_year_1900_complete_bar.png"
         tmp_dat = []
         for y in year_data_1900:
@@ -715,7 +711,6 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         outfile.write("    </figure>\n")
 
         # cumulative publications line chart
-        # filename = "cumulative_pubs_line.svg"
         filename = "cumulative_pubs_line.png"
         TMB_Create_Graphs.create_line_chart_file(filename, year_data, miny, maxy, 2, init_data().graph_font)
         outfile.write("    <h3 class=\"nobookmark\">Cumulative References by Year</h3>\n")
@@ -1387,7 +1382,6 @@ def write_binomial_name_page(outfile: TextIO, do_print: bool, name: str, namefil
     if do_print:
         start_page_division(outfile, "name_page")
         if maxcnt > 0:
-            # image_name = name_to_filename(name) + "_chronology.svg"
             image_name = name_to_filename(name) + "_chronology.png"
             TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, name_by_year,
                                                            init_data().graph_font)
@@ -1426,8 +1420,6 @@ def write_binomial_name_page(outfile: TextIO, do_print: bool, name: str, namefil
         outfile.write("    <h3 class=\"nobookmark\">Locations Where the Name has Been Applied</h3>\n")
         if do_print:
             outfile.write("      <figure>\n")
-            # outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(name)) +
-            #               ".svg\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
             outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(name)) +
                           ".png\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
             outfile.write("      </figure>\n")
@@ -1493,7 +1485,9 @@ def calculate_specific_locations(specific_name: TMB_Classes.SpecificNameClass, b
 
 def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB_Classes.SpecificNameClass,
                              binomial_names: list, refdict: dict, binomial_cnts: dict, location_set: set) -> None:
-    """ create a page with the history of a specific name """
+    """
+    create a page with the history of a specific name
+    """
     miny = init_data().start_year
     maxy = init_data().current_year
     byears = {y: 0 for y in range(miny, maxy + 1)}
@@ -1510,7 +1504,6 @@ def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB
     if do_print:
         start_page_division(outfile, "base_page")
         if maxcnt > 0:
-            # image_name = name_to_filename(specific_name.name) + "_chronology.svg"
             image_name = name_to_filename(specific_name.name) + "_chronology.png"
             TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, byears,
                                                            init_data().graph_font)
@@ -1584,13 +1577,10 @@ def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB
         outfile.write("    <h3 class=\"nobookmark\">Locations Where the Name has Been Applied</h3>\n")
         if do_print:
             outfile.write("      <figure>\n")
-            # outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("sn_" + specific_name.name) +
-            #               ".svg\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
             outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("sn_" + specific_name.name) +
                           ".png\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
             outfile.write("      </figure>\n")
         else:
-            # outfile.write("           <div id=\"sp_point_map_canvas\"></div>\n")
             outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
         outfile.write("    </div>\n")
 
@@ -1624,8 +1614,7 @@ def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB
         common_html_footer(outfile, indexpath="../")
 
 
-def setup_chronology_chart(outfile: TextIO, n: int, miny: int, maxy: int, maxcnt: int,
-                           yearly_data: dict) -> None:
+def setup_chronology_chart(outfile: TextIO, n: int, miny: int, maxy: int, maxcnt: int, yearly_data: dict) -> None:
     nstr = str(n)
     outfile.write("        var data" + nstr + " = google.visualization.arrayToDataTable([\n")
     outfile.write("          ['Year', 'Number of Uses', 'Number of Uses'],\n")
@@ -1751,17 +1740,14 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species_name: str
 
     if do_print:
         start_page_division(outfile, "synonym_page")
-        # image_name = "synonym_" + name_to_filename(species) + "_total_chronology.svg"
         image_name = "synonym_" + name_to_filename(species_name) + "_total_chronology.png"
         TMB_Create_Graphs.create_chronology_chart_file(image_name,  miny, maxy, maxcnt, total_cnts,
                                                        init_data().graph_font)
         for name in sp_order:
-            # image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
             image_name = "synonym_" + name_to_filename(name) + "_chronology.png"
             TMB_Create_Graphs.create_chronology_chart_file(image_name, miny, maxy, maxcnt, specific_name_counts[name],
                                                            init_data().graph_font)
         for name in bi_order:
-            # image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
             image_name = "synonym_" + name_to_filename(name) + "_chronology.png"
             TMB_Create_Graphs.create_chronology_chart_file(image_name, miny, maxy, maxcnt,
                                                            binomial_name_counts[clean_name(name)],
@@ -1794,7 +1780,6 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species_name: str
     outfile.write("    </header>\n")
     outfile.write("\n")
     if do_print:
-        # image_name = "synonym_" + name_to_filename(species) + "_total_chronology.svg"
         image_name = "synonym_" + name_to_filename(species_name) + "_total_chronology.png"
     else:
         image_name = 0
@@ -1805,7 +1790,6 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species_name: str
     outfile.write("    <h2 class=\"nobookmark\">Specific Synonyms</h2>\n")
     for i, name in enumerate(sp_order):
         if do_print:
-            # image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
             image_name = "synonym_" + name_to_filename(name) + "_chronology.png"
         else:
             image_name = i + adjust
@@ -1814,7 +1798,6 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species_name: str
     outfile.write("    <h2  class=\"nobookmark\" style=\"clear: both\">Binomial Synonyms</h2>\n")
     for i, name in enumerate(bi_order):
         if do_print:
-            # image_name = "synonym_" + name_to_filename(name) + "_chronology.svg"
             image_name = "synonym_" + name_to_filename(name) + "_chronology.png"
         else:
             image_name = i + adjust
@@ -1992,7 +1975,6 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
 
     outfile.write("    <h3 class=\"nobookmark\">Cumulative Unique Binomial/Compound Names by Year</h3>\n")
     if do_print:
-        # filename = "cumulative_binames_line.svg"
         filename = "cumulative_binames_line.png"
         TMB_Create_Graphs.create_line_chart_file(filename, byears, init_data().start_year, init_data().current_year, 2,
                                                  init_data().graph_font)
@@ -2004,7 +1986,6 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
 
     outfile.write("    <h3 class=\"nobookmark\">Unique Binomial/Compound Names by Year</h3>\n")
     if do_print:
-        # filename = "binames_per_year_bar.svg"
         filename = "binames_per_year_bar.png"
         TMB_Create_Graphs.create_bar_chart_file(filename, byears, init_data().start_year, init_data().current_year, 1,
                                                 init_data().graph_font)
@@ -2016,7 +1997,6 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
 
     outfile.write("    <h3 class=\"nobookmark\">Cumulative Unique Specific Names by Year</h3>\n")
     if do_print:
-        # filename = "cumulative_spnames_line.svg"
         filename = "cumulative_spnames_line.png"
         TMB_Create_Graphs.create_line_chart_file(filename, syears, 1758, init_data().current_year, 2,
                                                  init_data().graph_font)
@@ -2028,7 +2008,6 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
 
     outfile.write("    <h3 class=\"nobookmark\">Unique Specific Names by Year</h3>\n")
     if do_print:
-        # filename = "spnames_per_year_bar.svg"
         filename = "spnames_per_year_bar.png"
         TMB_Create_Graphs.create_bar_chart_file(filename, syears, 1758, init_data().current_year, 1,
                                                 init_data().graph_font)
@@ -2043,7 +2022,6 @@ def create_name_summary(outfile: TextIO, do_print: bool, binomial_year_cnts: dic
     for i in range(ngraph):
         c += 1
         if do_print:
-            # filename = "refs_per_species_bar" + str(c) + ".svg"
             filename = "refs_per_species_bar" + str(c) + ".png"
             sublist = tmpslist[i*per_graph:(i+1)*per_graph]
             ref_cnts[""] = 0
@@ -2143,7 +2121,6 @@ def create_genus_chronology(outfile: TextIO, do_print: bool, genus_cnts: dict) -
     outfile.write("    </header>\n")
     outfile.write("\n")
     if do_print:
-        # filename = "Genus_total_chronology.svg"
         filename = "Genus_total_chronology.png"
     else:
         filename = 0
@@ -2159,7 +2136,6 @@ def create_genus_chronology(outfile: TextIO, do_print: bool, genus_cnts: dict) -
     outfile.write("    <h2 class=\"nobookmark\">Genus Synonyms</h2>\n")
     for i, name in enumerate(order):
         if do_print:
-            # filename = "Genus_" + name + "_chronology.svg"
             filename = "Genus_" + name + "_chronology.png"
         else:
             filename = i + adjust
