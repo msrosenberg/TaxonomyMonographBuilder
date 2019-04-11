@@ -4977,8 +4977,8 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list, higher_ta
         outfile.write("    <ul class=\"fa-ul\">\n")
         outfile.write("      <li>" + fetch_fa_glyph("list systematics") + "<a href=\"" + init_data().syst_url +
                       "\">Systematics</a></li>\n")
-        outfile.write("      <li>" + fetch_fa_glyph("list phylogeny") + "<a href=\"" + init_data().tree_url +
-                      "\">Phylogeny</a></li>\n")
+        # outfile.write("      <li>" + fetch_fa_glyph("list phylogeny") + "<a href=\"" + init_data().tree_url +
+        #               "\">Phylogeny</a></li>\n")
         outfile.write("      <li>" + fetch_fa_glyph("list species") + "<a href=\"" + init_data().species_url +
                       "\">Species</a>\n")
         outfile.write("        <ul>\n")
@@ -5289,7 +5289,7 @@ def print_table_of_contents(outfile: TextIO, species_list: list) -> None:
     outfile.write("           <li><a href=\"#species\">Species</a></li>\n")
     outfile.write("         </ul>\n")
     outfile.write("       </li>\n")
-    outfile.write("       <li><a href=\"#" + init_data().tree_url + "\">Phylogeny</a></li>\n")
+    # outfile.write("       <li><a href=\"#" + init_data().tree_url + "\">Phylogeny</a></li>\n")
     outfile.write("       <li><a href=\"#" + init_data().lifecycle_url + "\">Life Cycle</a></li>\n")
     outfile.write("       <li><a href=\"#" + init_data().species_url + "\">Species</a>\n")
     outfile.write("         <ul>\n")
@@ -5513,8 +5513,8 @@ def build_site() -> None:
                     write_common_names_pages(outfile, False, replace_references(common_name_data, refdict, False))
                 with open(WEBOUT_PATH + init_data().lifecycle_url, "w", encoding="utf-8") as outfile:
                     write_life_cycle_pages(outfile, False)
-                with open(WEBOUT_PATH + init_data().tree_url, "w", encoding="utf-8") as outfile:
-                    write_phylogeny_pages(outfile, False, refdict)
+                # with open(WEBOUT_PATH + init_data().tree_url, "w", encoding="utf-8") as outfile:
+                #     write_phylogeny_pages(outfile, False, refdict)
                 with open(WEBOUT_PATH + init_data().morph_url, "w", encoding="utf-8") as outfile:
                     write_main_morphology_pages(outfile, False, morphology)
                 with open(WEBOUT_PATH + "index.html", "w", encoding="utf-8") as outfile:
@@ -5531,7 +5531,7 @@ def build_site() -> None:
                     write_common_names_pages(printfile, True, replace_references(common_name_data, refdict, True))
                     write_systematics_overview(printfile, True, taxon_ranks, higher_taxa, species, refdict,
                                                species_changes_new, species_changes_synonyms, species_changes_spelling)
-                    write_phylogeny_pages(printfile, True, refdict)
+                    # write_phylogeny_pages(printfile, True, refdict)
                     write_life_cycle_pages(printfile, True)
                     print("......Writing Species Pages......")
                     write_species_info_pages(printfile, True, species, references, specific_names, all_names, photos,
