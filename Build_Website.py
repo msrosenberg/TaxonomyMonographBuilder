@@ -2556,8 +2556,7 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("index") + "Location "
-                      "Index</a></li>\n")
+        outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("index") + "Location Index</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -2596,9 +2595,6 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
         outfile.write("    <div class=\"map_section\">\n")
         if do_print:
             outfile.write("      <figure>\n")
-            # outfile.write("        <img src=\"" + TMP_MAP_PATH +
-            #               pointmap_name("location_" + place_to_filename(loc.name)) + ".svg\" alt=\"" +
-            #               loc.trimmed_name + "\" title=\"Map of " + loc.trimmed_name + "\" />\n")
             outfile.write("        <img src=\"" + TMP_MAP_PATH +
                           pointmap_name("location_" + place_to_filename(loc.name)) + ".png\" alt=\"" +
                           loc.trimmed_name + "\" title=\"Map of " + loc.trimmed_name + "\" />\n")
