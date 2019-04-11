@@ -911,6 +911,26 @@ def create_species_link(genus: str, species: str, do_print: bool, status: str = 
             " " + species + "</em>" + sc + "</a>")
 
 
+def rank_tags(x: str) -> Tuple[str, str]:
+    if ("genus" in x) or ("species" in x):
+        return "<em class=\"species\">", "</em>"
+    else:
+        return "", ""
+
+
+def create_taxon_link(rank: str, name: str, do_print: bool, same_page: bool = False) -> str:
+    """
+    create a link to a higher-order taxonomic entry
+    """
+    start_tag, end_tag = rank_tags(rank)
+    if same_page:
+        x = ""
+    else:
+        x = init_data().syst_url
+    return "<a href=\"" + rel_link_prefix(do_print, x + "#") + \
+           "{0}_{1}\">{2} {3}{1}{4}</a>".format(rank, name, rank.capitalize(), start_tag, end_tag)
+
+
 def create_location_link(location: TMB_Classes.LocationClass, display_name: str, do_print: bool, path: str = "",
                          mark_unknown: bool = False, mark_secondary: bool = False) -> str:
     if mark_unknown and location.unknown:
@@ -1139,9 +1159,11 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
             outfile.write("      <td>TBD</td>\n")
         elif n.actual == "n/a":
             outfile.write("      <td>&nbsp;</td>\n")                    
-        elif n.actual[0] == ">":
-            outfile.write("      <td><em class=\"species\">" + n.actual[1:] +
-                          "</em></td>\n")
+        elif n.actual.startswith(">"):
+            outfile.write("      <td><em class=\"species\">" + n.actual[1:] + "</em></td>\n")
+        elif n.actual.startswith("#"):
+            t_rank, t_name = n.actual[1:].split("#")
+            outfile.write("      <td>" + create_taxon_link(t_rank, t_name, do_print) + "</td>\n")
         else:
             s = find_species_by_name(n.actual)
             outfile.write("      <td><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + n.actual +
@@ -3314,15 +3336,16 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
         ctaxa = ctaxa.parent
     tlist = []
     for ctaxa in hlist[::-1]:
-        if "genus" in ctaxa.taxon_rank:
-            starttag = "<em class=\"species\">"
-            endtag = "</em>"
-        else:
-            starttag = ""
-            endtag = ""
-        tlist.append("<a href=\"" + rel_link_prefix(do_print) + init_data().syst_url +
-                     "#{0}_{1}\">{2} {3}{1}{4}</a>".format(ctaxa.taxon_rank, ctaxa.name, ctaxa.taxon_rank.capitalize(),
-                                                           starttag, endtag))
+        # if "genus" in ctaxa.taxon_rank:
+        #     starttag = "<em class=\"species\">"
+        #     endtag = "</em>"
+        # else:
+        #     starttag = ""
+        #     endtag = ""
+        # tlist.append("<a href=\"" + rel_link_prefix(do_print) + init_data().syst_url +
+        #              "#{0}_{1}\">{2} {3}{1}{4}</a>".format(ctaxa.taxon_rank, ctaxa.name, ctaxa.taxon_rank.capitalize(),
+        #                                                    starttag, endtag))
+        tlist.append(create_taxon_link(ctaxa.taxon_rank, ctaxa.name, do_print))
     outfile.write("       <dt>Taxonomy</dt>\n")
     outfile.write("       <dd>" + " &rarr; ".join(tlist) + "</dd>\n")
 
@@ -4020,11 +4043,11 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
     def replace_media_path(x: str, p: str) -> str:
         return x.replace("%%MEDIA_PATH%%", p)
 
-    def rank_tags(x: str) -> Tuple[str, str]:
-        if ("genus" in x) or ("species" in x):
-            return "<em>", "</em>"
-        else:
-            return "", ""
+    # def rank_tags(x: str) -> Tuple[str, str]:
+    #     if ("genus" in x) or ("species" in x):
+    #         return "<em>", "</em>"
+    #     else:
+    #         return "", ""
 
     def taxon_link(tax: TMB_Classes.RankedTaxonClass) -> str:
         return tax.taxon_rank + "_" + tax.name
@@ -4033,10 +4056,11 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
         """
         subfunction to write a hierarchical list of taxonomic names to html
         """
-        starttag, endtag = rank_tags(tax.taxon_rank)
-        outfile.write(ind + "<li><a href=\"#{}\">{} {}{}{}</a>".format(taxon_link(tax), tax.taxon_rank.capitalize(),
-                                                                       starttag, tax.name, endtag))
-        outfile.write("\n" + ind + "  <ul>\n")
+        # starttag, endtag = rank_tags(tax.taxon_rank)
+        # outfile.write(ind + "<li><a href=\"#{}\">{} {}{}{}</a>".format(taxon_link(tax), tax.taxon_rank.capitalize(),
+        #                                                                starttag, tax.name, endtag))
+        outfile.write(ind + "<li>" + create_taxon_link(tax.taxon_rank, tax.name, do_print, same_page=True) + "\n")
+        outfile.write(ind + "  <ul>\n")
         if tax.n_children() > 0:
             for cc in sorted(tax.children):
                 write_taxon_item(cc, ind + 4 * " ")
@@ -4163,10 +4187,12 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
                 outfile.write("        <dt>Type</dt>\n")
                 outfile.write("        <dd>" + typestr + "</dd>\n")
                 if taxon.parent is not None:
-                    start_tag, end_tag = rank_tags(taxon.parent.taxon_rank)
                     outfile.write("        <dt>Part of " + taxon.parent.taxon_rank + "</dt>\n")
-                    outfile.write("        <dd><a href=\"#" + taxon_link(taxon.parent) + "\">" +
-                                  start_tag + taxon.parent.name + end_tag + "</a></dd>\n")
+                    # start_tag, end_tag = rank_tags(taxon.parent.taxon_rank)
+                    # outfile.write("        <dd><a href=\"#" + taxon_link(taxon.parent) + "\">" +
+                    #               start_tag + taxon.parent.name + end_tag + "</a></dd>\n")
+                    outfile.write("        <dd>" + create_taxon_link(taxon.parent.taxon_rank, taxon.parent.name,
+                                                                     do_print, same_page=True) + "</dd>\n")
                 c_label = "Contains "
                 if taxon.n_children() > 0:
                     if taxon.n_children() == 1:
@@ -4178,8 +4204,9 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
                         c_label += taxon_ranks[i].plural
                     children = []
                     for c in taxon.children:
-                        start_tag, end_tag = rank_tags(c.taxon_rank)
-                        children.append("<a href=\"#" + taxon_link(c) + "\">" + start_tag + c.name + end_tag + "</a>")
+                        # start_tag, end_tag = rank_tags(c.taxon_rank)
+                        # children.append("<a href=\"#" + taxon_link(c) + "\">" + start_tag + c.name + end_tag + "</a>")
+                        children.append(create_taxon_link(c.taxon_rank, c.name, do_print, same_page=True))
                     children.sort()
                     outfile.write("        <dt>" + c_label + "</dt>\n")
                     outfile.write("        <dd>" + ", ".join(children) + "</dd>\n")
