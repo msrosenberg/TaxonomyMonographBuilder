@@ -110,7 +110,7 @@ def common_header_part1(outfile: TextIO, title: str, indexpath: str = "") -> Non
     outfile.write("    <script defer src=\"" + indexpath + "js/fontawesome.min.js\"></script>\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath +
                   "images/flag-icon-css/css/flag-icon.min.css\" />\n")
-    outfile.write("    <link rel=\"author\" href=\"mailto:msrosenberg@vcu.edu\" />\n")
+    outfile.write("    <link rel=\"author\" href=\"" + init_data().site_author_email  + "\" />\n")
 
 
 def common_header_part2(outfile: TextIO, indexpath: str = "", include_map: bool = False) -> None:

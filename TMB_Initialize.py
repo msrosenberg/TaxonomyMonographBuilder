@@ -47,6 +47,7 @@ class InitializationData:
         self.site_author = "Michael S. Rosenberg"
         self.site_address = "www.fiddlercrab.info"
         self.site_http = "https://"  # this leaves open the option of quick switching between http and https
+        self.site_author_email = "msrosenberg@vcu.edu"
 
         # major web output file names
         self.species_url = "uca_species.html"
