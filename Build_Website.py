@@ -4919,7 +4919,7 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list, higher_ta
         outfile.write("      <h1 class=\"bookmark1\">Introduction</h1>\n")
         outfile.write("    </header>\n")
     else:
-        common_html_header(outfile, "Fiddler Crabs (Genus Uca)")
+        common_html_header(outfile, "Fiddler Crabs")
     outfile.write("    <p>\n")
     scnt = 0
     for s in species:
@@ -5025,6 +5025,9 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list, higher_ta
 
 
 def create_path_and_index(subdir: str) -> None:
+    """
+    function to create an output path if it doesn't exist and auto-populate it with a blank index file
+    """
     if not os.path.exists(WEBOUT_PATH + subdir):
         os.makedirs(WEBOUT_PATH + subdir)
     create_blank_index(WEBOUT_PATH + subdir + "index.html")
@@ -5033,7 +5036,6 @@ def create_path_and_index(subdir: str) -> None:
 def create_web_output_paths() -> None:
     """
     create web output directories if they do not already exist
-    add a blank index to each one
     """
     create_path_and_index("")
     create_path_and_index("photos/")
