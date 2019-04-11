@@ -2109,8 +2109,7 @@ def create_genus_chronology(outfile: TextIO, do_print: bool, genus_cnts: dict) -
         common_header_part2(outfile)
 
     outfile.write("    <header>\n")
-    outfile.write("      <h1 class=\"bookmark2\">Synonym Chronology of the genus " + format_name_string("Uca") +
-                  "</h1>\n")
+    outfile.write("      <h1 class=\"bookmark2\">Chronology of Fiddler Crab Genera</h1>\n")
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
@@ -2124,16 +2123,14 @@ def create_genus_chronology(outfile: TextIO, do_print: bool, genus_cnts: dict) -
         filename = "Genus_total_chronology.png"
     else:
         filename = 0
-    outfile.write("    <p>Chronological charts of different generic names for fiddler crabs. Strictly speaking "
-                  "not all of these are synonyms; the charts include instances when fiddler crabs were placed in "
-                  "other, valid, genera (<em>e.g.,</em> <em class=\"species\">Cancer</em>) as well as cases in the "
-                  "19<sup>th</sup> century when the genus <em class=\"species\">Uca</em> was used for non-fiddler "
-                  "crabs.</p>\n")
+    outfile.write("    <p>Chronological charts of different generic names for fiddler crabs. The charts include "
+                  "instances when fiddler crabs were placed in other, valid, genera (<em>e.g.,</em> "
+                  "<em class=\"species\">Cancer</em>) as well as cases in the 19<sup>th</sup> century when the "
+                  "genus <em class=\"species\">Uca</em> was used for non-fiddler crabs.</p>\n")
     write_chronology_chart_div(outfile, do_print, filename, None, "All Genera", False, True)
     adjust = 1
-    outfile.write("    <p style=\"clear: both\">Accepted name is listed first, followed by synonyms in decreasing "
-                  "order of use.</p>\n")
-    outfile.write("    <h2 class=\"nobookmark\">Genus Synonyms</h2>\n")
+    outfile.write("    <p style=\"clear: both\">Genera are listed in decreasing order of use.</p>\n")
+    outfile.write("    <h2 class=\"nobookmark\">Fiddler Crab Genera</h2>\n")
     for i, name in enumerate(order):
         if do_print:
             filename = "Genus_" + name + "_chronology.png"
@@ -2282,7 +2279,7 @@ def write_all_name_pages(outfile: TextIO, do_print: bool, refdict: dict, citelis
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + init_data().species_url +
                       "\">" + fetch_fa_glyph("accepted species") + "Accepted Species</a></li>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) +
-                      "synonyms_uca.html\">Synonyms of <em class=\"species\">Uca</em></a></li>\n")
+                      "synonyms_uca.html\">Genera Usage Patterns</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
