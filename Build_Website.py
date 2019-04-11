@@ -253,7 +253,7 @@ def common_html_footer(outfile: TextIO, indexpath: str = "") -> None:
     outfile.write("       <p id=\"citation\"><a href=\"" + indexpath + init_data().cite_url +
                   "\">" + fetch_fa_glyph("site cite") + "How to cite this site</a></p>\n")
     outfile.write("       <p id=\"contact\">Questions or comments about the site? Contact "
-                  "<a href=\"mailto:msrosenberg@vcu.edu\">" + fetch_fa_glyph("mail") +
+                  "<a href=\"mailto:" + init_data().site_author_email + "\">" + fetch_fa_glyph("mail") +
                   "Dr. Michael S. Rosenberg</a></p>\n")
     outfile.write("       <p id=\"copyright\">Release: " + init_data().version +
                   " &mdash; Copyright &copy; 2003&ndash;" + str(init_data().current_year) +
