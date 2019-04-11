@@ -1179,7 +1179,7 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
             if n.name_note == ".":
                 outfile.write("      <td>&nbsp;</td>\n")
             else:
-                outfile.write("      <td>" + n.name_note + "</td>\n")
+                outfile.write("      <td>" + replace_species_in_string(n.name_note) + "</td>\n")
         outfile.write("    </tr>\n")
     outfile.write("    </table>\n")
 
@@ -1247,7 +1247,7 @@ def write_reference_page(outfile: TextIO, do_print: bool, ref: TMB_Classes.Refer
             if not started_note:
                 outfile.write("    <p>\n")
                 started_note = True
-            outfile.write("      " + n.general_note + "\n")
+            outfile.write("      " + replace_species_in_string(n.general_note) + "\n")
         if n.common != ".":
             comcnt += 1
         if n.name_note != ".":
