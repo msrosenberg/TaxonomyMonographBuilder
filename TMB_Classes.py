@@ -130,7 +130,7 @@ class SpeciesClass:
         self.genus = ""
         self.subgenus = ""
         self.type_species = ""
-        self.type_reference = ""
+        self.type_reference = None
         self.common = ""
         self.commonext = ""
         self.range = ""
@@ -154,6 +154,14 @@ class SpeciesClass:
             return self.binomial()
         else:
             return self.genus + " (" + self.subgenus + ") " + self.species
+
+    def authority(self) -> str:
+        ogenus = self.type_species[:self.type_species.find(" ")].strip()
+        author = self.type_reference.author() + ", " + str(self.type_reference.year)
+        if ogenus == self.genus:
+            return author
+        else:
+            return "(" + author + ")"
 
 
 class CitationClass:
