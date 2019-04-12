@@ -29,7 +29,6 @@ MEDIA_PATH = "media/"
 TMP_PATH = "temp/"
 TMP_MAP_PATH = TMP_PATH + "maps/"
 
-# fossilImage = "<img class=\"fossilImg\" src=\"images/fossil.png\" alt=\" (fossil)\" title=\" (fossil)\" />"
 FOSSIL_IMAGE = " <span class=\"fossil-img\">&#9760;</span>"
 STAR = "<sup>*</sup>"
 DAGGER = "<sup>†</sup>"
@@ -2124,17 +2123,12 @@ def create_genus_chronology(outfile: TextIO, do_print: bool, genus_cnts: dict) -
     maxcnt = max(total_cnts.values())
     name_cnts.sort(reverse=True)
     # put accepted name first, followed by the rest in decreasing frequency
-    order = ["Uca"]
-    for x in name_cnts:
-        if x[1] != "Uca":
-            order.append(x[1])
+    order = [x[1] for x in name_cnts]
     if do_print:
         start_page_division(outfile, "synonym_page")
-        # filename = "Genus_total_chronology.svg"
         filename = "Genus_total_chronology.png"
         TMB_Create_Graphs.create_chronology_chart_file(filename, miny, maxy, maxcnt, total_cnts, init_data().graph_font)
         for name in order:
-            # filename = "Genus_" + name + "_chronology.svg"
             filename = "Genus_" + name + "_chronology.png"
             TMB_Create_Graphs.create_chronology_chart_file(filename, miny, maxy, maxcnt, genus_cnts[name],
                                                            init_data().graph_font)
@@ -2318,8 +2312,8 @@ def write_all_name_pages(outfile: TextIO, do_print: bool, refdict: dict, citelis
                       "\">" + fetch_fa_glyph("summary charts") + "Name Summary</a></li>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + init_data().species_url +
                       "\">" + fetch_fa_glyph("accepted species") + "Accepted Species</a></li>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) +
-                      "synonyms_uca.html\">Genera Usage Patterns</a></li>\n")
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + init_data().synonyms_genera +
+                      "\">Genera Usage Patterns</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -2377,7 +2371,7 @@ def write_all_name_pages(outfile: TextIO, do_print: bool, refdict: dict, citelis
     else:
         with open(WEBOUT_PATH + "names/" + init_data().name_sum_url, "w", encoding="utf-8") as suboutfile:
             create_name_summary(suboutfile, do_print, total_binomial_year_cnts, specific_year_cnts, species_refs)
-        with open(WEBOUT_PATH + "names/synonyms_uca.html", "w", encoding="utf-8") as suboutfile:
+        with open(WEBOUT_PATH + "names/" + init_data().synonyms_genera, "w", encoding="utf-8") as suboutfile:
             create_genus_chronology(suboutfile, do_print, genus_cnts)
 
     # write out individual pages for each binomial name and specific name
@@ -3318,7 +3312,7 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
             outfile.write("          <li><a href=\"#video\">" + fetch_fa_glyph("video") + "Video</a></li>\n")
             outfile.write("          <li><a href=\"#art\">" + fetch_fa_glyph("art") + "Art</a></li>\n")
         outfile.write("          <li><a href=\"#references\">" + fetch_fa_glyph("references") + "References</a></li>\n")
-        outfile.write("          <li><a href=\"uca_species.html\">" + fetch_fa_glyph("index") +
+        outfile.write("          <li><a href=\"" + init_data().species_url + "\">" + fetch_fa_glyph("index") +
                       "Species List</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
@@ -3507,8 +3501,8 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
                     if do_print:
                         outfile.write("    <p>\n")
                         outfile.write("      Videos are available on the web at <a href=\"" + init_data().site_url() +
-                                      "/uca_videos.html\">" + init_data().site_url() +
-                                      "/uca_videos.html</a> or by following the embedded links.")
+                                      "/" + init_data().video_url + "\">" + init_data().site_url() +
+                                      "/" + init_data().video_url + "</a> or by following the embedded links.")
                         outfile.write("    </p>\n")
                     outfile.write("      <dl class=\"vidlist\">\n")
                 outfile.write("            <dt><a class=\"vidlink\" href=\"" + abs_link_prefix(do_print) + vfname +
@@ -3675,8 +3669,8 @@ def write_video_index(outfile: TextIO, do_print: bool, videos: list) -> None:
     if do_print:
         outfile.write("    <p>\n")
         outfile.write("      Videos are available on the web at <a href=\"" + init_data().site_url() +
-                      "/uca_videos.html\">" + init_data().site_url() +
-                      "/uca_videos.html</a> or by following the embedded links.")
+                      "/" + init_data().video_url + "\">" + init_data().site_url() +
+                      "/" + init_data().video_url + "</a> or by following the embedded links.")
         outfile.write("    </p>\n")
     outfile.write("    <p>\n")
     if do_print:
