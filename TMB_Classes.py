@@ -157,7 +157,7 @@ class SpeciesClass:
 
     def authority(self) -> str:
         ogenus = self.type_species[:self.type_species.find(" ")].strip()
-        author = self.type_reference.author() + ", " + str(self.type_reference.year)
+        author = self.type_reference.author() + ", " + str(self.type_reference.year())
         if ogenus == self.genus:
             return author
         else:
