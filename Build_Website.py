@@ -437,8 +437,18 @@ def replace_species_in_string(instr: str) -> str:
     # for every species tagged in the string
     for match in re.finditer(search_str, instr):
         # look up full species name
-        s = SPECIES_XREF[match.group("species")]
-        instr = re.sub(search_str, "<em class=\"species\">" + s.binomial() + "</em>", instr, 1)
+        name = match.group("species")
+        if name.startswith("+"):
+            include_authority = True
+            name = name[1:]
+        else:
+            include_authority = False
+        s = SPECIES_XREF[name]
+        if include_authority:
+            a = " " + s.authority()
+        else:
+            a = ""
+        instr = re.sub(search_str, "<em class=\"species\">" + s.binomial() + "</em>" + a, instr, 1)
     return instr
 
 
@@ -472,6 +482,14 @@ def replace_references(in_list: list, refdict: dict, do_print: bool) -> list:
     for line in in_list:
         out_list.append(replace_reference_in_string(line, refdict, do_print))
     return out_list
+
+
+def connect_type_references(species: list, refdict: dict) -> None:
+    """
+    function to replace species type reference keys with point to reference object
+    """
+    for s in species:
+        s.type_reference = refdict[s.type_reference]
 
 
 def clean_reference_html(ref: str) -> str:
@@ -3313,8 +3331,8 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
         outfile.write("      <h2 id=\"type\" class=\"nobookmark\">Type Description</h2>\n")
     outfile.write("      <dl>\n")
     outfile.write("        <dt><em class=\"species\">" + species.type_species + "</em></dt>\n")
-    tref = refdict[species.type_reference]
-    outfile.write("        <dd>" + tref.formatted_html + "</dd>\n")
+    # tref = refdict[species.type_reference]
+    outfile.write("        <dd>" + species.type_reference.formatted_html + "</dd>\n")
     outfile.write("      </dl>\n")
     outfile.write("    </section>\n")
     outfile.write("\n")
@@ -5420,6 +5438,7 @@ def build_site() -> None:
         species_changes_synonyms = TMB_Import.read_simple_file(init_data().species_changes_synonyms)
         species_changes_spelling = TMB_Import.read_simple_file(init_data().species_changes_spelling)
         prepare_species_crossref(species)
+        connect_type_references(species, refdict)
 
         print("...Connecting References...")
         print("......Computing Species from Citation Linking......")
