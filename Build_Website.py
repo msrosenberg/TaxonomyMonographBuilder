@@ -22,6 +22,7 @@ from TMB_Common import *
 import TMB_Initialize
 import TMB_Classes
 import TMB_Create_Graphs
+from TMB_SpeciesXRef import init_species_crossref, find_species_by_name
 
 
 WEBOUT_PATH = "webout/"
@@ -51,8 +52,6 @@ INCLUDE_INAT = False
 # these flags control creating print and web output, respectively
 OUTPUT_PRINT = False
 OUTPUT_WEB = True
-
-SPECIES_XREF = {}
 
 # randSeed = random.randint(0, 10000)
 
@@ -442,7 +441,7 @@ def replace_species_in_string(instr: str) -> str:
             name = name[1:]
         else:
             include_authority = False
-        s = SPECIES_XREF[name]
+        s = find_species_by_name(name)
         if include_authority:
             a = " " + s.authority()
         else:
@@ -901,22 +900,6 @@ def compute_species_from_citation_linking(citelist: list) -> None:
                     cite.name_note = "in part"
                 else:
                     cite.name_note = "in part; " + cite.name_note
-
-
-def prepare_species_crossref(species: list):
-    global SPECIES_XREF
-    SPECIES_XREF = {}
-    for s in species:
-        SPECIES_XREF[s.species] = s
-
-
-def find_species_by_name(x: str) -> TMB_Classes.SpeciesClass:
-    sp_dict = SPECIES_XREF
-    if x in sp_dict:
-        return sp_dict[x]
-    else:
-        report_error("Crossref Error: Cannot find species " + x)
-        return sp_dict["vocans"]  # default to keep the program from crashing
 
 
 def create_species_link(genus: str, species: str, do_print: bool, status: str = "", path: str = "") -> str:
@@ -5194,7 +5177,7 @@ def build_site() -> None:
         # species_changes_new = TMB_Import.read_simple_file(init_data().species_changes_new)
         # species_changes_synonyms = TMB_Import.read_simple_file(init_data().species_changes_synonyms)
         # species_changes_spelling = TMB_Import.read_simple_file(init_data().species_changes_spelling)
-        prepare_species_crossref(species)
+        init_species_crossref(species)
         connect_type_references(species, refdict)
 
         print("...Connecting References...")
