@@ -3354,30 +3354,10 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
         ctaxa = ctaxa.parent
     tlist = []
     for ctaxa in hlist[::-1]:
-        # if "genus" in ctaxa.taxon_rank:
-        #     starttag = "<em class=\"species\">"
-        #     endtag = "</em>"
-        # else:
-        #     starttag = ""
-        #     endtag = ""
-        # tlist.append("<a href=\"" + rel_link_prefix(do_print) + init_data().syst_url +
-        #              "#{0}_{1}\">{2} {3}{1}{4}</a>".format(ctaxa.taxon_rank, ctaxa.name, ctaxa.taxon_rank.capitalize(),
-        #                                                    starttag, endtag))
         tlist.append(create_taxon_link(ctaxa.taxon_rank, ctaxa.name, do_print))
     outfile.write("       <dt>Taxonomy</dt>\n")
     outfile.write("       <dd>" + " &rarr; ".join(tlist) + "</dd>\n")
 
-    # for ctaxa in hlist[::-1]:
-    #     outfile.write("       <dt>" + ctaxa.taxon_rank.capitalize() + "</dt>\n")
-    #     outfile.write("         <dd><a href=\"" + rel_link_prefix(do_print) + init_data().syst_url +
-    #                   "#{0}_{1}\">{1}</a></dd>\n".format(ctaxa.taxon_rank, ctaxa.name))
-    # outfile.write("       <dt>Genus</dt>\n")
-    # outfile.write("         <dd><a href=\"" + rel_link_prefix(do_print) + init_data().syst_url + "#genus_" +
-    #               species.genus + "\"><em class=\"species\">" + species.genus + "</em></a></dd>\n")
-    # if species.subgenus != "":
-    #     outfile.write("       <dt>Subgenus</dt>\n")
-    #     outfile.write("         <dd><a href=\"" + rel_link_prefix(do_print) + init_data().syst_url + "#subgenus_" +
-    #                   species.subgenus + "\"><em class=\"species\">" + species.subgenus + "</em></a></dd>\n")
     if not is_fossil:
         outfile.write("       <dt>Common Names</dt>\n")
         outfile.write("         <dd>" + species.commonext + "</dd>\n")
@@ -4027,9 +4007,11 @@ def write_species_info_pages(outfile: Optional[TextIO], do_print: bool, speciesl
                                    art, sprefs, refdict, binomial_name_cnts, specific_name_cnts, higher_dict)
 
 
+# def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: list, higher_taxa_list: list,
+#                                specieslist: list, refdict: dict, species_changes_new: list,
+#                                species_changes_synonyms: list, species_changes_spelling: list) -> None:
 def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: list, higher_taxa_list: list,
-                               specieslist: list, refdict: dict, species_changes_new: list,
-                               species_changes_synonyms: list, species_changes_spelling: list) -> None:
+                               specieslist: list, refdict: dict) -> None:
     """
     create the systematics page
     """
@@ -4247,225 +4229,6 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
                                   "</p>\n")
             outfile.write("    </section>\n")
             outfile.write("\n")
-
-    # # genus section
-    # outfile.write("    <section class=\"spsection\">\n")
-    # outfile.write("      <h2 id=\"genus\" class=\"bookmark2\">Genus <em class=\"species\">Uca</em> " +
-    #               format_reference_cite(refdict["Leach1814"], do_print, AUTHOR_NOPCOMMA) + "</h2>\n")
-    # outfile.write("      <h3 class=\"nobookmark\">Type species: <em class=\"species\">Cancer vocans major</em> " +
-    #               format_reference_cite(refdict["Herbst1782"], do_print, AUTHOR_NOPCOMMA) + "</h3>\n")
-    # outfile.write("      <p>\n")
-    # outfile.write("         The earliest description of the type species of <em class=\"species\">Uca</em> is from "
-    #               "a drawing in " + format_reference_cite(refdict["Seba1758"], do_print, AUTHOR_PAREN) +
-    #               ", which he called <em class=\"species\">Cancer uka una, Brasiliensibus</em> (shown below).\n")
-    # outfile.write("      </p>\n")
-    # outfile.write("      <figure>\n")
-    # outfile.write("        <img src=\"" + media_path + "art/Seba_Uca_una.jpg\" "
-    #               "style=\"padding-left: 0; padding-right: 0; "
-    #               "margin-left: 0; margin-right: 0; text-align: center\" alt=\"Seba's fiddler crab image\" "
-    #               "title=\"Seba's fiddler crab\" />\n")
-    # outfile.write("      </figure>\n")
-    # outfile.write("      <p>\n")
-    # outfile.write("        A number of authors subsequently used this same picture as a basis for naming the "
-    #               "species (" +
-    #               format_reference_cite(refdict["Manning1981"], do_print, AUTHOR_NOPAREN) + ").  "
-    #               "<em class=\"species\">Cancer vocans major</em> Herbst, 1782; "
-    #               "<em class=\"species\">Ocypode heterochelos</em> Lamarck, 1801; "
-    #               "<em class=\"species\">Cancer uka</em> Shaw and Nodder, 1802; and "
-    #               "<em class=\"species\">Uca una</em> Leach, 1814, are  all objective synonyms, because they are "
-    #               "all based on the picture and  description from Seba. Because of this, the official type "
-    #               "specimen of the  genus <em class=\"species\">Uca</em> is <em class=\"species\">Cancer vocans "
-    #               "major.</em>  The earliest description of  this species based on actual specimens and not on "
-    #               "Seba's drawing was <em class=\"species\"> Gelasimus platydactylus</em> Milne-Edwards, 1837.\n")
-    # outfile.write("      </p>\n")
-    # outfile.write("      <blockquote>\n")
-    # outfile.write("        As an aside, Seba's name, <em class=\"species\">Cancer uka una</em> comes from the "
-    #               "nomenclature of " +
-    #               format_reference_cite(refdict["Marcgrave1648"], do_print, AUTHOR_PAREN) +
-    #               ", who mispelled &ldquo;u&ccedil;a una&rdquo; as &ldquo;uca una&rdquo;. Not only did Seba copy the "
-    #               "mispelling, but he applied it to the fiddler crab instead of the mangrove crab (which is today "
-    #               "called <em class=\"species\">Ucides</em>) to which Marcgrave applied the name (see below). "
-    #               "<a href=\"references/Latreille1817.2.html\">Latreille's (1817)</a> proposal of the generic "
-    #               "name <em class=\"species\">Gelasimus</em> for fiddler crabs was so that "
-    #               "<em class=\"species\">Uca</em> could be applied to mangrove crabs; as this was an invalid "
-    #               "proposal, <em class=\"species\">Uca</em> is retained for fiddlers, despite being due to a pair of "
-    #               "errors (" +
-    #               format_reference_cite(refdict["Tavares1993"], do_print, AUTHOR_NOPAREN) + ").\n")
-    # outfile.write("        <figure class=\"syspic\">\n")
-    # outfile.write("          <img src=\"" + media_path + "art/Marcgrave_Maracoani.png\" "
-    #               "alt=\"Marcgrave's Maracoani image\" title=\"Marcgrave's Maracoani\">\n")
-    # outfile.write("          <figcaption>Oldest known drawing of a fiddler crab "
-    #               "(" + format_reference_cite(refdict["Marcgrave1648"], do_print, AUTHOR_NOPAREN) + "). "
-    #               "He labeled it &ldquo;Maracoani&rdquo;, and it represents the namesake of the species "
-    #               "<em class=\"species\">Uca maracoani.</em></figcaption>\n")
-    # outfile.write("        </figure>\n")
-    # outfile.write("        <figure class=\"syspic\">\n")
-    # outfile.write("          <img src=\"" + media_path + "art/Marcgrave_Uca_una.png\" "
-    #               "alt=\"Marcgrave's Uca una image\" title=\"Marcgrave's Uca una\">\n")
-    # outfile.write("          <figcaption>The drawing actually labeled &ldquo;Uca Una&rdquo; by "
-    #               + format_reference_cite(refdict["Marcgrave1648"], do_print, AUTHOR_PAREN) +
-    #               " is not a fiddler crab. Today this species is known as the mangrove crab "
-    #               "<em class=\"species\">Ucides cordatus.</em></figcaption>\n")
-    # outfile.write("        </figure>\n")
-    # outfile.write("        <figure class=\"syspic\">\n")
-    # outfile.write("          <img src=\"" + media_path + "art/Marcgrave_Ciecie_Ete.png\" "
-    #               "alt=\"Marcgrave's Ciecie Ete image\" title=\"Marcgrave's Ciecie Ete\">\n")
-    # outfile.write("          <figcaption>The other fiddler crab drawing found in "
-    #               + format_reference_cite(refdict["Marcgrave1648"], do_print, AUTHOR_PAREN) + ", labeled "
-    #               "&ldquo;Ciecie Ete&rdquo; (he also refers to a very similar species called "
-    #               "&ldquo;Ciecie Panema&rdquo;). This figure is believed to most likely represent "
-    #               "<em class=\"species\">Uca thayeri.</em></figcaption>\n")
-    # outfile.write("        </figure>\n")
-    # outfile.write("      </blockquote>\n")
-    # outfile.write("      <p>\n")
-    # outfile.write("        For about 60 years, the genus was known as <em class=\"species\">Gelasimus,</em> "
-    #               "until " + format_reference_cite(refdict["Rathbun1897.1"], do_print, AUTHOR_PAREN)
-    #               + " showed that the abandonment of the older name <em class=\"species\">Uca</em> did not conform to "
-    #               "zoological naming conventions. The type species of <em class=\"species\">Uca</em> was known as both "
-    #               "<em class=\"species\">Uca heterochelos</em> and <em class=\"species\">U. platydactylus,</em> "
-    #               "until " + format_reference_cite(refdict["Rathbun1918.2"], do_print, AUTHOR_PAREN) +
-    #               " suggested the adoption of "
-    #               "<em class=\"species\">U. heterochelos</em> as the valid name. Almost 50 years later, "
-    #               + format_reference_cite(refdict["Holthuis1962"], do_print, AUTHOR_PAREN) +
-    #               " pointed out that "
-    #               "<em class=\"species\">U. heterochelos</em> was an objective junior synonym of "
-    #               "<em class=\"species\">U. major,</em> thus the type species has been referred to as "
-    #               "<em class=\"species\">U. major</em> ever since.\n")
-    # outfile.write("      </p>\n")
-    # outfile.write("      <p>\n")
-    # outfile.write("        However, " +
-    #               format_reference_cite(refdict["Bott1973.1"], do_print, AUTHOR_PAREN) +
-    #               " discovered that there "
-    #               "has been a universal  misinterpretation of the type species; the species pictured by Seba is "
-    #               "not the American species commonly referred to as "
-    #               "<em class=\"species\">U. major,</em> but rather the West African/Portuguese species called "
-    #               "<em class=\"species\">U. tangeri</em> (Eydoux, 1835). Correcting this error would have caused "
-    #               "a somewhat painful change of names (" +
-    #               format_reference_cite(refdict["Holthuis1979"], do_print, AUTHOR_NOPAREN) + "; " +
-    #               format_reference_cite(refdict["Manning1981"], do_print, AUTHOR_NOPAREN) +
-    #               "). The type species would still be called <em class=\"species\">U. major</em>, but would refer to "
-    #               "the West African/European species rather than the American one; the American species, "
-    #               "which has been called <em class=\"species\">U. major</em> since 1962, would be called "
-    #               "<em class=\"species\">U. platydactylus,</em> a name not used since 1918.\n")
-    # outfile.write("      </p>\n")
-    # outfile.write("      <p>\n")
-    # outfile.write("         To deal with this dilemma, the Society of Zoological Nomenclature officially "
-    #               "designated the holotype of <em class=\"species\">Gelasimus platydactylus</em> as a neotype "
-    #               "of <em class=\"species\">Cancer vocans major</em> (" +
-    #               format_reference_cite(refdict["Holthuis1979"], do_print, AUTHOR_NOPAREN) + "; " +
-    #               format_reference_cite(refdict["ICZN1983"], do_print, AUTHOR_NOPAREN) + "). "
-    #               "The result of this decision is "
-    #               "that we retain the names <em class=\"species\">U. major</em> for the American species and "
-    #               "<em class=\"species\">U. tangeri</em> for the West African/European species. It also means "
-    #               "that although <em class=\"species\">U. tangeri</em> is technically the species upon which "
-    #               "the genus is named, <em class=\"species\">U. major</em> "
-    #               "(<em class=\"species\">Cancer vocans major</em>) is still the official type species of the "
-    #               "genus <em class=\"species\">Uca.</em>\n")
-    # outfile.write("      </p>\n")
-    # outfile.write("    </section>\n")
-    # outfile.write("\n")
-
-    # # subgenera section
-    # outfile.write("    <section class=\"spsection\">\n")
-    # outfile.write("      <h2 id=\"subgenera\" class=\"bookmark2\">Subgenera</h2>\n")
-    # outfile.write("      <p>\n")
-    # outfile.write("       There have been two major proposals for splitting up the genus, one by " +
-    #               format_reference_cite(refdict["Bott1973.2"], do_print, AUTHOR_PAREN) +
-    #               " and the other by " +
-    #               format_reference_cite(refdict["Crane1975"], do_print, AUTHOR_PAREN) + ". "
-    #               "Neither is based on a numerical "
-    #               "phylogeny. Crane's descriptions are very complete. Bott's descriptions are poor, but have "
-    #               "priority. For a long time, scientists actively ignored both subdivisions and when there "
-    #               "was a reference in the literature, it almost always used Crane's names and not Bott's. "
-    #               "Bott also split the genus into multiple genera rather than subgenera, an unnecessary "
-    #               "complication in most researcher's minds.\n")
-    # outfile.write("      </p>\n")
-    # outfile.write("      <p>\n")
-    # outfile.write("       " + format_reference_cite(refdict["Rosenberg2001"], do_print, AUTHOR_PAREN) +
-    #               " partly cleared up the confusion between the two systems. More recent work by " +
-    #               format_reference_cite(refdict["Beinlich2006"], do_print, AUTHOR_PAREN) + ", " +
-    #               format_reference_cite(refdict["Shih2009"], do_print, AUTHOR_PAREN) + ", " +
-    #               format_reference_cite(refdict["Spivak2009"], do_print, AUTHOR_PAREN) + ", " +
-    #               format_reference_cite(refdict["Naderloo2010"], do_print, AUTHOR_PAREN) + ", " +
-    #               format_reference_cite(refdict["Landstorfer2010"], do_print, AUTHOR_PAREN) + ", and " +
-    #               format_reference_cite(refdict["Shih2015.2"], do_print, AUTHOR_PAREN) +
-    #               " have continued to refine the subgenera as detailed below.\n")
-    # outfile.write("      </p>\n")
-    # outfile.write("      <ul>\n")
-    # for subgen in higher_taxa_list:
-    #     outfile.write("        <li><a href=\"#"+subgen.name + "\">Subgenus <em class=\"species\">" +
-    #                   subgen.name + "</em></a></li>\n")
-    # outfile.write("      </ul>\n")
-    #
-    # for subgen in higher_taxa_list:
-    #     outfile.write("      <hr />\n")
-    #     outfile.write("      <h3 id=\"" + subgen.name + "\" class=\"bookmark3\">Subgenus <em class=\"species\">" +
-    #                   subgen.name + "</em> " +
-    #                   format_reference_cite(refdict[subgen.author], do_print, AUTHOR_NOPCOMMA) + "</h3>\n")
-    #     outfile.write("      <dl>\n")
-    #     outfile.write("        <dt>Type</dt>\n")
-    #     s = find_species_by_name(subgen.type_species)
-    #     outfile.write("        <dd>" + create_species_link(s.genus, s.species, do_print) + "</dd>\n")
-    #     outfile.write("        <dt>All Species</dt>\n")
-    #     splist = []
-    #     for s in specieslist:
-    #         if s.subgenus == subgen.name:
-    #             splist.append(create_species_link(s.genus, s.species, do_print, status=s.status))
-    #     outfile.write("        <dd>" + ", ".join(splist) + "</dd>\n")
-    #     outfile.write("      </dl>\n")
-    #     outfile.write("      <p>\n")
-    #     outfile.write("      " + subgen.notes + "\n")
-    #     outfile.write("      </p>\n")
-    #     outfile.write("\n")
-    #
-    # outfile.write("    </section>\n")
-    # outfile.write("\n")
-
-    # # species section
-    # outfile.write("    <section class=\"spsection\">\n")
-    # outfile.write("      <h2 id=\"species\" class=\"bookmark2\">Species Level Systematics</h2>\n")
-    # outfile.write("      <ul>\n")
-    # outfile.write("        <li><a href=\"" + init_data().species_url + "\">Currently recognized species</a></li>\n")
-    # outfile.write("      </ul>\n")
-    # outfile.write("      <p>\n")
-    # outfile.write("For an overview of all <em class=\"species\">Uca</em> species, the best reference is " +
-    #               format_reference_cite(refdict["Crane1975"], do_print, AUTHOR_PAREN) +
-    #               "; any earlier major work would be "
-    #               "overridden by Crane's descriptions. For the most part, the taxa recognized by Crane are still "
-    #               "accepted today. A number of new species have been described since the publication of her "
-    #               "monograph, a few species has been discovered to be invalid, and two of her new species were "
-    #               "previously described by " +
-    #               format_reference_cite(refdict["Bott1973.2"], do_print, AUTHOR_PAREN) + "; as with the "
-    #               "subgenera, his names have priority and take precedence. These changes are summarized below.\n")
-    # outfile.write("      </p>\n")
-    # outfile.write("      <h3 class=\"nobookmark\">Changes to the species level taxonomy of the genus "
-    #               "<em class=\"species\">Uca</em> since Crane (1975)</h3>\n")
-    # write_species_table(["New/Validated Extant Species", "Reference(s)"], species_changes_new)
-    # write_species_table(["Junior Subsynonym", "Correct Name", "Reference(s)"], species_changes_synonyms)
-    # write_species_table(["Incorrect Spelling", "Correct Spelling", "Reference(s)"], species_changes_spelling)
-    # outfile.write("      <p>\n")
-    # outfile.write(format_reference_cite(refdict["Crane1975"], do_print, AUTHOR_PAREN) +
-    #               " tended to lump related taxa into "
-    #               "subspecies rather than treat them as distinct species. A number of studies since that time "
-    #               "have raised virtually all of her subspecies to specific status (<em>e.g.,</em> " +
-    #               format_reference_cite(refdict["Barnwell1980"], do_print, AUTHOR_NOPAREN) + "; " +
-    #               format_reference_cite(refdict["Barnwell1984.1"], do_print, AUTHOR_NOPAREN) + "; " +
-    #               format_reference_cite(refdict["Collins1984"], do_print, AUTHOR_NOPAREN) + "; " +
-    #               format_reference_cite(refdict["Green1980"], do_print, AUTHOR_NOPAREN) + "; " +
-    #               format_reference_cite(refdict["Salmon1979.2"], do_print, AUTHOR_NOPAREN) + "; " +
-    #               format_reference_cite(refdict["Salmon1987.2"], do_print, AUTHOR_NOPAREN) + "; " +
-    #               format_reference_cite(refdict["Thurman1979"], do_print, AUTHOR_NOPAREN) + "; " +
-    #               format_reference_cite(refdict["Thurman1982"], do_print, AUTHOR_NOPAREN) + "; " +
-    #               format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_NOPAREN) + "). "
-    #               "It has become common practice with many authors to ignore all of the subspecific designations "
-    #               "and treat each as a separate species (<em>e.g.,</em> " +
-    #               format_reference_cite(refdict["George1982"], do_print, AUTHOR_NOPAREN) + "; " +
-    #               format_reference_cite(refdict["Jones1994"], do_print, AUTHOR_NOPAREN) + "; " +
-    #               format_reference_cite(refdict["vonHagen1989"], do_print, AUTHOR_NOPAREN) + "). "
-    #               "I follow this practice throughout this website.\n")
-    # outfile.write("      </p>\n")
-    # outfile.write("    </section>\n")
-
     if do_print:
         end_page_division(outfile)
     else:
@@ -5434,9 +5197,9 @@ def build_site() -> None:
         languages, languages_by_year = summarize_languages(references)
         print("...Reading Species...")
         species = TMB_Import.read_species_data(init_data().species_data_file)
-        species_changes_new = TMB_Import.read_simple_file(init_data().species_changes_new)
-        species_changes_synonyms = TMB_Import.read_simple_file(init_data().species_changes_synonyms)
-        species_changes_spelling = TMB_Import.read_simple_file(init_data().species_changes_spelling)
+        # species_changes_new = TMB_Import.read_simple_file(init_data().species_changes_new)
+        # species_changes_synonyms = TMB_Import.read_simple_file(init_data().species_changes_synonyms)
+        # species_changes_spelling = TMB_Import.read_simple_file(init_data().species_changes_spelling)
         prepare_species_crossref(species)
         connect_type_references(species, refdict)
 
@@ -5455,7 +5218,6 @@ def build_site() -> None:
          name_table, specific_point_locations, binomial_point_locations, binomial_usage_cnts,
          specific_usage_cnts) = calculate_name_index_data(refdict, citelist, specific_names)
         common_name_data = TMB_Import.read_common_name_data(init_data().common_names_file)
-        # common_name_data = replace_references(common_name_data, refdict, True)
         common_name_data = replace_species_references(common_name_data)
 
         taxon_ranks = TMB_Import.read_taxon_rank_data(init_data().taxon_ranks_file)
@@ -5555,8 +5317,10 @@ def build_site() -> None:
                     write_video_index(outfile, False, videos)
                 print("......Writing Misc......")
                 with open(WEBOUT_PATH + init_data().syst_url, "w", encoding="utf-8") as outfile:
-                    write_systematics_overview(outfile, False, taxon_ranks, higher_taxa, species, refdict,
-                                               species_changes_new, species_changes_synonyms, species_changes_spelling)
+                    # write_systematics_overview(outfile, False, taxon_ranks, higher_taxa, species, refdict,
+                    #                            species_changes_new, species_changes_synonyms,
+                    #                            species_changes_spelling)
+                    write_systematics_overview(outfile, False, taxon_ranks, higher_taxa, species, refdict)
                 with open(WEBOUT_PATH + init_data().common_url, "w", encoding="utf-8") as outfile:
                     write_common_names_pages(outfile, False, replace_references(common_name_data, refdict, False))
                 with open(WEBOUT_PATH + init_data().lifecycle_url, "w", encoding="utf-8") as outfile:
@@ -5577,8 +5341,10 @@ def build_site() -> None:
                     write_print_only_pages(printfile, species, refdict)
                     write_introduction(printfile, True, species, higher_taxa)
                     write_common_names_pages(printfile, True, replace_references(common_name_data, refdict, True))
-                    write_systematics_overview(printfile, True, taxon_ranks, higher_taxa, species, refdict,
-                                               species_changes_new, species_changes_synonyms, species_changes_spelling)
+                    # write_systematics_overview(printfile, True, taxon_ranks, higher_taxa, species, refdict,
+                    #                            species_changes_new, species_changes_synonyms,
+                    #                            species_changes_spelling)
+                    write_systematics_overview(printfile, True, taxon_ranks, higher_taxa, species, refdict)
                     # write_phylogeny_pages(printfile, True, refdict)
                     write_life_cycle_pages(printfile, True)
                     print("......Writing Species Pages......")
