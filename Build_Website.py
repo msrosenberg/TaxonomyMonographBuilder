@@ -936,7 +936,7 @@ def rank_tags(x: str) -> Tuple[str, str]:
         return "", ""
 
 
-def create_taxon_link(rank: str, name: str, do_print: bool, same_page: bool = False) -> str:
+def create_taxon_link(rank: str, name: str, do_print: bool, same_page: bool = False, path: str = "") -> str:
     """
     create a link to a higher-order taxonomic entry
     """
@@ -944,7 +944,7 @@ def create_taxon_link(rank: str, name: str, do_print: bool, same_page: bool = Fa
     if same_page:
         x = ""
     else:
-        x = init_data().syst_url
+        x = path + init_data().syst_url
     return "<a href=\"" + rel_link_prefix(do_print, x + "#") + \
            "{0}_{1}\">{2} {3}{1}{4}</a>".format(rank, name, rank.capitalize(), start_tag, end_tag)
 
@@ -1181,7 +1181,7 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
             outfile.write("      <td><em class=\"species\">" + n.actual[1:] + "</em></td>\n")
         elif n.actual.startswith("#"):
             t_rank, t_name = n.actual[1:].split("#")
-            outfile.write("      <td>" + create_taxon_link(t_rank, t_name, do_print) + "</td>\n")
+            outfile.write("      <td>" + create_taxon_link(t_rank, t_name, do_print, path="../") + "</td>\n")
         else:
             s = find_species_by_name(n.actual)
             outfile.write("      <td><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + n.actual +
