@@ -23,6 +23,7 @@ import TMB_Initialize
 import TMB_Classes
 import TMB_Create_Graphs
 from TMB_SpeciesXRef import init_species_crossref, find_species_by_name
+import phy2html
 
 
 WEBOUT_PATH = "webout/"
@@ -430,7 +431,7 @@ def format_reference_cite(ref: TMB_Classes.ReferenceClass, do_print: bool, autho
             return ref.cite_key
 
 
-def replace_species_in_string(instr: str) -> str:
+def replace_species_in_string(instr: str, include_link: bool = False, do_print: bool = False) -> str:
     search_str = r"{{(?P<species>.+?)}}"
     # for every species tagged in the string
     for match in re.finditer(search_str, instr):
@@ -442,11 +443,15 @@ def replace_species_in_string(instr: str) -> str:
         else:
             include_authority = False
         s = find_species_by_name(name)
+        if include_link:
+            name_str = create_species_link(s.genus, s.species, do_print, s.status)
+        else:
+            name_str = "<em class=\"species\">" + s.binomial() + "</em>"
         if include_authority:
             a = " " + s.authority()
         else:
             a = ""
-        instr = re.sub(search_str, "<em class=\"species\">" + s.binomial() + "</em>" + a, instr, 1)
+        instr = re.sub(search_str, name_str + a, instr, 1)
     return instr
 
 
@@ -918,7 +923,8 @@ def rank_tags(x: str) -> Tuple[str, str]:
         return "", ""
 
 
-def create_taxon_link(rank: str, name: str, do_print: bool, same_page: bool = False, path: str = "") -> str:
+def create_taxon_link(rank: str, name: str, do_print: bool, same_page: bool = False, path: str = "",
+                      include_rank: bool = True) -> str:
     """
     create a link to a higher-order taxonomic entry
     """
@@ -927,8 +933,12 @@ def create_taxon_link(rank: str, name: str, do_print: bool, same_page: bool = Fa
         x = ""
     else:
         x = path + init_data().syst_url
+    if include_rank:
+        rc = rank.capitalize() + " "
+    else:
+        rc = ""
     return "<a href=\"" + rel_link_prefix(do_print, x + "#") + \
-           "{0}_{1}\">{2} {3}{1}{4}</a>".format(rank, name, rank.capitalize(), start_tag, end_tag)
+           "{0}_{1}\">{2}{3}{1}{4}</a>".format(rank, name, rc, start_tag, end_tag)
 
 
 def create_location_link(location: TMB_Classes.LocationClass, display_name: str, do_print: bool, path: str = "",
@@ -4393,52 +4403,95 @@ def write_life_cycle_pages(outfile: TextIO, do_print: bool) -> None:
         common_html_footer(outfile)
 
 
-def write_phylogeny_pages(outfile: TextIO, do_print: bool, refdict: dict) -> None:
+def create_html_phylogenies():
+    gen_tree = phy2html.create_html_tree("data/fiddler_genera_tree.nwk", "", prefix="genera_")
+    sp_tree = phy2html.create_html_tree("data/fiddler_species_tree.nwk", "", prefix="species_")
+    return gen_tree, sp_tree
+
+
+def write_phylogeny_pages(outfile: TextIO, genera_tree: list, species_tree: list, do_print: bool,
+                          refdict: dict) -> None:
     """
     create the phylogeny page
     """
-    treelist = {"tree_species.svg", "tree_subgenera.svg"}
+
+    def split_html_tree(intree: list) -> Tuple[list, list]:
+        """
+        take a phy2html output file and split it into style and body sections
+        """
+        instyle = False
+        inbody = False
+        style_list = []
+        body_list = []
+        for inline in intree:
+            if "<style>" in inline:
+                instyle = True
+            elif "</style>" in inline:
+                instyle = False
+            elif "<body>" in inline:
+                inbody = True
+            elif "</body>" in inline:
+                inbody = False
+            elif instyle:
+                style_list.append(inline)
+            elif inbody:
+                body_list.append(inline)
+        return style_list, body_list
+
+    def add_link_to_genus(inline: str) -> str:
+        if "id=\"genera_taxon" in inline:
+            i = inline.find(">")
+            start = inline[:i+1]
+            tname = inline[i+1:]
+            j = tname.find("<")
+            end = tname[j:]
+            tname = tname[:j]
+            tname = create_taxon_link("genus", tname, do_print=do_print, include_rank=False)
+            return start + tname + end
+        else:
+            return inline
+
+    # --- main function code ---
+    gen_style, gen_body = split_html_tree(genera_tree)
+    sp_style, sp_body = split_html_tree(species_tree)
+
     if do_print:
         start_page_division(outfile, "base_page")
-        media_path = "resources/"
     else:
-        common_html_header(outfile, "Fiddler Crab Phylogeny")
-        media_path = ""
-        # copy trees to webout directory
-        for tree in treelist:
-            try:
-                shutil.copy2("resources/images/" + tree, WEBOUT_PATH + "images/")
-            except FileNotFoundError:
-                report_error("File missing: resources/images/" + tree)
+        common_header_part1(outfile, "Fiddler Crab Phylogeny")
+    outfile.write("    <style>\n")
+    for line in gen_style:
+        outfile.write(line)
+    outfile.write("\n")
+    for line in sp_style:
+        outfile.write(line)
+    outfile.write("\n")
+    outfile.write("    .phylogeny_grid { padding: 30px;  }\n")  # add a little extra padding
+    outfile.write("    </style>\n")
+
+    if not do_print:
+        common_header_part2(outfile)
+
     outfile.write("    <header id=\"" + init_data().tree_url + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Phylogeny</h1>\n")
     outfile.write("    </header>\n")
     outfile.write("\n")
     outfile.write("    <p>\n")
     outfile.write("     The phylogeny of fiddler crabs is still largely unresolved. Two trees are shown below: one "
-                  "just the subgenera and one including all species. These are both rough, conservative estimates "
-                  "based on combining information from " +
-                  format_reference_cite(refdict["Levinton1996"], do_print, AUTHOR_PAREN) + ", " +
-                  format_reference_cite(refdict["Sturmbauer1996"], do_print, AUTHOR_PAREN) + ", " +
-                  format_reference_cite(refdict["Rosenberg2001"], do_print, AUTHOR_PAREN) + ", " +
-                  format_reference_cite(refdict["Shih2009"], do_print, AUTHOR_PAREN) + ", " +
-                  format_reference_cite(refdict["Shih2010.1"], do_print, AUTHOR_PAREN) + ", " +
-                  format_reference_cite(refdict["Landstorfer2010"], do_print, AUTHOR_PAREN) + ", " +
-                  format_reference_cite(refdict["Shih2012"], do_print, AUTHOR_PAREN) + ", " +
-                  format_reference_cite(refdict["Shih2013"], do_print, AUTHOR_PAREN) + ", " +
-                  format_reference_cite(refdict["Shih2013.2"], do_print, AUTHOR_PAREN) + ", and " +
-                  format_reference_cite(refdict["Shih2015.2"], do_print, AUTHOR_PAREN) + ".\n")
+                  "of just the genera and one including all species. The tree of genera is fairly solid, "
+                  "but the species tree is a rough estimate with many polytomies. Both are predominantly on the "
+                  "work of " + format_reference_cite(refdict["Shih2016.2"], do_print, AUTHOR_PAREN) + ".\n")
     outfile.write("    </p>\n")
     outfile.write("\n")
     outfile.write("    <section class=\"spsection\">\n")
-    outfile.write("      <h2 class=\"bookmark2\">Subgenera Phylogeny</h2>\n")
-    outfile.write("      <object id=\"subgenera_phylogeny\" class=\"tree_figure\" data=\"" + media_path +
-                  "images/tree_subgenera.svg\" type=\"image/svg+xml\"></object>\n")
+    outfile.write("      <h2 class=\"bookmark2\">Genera Phylogeny</h2>\n")
+    for line in gen_body:
+        outfile.write(add_link_to_genus(line))
     outfile.write("    </section>\n")
     outfile.write("    <section class=\"spsection\">\n")
     outfile.write("      <h2 class=\"bookmark2\">Species Phylogeny</h2>\n")
-    outfile.write("      <object id=\"species_phylogeny\" class=\"tree_figure\" data=\"" + media_path +
-                  "images/tree_species.svg\" type=\"image/svg+xml\"></object>\n")
+    for line in sp_body:
+        outfile.write(replace_species_in_string(line, True, do_print))
     outfile.write("    </section>\n")
     outfile.write("\n")
     if do_print:
@@ -5221,6 +5274,8 @@ def build_site() -> None:
          location_direct_refs, location_cited_refs) = match_names_to_locations(species, specific_point_locations,
                                                                                binomial_point_locations,
                                                                                point_locations, citelist)
+        genera_tree, species_tree = create_html_phylogenies()
+
         if INCLUDE_INAT and (not CHECK_DATA):
             species_inat = TMB_Import.fetch_inat_data(species)
             # for s in species:
@@ -5257,41 +5312,41 @@ def build_site() -> None:
 
             # output website version
             if OUTPUT_WEB:
-                create_web_output_paths()
-                print("...Creating Web Version...")
-                copy_support_files()
-                print("......Writing References......")
-                with open(WEBOUT_PATH + init_data().ref_url, "w", encoding="utf-8") as outfile:
-                    write_reference_bibliography(outfile, False, references)
-                with open(WEBOUT_PATH + init_data().ref_sum_url, "w", encoding="utf-8") as outfile:
-                    write_reference_summary(outfile, False, len(references), yeardat, yeardat1900, citecount,
-                                            languages, languages_by_year)
-                write_reference_pages(None, False, references, refdict, citelist, name_table, point_locations)
-                print("......Writing Names Info......")
-                with open(WEBOUT_PATH + "names/index.html", "w", encoding="utf-8") as outfile:
-                    write_all_name_pages(outfile, False, refdict, citelist, all_names, specific_names, name_table,
-                                         species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
-                                         binomial_point_locations, specific_point_locations, point_locations)
-                print("......Writing Species......")
-                write_species_info_pages(None, False, species, references, specific_names, all_names, photos, videos,
-                                         art, species_refs, refdict, binomial_name_cnts, specific_name_cnts,
-                                         higher_dict)
-                if DRAW_MAPS:
-                    print("......Copying Maps......")
-                    copy_map_files(species, all_names, specific_names, point_locations)
-                print("......Writing Locations......")
-                with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
-                    write_location_index(outfile, False, point_locations, location_dict, location_species,
-                                         location_sp_names, location_bi_names, location_direct_refs,
-                                         location_cited_refs, references)
-                with open(WEBOUT_PATH + init_data().map_url, "w", encoding="utf-8") as outfile:
-                    write_geography_page(outfile, False, species)
-                print("......Writing Media Pages......")
-                with open(WEBOUT_PATH + init_data().photo_url, "w", encoding="utf-8") as outfile:
-                    write_photo_index(outfile, False, species, photos)
-                write_all_art_pages(None, False, art)
-                with open(WEBOUT_PATH + init_data().video_url, "w", encoding="utf-8") as outfile:
-                    write_video_index(outfile, False, videos)
+                # create_web_output_paths()
+                # print("...Creating Web Version...")
+                # copy_support_files()
+                # print("......Writing References......")
+                # with open(WEBOUT_PATH + init_data().ref_url, "w", encoding="utf-8") as outfile:
+                #     write_reference_bibliography(outfile, False, references)
+                # with open(WEBOUT_PATH + init_data().ref_sum_url, "w", encoding="utf-8") as outfile:
+                #     write_reference_summary(outfile, False, len(references), yeardat, yeardat1900, citecount,
+                #                             languages, languages_by_year)
+                # write_reference_pages(None, False, references, refdict, citelist, name_table, point_locations)
+                # print("......Writing Names Info......")
+                # with open(WEBOUT_PATH + "names/index.html", "w", encoding="utf-8") as outfile:
+                #     write_all_name_pages(outfile, False, refdict, citelist, all_names, specific_names, name_table,
+                #                          species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
+                #                          binomial_point_locations, specific_point_locations, point_locations)
+                # print("......Writing Species......")
+                # write_species_info_pages(None, False, species, references, specific_names, all_names, photos, videos,
+                #                          art, species_refs, refdict, binomial_name_cnts, specific_name_cnts,
+                #                          higher_dict)
+                # if DRAW_MAPS:
+                #     print("......Copying Maps......")
+                #     copy_map_files(species, all_names, specific_names, point_locations)
+                # print("......Writing Locations......")
+                # with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
+                #     write_location_index(outfile, False, point_locations, location_dict, location_species,
+                #                          location_sp_names, location_bi_names, location_direct_refs,
+                #                          location_cited_refs, references)
+                # with open(WEBOUT_PATH + init_data().map_url, "w", encoding="utf-8") as outfile:
+                #     write_geography_page(outfile, False, species)
+                # print("......Writing Media Pages......")
+                # with open(WEBOUT_PATH + init_data().photo_url, "w", encoding="utf-8") as outfile:
+                #     write_photo_index(outfile, False, species, photos)
+                # write_all_art_pages(None, False, art)
+                # with open(WEBOUT_PATH + init_data().video_url, "w", encoding="utf-8") as outfile:
+                #     write_video_index(outfile, False, videos)
                 print("......Writing Misc......")
                 with open(WEBOUT_PATH + init_data().syst_url, "w", encoding="utf-8") as outfile:
                     # write_systematics_overview(outfile, False, taxon_ranks, higher_taxa, species, refdict,
@@ -5302,8 +5357,9 @@ def build_site() -> None:
                     write_common_names_pages(outfile, False, replace_references(common_name_data, refdict, False))
                 with open(WEBOUT_PATH + init_data().lifecycle_url, "w", encoding="utf-8") as outfile:
                     write_life_cycle_pages(outfile, False)
-                # with open(WEBOUT_PATH + init_data().tree_url, "w", encoding="utf-8") as outfile:
-                #     write_phylogeny_pages(outfile, False, refdict)
+                with open(WEBOUT_PATH + init_data().tree_url, "w", encoding="utf-8") as outfile:
+                    # write_phylogeny_pages(outfile, False, refdict)
+                    write_phylogeny_pages(outfile, genera_tree, species_tree, False, refdict)
                 with open(WEBOUT_PATH + init_data().morph_url, "w", encoding="utf-8") as outfile:
                     write_main_morphology_pages(outfile, False, morphology)
                 with open(WEBOUT_PATH + "index.html", "w", encoding="utf-8") as outfile:
@@ -5322,7 +5378,7 @@ def build_site() -> None:
                     #                            species_changes_new, species_changes_synonyms,
                     #                            species_changes_spelling)
                     write_systematics_overview(printfile, True, taxon_ranks, higher_taxa, species, refdict)
-                    # write_phylogeny_pages(printfile, True, refdict)
+                    write_phylogeny_pages(printfile, genera_tree, species_tree, True, refdict)
                     write_life_cycle_pages(printfile, True)
                     print("......Writing Species Pages......")
                     write_species_info_pages(printfile, True, species, references, specific_names, all_names, photos,
