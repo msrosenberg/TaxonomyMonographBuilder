@@ -4815,8 +4815,8 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list, higher_ta
         outfile.write("    <ul class=\"fa-ul\">\n")
         outfile.write("      <li>" + fetch_fa_glyph("list systematics") + "<a href=\"" + init_data().syst_url +
                       "\">Systematics</a></li>\n")
-        # outfile.write("      <li>" + fetch_fa_glyph("list phylogeny") + "<a href=\"" + init_data().tree_url +
-        #               "\">Phylogeny</a></li>\n")
+        outfile.write("      <li>" + fetch_fa_glyph("list phylogeny") + "<a href=\"" + init_data().tree_url +
+                      "\">Phylogeny</a></li>\n")
         outfile.write("      <li>" + fetch_fa_glyph("list species") + "<a href=\"" + init_data().species_url +
                       "\">Species</a>\n")
         outfile.write("        <ul>\n")
@@ -5129,7 +5129,7 @@ def print_table_of_contents(outfile: TextIO, species_list: list) -> None:
     outfile.write("           <li><a href=\"#species\">Species</a></li>\n")
     outfile.write("         </ul>\n")
     outfile.write("       </li>\n")
-    # outfile.write("       <li><a href=\"#" + init_data().tree_url + "\">Phylogeny</a></li>\n")
+    outfile.write("       <li><a href=\"#" + init_data().tree_url + "\">Phylogeny</a></li>\n")
     outfile.write("       <li><a href=\"#" + init_data().lifecycle_url + "\">Life Cycle</a></li>\n")
     outfile.write("       <li><a href=\"#" + init_data().species_url + "\">Species</a>\n")
     outfile.write("         <ul>\n")
@@ -5312,53 +5312,49 @@ def build_site() -> None:
 
             # output website version
             if OUTPUT_WEB:
-                # create_web_output_paths()
-                # print("...Creating Web Version...")
-                # copy_support_files()
-                # print("......Writing References......")
-                # with open(WEBOUT_PATH + init_data().ref_url, "w", encoding="utf-8") as outfile:
-                #     write_reference_bibliography(outfile, False, references)
-                # with open(WEBOUT_PATH + init_data().ref_sum_url, "w", encoding="utf-8") as outfile:
-                #     write_reference_summary(outfile, False, len(references), yeardat, yeardat1900, citecount,
-                #                             languages, languages_by_year)
-                # write_reference_pages(None, False, references, refdict, citelist, name_table, point_locations)
-                # print("......Writing Names Info......")
-                # with open(WEBOUT_PATH + "names/index.html", "w", encoding="utf-8") as outfile:
-                #     write_all_name_pages(outfile, False, refdict, citelist, all_names, specific_names, name_table,
-                #                          species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
-                #                          binomial_point_locations, specific_point_locations, point_locations)
-                # print("......Writing Species......")
-                # write_species_info_pages(None, False, species, references, specific_names, all_names, photos, videos,
-                #                          art, species_refs, refdict, binomial_name_cnts, specific_name_cnts,
-                #                          higher_dict)
-                # if DRAW_MAPS:
-                #     print("......Copying Maps......")
-                #     copy_map_files(species, all_names, specific_names, point_locations)
-                # print("......Writing Locations......")
-                # with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
-                #     write_location_index(outfile, False, point_locations, location_dict, location_species,
-                #                          location_sp_names, location_bi_names, location_direct_refs,
-                #                          location_cited_refs, references)
-                # with open(WEBOUT_PATH + init_data().map_url, "w", encoding="utf-8") as outfile:
-                #     write_geography_page(outfile, False, species)
-                # print("......Writing Media Pages......")
-                # with open(WEBOUT_PATH + init_data().photo_url, "w", encoding="utf-8") as outfile:
-                #     write_photo_index(outfile, False, species, photos)
-                # write_all_art_pages(None, False, art)
-                # with open(WEBOUT_PATH + init_data().video_url, "w", encoding="utf-8") as outfile:
-                #     write_video_index(outfile, False, videos)
+                create_web_output_paths()
+                print("...Creating Web Version...")
+                copy_support_files()
+                print("......Writing References......")
+                with open(WEBOUT_PATH + init_data().ref_url, "w", encoding="utf-8") as outfile:
+                    write_reference_bibliography(outfile, False, references)
+                with open(WEBOUT_PATH + init_data().ref_sum_url, "w", encoding="utf-8") as outfile:
+                    write_reference_summary(outfile, False, len(references), yeardat, yeardat1900, citecount,
+                                            languages, languages_by_year)
+                write_reference_pages(None, False, references, refdict, citelist, name_table, point_locations)
+                print("......Writing Names Info......")
+                with open(WEBOUT_PATH + "names/index.html", "w", encoding="utf-8") as outfile:
+                    write_all_name_pages(outfile, False, refdict, citelist, all_names, specific_names, name_table,
+                                         species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
+                                         binomial_point_locations, specific_point_locations, point_locations)
+                print("......Writing Species......")
+                write_species_info_pages(None, False, species, references, specific_names, all_names, photos, videos,
+                                         art, species_refs, refdict, binomial_name_cnts, specific_name_cnts,
+                                         higher_dict)
+                if DRAW_MAPS:
+                    print("......Copying Maps......")
+                    copy_map_files(species, all_names, specific_names, point_locations)
+                print("......Writing Locations......")
+                with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
+                    write_location_index(outfile, False, point_locations, location_dict, location_species,
+                                         location_sp_names, location_bi_names, location_direct_refs,
+                                         location_cited_refs, references)
+                with open(WEBOUT_PATH + init_data().map_url, "w", encoding="utf-8") as outfile:
+                    write_geography_page(outfile, False, species)
+                print("......Writing Media Pages......")
+                with open(WEBOUT_PATH + init_data().photo_url, "w", encoding="utf-8") as outfile:
+                    write_photo_index(outfile, False, species, photos)
+                write_all_art_pages(None, False, art)
+                with open(WEBOUT_PATH + init_data().video_url, "w", encoding="utf-8") as outfile:
+                    write_video_index(outfile, False, videos)
                 print("......Writing Misc......")
                 with open(WEBOUT_PATH + init_data().syst_url, "w", encoding="utf-8") as outfile:
-                    # write_systematics_overview(outfile, False, taxon_ranks, higher_taxa, species, refdict,
-                    #                            species_changes_new, species_changes_synonyms,
-                    #                            species_changes_spelling)
                     write_systematics_overview(outfile, False, taxon_ranks, higher_taxa, species, refdict)
                 with open(WEBOUT_PATH + init_data().common_url, "w", encoding="utf-8") as outfile:
                     write_common_names_pages(outfile, False, replace_references(common_name_data, refdict, False))
                 with open(WEBOUT_PATH + init_data().lifecycle_url, "w", encoding="utf-8") as outfile:
                     write_life_cycle_pages(outfile, False)
                 with open(WEBOUT_PATH + init_data().tree_url, "w", encoding="utf-8") as outfile:
-                    # write_phylogeny_pages(outfile, False, refdict)
                     write_phylogeny_pages(outfile, genera_tree, species_tree, False, refdict)
                 with open(WEBOUT_PATH + init_data().morph_url, "w", encoding="utf-8") as outfile:
                     write_main_morphology_pages(outfile, False, morphology)
@@ -5374,9 +5370,6 @@ def build_site() -> None:
                     write_print_only_pages(printfile, species, refdict)
                     write_introduction(printfile, True, species, higher_taxa)
                     write_common_names_pages(printfile, True, replace_references(common_name_data, refdict, True))
-                    # write_systematics_overview(printfile, True, taxon_ranks, higher_taxa, species, refdict,
-                    #                            species_changes_new, species_changes_synonyms,
-                    #                            species_changes_spelling)
                     write_systematics_overview(printfile, True, taxon_ranks, higher_taxa, species, refdict)
                     write_phylogeny_pages(printfile, genera_tree, species_tree, True, refdict)
                     write_life_cycle_pages(printfile, True)
