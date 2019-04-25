@@ -744,7 +744,9 @@ def create_all_species_point_maps(species: list, point_locations: dict, species_
         if s.status != "fossil":
             places = species_plot_locations[s]
             invalid_places = invalid_species_locations[s]
-            if s.species in inat_species_locations:
+            if inat_species_locations is None:
+                inat_data = None
+            elif s.species in inat_species_locations:
                 inat_data = inat_species_locations[s.species]
             else:
                 inat_data = None
