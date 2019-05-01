@@ -43,15 +43,15 @@ AUTHOR_NOPCOMMA = 2     # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = False
+DRAW_MAPS = True
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
 CHECK_LOCATIONS = False
 # this flag controls whether additional location data should be fetched from iNaturalist
-INCLUDE_INAT = False
+INCLUDE_INAT = True
 # these flags control creating print and web output, respectively
-OUTPUT_PRINT = False
+OUTPUT_PRINT = True
 OUTPUT_WEB = True
 
 # randSeed = random.randint(0, 10000)
@@ -4791,7 +4791,7 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list, higher_ta
     outfile.write("      <tr><td class=\"classcol1\">Infraorder</td><td>Brachyura</td></tr>\n")
     outfile.write("      <tr><td class=\"classcol1\">Superfamily</td><td>Ocypodoidea</td></tr>\n")
     outfile.write("      <tr><td class=\"classcol1\">Family</td><td>Ocypodidae</td></tr>\n")
-    outfile.write("      <tr><td class=\"classcol1\">Subfamily</td><td>Ocypodinae</td>\n")
+    # outfile.write("      <tr><td class=\"classcol1\">Subfamily</td><td>Ocypodinae</td>\n")
     # outfile.write("      <tr><td class=\"classcol1\">Genus</td><td><em class=\"species\">Uca</em></td>\n")
     genera = []
     for t in higher_taxa:
@@ -5292,7 +5292,10 @@ def build_site() -> None:
         elif CHECK_LOCATIONS:
             if DRAW_MAPS:
                 print("...Creating Maps...")
-                TMB_Create_Maps.create_all_maps(init_data(), point_locations)
+                TMB_Create_Maps.create_all_maps(init_data(), point_locations)  # only draw location maps
+                # TMB_Create_Maps.create_all_maps(init_data(), point_locations, species, species_plot_locations,
+                #                                 invalid_species_locations, all_names, binomial_plot_locations,
+                #                                 specific_names, specific_plot_locations, species_inat)
             print("......Writing Locations......")
             with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
                 write_location_index(outfile, False, point_locations, location_dict, location_species,
