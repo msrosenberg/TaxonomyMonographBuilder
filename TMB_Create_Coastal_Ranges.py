@@ -52,12 +52,13 @@ def import_species_blocks(filename: str) -> dict:
     for line in lines[1:]:
         if line.strip() != "":
             species, startlat, startlon, endlat, endlon = line.strip().split("\t")
-            if species in blocks:
-                block_data = blocks[species]
-            else:
-                block_data = []
-                blocks[species] = block_data
-            block_data.append(Rectangle(eval(startlat), eval(startlon), eval(endlat), eval(endlon)))
+            blocks.setdefault(species, []).append(Rectangle(eval(startlat), eval(startlon), eval(endlat), eval(endlon)))
+            # if species in blocks:
+            #     block_data = blocks[species]
+            # else:
+            #     block_data = []
+            #     blocks[species] = block_data
+            # block_data.append(Rectangle(eval(startlat), eval(startlon), eval(endlat), eval(endlon)))
     return blocks
 
 

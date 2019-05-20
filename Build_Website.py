@@ -9,6 +9,7 @@ import os
 import shutil
 import re
 import math
+import collections
 # import subprocess
 # from typing import Optional, Tuple, Union, TextIO
 from typing import Optional, Tuple, TextIO
@@ -863,15 +864,17 @@ def compute_species_from_citation_linking(citelist: list) -> None:
     for i, cite in enumerate(citelist):
         if cite.actual == "=":
             cname = ""
-            crossnames = {}
+            # crossnames = {}
+            crossnames = collections.Counter()
             for j in range(i):  # only look at entries up to the current one
                 tmp = citelist[j]
                 if (tmp.cite_key == cite.application) and match_num_ref(tmp.name_key, cite.cite_n):
                     cname = tmp.name
-                    if tmp.actual in crossnames:
-                        crossnames[tmp.actual] += 1
-                    else:
-                        crossnames[tmp.actual] = 1
+                    crossnames.update(tmp.actual)
+                    # if tmp.actual in crossnames:
+                    #     crossnames[tmp.actual] += 1
+                    # else:
+                    #     crossnames[tmp.actual] = 1
             if len(crossnames) == 0:
                 pass
             elif len(crossnames) == 1:
@@ -2214,7 +2217,8 @@ def calculate_name_index_data(refdict: dict, citelist: list, specific_names: lis
     name_table = create_name_table(citelist)
     unique_names = list()
     nameset = set()
-    total_binomial_year_cnts = {}
+    # total_binomial_year_cnts = {}
+    total_binomial_year_cnts = collections.Counter()
     for c in citelist:
         if c.name != ".":
             clean = clean_name(c.name)
@@ -2223,10 +2227,11 @@ def calculate_name_index_data(refdict: dict, citelist: list, specific_names: lis
                 unique_names.append(clean)
                 y = refdict[c.cite_key].year()
                 if y is not None:
-                    if y in total_binomial_year_cnts:
-                        total_binomial_year_cnts[y] += 1
-                    else:
-                        total_binomial_year_cnts[y] = 1
+                    total_binomial_year_cnts.update(y)
+                    # if y in total_binomial_year_cnts:
+                    #     total_binomial_year_cnts[y] += 1
+                    # else:
+                    #     total_binomial_year_cnts[y] = 1
     unique_names.sort(key=lambda s: s.lower())
 
     # identify genera used per paper
@@ -2246,11 +2251,13 @@ def calculate_name_index_data(refdict: dict, citelist: list, specific_names: lis
                 for genus in genera_set:
                     genus = clean_genus(genus)
                     if genus != "":
-                        if genus not in genus_cnts:
-                            genus_cnts[genus] = {y: 0 for y in range(init_data().start_year,
-                                                                     init_data().current_year + 1)}
-                        gcnts = genus_cnts[genus]
-                        gcnts[y] += 1
+                        genus_cnts.setdefault(genus, {y: 0 for y in range(init_data().start_year,
+                                                                          init_data().current_year + 1)})[y] += 1
+                        # if genus not in genus_cnts:
+                        #     genus_cnts[genus] = {y: 0 for y in range(init_data().start_year,
+                        #                                              init_data().current_year + 1)}
+                        # gcnts = genus_cnts[genus]
+                        # gcnts[y] += 1
 
     binomial_usage_cnts_by_year = {}
     binomial_location_applications = {}
@@ -2261,7 +2268,8 @@ def calculate_name_index_data(refdict: dict, citelist: list, specific_names: lis
             binomial_usage_cnts[name] = tmptotal
         binomial_location_applications[name] = calculate_binomial_locations(name, citelist)
 
-    specific_year_cnts = {}
+    # specific_year_cnts = {}
+    specific_year_cnts = collections.Counter()
     specific_usage_cnts_by_year = {}
     specific_location_applications = {}
     specific_usage_cnts = {}
@@ -2276,10 +2284,11 @@ def calculate_name_index_data(refdict: dict, citelist: list, specific_names: lis
         if tmpkey != ".":
             y = refdict[tmpkey].year()
             if y is not None:
-                if y in specific_year_cnts:
-                    specific_year_cnts[y] += 1
-                else:
-                    specific_year_cnts[y] = 1
+                specific_year_cnts.update(y)
+                # if y in specific_year_cnts:
+                #     specific_year_cnts[y] += 1
+                # else:
+                #     specific_year_cnts[y] = 1
     return (unique_names, binomial_usage_cnts_by_year, specific_usage_cnts_by_year, genus_cnts,
             total_binomial_year_cnts, name_table, specific_location_applications, binomial_location_applications,
             binomial_usage_cnts, specific_usage_cnts)
@@ -2339,7 +2348,8 @@ def write_all_name_pages(outfile: TextIO, do_print: bool, refdict: dict, citelis
     outfile.write("      <h3 id=\"specificnames\" class=\"bookmark2\">Specific Names</h3>\n")
     outfile.write("      <ul class=\"spnamelist\">\n")
 
-    specific_year_cnts = {}
+    # specific_year_cnts = {}
+    specific_year_cnts = collections.Counter()
     for name in specific_names:
         outfile.write("        <li><a href=\"" + rel_link_prefix(do_print) + "sn_" + name.name + ".html\">" +
                       format_name_string(name.name) + "</a></li>\n")
@@ -2347,10 +2357,11 @@ def write_all_name_pages(outfile: TextIO, do_print: bool, refdict: dict, citelis
         if tmpkey != ".":
             y = refdict[tmpkey].year()
             if y is not None:
-                if y in specific_year_cnts:
-                    specific_year_cnts[y] += 1
-                else:
-                    specific_year_cnts[y] = 1
+                specific_year_cnts.update(y)
+                # if y in specific_year_cnts:
+                #     specific_year_cnts[y] += 1
+                # else:
+                #     specific_year_cnts[y] = 1
     outfile.write("      </ul>\n")
     outfile.write("    </div>\n")
     if do_print:
@@ -4261,7 +4272,8 @@ def summarize_languages(refs: list) -> Tuple[dict, dict]:
             x = x[:s]
         return x
 
-    languages = {}
+    # languages = {}
+    languages = collections.Counter()
     miny = init_data().current_year
     maxy = 0
     language_set = set()
@@ -4279,10 +4291,11 @@ def summarize_languages(refs: list) -> Tuple[dict, dict]:
         lang = ref.language
         if lang != "":
             lang = primary_language(lang)
-            if lang in languages:
-                languages[lang] += 1
-            else:
-                languages[lang] = 1
+            languages.update(lang)
+            # if lang in languages:
+            #     languages[lang] += 1
+            # else:
+            #     languages[lang] = 1
             if ref.year() is not None:
                 lyear = languages_by_year[lang]
                 lyear[ref.year()] += 1
@@ -4615,12 +4628,14 @@ def write_morphology_index(outfile: TextIO, do_print: bool, morphlist: list) -> 
     outfile.write("    </header>\n")
     outfile.write("\n")
     outfile.write("     <ul class=\"morphlist\">\n")
-    uniquelist = {}
-    for m in morphlist:
-        if m.character in uniquelist:
-            uniquelist[m.character] += 1
-        else:
-            uniquelist[m.character] = 1
+    # uniquelist = {}
+    uniquelist = collections.Counter(m.character for m in morphlist)
+    # for m in morphlist:
+    #     uniquelist.update(m.character)
+    #     # if m.character in uniquelist:
+    #     #     uniquelist[m.character] += 1
+    #     # else:
+    #     #     uniquelist[m.character] = 1
 
     sortlist = []
     for m in morphlist:
