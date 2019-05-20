@@ -82,7 +82,7 @@ def read_reference_data(ref_filename: str, formatref_filename: str,
             # calculate publishing trend
             y = newref.year()
             if y is not None:
-                year_dat.update(y)
+                year_dat.update([y])
                 # if y in year_dat:
                 #     year_dat[y] += 1
                 # else:

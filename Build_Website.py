@@ -870,7 +870,7 @@ def compute_species_from_citation_linking(citelist: list) -> None:
                 tmp = citelist[j]
                 if (tmp.cite_key == cite.application) and match_num_ref(tmp.name_key, cite.cite_n):
                     cname = tmp.name
-                    crossnames.update(tmp.actual)
+                    crossnames.update([tmp.actual])
                     # if tmp.actual in crossnames:
                     #     crossnames[tmp.actual] += 1
                     # else:
@@ -2227,7 +2227,7 @@ def calculate_name_index_data(refdict: dict, citelist: list, specific_names: lis
                 unique_names.append(clean)
                 y = refdict[c.cite_key].year()
                 if y is not None:
-                    total_binomial_year_cnts.update(y)
+                    total_binomial_year_cnts.update([y])
                     # if y in total_binomial_year_cnts:
                     #     total_binomial_year_cnts[y] += 1
                     # else:
@@ -2284,7 +2284,7 @@ def calculate_name_index_data(refdict: dict, citelist: list, specific_names: lis
         if tmpkey != ".":
             y = refdict[tmpkey].year()
             if y is not None:
-                specific_year_cnts.update(y)
+                specific_year_cnts.update([y])
                 # if y in specific_year_cnts:
                 #     specific_year_cnts[y] += 1
                 # else:
@@ -2357,7 +2357,7 @@ def write_all_name_pages(outfile: TextIO, do_print: bool, refdict: dict, citelis
         if tmpkey != ".":
             y = refdict[tmpkey].year()
             if y is not None:
-                specific_year_cnts.update(y)
+                specific_year_cnts.update([y])
                 # if y in specific_year_cnts:
                 #     specific_year_cnts[y] += 1
                 # else:
@@ -4291,7 +4291,7 @@ def summarize_languages(refs: list) -> Tuple[dict, dict]:
         lang = ref.language
         if lang != "":
             lang = primary_language(lang)
-            languages.update(lang)
+            languages.update([lang])
             # if lang in languages:
             #     languages[lang] += 1
             # else:
