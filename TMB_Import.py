@@ -3,6 +3,7 @@ Functions to read data from files
 """
 
 # import codecs
+import collections
 from typing import Tuple
 import urllib.request
 import csv
@@ -62,7 +63,8 @@ def read_reference_data(ref_filename: str, formatref_filename: str,
     read all reference data
     """
     ref_list = []
-    year_dat = {}
+    # year_dat = {}
+    year_dat = collections.Counter()
     cite_done = {}
 
     # citation style data (Author, Year) and language for each reference
@@ -80,10 +82,11 @@ def read_reference_data(ref_filename: str, formatref_filename: str,
             # calculate publishing trend
             y = newref.year()
             if y is not None:
-                if y in year_dat:
-                    year_dat[y] += 1
-                else:
-                    year_dat[y] = 1
+                year_dat.update(y)
+                # if y in year_dat:
+                #     year_dat[y] += 1
+                # else:
+                #     year_dat[y] = 1
             cite_done[newref.cite_key] = [False, y]
             ref_list.append(newref)
 
