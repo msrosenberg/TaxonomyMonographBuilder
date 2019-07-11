@@ -123,6 +123,8 @@ def common_header_part2(outfile: TextIO, indexpath: str = "", include_map: bool 
         outfile.write("  <body onload=\"initialize()\">\n")
     else:
         outfile.write("  <body>\n")
+    outfile.write("    <div id=\"skip-links\" role=\"complementary\" aria-label=\"Skip links menu\">")
+    outfile.write("<a href=\"#Main\" tabindex=\"1\">Skip to content</a></div>\n")
     outfile.write("    <div id=\"home\">\n")
     outfile.write("      <a href=\"" + indexpath + "index.html\" class=\"home-title\">Fiddler Crabs</a>\n")
     outfile.write("      <a href=\"" + indexpath +
