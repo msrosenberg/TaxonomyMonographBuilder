@@ -305,7 +305,7 @@ def fetch_fa_glyph(glyph: Optional[str]) -> str:
     if glyph is None:
         return ""
     else:
-        x = "<span class=\"fa"
+        x = "<span  role=\"presentation\" class=\"fa"
         if glyph == "home":
             x += " fa-home\" aria-hidden"
         elif glyph == "blog":
