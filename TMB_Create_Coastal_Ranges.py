@@ -25,7 +25,7 @@ class Rectangle:
         else:
             self.wrap = False
 
-    def __str__(self):
+    def __repr__(self):
         return "{}, {}, {}, {}".format(self.lower_left_lat, self.lower_left_lon, self.upper_right_lat,
                                        self.upper_right_lon)
 
@@ -53,12 +53,6 @@ def import_species_blocks(filename: str) -> dict:
         if line.strip() != "":
             species, startlat, startlon, endlat, endlon = line.strip().split("\t")
             blocks.setdefault(species, []).append(Rectangle(eval(startlat), eval(startlon), eval(endlat), eval(endlon)))
-            # if species in blocks:
-            #     block_data = blocks[species]
-            # else:
-            #     block_data = []
-            #     blocks[species] = block_data
-            # block_data.append(Rectangle(eval(startlat), eval(startlon), eval(endlat), eval(endlon)))
     return blocks
 
 
@@ -151,6 +145,9 @@ def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseM
 def test_draw_blocks(species: str, blocks: list, base_map: TMB_Create_Maps.BaseMap) -> None:
     """
     only for cross-checking purposes
+
+    this function draws the defined rectangles on the map, and labels them by number, to aid in
+    evaluating that they cover the correct regions
     """
     fig, faxes = mplpy.subplots(figsize=[TMB_Create_Maps.FIG_WIDTH, TMB_Create_Maps.FIG_HEIGHT])
     for spine in faxes.spines:
