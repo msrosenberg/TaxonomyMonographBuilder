@@ -4,6 +4,7 @@ General Data Classes for the Taxonomy Manuscript Builder
 
 from typing import Optional
 from TMB_Common import Number
+from TMB_Error import report_error
 
 
 # ----classes----
@@ -24,7 +25,10 @@ class ReferenceClass:
                 y = y[1:]
             if len(y) > 4:
                 y = y[:4]
-            y = int(y)
+            try:
+                y = int(y)
+            except ValueError:
+                report_error("Error finding year in reference citation info: " + self.citation)
             return y
         else:
             return None
