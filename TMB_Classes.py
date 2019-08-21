@@ -14,6 +14,7 @@ class ReferenceClass:
         self.citation = ""
         self.cite_key = ""
         self.language = ""
+        self.doi = None
 
     def year(self) -> Optional[int]:
         y = self.citation
