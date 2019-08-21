@@ -44,15 +44,15 @@ AUTHOR_NOPCOMMA = 2     # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = True
+DRAW_MAPS = False
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
 CHECK_LOCATIONS = False
 # this flag controls whether additional location data should be fetched from iNaturalist
-INCLUDE_INAT = True
+INCLUDE_INAT = False
 # these flags control creating print and web output, respectively
-OUTPUT_PRINT = True
+OUTPUT_PRINT = False
 OUTPUT_WEB = True
 
 # randSeed = random.randint(0, 10000)
@@ -1293,9 +1293,12 @@ def write_reference_page(outfile: TextIO, do_print: bool, ref: TMB_Classes.Refer
     if started_note:
         outfile.write("    </p>\n")
 
-    # write name table
     if ref.language != "":
         outfile.write("<p><strong>Language:</strong> " + format_language(ref.language) + "</p>\n")
+    if ref.doi is not None:
+        outfile.write("<p><strong>DOI:</strong> <a href=\"https://dx.doi.org/{0}\">{0}</a></p>\n".format(ref.doi))
+
+    # write name table
     outfile.write("    <h3 class=\"nobookmark\">Names Appearing in this Publication</h3>\n")
     if len(names) > 0:
         outfile.write("    <table class=\"citetable\">\n")
