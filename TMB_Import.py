@@ -7,6 +7,7 @@ import collections
 from typing import Tuple
 import urllib.request
 import csv
+import time
 from tqdm import tqdm
 import TMB_Classes
 from TMB_Error import report_error
@@ -352,6 +353,7 @@ def fetch_inat_data(species: list) -> dict:
     inat_data = {}
     print("...Importing iNaturalist Data...")
     for s in tqdm(species):
+        time.sleep(5)
         if s.inatid != ".":
             coords = []
             page = 0
