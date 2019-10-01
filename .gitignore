@@ -3,6 +3,8 @@ __pycache__/
 .idea/
 private/
 temp/
+venv/
+
 
 # Windows image file caches
 Thumbs.db
