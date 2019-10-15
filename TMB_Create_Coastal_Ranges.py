@@ -97,7 +97,8 @@ def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseM
     """
     only for testing purposes
     """
-    fig, faxes = mplpy.subplots(figsize=[TMB_Create_Maps.FIG_WIDTH, TMB_Create_Maps.FIG_HEIGHT])
+    # fig, faxes = mplpy.subplots(figsize=[TMB_Create_Maps.FIG_WIDTH, TMB_Create_Maps.FIG_HEIGHT])
+    fig, faxes = mplpy.subplots(figsize=[9, 4.5])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
     maxlat = -90
@@ -132,12 +133,15 @@ def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseM
                 lon += 360
             lons.append(lon)
             lats.append(p.lat)
-        faxes.plot(lons, lats, color="red", linewidth=0.5)
+        faxes.plot(lons, lats, color="red", linewidth=1)
 
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)
+    mplpy.xlabel("longitude")
+    mplpy.ylabel("latitude")
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
+    TMB_Create_Maps.adjust_longitude_tick_values(faxes)
     mplpy.savefig(__OUTPUT_PATH__ + "blocks_" + species + "_test_range.png", format="png", dpi=600)
     mplpy.close("all")
 

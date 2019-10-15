@@ -381,6 +381,9 @@ def fetch_fa_glyph(glyph: Optional[str]) -> str:
         elif glyph == "bad location":
             x += " fa-exclamation-triangle\" style=\"color: red\" title=\"Problematic Location: Outside range of " \
                  "all fiddler crabs or this particular species.\""
+        elif glyph == "questionable id":
+            x += " fa-question-circle\" style=\"color: goldenrod\" title=\"Questionable ID: Species identity " \
+                 "uncertain.\""
         else:
             report_error("missing glyph: " + glyph)
             return ""
@@ -968,6 +971,7 @@ def strip_location_subtext(x: str) -> str:
     """
     # remove <!> indicator from locations
     x = x.replace("<!>", "").strip()
+    x = x.replace("<?>", "").strip()
     # remove information in []'s from a location string
     if "[" in x:
         x = x[:x.find("[") - 1]
@@ -1061,6 +1065,8 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
             if tmpname != x:
                 tmpstr += x[len(tmpname):]
                 tmpstr = tmpstr.replace("<!>", fetch_fa_glyph("bad location"))
+                # tmpstr = tmpstr.replace("<?>", fetch_fa_glyph("questionable id"))
+                tmpstr = tmpstr.replace("<?>", "").strip()
         else:
             tmpstr = x
         return tmpstr
@@ -1110,6 +1116,7 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
             if comcnt > 0:
                 outfile.write("      <td>&nbsp;</td>\n")
             outfile.write("      <td>&nbsp;</td>\n")
+
         # applies to...
         if n.context == "location":
             outstr = create_location_sublink(n.application)
@@ -1181,8 +1188,12 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
             outfile.write("      <td>" + create_taxon_link(t_rank, t_name, do_print, path="../") + "</td>\n")
         else:
             s = find_species_by_name(n.actual)
+            if "<?>" in n.application:
+                glyphstr = " " + fetch_fa_glyph("questionable id")
+            else:
+                glyphstr = ""
             outfile.write("      <td><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + n.actual +
-                          ".html\"><em class=\"species\">" + s.binomial() + "</em></a></td>\n")
+                          ".html\"><em class=\"species\">" + s.binomial() + "</em></a>" + glyphstr + "</td>\n")
 
         # source of accepted species
         if n.source == ".":  # currently not listed
@@ -2928,9 +2939,10 @@ def check_location_index(point_locations: dict, location_species: dict, location
 
 def match_names_to_locations(species: list, specific_point_locations: dict,  binomial_point_locations: dict,
                              point_locations: dict, citelist: list) -> Tuple[dict, dict, dict, dict, dict, dict,  dict,
-                                                                             dict, dict]:
+                                                                             dict, dict, dict]:
     species_plot_locations = {}
     invalid_species_locations = {}
+    questionable_id_locations = {}
     location_species = {x: set() for x in point_locations}
     location_bi_names = {x: set() for x in point_locations}
     location_sp_names = {x: set() for x in point_locations}
@@ -2941,6 +2953,8 @@ def match_names_to_locations(species: list, specific_point_locations: dict,  bin
         if s.status != "fossil":
             places = set()
             invalid_places = set()
+            questionable_ids = set()
+            good_ids = set()
             for c in citelist:
                 if (c.actual == s.species) and ((c.context == "location") or
                                                 (c.context == "specimen")):
@@ -2952,13 +2966,19 @@ def match_names_to_locations(species: list, specific_point_locations: dict,  bin
                             location_species[p] |= {s}
                             if "<!>" in c.application:
                                 invalid_places.add(p)
+                            elif "<?>" in c.application:
+                                questionable_ids.add(p)
+                            else:
+                                good_ids.add(p)
                         elif p != "?":
                             missing_set |= {p}
             species_plot_locations[s] = sorted(list(places))
             invalid_species_locations[s] = invalid_places
+            questionable_id_locations[s] = questionable_ids - good_ids
         else:
             species_plot_locations[s] = None
             invalid_species_locations[s] = None
+            questionable_id_locations[s] = None
 
     # create set of all citations that refer to each location
     for c in citelist:
@@ -3007,7 +3027,8 @@ def match_names_to_locations(species: list, specific_point_locations: dict,  bin
             report_error("Missing point location: " + m)
 
     return (species_plot_locations, invalid_species_locations, binomial_plot_locations, specific_plot_locations,
-            location_species, location_sp_names, location_bi_names, location_direct_refs, location_cited_refs)
+            location_species, location_sp_names, location_bi_names, location_direct_refs, location_cited_refs,
+            questionable_id_locations)
 
 
 def write_common_names_pages(outfile: TextIO, do_print: bool, common_name_data: list) -> None:
@@ -5297,10 +5318,10 @@ def build_site() -> None:
         # location_sp_names is a dict of sets of specific name objects, key = location full names
         # location_bi_names is a dict of sets of names (strings), keys = location full names
         (species_plot_locations, invalid_species_locations, binomial_plot_locations,
-         specific_plot_locations, location_species, location_sp_names, location_bi_names,
-         location_direct_refs, location_cited_refs) = match_names_to_locations(species, specific_point_locations,
-                                                                               binomial_point_locations,
-                                                                               point_locations, citelist)
+         specific_plot_locations, location_species, location_sp_names, location_bi_names, location_direct_refs,
+         location_cited_refs, questionable_id_locations) = match_names_to_locations(species, specific_point_locations,
+                                                                                    binomial_point_locations,
+                                                                                    point_locations, citelist)
         genera_tree, species_tree = create_html_phylogenies()
 
         if INCLUDE_INAT and (not CHECK_DATA):
@@ -5320,9 +5341,6 @@ def build_site() -> None:
             if DRAW_MAPS:
                 print("...Creating Maps...")
                 TMB_Create_Maps.create_all_maps(init_data(), point_locations)  # only draw location maps
-                # TMB_Create_Maps.create_all_maps(init_data(), point_locations, species, species_plot_locations,
-                #                                 invalid_species_locations, all_names, binomial_plot_locations,
-                #                                 specific_names, specific_plot_locations, species_inat)
             print("......Writing Locations......")
             with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
                 write_location_index(outfile, False, point_locations, location_dict, location_species,
@@ -5335,7 +5353,8 @@ def build_site() -> None:
                 print("......Map Start Time:", map_start_time)
                 TMB_Create_Maps.create_all_maps(init_data(), point_locations, species, species_plot_locations,
                                                 invalid_species_locations, all_names, binomial_plot_locations,
-                                                specific_names, specific_plot_locations, species_inat)
+                                                specific_names, specific_plot_locations, species_inat,
+                                                questionable_id_locations)
                 map_end_time = datetime.datetime.now()
                 print("......Map End Time:", map_end_time)
                 print("...Total Map Creation Time:", map_end_time - map_start_time)

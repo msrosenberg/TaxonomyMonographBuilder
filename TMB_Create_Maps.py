@@ -431,32 +431,8 @@ def write_species_range_map(base_map: BaseMap, species_map: list, graph_font: Op
     minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
     (minlon, maxlon, minlat, maxlat, wrap_lons) = draw_and_adjust_basemap(faxes, base_map, mid_atlantic, minlon,
                                                                           maxlon, minlat, maxlat, all_lons, all_lats)
-    # draw_base_map(faxes, base_map)
-    # wrap_lons = False
-    # if (not mid_atlantic) and (maxlon == 180) and (minlon == -180):
-    #     # shift map focus so default center is international date line rather than Greenwich
-    #     draw_base_map(faxes, base_map, 360)
-    #     # adjust longitude of points and recalculate boundaries
-    #     maxlat = -90
-    #     minlat = 90
-    #     maxlon = 0
-    #     minlon = 360
-    #     for i in range(len(all_lons)):
-    #         if all_lons[i] < 0:
-    #             all_lons[i] += 360
-    #         maxlon = max(maxlon, all_lons[i])
-    #         minlon = min(minlon, all_lons[i])
-    #         maxlat = max(maxlat, all_lats[i])
-    #         minlat = min(minlat, all_lats[i])
-    #     minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
-    #     wrap_lons = True
-    # else:  # if necessary, wrap map across international date line
-    #     if maxlon > 180:
-    #         draw_base_map(faxes, base_map, 360)
-    #     if minlon < -180:
-    #         draw_base_map(faxes, base_map, -360)
-    # draw range lines
 
+    # draw range lines
     for loc in locs:
         if loc[1]:
             for x in loc[2]:
@@ -504,8 +480,8 @@ def write_all_range_map(base_map: BaseMap, species_maps: list) -> None:
 
 
 def write_point_map_kml(title: str, place_list: list, point_locations: dict, invalid_places: Optional[set],
-                        inat_locations: Optional[list], init_data: TMB_Initialize.InitializationData,
-                        sub_locations: Optional[list]) -> None:
+                        questionable_ids: Optional[set], inat_locations: Optional[list],
+                        init_data: TMB_Initialize.InitializationData, sub_locations: Optional[list]) -> None:
     with open(__TMP_PATH__ + "doc.kml", "w", encoding="utf-8") as outfile:
         outfile.write("<?xml version=\"1.0\"?>\n")
         outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
@@ -521,6 +497,13 @@ def write_point_map_kml(title: str, place_list: list, point_locations: dict, inv
         outfile.write("      <IconStyle>\n")
         outfile.write("        <Icon>\n")
         outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/blu-circle.png</href>\n")
+        outfile.write("        </Icon >\n")
+        outfile.write("      </IconStyle>\n")
+        outfile.write("    </Style>\n")
+        outfile.write("    <Style id=\"questionable_id\">\n")
+        outfile.write("      <IconStyle>\n")
+        outfile.write("        <Icon>\n")
+        outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/ylw-circle.png</href>\n")
         outfile.write("        </Icon >\n")
         outfile.write("      </IconStyle>\n")
         outfile.write("    </Style>\n")
@@ -575,6 +558,10 @@ def write_point_map_kml(title: str, place_list: list, point_locations: dict, inv
                     is_invalid = True
                 elif pnt.validity == "FOSSIL":
                     is_fossil = True
+                is_question = False
+                if questionable_ids is not None:
+                    if place in questionable_ids:
+                        is_question = True
                 is_sub = False
                 if sub_locations is not None:
                     if pnt in sub_locations:
@@ -586,6 +573,8 @@ def write_point_map_kml(title: str, place_list: list, point_locations: dict, inv
                 outfile.write("      <styleUrl>\n")
                 if is_invalid:
                     outfile.write("        #bad_location\n")
+                elif is_question:
+                    outfile.write("        #questionable_id\n")
                 elif is_fossil:
                     outfile.write("        #fossil_location\n")
                 elif is_sub:
@@ -631,8 +620,8 @@ def adjust_longitude_tick_values(faxes: mplpy.Axes) -> None:
 
 
 def write_point_map(title: str, place_list: list, point_locations: dict, invalid_places: Optional[set],
-                    inat_locations: Optional[list], base_map: BaseMap, skip_axes: bool, sub_locations: Optional[list],
-                    graph_font: Optional[str] = None) -> None:
+                    questionable_ids: Optional[set], inat_locations: Optional[list], base_map: BaseMap,
+                    skip_axes: bool, sub_locations: Optional[list], graph_font: Optional[str] = None) -> None:
     fig, faxes = mplpy.subplots(figsize=[FIG_WIDTH, FIG_HEIGHT])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
@@ -673,6 +662,10 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
                     is_invalid = True
                 elif point.validity == "FOSSIL":
                     is_fossil = True
+                is_question = False
+                if questionable_ids is not None:
+                    if place in questionable_ids:
+                        is_question = True
                 is_sub = False
                 if sub_locations is not None:
                     if point in sub_locations:
@@ -682,6 +675,9 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
                 if is_invalid:
                     colors.append("blue")
                     edges.append("darkblue")
+                elif is_question:
+                    colors.append("yellow")
+                    edges.append("goldenrod")
                 elif is_fossil:
                     colors.append("mediumpurple")
                     edges.append("indigo")
@@ -735,7 +731,8 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
 def create_all_species_point_maps(species: list, point_locations: dict, species_plot_locations: dict,
                                   invalid_species_locations: dict, base_map: BaseMap,
                                   init_data: TMB_Initialize.InitializationData,
-                                  inat_species_locations: Optional[dict] = None) -> None:
+                                  inat_species_locations: Optional[dict] = None,
+                                  questionable_id_locations: Optional[dict] = None) -> None:
     all_places = set()
     print(".........Species Point Maps.........")
     pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
@@ -744,27 +741,31 @@ def create_all_species_point_maps(species: list, point_locations: dict, species_
         if s.status != "fossil":
             places = species_plot_locations[s]
             invalid_places = invalid_species_locations[s]
+            questionable_ids = questionable_id_locations[s]
             if inat_species_locations is None:
                 inat_data = None
             elif s.species in inat_species_locations:
                 inat_data = inat_species_locations[s.species]
             else:
                 inat_data = None
-            png_inputs.append(("u_" + s.species, places, point_locations, invalid_places, inat_data, base_map, False,
-                               None, init_data.graph_font))
-            write_point_map_kml("u_" + s.species, places, point_locations, invalid_places, inat_data, init_data, None)
+            png_inputs.append(("u_" + s.species, places, point_locations, invalid_places, questionable_ids, inat_data,
+                               base_map, False, None, init_data.graph_font))
+            write_point_map_kml("u_" + s.species, places, point_locations, invalid_places, questionable_ids, inat_data,
+                                init_data, None)
             all_places |= set(places)
     pool.starmap(write_point_map, png_inputs)
     all_list = sorted(list(all_places))
     pool.close()
     pool.join()
-    write_point_map("fiddlers_all", all_list, point_locations, None, None, base_map, True, None, init_data.graph_font)
-    write_point_map_kml("fiddlers_all", all_list, point_locations, None, None, init_data, None)
+    write_point_map("fiddlers_all", all_list, point_locations, None, None, None, base_map, True, None,
+                    init_data.graph_font)
+    write_point_map_kml("fiddlers_all", all_list, point_locations, None, None, None, init_data, None)
 
 
 def create_all_species_maps(base_map: BaseMap, init_data: TMB_Initialize.InitializationData, species: list,
                             point_locations: dict, species_plot_locations: dict, invalid_species_locations: dict,
-                            inat_species_locations: Optional[dict] = None) -> None:
+                            inat_species_locations: Optional[dict] = None,
+                            questionable_id_locations: Optional[dict] = None) -> None:
     # create range maps
     species_maps = read_raw_kml(init_data.map_kml_file)
 
@@ -782,7 +783,7 @@ def create_all_species_maps(base_map: BaseMap, init_data: TMB_Initialize.Initial
 
     # create point maps
     create_all_species_point_maps(species, point_locations, species_plot_locations, invalid_species_locations, base_map,
-                                  init_data, inat_species_locations)
+                                  init_data, inat_species_locations, questionable_id_locations)
 
 
 def create_all_name_maps(base_map: BaseMap, all_names: list, specific_names: list, point_locations: dict,
@@ -794,15 +795,15 @@ def create_all_name_maps(base_map: BaseMap, all_names: list, specific_names: lis
     for i, name in enumerate(all_names):
         namefile = "name_" + name_to_filename(name)
         place_list = binomial_plot_locations[name]
-        bi_inputs_png.append((namefile, place_list, point_locations, None, None, base_map, False, None,
+        bi_inputs_png.append((namefile, place_list, point_locations, None, None, None, base_map, False, None,
                               init_data.graph_font))
-        write_point_map_kml(namefile, place_list, point_locations, None, None, init_data, None)
+        write_point_map_kml(namefile, place_list, point_locations, None, None, None, init_data, None)
     for i, name in enumerate(specific_names):
         namefile = "sn_" + name.name
         place_list = specific_plot_locations[name]
-        sp_inputs_png.append((namefile, place_list, point_locations, None, None, base_map, False, None,
+        sp_inputs_png.append((namefile, place_list, point_locations, None, None, None, base_map, False, None,
                               init_data.graph_font))
-        write_point_map_kml(namefile, place_list, point_locations, None, None, init_data, None)
+        write_point_map_kml(namefile, place_list, point_locations, None, None, None, init_data, None)
     pool.starmap(write_point_map, bi_inputs_png)
     pool.starmap(write_point_map, sp_inputs_png)
     pool.close()
@@ -827,9 +828,9 @@ def create_all_location_maps(base_map: BaseMap, point_locations: dict,
                 place_list.append(p.name)
             place_list.append(loc)  # put the primary location at end so it is drawn above children
             namefile = "location_" + place_to_filename(loc)
-            png_inputs.append((namefile, place_list, point_locations, None, None, base_map, False, sub_list,
+            png_inputs.append((namefile, place_list, point_locations, None, None, None, base_map, False, sub_list,
                                init_data.graph_font))
-            write_point_map_kml(namefile, place_list, point_locations, None, None, init_data, sub_list)
+            write_point_map_kml(namefile, place_list, point_locations, None, None, None, init_data, sub_list)
     pool.starmap(write_point_map, png_inputs)
     pool.close()
     pool.join()
@@ -839,12 +840,12 @@ def create_all_maps(init_data: TMB_Initialize.InitializationData, point_location
                     species_plot_locations: Optional[dict] = None, invalid_species_locations: Optional[dict] = None,
                     all_names: Optional[list] = None, binomial_plot_locations: Optional[dict] = None,
                     specific_names: Optional[list] = None, specific_plot_locations: Optional[dict] = None,
-                    inat_locations: Optional[dict] = None) -> None:
+                    inat_locations: Optional[dict] = None, questionable_id_locations: Optional[dict] = None) -> None:
     base_map = read_base_map(init_data.map_primary, init_data.map_secondary, init_data.map_islands)
     if species is not None:
         print("......Creating Species Maps......")
         create_all_species_maps(base_map, init_data, species, point_locations, species_plot_locations,
-                                invalid_species_locations, inat_locations)
+                                invalid_species_locations, inat_locations, questionable_id_locations)
     if specific_names is not None:
         print("......Creating Name Maps......")
         create_all_name_maps(base_map, all_names, specific_names, point_locations, specific_plot_locations,
