@@ -5309,6 +5309,9 @@ def build_site() -> None:
         art = TMB_Import.read_art_data(init_data().art_file)
         morphology = TMB_Import.read_morphology_data(init_data().morphology_file)
 
+        print("...Reading Ranges...")
+        species_range_blocks = TMB_Import.read_species_blocks(init_data().species_range_blocks)
+
         print("...Reading Locations...")
         # a dict of locations, keys = full location names
         point_locations = TMB_Import.read_location_data(init_data().location_file)
@@ -5354,7 +5357,7 @@ def build_site() -> None:
                 TMB_Create_Maps.create_all_maps(init_data(), point_locations, species, species_plot_locations,
                                                 invalid_species_locations, all_names, binomial_plot_locations,
                                                 specific_names, specific_plot_locations, species_inat,
-                                                questionable_id_locations)
+                                                questionable_id_locations, species_range_blocks)
                 map_end_time = datetime.datetime.now()
                 print("......Map End Time:", map_end_time)
                 print("...Total Map Creation Time:", map_end_time - map_start_time)

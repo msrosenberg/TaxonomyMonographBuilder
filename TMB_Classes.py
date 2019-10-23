@@ -253,3 +253,34 @@ class Point:
     def __init__(self, lat: Number = 0, lon: Number = 0):
         self.lat = lat
         self.lon = lon
+
+
+class RangeBlock:
+    def __init__(self, startlat=0, startlon=0, endlat=0, endlon=0):
+        self.lower_left_lat = startlat
+        self.lower_left_lon = startlon
+        self.upper_right_lat = endlat
+        self.upper_right_lon = endlon
+        if endlon < startlon:
+            self.wrap = True
+        else:
+            self.wrap = False
+
+    def __repr__(self):
+        return "{}, {}, {}, {}".format(self.lower_left_lat, self.lower_left_lon, self.upper_right_lat,
+                                       self.upper_right_lon)
+
+    def inside(self, lat: Number, lon: Number) -> bool:
+        if (self.lower_left_lat <= lat <= self.upper_right_lat) and \
+                (self.lower_left_lon <= lon <= self.upper_right_lon):
+            return True
+        elif self.wrap:
+            if lon < 0:
+                lon += 360
+            if (self.lower_left_lat <= lat <= self.upper_right_lat) and \
+                    (self.lower_left_lon <= lon <= self.upper_right_lon + 360):
+                return True
+            else:
+                return False
+        else:
+            return False

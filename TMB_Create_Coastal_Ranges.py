@@ -1,96 +1,21 @@
 """
 Create Species Range Maps from the intersection of rectangular bounds and coastlines
+
+This module is for creating and testing species range maps outside of the normal program pipeline.
+In addition to calculating and drawing the range maps, it will also draw the maps of the blocks from
+which the ranges are derived.
+
 """
 
 import TMB_Create_Maps
 import TMB_Initialize
 import TMB_ImportShape
-from TMB_Classes import Point
-from TMB_Common import Number
+import TMB_Import
 import matplotlib.pyplot as mplpy
 
 
 __TMP_PATH__ = "temp/"
 __OUTPUT_PATH__ = __TMP_PATH__ + "maps/"
-
-
-class Rectangle:
-    def __init__(self, startlat=0, startlon=0, endlat=0, endlon=0):
-        self.lower_left_lat = startlat
-        self.lower_left_lon = startlon
-        self.upper_right_lat = endlat
-        self.upper_right_lon = endlon
-        if endlon < startlon:
-            self.wrap = True
-        else:
-            self.wrap = False
-
-    def __repr__(self):
-        return "{}, {}, {}, {}".format(self.lower_left_lat, self.lower_left_lon, self.upper_right_lat,
-                                       self.upper_right_lon)
-
-    def inside(self, lat: Number, lon: Number) -> bool:
-        if (self.lower_left_lat <= lat <= self.upper_right_lat) and \
-                (self.lower_left_lon <= lon <= self.upper_right_lon):
-            return True
-        elif self.wrap:
-            if lon < 0:
-                lon += 360
-            if (self.lower_left_lat <= lat <= self.upper_right_lat) and \
-                    (self.lower_left_lon <= lon <= self.upper_right_lon + 360):
-                return True
-            else:
-                return False
-        else:
-            return False
-
-
-def import_species_blocks(filename: str) -> dict:
-    blocks = {}
-    with open(filename, "r") as infile:
-        lines = infile.readlines()
-    for line in lines[1:]:
-        if line.strip() != "":
-            species, startlat, startlon, endlat, endlon = line.strip().split("\t")
-            blocks.setdefault(species, []).append(Rectangle(eval(startlat), eval(startlon), eval(endlat), eval(endlon)))
-    return blocks
-
-
-def in_blocks(p: Point, blocks: list) -> bool:
-    """
-    test whether the point is in any of the blocks
-    """
-    result = False
-    for b in blocks:
-        if not result:
-            result = b.inside(p.lat, p.lon)
-    return result
-
-
-def get_overlap(blocks: list, coastline: list) -> list:
-    species_range = []
-    for part in coastline:
-        p1 = part[0]
-        p1in = in_blocks(p1, blocks)
-        startline = True
-        newline = []
-        for p2 in part[1:]:
-            p2in = in_blocks(p2, blocks)
-            if p1in and p2in:
-                if startline:
-                    newline = [p1, p2]
-                    startline = False
-                else:
-                    newline.append(p2)
-            else:
-                startline = True
-                if len(newline) > 0:
-                    species_range.append(newline)
-                newline = []
-            p1, p1in = p2, p2in
-        if len(newline) > 0:
-            species_range.append(newline)
-    return species_range
 
 
 def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseMap) -> None:
@@ -201,20 +126,22 @@ def test_draw_blocks(species: str, blocks: list, base_map: TMB_Create_Maps.BaseM
     mplpy.close("all")
 
 
-def calculate_ranges(init_data: TMB_Initialize.InitializationData) -> None:
+def calculate_ranges(init_data: TMB_Initialize.InitializationData, verbose: bool = False) -> None:
     base_map = TMB_Create_Maps.read_base_map(init_data.map_primary, None, init_data.map_islands)
     coastline_map = TMB_ImportShape.import_arcinfo_shp(TMB_Initialize.INIT_DATA.map_coastline)
     coastline_map.extend(TMB_ImportShape.import_arcinfo_shp(TMB_Initialize.INIT_DATA.map_islands))
-    print("Number of coastline elements:", len(coastline_map))
+    if verbose:
+        print("Number of coastline elements:", len(coastline_map))
 
-    species_blocks = import_species_blocks(init_data.species_range_blocks)
+    species_blocks = TMB_Import.read_species_blocks(init_data.species_range_blocks)
     for species in species_blocks:
         test_draw_blocks(species, species_blocks[species], base_map)
 
     ranges = {}
     for species in species_blocks:
-        print("Determining {} range".format(species))
-        ranges[species] = get_overlap(species_blocks[species], coastline_map)
+        if verbose:
+            print("Determining {} range".format(species))
+        ranges[species] = TMB_Create_Maps.get_range_map_overlap(species_blocks[species], coastline_map)
     for species in ranges:
         test_draw_ranges(species, ranges[species], base_map)
 
@@ -222,4 +149,4 @@ def calculate_ranges(init_data: TMB_Initialize.InitializationData) -> None:
 if __name__ == "__main__":
     TMB_Initialize.initialize()
     t_init_data = TMB_Initialize.INIT_DATA
-    calculate_ranges(t_init_data)
+    calculate_ranges(t_init_data, True)

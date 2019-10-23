@@ -11,14 +11,15 @@ completion of the code.
 
 import zipfile
 import multiprocessing
-from typing import Tuple, Optional, TextIO
+from typing import Tuple, Optional
 import matplotlib.pyplot as mplpy
 from matplotlib.collections import PatchCollection
 import matplotlib.patches as mplp
+from tqdm import tqdm
 import TMB_Initialize
 from TMB_Error import report_error
 from TMB_Common import *
-# from TMB_Classes import Point
+from TMB_Classes import Point
 import TMB_ImportShape
 
 
@@ -27,14 +28,6 @@ __OUTPUT_PATH__ = __TMP_PATH__ + "maps/"
 FIG_WIDTH = 6.5
 FIG_HEIGHT = 3.25
 MAX_PROCESSOR_COUNT = 2  # maximum number of processors which can be used for map creation
-
-
-# class Polygon:
-#     def __init__(self):
-#         self.points = []
-#
-#     def n(self) -> int:
-#         return len(self.points)
 
 
 class BaseMap:
@@ -49,72 +42,106 @@ class BaseMap:
             return False
 
 
-def read_kml_placemark(infile: TextIO) -> list:
-    namestr = infile.readline().strip()  # read name
-    line = infile.readline().strip()
-    while (not line.startswith("<LineString>") and not line.startswith("<Polygon>") and
-           not line.startswith("<MultiGeometry>")):
-        line = infile.readline().strip()
-    typestr = line
-    if typestr.startswith("<MultiGeometry>"):
-        coords = []
-        while not line.startswith("</Placemark>"):
-            line = infile.readline().strip()
-            if line.startswith("<coordinates>"):
-                line = infile.readline().strip()
-                coords.append(line)
-        return [namestr, True, coords]
-    else:
-        line = infile.readline().strip()
-        while not line.startswith("<coordinates>"):
-            line = infile.readline().strip()
-        coords = infile.readline().strip()
-        line = infile.readline().strip()
-        while not line.startswith("</Placemark>"):
-            line = infile.readline().strip()
-        return [namestr, False, coords]
+def point_in_blocks(p: Point, blocks: list) -> bool:
+    """
+    test whether the point is in any of the blocks
+    """
+    result = False
+    for b in blocks:
+        if not result:
+            result = b.inside(p.lat, p.lon)
+    return result
 
 
-def read_species_from_kml(infile: TextIO, namestr: str) -> list:
-    line = infile.readline().strip()
-    crabplaces = []
-    while not line.startswith("</Folder>"):
-        if line.startswith("<Placemark>"):
-            newplace = read_kml_placemark(infile)
-            crabplaces.append(newplace)
-        line = infile.readline().strip()
-    return [namestr, crabplaces]
+def get_range_map_overlap(blocks: list, coastline: list) -> list:
+    species_range = []
+    for part in coastline:
+        p1 = part[0]
+        p1in = point_in_blocks(p1, blocks)
+        startline = True
+        newline = []
+        for p2 in part[1:]:
+            p2in = point_in_blocks(p2, blocks)
+            if p1in and p2in:
+                if startline:
+                    newline = [p1, p2]
+                    startline = False
+                else:
+                    newline.append(p2)
+            else:
+                startline = True
+                if len(newline) > 0:
+                    species_range.append(newline)
+                newline = []
+            p1, p1in = p2, p2in
+        if len(newline) > 0:
+            species_range.append(newline)
+    return species_range
 
 
-def read_kml_folder(infile: TextIO) -> list:
-    line = infile.readline().strip()
-    crab = None
-    while not line.startswith("</Folder>"):
-        if line.startswith("<name>Uca"):
-            crab = read_species_from_kml(infile, line)
-            line = "</Folder>"
-        else:
-            line = infile.readline().strip()
-    return crab
+# def read_kml_placemark(infile: TextIO) -> list:
+#     namestr = infile.readline().strip()  # read name
+#     line = infile.readline().strip()
+#     while (not line.startswith("<LineString>") and not line.startswith("<Polygon>") and
+#            not line.startswith("<MultiGeometry>")):
+#         line = infile.readline().strip()
+#     typestr = line
+#     if typestr.startswith("<MultiGeometry>"):
+#         coords = []
+#         while not line.startswith("</Placemark>"):
+#             line = infile.readline().strip()
+#             if line.startswith("<coordinates>"):
+#                 line = infile.readline().strip()
+#                 coords.append(line)
+#         return [namestr, True, coords]
+#     else:
+#         line = infile.readline().strip()
+#         while not line.startswith("<coordinates>"):
+#             line = infile.readline().strip()
+#         coords = infile.readline().strip()
+#         line = infile.readline().strip()
+#         while not line.startswith("</Placemark>"):
+#             line = infile.readline().strip()
+#         return [namestr, False, coords]
 
 
-def read_raw_kml(filename: str) -> list:
-    maplist = []
-    with open(filename, "r", encoding="utf-8") as infile:
-        line = infile.readline()
-        while line != "":
-            line = line.strip()
-            if line.startswith("<Folder>"):
-                new_map = read_kml_folder(infile)
-                maplist.append(new_map)
-            line = infile.readline()
-    return maplist
+# def read_species_from_kml(infile: TextIO, namestr: str) -> list:
+#     line = infile.readline().strip()
+#     crabplaces = []
+#     while not line.startswith("</Folder>"):
+#         if line.startswith("<Placemark>"):
+#             newplace = read_kml_placemark(infile)
+#             crabplaces.append(newplace)
+#         line = infile.readline().strip()
+#     return [namestr, crabplaces]
 
 
-def write_species_range_map_kml(species_map: list) -> None:
-    name = species_map[0]
-    locs = species_map[1]
-    name = name[name.find("Uca")+4:name.find("</")]
+# def read_kml_folder(infile: TextIO) -> list:
+#     line = infile.readline().strip()
+#     crab = None
+#     while not line.startswith("</Folder>"):
+#         if line.startswith("<name>Uca"):
+#             crab = read_species_from_kml(infile, line)
+#             line = "</Folder>"
+#         else:
+#             line = infile.readline().strip()
+#     return crab
+
+
+# def read_raw_kml(filename: str) -> list:
+#     maplist = []
+#     with open(filename, "r", encoding="utf-8") as infile:
+#         line = infile.readline()
+#         while line != "":
+#             line = line.strip()
+#             if line.startswith("<Folder>"):
+#                 new_map = read_kml_folder(infile)
+#                 maplist.append(new_map)
+#             line = infile.readline()
+#     return maplist
+
+
+def write_species_range_map_kml(name, species_range: list) -> None:
     with open(__TMP_PATH__ + "doc.kml", "w", encoding="UTF-8") as outfile:
         outfile.write("<?xml version=\"1.0\"?>\n")
         outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
@@ -132,20 +159,13 @@ def write_species_range_map_kml(species_map: list) -> None:
         outfile.write("        #species_range\n")
         outfile.write("      </styleUrl>\n")
         outfile.write("      <MultiGeometry>\n")
-        for loc in locs:
-            if loc[1]:
-                for x in loc[2]:
-                    outfile.write("        <LineString>\n")
-                    outfile.write("          <coordinates>\n")
-                    outfile.write("            " + x + "\n")
-                    outfile.write("          </coordinates>\n")
-                    outfile.write("        </LineString>\n")
-            else:
-                outfile.write("        <LineString>\n")
-                outfile.write("          <coordinates>\n")
-                outfile.write("            " + loc[2] + "\n")
-                outfile.write("          </coordinates>\n")
-                outfile.write("        </LineString>\n")
+        for line in species_range:
+            outfile.write("        <LineString>\n")
+            outfile.write("          <coordinates>\n")
+            for p in line:
+                outfile.write("            {},{},0\n".format(p.lon, p.lat))
+            outfile.write("          </coordinates>\n")
+            outfile.write("        </LineString>\n")
         outfile.write("      </MultiGeometry>\n")
         outfile.write("    </Placemark>\n")
         outfile.write("  </Document>\n")
@@ -155,45 +175,34 @@ def write_species_range_map_kml(species_map: list) -> None:
         myzip.close()
 
 
-def write_all_range_map_kml(species_maps: list) -> None:
+def write_all_range_map_kml(species_maps: dict) -> None:
     with open(__TMP_PATH__ + "doc.kml", "w", encoding="UTF-8") as outfile:
         outfile.write("<?xml version=\"1.0\"?>\n")
         outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
         outfile.write("  <Document>\n")
         for species in species_maps:
-            name = species[0]
-            name = name[name.find("Uca")+4:name.find("</")]
-            outfile.write("    <Style id=\"" + name + "\">\n")
+            outfile.write("    <Style id=\"" + species + "\">\n")
             outfile.write("      <LineStyle>\n")
             outfile.write("        <color>28FF78F0</color>\n")
             outfile.write("        <width>5</width>\n")
             outfile.write("      </LineStyle>\n")
             outfile.write("    </Style>\n")
         for species in species_maps:
-            name = species[0]
-            locs = species[1]
-            name = name[name.find("Uca")+4:name.find("</")]
+            species_range = species_maps[species]
             outfile.write("    <Placemark>\n")
-            outfile.write("      <name>Uca " + name + "</name>\n")
+            outfile.write("      <name>Uca " + species + "</name>\n")
             outfile.write("      <description/>\n")
             outfile.write("      <styleUrl>\n")
-            outfile.write("        #" + name + "\n")
+            outfile.write("        #" + species + "\n")
             outfile.write("      </styleUrl>\n")
             outfile.write("      <MultiGeometry>\n")
-            for loc in locs:
-                if loc[1]:
-                    for x in loc[2]:
-                        outfile.write("        <LineString>\n")
-                        outfile.write("          <coordinates>\n")
-                        outfile.write("            " + x + "\n")
-                        outfile.write("          </coordinates>\n")
-                        outfile.write("        </LineString>\n")
-                else:
-                    outfile.write("        <LineString>\n")
-                    outfile.write("          <coordinates>\n")
-                    outfile.write("            " + loc[2] + "\n")
-                    outfile.write("          </coordinates>\n")
-                    outfile.write("        </LineString>\n")
+            for line in species_range:
+                outfile.write("        <LineString>\n")
+                outfile.write("          <coordinates>\n")
+                for p in line:
+                    outfile.write("            {},{},0\n".format(p.lon, p.lat))
+                outfile.write("          </coordinates>\n")
+                outfile.write("        </LineString>\n")
             outfile.write("      </MultiGeometry>\n")
             outfile.write("    </Placemark>\n")
         outfile.write("  </Document>\n")
@@ -201,26 +210,6 @@ def write_all_range_map_kml(species_maps: list) -> None:
     with zipfile.ZipFile(__OUTPUT_PATH__ + rangemap_name("fiddlers_all") + ".kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
         myzip.write(__TMP_PATH__ + "doc.kml")
         myzip.close()
-
-
-# def read_polygons_from_file(filename: str, outlist: list) -> None:
-#     with open(filename, "r") as infile:
-#         line = infile.readline()
-#         while line != "":
-#             if line.startswith("Polygon"):
-#                 data = line.strip().split("\t")
-#                 new_polygon = Polygon()
-#                 outlist.append(new_polygon)
-#                 n = abs(int(data[1]))
-#                 new_point = Point(lat=float(data[3]), lon=float(data[2]))
-#                 new_polygon.points.append(new_point)
-#                 for i in range(n - 1):
-#                     line = infile.readline()
-#                     data = line.strip().split("\t")
-#                     new_point = Point(lat=float(data[1]), lon=float(data[0]))
-#                     new_polygon.points.append(new_point)
-#             else:
-#                 line = infile.readline()
 
 
 def read_base_map(primary_file: str, secondary_file: Optional[str] = None,
@@ -231,11 +220,6 @@ def read_base_map(primary_file: str, secondary_file: Optional[str] = None,
         basemap.primary_parts.extend(TMB_ImportShape.import_arcinfo_shp(island_file))
     if secondary_file is not None:
         basemap.secondary_parts = TMB_ImportShape.import_arcinfo_shp(secondary_file)
-    # read_polygons_from_file(primary_file, basemap.primary_parts)
-    # if island_file is not None:
-    #     read_polygons_from_file(island_file, basemap.primary_parts)
-    # if secondary_file is not None:
-    #     read_polygons_from_file(secondary_file, basemap.secondary_parts)
     return basemap
 
 
@@ -267,35 +251,6 @@ def draw_base_map(faxes: mplpy.Axes, base_map: BaseMap, adj_lon: int = 0) -> Non
     else:
         pc = PatchCollection(parts_list, alpha=1, facecolor="gainsboro", edgecolor="darkgrey", zorder=1, linewidths=0.5)
     faxes.add_collection(pc)
-    """
-    if base_map.has_secondary():
-        # if data present, draw internal 1st level boundaries within countries (states, provinces, etc.)
-        poly_list = []
-        for polygon in base_map.secondary_parts:
-            plist = []
-            for p in polygon.points:
-                plist.append([p.lon + adj_lon, p.lat])
-            newp = mplp.Polygon(plist, True)
-            poly_list.append(newp)
-        pc = PatchCollection(poly_list, alpha=1, facecolor="gainsboro", edgecolor="silver", zorder=1, linewidths=0.3)
-        faxes.add_collection(pc)
-
-    poly_list = []
-    for polygon in base_map.primary_parts:
-        plist = []
-        for p in polygon.points:
-            plist.append([p.lon + adj_lon, p.lat])
-        newp = mplp.Polygon(plist, True)
-        poly_list.append(newp)
-    if base_map.has_secondary():
-        pc = PatchCollection(poly_list, alpha=1, facecolor="none", edgecolor="darkgrey", zorder=1, linewidths=0.5)
-    else:
-        pc = PatchCollection(poly_list, alpha=1, facecolor="gainsboro", edgecolor="darkgrey", zorder=1, linewidths=0.5)
-    # pc = PatchCollection(poly_list, alpha=0.2, facecolor="silver", edgecolor="darkgray", zorder=1)
-    # pc = PatchCollection(poly_list, alpha=0.2, facecolor="silver", edgecolor="darkgray", zorder=1, linewidths=0.5)
-    # pc = PatchCollection(poly_list, alpha=0.2, facecolor="white", edgecolor="darkgray", zorder=1)
-    faxes.add_collection(pc)
-    """
 
 
 def adjust_map_boundaries(minlon: Number, maxlon: Number, minlat: Number, maxlat: Number) -> Tuple[Number, Number,
@@ -339,38 +294,34 @@ def adjust_map_boundaries(minlon: Number, maxlon: Number, minlat: Number, maxlat
         return minlon, maxlon, minlat, maxlat
 
 
-def add_line_to_map(faxes: mplpy.Axes, points: str, wrap_lons: bool = False, lw: int = 1, a: Number = 1) -> None:
+def add_line_to_map(faxes: mplpy.Axes, points: list, wrap_lons: bool = False, lw: int = 1, a: Number = 1) -> None:
     lons = []
     lats = []
-    points = points.split(" ")
     for p in points:
-        coords = p.split(",")
-        lon = float(coords[0])
-        lat = float(coords[1])
-        if wrap_lons and lon < 0:
-            lon += 360
-        lons.append(lon)
-        lats.append(lat)
+        if wrap_lons and p.lon < 0:
+            p.lon += 360
+        lons.append(p.lon)
+        lats.append(p.lat)
     faxes.plot(lons, lats, color="red", linewidth=lw, alpha=a)
 
 
-def check_line_boundaries(points: str, minlon: Number, maxlon: Number, minlat: Number, maxlat: Number,
-                          mid_atlantic: bool, lons, lats: list) -> Tuple[Number, Number, Number, Number, bool,
-                                                                         list, list]:
-    points = points.split(" ")
-    for p in points:
-        coords = p.split(",")
-        lon = float(coords[0])
-        lat = float(coords[1])
-        maxlon = max(maxlon, lon)
-        minlon = min(minlon, lon)
-        maxlat = max(maxlat, lat)
-        minlat = min(minlat, lat)
-        if 0 > lon > -50:
-            mid_atlantic = True
-        lons.append(lon)
-        lats.append(lat)
-    return minlon, maxlon, minlat, maxlat, mid_atlantic, lons, lats
+# def check_line_boundaries(points: str, minlon: Number, maxlon: Number, minlat: Number, maxlat: Number,
+#                           mid_atlantic: bool, lons, lats: list) -> Tuple[Number, Number, Number, Number, bool,
+#                                                                          list, list]:
+#     points = points.split(" ")
+#     for p in points:
+#         coords = p.split(",")
+#         lon = float(coords[0])
+#         lat = float(coords[1])
+#         maxlon = max(maxlon, lon)
+#         minlon = min(minlon, lon)
+#         maxlat = max(maxlat, lat)
+#         minlat = min(minlat, lat)
+#         if 0 > lon > -50:
+#             mid_atlantic = True
+#         lons.append(lon)
+#         lats.append(lat)
+#     return minlon, maxlon, minlat, maxlat, mid_atlantic, lons, lats
 
 
 def draw_and_adjust_basemap(faxes: mplpy.Axes, base_map: BaseMap, mid_atlantic: bool, minlon: float, maxlon: float,
@@ -403,7 +354,8 @@ def draw_and_adjust_basemap(faxes: mplpy.Axes, base_map: BaseMap, mid_atlantic: 
     return minlon, maxlon, minlat, maxlat, wrap_lons
 
 
-def write_species_range_map(base_map: BaseMap, species_map: list, graph_font: Optional[str] = None) -> None:
+# def write_species_range_map(base_map: BaseMap, species_map: list, graph_font: Optional[str] = None) -> None:
+def write_species_range_map(base_map: BaseMap, species, species_map: list, graph_font: Optional[str] = None) -> None:
     fig, faxes = mplpy.subplots(figsize=[FIG_WIDTH, FIG_HEIGHT])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
@@ -412,33 +364,26 @@ def write_species_range_map(base_map: BaseMap, species_map: list, graph_font: Op
     maxlon = -180
     minlon = 180
     mid_atlantic = False
-    name = species_map[0]
-    name = name[name.find("Uca")+4:name.find("</")]
-    locs = species_map[1]
     # find boundaries from range lines
     all_lons = []
     all_lats = []
-    for loc in locs:
-        if loc[1]:
-            for x in loc[2]:
-                (minlon, maxlon, minlat, maxlat,
-                 mid_atlantic, all_lons, all_lats) = check_line_boundaries(x, minlon, maxlon, minlat, maxlat,
-                                                                           mid_atlantic, all_lons, all_lats)
-        else:
-            (minlon, maxlon, minlat, maxlat,
-             mid_atlantic, all_lons, all_lats) = check_line_boundaries(loc[2], minlon, maxlon, minlat, maxlat,
-                                                                       mid_atlantic, all_lons, all_lats)
+    for line in species_map:
+        for p in line:
+            maxlon = max(maxlon, p.lon)
+            maxlat = max(maxlat, p.lat)
+            minlon = min(minlon, p.lon)
+            minlat = min(minlat, p.lat)
+            if 0 > p.lon > -50:
+                mid_atlantic = True
+            all_lons.append(p.lon)
+            all_lats.append(p.lat)
     minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
     (minlon, maxlon, minlat, maxlat, wrap_lons) = draw_and_adjust_basemap(faxes, base_map, mid_atlantic, minlon,
                                                                           maxlon, minlat, maxlat, all_lons, all_lats)
 
     # draw range lines
-    for loc in locs:
-        if loc[1]:
-            for x in loc[2]:
-                add_line_to_map(faxes, x, wrap_lons)
-        else:
-            add_line_to_map(faxes, loc[2], wrap_lons)
+    for line in species_map:
+        add_line_to_map(faxes, line, wrap_lons)
 
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)
@@ -451,23 +396,19 @@ def write_species_range_map(base_map: BaseMap, species_map: list, graph_font: Op
     mplpy.tight_layout()
     adjust_longitude_tick_values(faxes)
     # mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("u_" + name) + ".svg", format="svg")
-    mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("u_" + name) + ".png", format="png", dpi=600)
+    mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("u_" + species) + ".png", format="png", dpi=600)
     mplpy.close("all")
 
 
-def write_all_range_map(base_map: BaseMap, species_maps: list) -> None:
+def write_all_range_map(base_map: BaseMap, species_maps: dict) -> None:
     fig, faxes = mplpy.subplots(figsize=[FIG_WIDTH, FIG_HEIGHT])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
     draw_base_map(faxes, base_map)
     for species in species_maps:
-        locs = species[1]
-        for loc in locs:
-            if loc[1]:
-                for x in loc[2]:
-                    add_line_to_map(faxes, x, lw=2, a=0.1)
-            else:
-                add_line_to_map(faxes, loc[2], lw=2, a=0.1)
+        species_range = species_maps[species]
+        for line in species_range:
+            add_line_to_map(faxes, line, lw=2, a=0.1)
 
     mplpy.xlim(-180, 180)
     mplpy.ylim(-90, 90)
@@ -737,7 +678,7 @@ def create_all_species_point_maps(species: list, point_locations: dict, species_
     print(".........Species Point Maps.........")
     pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
     png_inputs = []
-    for i, s in enumerate(species):
+    for s in species:
         if s.status != "fossil":
             places = species_plot_locations[s]
             invalid_places = invalid_species_locations[s]
@@ -763,23 +704,21 @@ def create_all_species_point_maps(species: list, point_locations: dict, species_
 
 
 def create_all_species_maps(base_map: BaseMap, init_data: TMB_Initialize.InitializationData, species: list,
-                            point_locations: dict, species_plot_locations: dict, invalid_species_locations: dict,
-                            inat_species_locations: Optional[dict] = None,
+                            species_ranges: dict, point_locations: dict, species_plot_locations: dict,
+                            invalid_species_locations: dict, inat_species_locations: Optional[dict] = None,
                             questionable_id_locations: Optional[dict] = None) -> None:
     # create range maps
-    species_maps = read_raw_kml(init_data.map_kml_file)
-
     print(".........Species Range Maps.........")
     pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
     inputs = []
-    for i, m in enumerate(species_maps):
-        write_species_range_map_kml(m)
-        inputs.append((base_map, m, init_data.graph_font))
+    for s in species_ranges:
+        write_species_range_map_kml(s, species_ranges[s])
+        inputs.append((base_map, s, species_ranges[s], init_data.graph_font))
     pool.starmap(write_species_range_map, inputs)
     pool.close()
     pool.join()
-    write_all_range_map_kml(species_maps)
-    write_all_range_map(base_map, species_maps)
+    write_all_range_map_kml(species_ranges)
+    write_all_range_map(base_map, species_ranges)
 
     # create point maps
     create_all_species_point_maps(species, point_locations, species_plot_locations, invalid_species_locations, base_map,
@@ -840,11 +779,20 @@ def create_all_maps(init_data: TMB_Initialize.InitializationData, point_location
                     species_plot_locations: Optional[dict] = None, invalid_species_locations: Optional[dict] = None,
                     all_names: Optional[list] = None, binomial_plot_locations: Optional[dict] = None,
                     specific_names: Optional[list] = None, specific_plot_locations: Optional[dict] = None,
-                    inat_locations: Optional[dict] = None, questionable_id_locations: Optional[dict] = None) -> None:
+                    inat_locations: Optional[dict] = None, questionable_id_locations: Optional[dict] = None,
+                    species_blocks: Optional[dict] = None) -> None:
     base_map = read_base_map(init_data.map_primary, init_data.map_secondary, init_data.map_islands)
     if species is not None:
         print("......Creating Species Maps......")
-        create_all_species_maps(base_map, init_data, species, point_locations, species_plot_locations,
+        print(".........Determining Species Ranges.........")
+        coastline_map = TMB_ImportShape.import_arcinfo_shp(TMB_Initialize.INIT_DATA.map_coastline)
+        coastline_map.extend(TMB_ImportShape.import_arcinfo_shp(TMB_Initialize.INIT_DATA.map_islands))
+        species_ranges = {}
+        for s in tqdm(species_blocks):
+            species_ranges[s] = get_range_map_overlap(species_blocks[s], coastline_map)
+
+        print(".........Drawing Species Maps.........")
+        create_all_species_maps(base_map, init_data, species, species_ranges, point_locations, species_plot_locations,
                                 invalid_species_locations, inat_locations, questionable_id_locations)
     if specific_names is not None:
         print("......Creating Name Maps......")

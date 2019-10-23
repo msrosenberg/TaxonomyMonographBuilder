@@ -374,3 +374,15 @@ def fetch_inat_data(species: list) -> dict:
                     next_page = False
             inat_data[s.species] = coords
     return inat_data
+
+
+def read_species_blocks(filename: str) -> dict:
+    blocks = {}
+    with open(filename, "r") as infile:
+        lines = infile.readlines()
+    for line in lines[1:]:
+        if line.strip() != "":
+            species, startlat, startlon, endlat, endlon = line.strip().split("\t")
+            blocks.setdefault(species, []).append(TMB_Classes.RangeBlock(eval(startlat), eval(startlon),
+                                                                         eval(endlat), eval(endlon)))
+    return blocks
