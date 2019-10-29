@@ -474,9 +474,12 @@ def write_point_map_kml(title: str, place_list: list, point_locations: dict, inv
         outfile.write("    </Style>\n")
 
         if inat_locations is not None:
-            for point in inat_locations:
+            # for point in inat_locations:
+            for p in inat_locations:
+                point = p.coords
                 outfile.write("    <Placemark>\n")
                 outfile.write("      <name>iNaturalist import</name>\n")
+                outfile.write("      <description>" + p.url + "</description>\n")
                 outfile.write("      <styleUrl>\n")
                 outfile.write("        #inat_location\n")
                 outfile.write("      </styleUrl>\n")
@@ -577,7 +580,9 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
     edges = []
     sizes = []
     if inat_locations is not None:
-        for point in inat_locations:
+        # for point in inat_locations:
+        for p in inat_locations:
+            point = p.coords
             lats.append(point.lat)
             lons.append(point.lon)
             colors.append("green")
