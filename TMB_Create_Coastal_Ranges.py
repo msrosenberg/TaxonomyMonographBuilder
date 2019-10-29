@@ -126,6 +126,26 @@ def test_draw_blocks(species: str, blocks: list, base_map: TMB_Create_Maps.BaseM
     mplpy.close("all")
 
 
+def test_draw_all_ranges(base_map: TMB_Create_Maps.BaseMap, species_maps: dict) -> None:
+    fig, faxes = mplpy.subplots(figsize=[9, 4.5])
+    for spine in faxes.spines:
+        faxes.spines[spine].set_visible(False)
+    TMB_Create_Maps.draw_base_map(faxes, base_map)
+    for species in species_maps:
+        species_range = species_maps[species]
+        for line in species_range:
+            TMB_Create_Maps.add_line_to_map(faxes, line, lw=2)
+
+    mplpy.xlim(-180, 180)
+    mplpy.ylim(-90, 90)
+    faxes.axes.get_yaxis().set_visible(False)
+    faxes.axes.get_xaxis().set_visible(False)
+    mplpy.rcParams["svg.fonttype"] = "none"
+    mplpy.tight_layout()
+    mplpy.savefig(__OUTPUT_PATH__ + "blocks_all_test_range.png", format="png", dpi=600)
+    mplpy.close("all")
+
+
 def calculate_ranges(init_data: TMB_Initialize.InitializationData, verbose: bool = False) -> None:
     base_map = TMB_Create_Maps.read_base_map(init_data.map_primary, None, init_data.map_islands)
     coastline_map = TMB_ImportShape.import_arcinfo_shp(TMB_Initialize.INIT_DATA.map_coastline)
@@ -134,16 +154,24 @@ def calculate_ranges(init_data: TMB_Initialize.InitializationData, verbose: bool
         print("Number of coastline elements:", len(coastline_map))
 
     species_blocks = TMB_Import.read_species_blocks(init_data.species_range_blocks)
-    for species in species_blocks:
-        test_draw_blocks(species, species_blocks[species], base_map)
+    # for species in species_blocks:
+    #     test_draw_blocks(species, species_blocks[species], base_map)
 
-    ranges = {}
+    # ranges = {}
+    # for species in species_blocks:
+    #     if verbose:
+    #         print("Determining {} range".format(species))
+    #     ranges[species] = TMB_Create_Maps.get_range_map_overlap(species_blocks[species], coastline_map)
+    # for species in ranges:
+    #     test_draw_ranges(species, ranges[species], base_map)
+
+    # test_draw_all_ranges(base_map, ranges)
+
+    all_blocks = []
     for species in species_blocks:
-        if verbose:
-            print("Determining {} range".format(species))
-        ranges[species] = TMB_Create_Maps.get_range_map_overlap(species_blocks[species], coastline_map)
-    for species in ranges:
-        test_draw_ranges(species, ranges[species], base_map)
+        all_blocks.extend(species_blocks[species])
+    all_range = TMB_Create_Maps.get_range_map_overlap(all_blocks, coastline_map)
+    test_draw_ranges("all_combined", all_range, base_map)
 
 
 if __name__ == "__main__":
