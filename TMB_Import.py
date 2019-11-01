@@ -8,7 +8,7 @@ from typing import Tuple
 import urllib.request
 import csv
 import time
-from collections import namedtuple
+# from collections import namedtuple
 from tqdm import tqdm
 import TMB_Classes
 from TMB_Error import report_error
@@ -352,7 +352,7 @@ def fetch_inat_data(species: list) -> dict:
     function to fetch species observation data from iNaturalist
     """
 
-    INatData = namedtuple("INatData", ["coords", "url"])
+    # INatData = namedtuple("INatData", ["coords", "url"])
 
     inat_data = {}
     print("...Importing iNaturalist Data...")
@@ -373,7 +373,7 @@ def fetch_inat_data(species: list) -> dict:
                                 point = TMB_Classes.Point(eval(data[4]), eval(data[5]))
                                 urlstr = data[8]
                                 # coords.append(point)
-                                coords.append(INatData(coords=point, url=urlstr))
+                                coords.append(TMB_Classes.INatData(coords=point, url=urlstr))
                             except SyntaxError:
                                 pass
                 else:

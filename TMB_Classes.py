@@ -284,3 +284,9 @@ class RangeBlock:
                 return False
         else:
             return False
+
+
+class INatData:
+    def __init__(self, coords: Point = None, url: str = ""):
+        self.coords = coords
+        self.url = url
