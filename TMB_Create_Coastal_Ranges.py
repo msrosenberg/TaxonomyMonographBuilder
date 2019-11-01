@@ -146,10 +146,17 @@ def test_draw_all_ranges(base_map: TMB_Create_Maps.BaseMap, species_maps: dict) 
     mplpy.close("all")
 
 
+def import_coastline_data(init_data: TMB_Initialize.InitializationData) -> list:
+    coastline_map = TMB_ImportShape.import_arcinfo_shp(init_data.map_coastline)
+    coastline_map.extend(TMB_ImportShape.import_arcinfo_shp(init_data.map_islands))
+    return coastline_map
+
+
 def calculate_ranges(init_data: TMB_Initialize.InitializationData, verbose: bool = False) -> None:
     base_map = TMB_Create_Maps.read_base_map(init_data.map_primary, None, init_data.map_islands)
-    coastline_map = TMB_ImportShape.import_arcinfo_shp(TMB_Initialize.INIT_DATA.map_coastline)
-    coastline_map.extend(TMB_ImportShape.import_arcinfo_shp(TMB_Initialize.INIT_DATA.map_islands))
+    # coastline_map = TMB_ImportShape.import_arcinfo_shp(init_data.map_coastline)
+    # coastline_map.extend(TMB_ImportShape.import_arcinfo_shp(init_data.map_islands))
+    coastline_map = import_coastline_data(init_data)
     if verbose:
         print("Number of coastline elements:", len(coastline_map))
 
