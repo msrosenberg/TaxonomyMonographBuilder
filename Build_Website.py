@@ -35,6 +35,7 @@ TMP_MAP_PATH = TMP_PATH + "maps/"
 FOSSIL_IMAGE = " <span class=\"fossil-img\">&#9760;</span>"
 STAR = "<sup>*</sup>"
 DAGGER = "<sup>†</sup>"
+DOUBLEDAGGER = "<sup>‡</sup>"
 
 CitationStyle = int
 AUTHOR_NOPAREN = 0      # Smith 1970
@@ -2581,7 +2582,8 @@ def fetch_child_data(loc: TMB_Classes.LocationClass, location_dict: dict) -> set
 
 def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.LocationClass, point_locations: dict,
                         location_species: dict, location_bi_names: dict, location_sp_names: dict,
-                        location_direct_refs: dict, location_cited_refs: dict, references: list) -> None:
+                        location_direct_refs: dict, location_cited_refs: dict, references: list,
+                        locations_range_species: dict) -> None:
     """
     write the output page for an individual location
     """
@@ -2693,8 +2695,14 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
         outfile.write("    </ul>\n")
         outfile.write("  </section>\n")
 
+    # add species
+    range_species = set(find_species_by_name(s) for s in locations_range_species[loc])
+    range_species -= all_species
+    all_species |= range_species
+
     is_error = True
     print_star = False
+    print_double = False
     if len(all_species) > 0:
         is_error = False
         outfile.write("  <section class=\"spsection\">\n")
@@ -2703,6 +2711,9 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
         for s in sorted(list(all_species)):
             if s in location_species[loc.name]:
                 suffix = ""
+            elif s in range_species:
+                suffix = DOUBLEDAGGER
+                print_double = True
             else:
                 suffix = STAR
                 print_star = True
@@ -2715,7 +2726,7 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
     if len(all_bi_names) > 0:
         is_error = False
         outfile.write("  <section class=\"spsection\">\n")
-        outfile.write("    <h3 class=\"nobookmark\">Names Which Have Been Used in This Area</h3>\n")
+        outfile.write("    <h3 class=\"nobookmark\">Names Which Have Been Used for This Area</h3>\n")
         outfile.write("    <ul class=\"locpagelist\">\n")
         for s in sorted(list(all_bi_names)):
             if s in location_bi_names[loc.name]:
@@ -2731,7 +2742,7 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
     if len(all_sp_names) > 0:
         is_error = False
         outfile.write("  <section class=\"spsection\">\n")
-        outfile.write("    <h3 class=\"nobookmark\">Specific Names Which Have Been Used in This Area</h3>\n")
+        outfile.write("    <h3 class=\"nobookmark\">Specific Names Which Have Been Used for This Area</h3>\n")
         outfile.write("    <ul class=\"locpagelist\">\n")
         for s in sorted(list(all_sp_names)):
             if s in location_sp_names[loc.name]:
@@ -2756,7 +2767,10 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
     else:
         key_str = ""
     if print_star:
-        key_str += "Entries marked with " + STAR + " are inferred from subareas."
+        key_str += "Entries marked with " + STAR + " are inferred from subareas. "
+    if print_double:
+        key_str += "Entries marked with " + DOUBLEDAGGER + " represent potential inhabitants inferred from " \
+                                                           "species ranges."
     if key_str != "":
         outfile.write("    <p>" + key_str.strip() + "</p>\n")
 
@@ -2770,12 +2784,14 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
         for c in loc.children:
             if do_print:
                 write_location_page(outfile, do_print, c, point_locations, location_species, location_bi_names,
-                                    location_sp_names, location_direct_refs, location_cited_refs, references)
+                                    location_sp_names, location_direct_refs, location_cited_refs, references,
+                                    locations_range_species)
             else:
                 with open(WEBOUT_PATH + "locations/" + place_to_filename(c.name) + ".html", "w",
                           encoding="utf-8") as suboutfile:
                     write_location_page(suboutfile, do_print, c, point_locations, location_species, location_bi_names,
-                                        location_sp_names, location_direct_refs, location_cited_refs, references)
+                                        location_sp_names, location_direct_refs, location_cited_refs, references,
+                                        locations_range_species)
 
 
 def write_location_index_entry(outfile: TextIO, do_print: bool, loc: TMB_Classes.LocationClass,
@@ -2802,7 +2818,8 @@ def write_location_index_entry(outfile: TextIO, do_print: bool, loc: TMB_Classes
 
 def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict, location_dict: dict,
                          location_species: dict, location_sp_names: dict, location_bi_names: dict,
-                         location_direct_refs: dict, location_cited_refs: dict, references: list) -> None:
+                         location_direct_refs: dict, location_cited_refs: dict, references: list,
+                         locations_range_species: dict) -> None:
     """
     output observation location index to HTML
     """
@@ -2890,12 +2907,14 @@ def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict,
         loc = point_locations[p]
         if do_print:
             write_location_page(outfile, do_print, loc, point_locations, location_species, location_bi_names,
-                                location_sp_names, location_direct_refs, location_cited_refs, references)
+                                location_sp_names, location_direct_refs, location_cited_refs, references,
+                                locations_range_species)
         else:
             with open(WEBOUT_PATH + "locations/" + place_to_filename(loc.name) + ".html", "w",
                       encoding="utf-8") as suboutfile:
                 write_location_page(suboutfile, do_print, loc, point_locations, location_species, location_bi_names,
-                                    location_sp_names, location_direct_refs, location_cited_refs, references)
+                                    location_sp_names, location_direct_refs, location_cited_refs, references,
+                                    locations_range_species)
 
 
 def check_location_page(loc: TMB_Classes.LocationClass, location_species: dict, location_bi_names: dict,
@@ -3029,6 +3048,23 @@ def match_names_to_locations(species: list, specific_point_locations: dict,  bin
     return (species_plot_locations, invalid_species_locations, binomial_plot_locations, specific_plot_locations,
             location_species, location_sp_names, location_bi_names, location_direct_refs, location_cited_refs,
             questionable_id_locations)
+
+
+def compare_ranges_to_locations(species_range_blocks: dict, point_locations: dict) -> dict:
+    point_range_species = {}
+    for p in point_locations:
+        dat = point_locations[p]
+        slist = []
+        for species in species_range_blocks:
+            blocks = species_range_blocks[species]
+            inside = False
+            for b in blocks:
+                if b.inside(dat.latitude, dat.longitude):
+                    inside = True
+            if inside:
+                slist.append(species)
+        point_range_species[dat] = slist
+    return point_range_species
 
 
 def write_common_names_pages(outfile: TextIO, do_print: bool, common_name_data: list) -> None:
@@ -5325,6 +5361,8 @@ def build_site() -> None:
          location_cited_refs, questionable_id_locations) = match_names_to_locations(species, specific_point_locations,
                                                                                     binomial_point_locations,
                                                                                     point_locations, citelist)
+        locations_range_species = compare_ranges_to_locations(species_range_blocks, point_locations)
+
         genera_tree, species_tree = create_html_phylogenies()
 
         if INCLUDE_INAT and (not CHECK_DATA):
@@ -5348,7 +5386,7 @@ def build_site() -> None:
             with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
                 write_location_index(outfile, False, point_locations, location_dict, location_species,
                                      location_sp_names, location_bi_names, location_direct_refs,
-                                     location_cited_refs, references)
+                                     location_cited_refs, references, locations_range_species)
         else:
             if DRAW_MAPS:
                 print("...Creating Maps...")
@@ -5390,7 +5428,7 @@ def build_site() -> None:
                 with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
                     write_location_index(outfile, False, point_locations, location_dict, location_species,
                                          location_sp_names, location_bi_names, location_direct_refs,
-                                         location_cited_refs, references)
+                                         location_cited_refs, references, locations_range_species)
                 with open(WEBOUT_PATH + init_data().map_url, "w", encoding="utf-8") as outfile:
                     write_geography_page(outfile, False, species)
                 print("......Writing Media Pages......")
@@ -5437,7 +5475,7 @@ def build_site() -> None:
                     write_geography_page(printfile, True, species)
                     write_location_index(printfile, True, point_locations, location_dict, location_species,
                                          location_sp_names, location_bi_names, location_direct_refs,
-                                         location_cited_refs, references)
+                                         location_cited_refs, references, locations_range_species)
                     print("......Writing Media Pages......")
                     write_main_morphology_pages(printfile, True, morphology)
                     write_photo_index(printfile, True, species, photos)
