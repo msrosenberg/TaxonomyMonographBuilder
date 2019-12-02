@@ -65,17 +65,16 @@ def read_reference_data(ref_filename: str, formatref_filename: str,
     read all reference data
     """
     ref_list = []
-    # year_dat = {}
     year_dat = collections.Counter()
     cite_done = {}
 
-    # citation style data (Author, Year), language, and DOI for each reference
+    # citation style data (Author, Year), language, DOI, and Taxon Author for each reference
     with open(ref_filename, "r", encoding="utf-8") as reffile:
         for line in reffile:
             line = line.replace("et al.", "<em>et al.</em>")
             line = line.replace(" & ", " &amp; ")
             ref = line.strip().split("\t")
-            while len(ref) < 4:
+            while len(ref) < 5:
                 ref.append("")
             newref = TMB_Classes.ReferenceClass()
             newref.citation = ref[0]
@@ -83,14 +82,13 @@ def read_reference_data(ref_filename: str, formatref_filename: str,
             newref.language = ref[2]
             if ref[3] != "":
                 newref.doi = ref[3]
+            if ref[4] != "":
+                newref.taxon_author = ref[4]
+
             # calculate publishing trend
             y = newref.year()
             if y is not None:
                 year_dat.update([y])
-                # if y in year_dat:
-                #     year_dat[y] += 1
-                # else:
-                #     year_dat[y] = 1
             cite_done[newref.cite_key] = [False, y]
             ref_list.append(newref)
 

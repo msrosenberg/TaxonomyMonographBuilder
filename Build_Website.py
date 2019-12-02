@@ -40,7 +40,7 @@ DOUBLEDAGGER = "<sup>‡</sup>"
 CitationStyle = int
 AUTHOR_NOPAREN = 0      # Smith 1970
 AUTHOR_PAREN = 1        # Smith (1970)
-AUTHOR_NOPCOMMA = 2     # Smith, 1970  <-- this one is needed for taxonomic name authority
+AUTHOR_TAXON = 2        # Smith, 1970  <-- this one is needed for taxonomic name authority
 
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
@@ -53,7 +53,7 @@ CHECK_LOCATIONS = False
 # this flag controls whether additional location data should be fetched from iNaturalist
 INCLUDE_INAT = True
 # these flags control creating print and web output, respectively
-OUTPUT_PRINT = True
+OUTPUT_PRINT = False
 OUTPUT_WEB = True
 
 # randSeed = random.randint(0, 10000)
@@ -423,8 +423,11 @@ def format_reference_cite(ref: TMB_Classes.ReferenceClass, do_print: bool, autho
         outstr = ref.citation
     elif author_style == AUTHOR_NOPAREN:  # Smith 1900
         outstr = ref.author() + " " + str(ref.year())
-    elif author_style == AUTHOR_NOPCOMMA:  # Smith, 1900
-        outstr = ref.author() + ", " + str(ref.year())
+    elif author_style == AUTHOR_TAXON:  # Smith, 1900
+        if ref.taxon_author is not None:
+            outstr = ref.taxon_author
+        else:
+            outstr = ref.author() + ", " + str(ref.year())
     else:
         outstr = ref.citation
     if ref.cite_key == "<pending>":
@@ -4238,7 +4241,7 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
                 if taxon.author == ".":
                     authorstr = ""
                 else:
-                    authorstr = format_reference_cite(refdict[taxon.author], do_print, AUTHOR_NOPCOMMA)
+                    authorstr = format_reference_cite(refdict[taxon.author], do_print, AUTHOR_TAXON)
                 outfile.write("      <h3 id=\"" + taxon_link(taxon) + "\">" + taxon.taxon_rank.capitalize() + " " +
                               start_tag + taxon.name + end_tag + " " + authorstr + "</h2>\n")
                 if taxon.type_species.startswith(">>"):
