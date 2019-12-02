@@ -18,7 +18,7 @@ __TMP_PATH__ = "temp/"
 __OUTPUT_PATH__ = __TMP_PATH__ + "maps/"
 
 
-def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseMap) -> None:
+def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseMap, draw_blank=False) -> None:
     """
     only for testing purposes
     """
@@ -30,6 +30,7 @@ def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseM
     minlat = 90
     maxlon = -180
     minlon = 180
+
     mid_atlantic = False
     all_lons = []
     all_lats = []
@@ -49,6 +50,17 @@ def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseM
      wrap_lons) = TMB_Create_Maps.draw_and_adjust_basemap(faxes, base_map, mid_atlantic, minlon, maxlon, minlat,
                                                           maxlat, all_lons, all_lats)
 
+    if draw_blank:
+        mplpy.xlim(minlon, maxlon)
+        mplpy.ylim(minlat, maxlat)
+        mplpy.xlabel("longitude")
+        mplpy.ylabel("latitude")
+        mplpy.rcParams["svg.fonttype"] = "none"
+        mplpy.tight_layout()
+        TMB_Create_Maps.adjust_longitude_tick_values(faxes)
+        mplpy.savefig(__OUTPUT_PATH__ + "blocks_blank_test_range.png", format="png", dpi=600)
+        mplpy.savefig(__OUTPUT_PATH__ + "blocks_blank_test_range.svg", format="svg", dpi=600)
+
     for line in ranges:
         lons = []
         lats = []
@@ -67,7 +79,8 @@ def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseM
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     TMB_Create_Maps.adjust_longitude_tick_values(faxes)
-    mplpy.savefig(__OUTPUT_PATH__ + "blocks_" + species + "_test_range.png", format="png", dpi=600)
+    # mplpy.savefig(__OUTPUT_PATH__ + "blocks_" + species + "_test_range.png", format="png", dpi=600)
+    mplpy.savefig(__OUTPUT_PATH__ + "blocks_" + species + "_test_range.svg", format="svg", dpi=600)
     mplpy.close("all")
 
 
@@ -178,7 +191,7 @@ def calculate_ranges(init_data: TMB_Initialize.InitializationData, verbose: bool
     for species in species_blocks:
         all_blocks.extend(species_blocks[species])
     all_range = TMB_Create_Maps.get_range_map_overlap(all_blocks, coastline_map)
-    test_draw_ranges("all_combined", all_range, base_map)
+    test_draw_ranges("all_combined", all_range, base_map, draw_blank=True)
 
 
 if __name__ == "__main__":
