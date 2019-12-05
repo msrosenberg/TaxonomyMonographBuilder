@@ -429,7 +429,7 @@ def format_reference_cite(ref: TMB_Classes.ReferenceClass, do_print: bool, autho
     elif author_style == AUTHOR_NOPAREN:  # Smith 1900
         outstr = ref.author() + " " + str(ref.year())
     elif author_style == AUTHOR_TAXON:  # Smith, 1900
-        if ref.taxon_author is not None:
+        if ref.taxon_author is not None:  # used to avoid et al. or for papers with slightly unusual authority
             outstr = ref.taxon_author
         else:
             outstr = ref.author() + ", " + str(ref.year())
@@ -2460,19 +2460,12 @@ def check_specific_names(citelist: list, specific_names: list) -> None:
             report_error("Missing specific name: " + n)
 
 
-# def clean_key_taxa(tk_taxa_data: dict, species: list) -> None:
-#     for sp in species:
-#         if sp.status != "fossil":
-#             taxon = tk_taxa_data["male " + sp.species]
-#             taxon.name = "Male " + sp.binomial()
-#             taxon.species = sp
-#             taxon = tk_taxa_data["female " + sp.species]
-#             taxon.name = "Female " + sp.binomial()
-#             taxon.species = sp
-
-
 def create_all_taxonomic_keys(point_locations: dict, location_species: dict, location_range_species: dict,
                               trait_data: dict, all_taxa_data: dict) -> dict:
+    """
+    create taxonomic keys for every unique set of species identified across all locations
+    """
+
     all_keys = {}
 
     # find all unique sets of species
@@ -2499,29 +2492,43 @@ def create_all_taxonomic_keys(point_locations: dict, location_species: dict, loc
             except KeyError:
                 report_error("Missing taxonomic key data: " + s.species)
 
-        all_keys[sp_set] = TMB_TaxKeyGen.generate_taxonomic_key(trait_data, taxa_data, out_name=None, verbose=False)
+        all_keys[sp_set] = TMB_TaxKeyGen.generate_taxonomic_key(trait_data, taxa_data, verbose=False)
+
+    # global key for all species
+    all_keys["all"] = TMB_TaxKeyGen.generate_taxonomic_key(trait_data, all_taxa_data, verbose=False)
 
     return all_keys
 
 
 def write_taxonomic_key(outfile: TextIO, do_print: bool, taxkey: TMB_TaxKeyGen.KeyText,
-                        location: TMB_Classes.LocationClass) -> None:
+                        location: Optional[TMB_Classes.LocationClass]) -> None:
+    """
+    write pre-generated taxonomic key to html
+    """
     if do_print:
         start_page_division(outfile, "base_page")
     else:
-        common_header_part1(outfile, location.trimmed_name + ": Taxonomic Key", indexpath="../../")
+        if location is None:
+            common_header_part1(outfile, "Fiddler Crab Taxonomic Key", indexpath="../../")
+        else:
+            common_header_part1(outfile, location.trimmed_name + ": Taxonomic Key", indexpath="../../")
         outfile.writelines(taxkey.header)
         common_header_part2(outfile, indexpath="../../")
 
-    outfile.write("    <header id=\"" + place_to_filename(location.name) + "_taxkey.html\">\n")
-    outfile.write("      <h1 class=\"nobookmark\">" + location.trimmed_name + ": Taxonomic Key</h1>\n")
+    if location is None:
+        outfile.write("    <header id=\"all_taxkey.html\">\n")
+        outfile.write("      <h1 class=\"nobookmark\">Taxonomic Key to All Fiddler Crabs</h1>\n")
+    else:
+        outfile.write("    <header id=\"" + place_to_filename(location.name) + "_taxkey.html\">\n")
+        outfile.write("      <h1 class=\"nobookmark\">" + location.trimmed_name + ": Taxonomic Key</h1>\n")
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li>" + create_location_link(location, location.trimmed_name, do_print, path="../",
-                                                              inc_icon=True) + "</li>\n")
-        outfile.write("          <li><a href=\"../index.html\">" + fetch_fa_glyph("index") +
-                      "Location Index</a></li>\n")
+        if location is not None:
+            outfile.write("          <li>" + create_location_link(location, location.trimmed_name, do_print, path="../",
+                                                                  inc_icon=True) + "</li>\n")
+            outfile.write("          <li><a href=\"../index.html\">" + fetch_fa_glyph("index") +
+                          "Location Index</a></li>\n")
         outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("tax key") +
                       "Taxonomic Key Guide</a></li>\n")
         outfile.write("        </ul>\n")
@@ -3064,9 +3071,12 @@ def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict,
     if location_keys is not None:
         if do_print:
             write_taxonomic_key_guide(outfile, do_print)
+            write_taxonomic_key(outfile, do_print, location_keys["all"], None)
         else:
             with open(WEBOUT_PATH + "locations/keys/index.html", "w", encoding="utf-8") as suboutfile:
                 write_taxonomic_key_guide(suboutfile, do_print)
+            with open(WEBOUT_PATH + "locations/keys/all_taxkey.html", "w", encoding="utf-8") as suboutfile:
+                write_taxonomic_key(suboutfile, do_print, location_keys["all"], None)
 
     # for p in tqdm(top_list):
     for p in top_list:
