@@ -23,6 +23,7 @@ from TMB_Common import *
 import TMB_Initialize
 import TMB_Classes
 import TMB_Create_Graphs
+import TMB_TaxKeyGen
 from TMB_SpeciesXRef import init_species_crossref, find_species_by_name
 import phy2html
 
@@ -45,13 +46,13 @@ AUTHOR_TAXON = 2        # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = True
+DRAW_MAPS = False
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
-CHECK_LOCATIONS = False
+CHECK_LOCATIONS = True
 # this flag controls whether additional location data should be fetched from iNaturalist
-INCLUDE_INAT = True
+INCLUDE_INAT = False
 # these flags control creating print and web output, respectively
 OUTPUT_PRINT = False
 OUTPUT_WEB = True
@@ -385,6 +386,10 @@ def fetch_fa_glyph(glyph: Optional[str]) -> str:
         elif glyph == "questionable id":
             x += " fa-question-circle\" style=\"color: goldenrod\" title=\"Questionable ID: Species identity " \
                  "uncertain.\""
+        elif glyph == "tax key":
+            x += " fa-key\" ara-hidden"
+        elif glyph == "location marker":
+            x += "r fa-map-marked-alt\" ara-hidden"
         else:
             report_error("missing glyph: " + glyph)
             return ""
@@ -441,7 +446,7 @@ def format_reference_cite(ref: TMB_Classes.ReferenceClass, do_print: bool, autho
             return ref.cite_key
 
 
-def replace_species_in_string(instr: str, include_link: bool = False, do_print: bool = False) -> str:
+def replace_species_in_string(instr: str, include_link: bool = False, do_print: bool = False, path: str = "") -> str:
     search_str = r"{{(?P<species>.+?)}}"
     # for every species tagged in the string
     for match in re.finditer(search_str, instr):
@@ -454,7 +459,7 @@ def replace_species_in_string(instr: str, include_link: bool = False, do_print: 
             include_authority = False
         s = find_species_by_name(name)
         if include_link:
-            name_str = create_species_link(s.genus, s.species, do_print, s.status)
+            name_str = create_species_link(s.genus, s.species, do_print, s.status, path=path)
         else:
             name_str = "<em class=\"species\">" + s.binomial() + "</em>"
         if include_authority:
@@ -603,8 +608,8 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         outfile.write("          ['Language', 'Count'],\n")
         langlist = list(languages.keys())
         langlist.sort()
-        for l in langlist:
-            outfile.write("          ['" + l + "', " + str(languages[l]) + "],\n")
+        for lang in langlist:
+            outfile.write("          ['" + lang + "', " + str(languages[lang]) + "],\n")
         outfile.write("        ]);\n")
 
         outfile.write("\n")
@@ -954,7 +959,7 @@ def create_taxon_link(rank: str, name: str, do_print: bool, same_page: bool = Fa
 
 
 def create_location_link(location: TMB_Classes.LocationClass, display_name: str, do_print: bool, path: str = "",
-                         mark_unknown: bool = False, mark_secondary: bool = False) -> str:
+                         mark_unknown: bool = False, mark_secondary: bool = False, inc_icon: bool = False) -> str:
     if mark_unknown and location.unknown:
         suffix = DAGGER
     elif mark_secondary:
@@ -965,8 +970,12 @@ def create_location_link(location: TMB_Classes.LocationClass, display_name: str,
         endstr = suffix + "</a>"
     else:  # put the suffix outside the link for the web
         endstr = "</a>" + suffix
+    if inc_icon:
+        iconstr = fetch_fa_glyph("location marker")
+    else:
+        iconstr = ""
     return ("<a href=\"" + rel_link_prefix(do_print, path) + place_to_filename(location.name) + ".html\">" +
-            display_name + endstr)
+            iconstr + display_name + endstr)
 
 
 def strip_location_subtext(x: str) -> str:
@@ -2451,6 +2460,144 @@ def check_specific_names(citelist: list, specific_names: list) -> None:
             report_error("Missing specific name: " + n)
 
 
+# def clean_key_taxa(tk_taxa_data: dict, species: list) -> None:
+#     for sp in species:
+#         if sp.status != "fossil":
+#             taxon = tk_taxa_data["male " + sp.species]
+#             taxon.name = "Male " + sp.binomial()
+#             taxon.species = sp
+#             taxon = tk_taxa_data["female " + sp.species]
+#             taxon.name = "Female " + sp.binomial()
+#             taxon.species = sp
+
+
+def create_all_taxonomic_keys(point_locations: dict, location_species: dict, location_range_species: dict,
+                              trait_data: dict, all_taxa_data: dict) -> dict:
+    all_keys = {}
+
+    # find all unique sets of species
+    species_sets = set()
+    for p in point_locations:
+        loc = point_locations[p]
+        all_species = set()
+        all_species |= location_species[loc.name]
+        if loc.n_direct_children() > 0:
+            for c in loc.direct_children():
+                all_species |= fetch_child_data(c, location_species)
+        range_species = set(find_species_by_name(s) for s in location_range_species[loc])
+        all_species |= range_species
+        if len(all_species) > 0:
+            species_sets.add(frozenset(all_species))
+
+    # create keys for each unique set of species
+    for sp_set in species_sets:
+        taxa_data = {}
+        for s in sp_set:
+            try:
+                taxa_data["Male " + s.binomial()] = all_taxa_data["Male {{" + s.species + "}}"]
+                taxa_data["Female " + s.binomial()] = all_taxa_data["Female {{" + s.species + "}}"]
+            except KeyError:
+                report_error("Missing taxonomic key data: " + s.species)
+
+        all_keys[sp_set] = TMB_TaxKeyGen.generate_taxonomic_key(trait_data, taxa_data, out_name=None, verbose=False)
+
+    return all_keys
+
+
+def write_taxonomic_key(outfile: TextIO, do_print: bool, taxkey: TMB_TaxKeyGen.KeyText,
+                        location: TMB_Classes.LocationClass) -> None:
+    if do_print:
+        start_page_division(outfile, "base_page")
+    else:
+        common_header_part1(outfile, location.trimmed_name + ": Taxonomic Key", indexpath="../../")
+        outfile.writelines(taxkey.header)
+        common_header_part2(outfile, indexpath="../../")
+
+    outfile.write("    <header id=\"" + place_to_filename(location.name) + "_taxkey.html\">\n")
+    outfile.write("      <h1 class=\"nobookmark\">" + location.trimmed_name + ": Taxonomic Key</h1>\n")
+    if not do_print:
+        outfile.write("      <nav>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("          <li>" + create_location_link(location, location.trimmed_name, do_print, path="../",
+                                                              inc_icon=True) + "</li>\n")
+        outfile.write("          <li><a href=\"../index.html\">" + fetch_fa_glyph("index") +
+                      "Location Index</a></li>\n")
+        outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("tax key") +
+                      "Taxonomic Key Guide</a></li>\n")
+        outfile.write("        </ul>\n")
+        outfile.write("      </nav>\n")
+    outfile.write("    </header>\n")
+    outfile.write("    <p>&nbsp;</p>\n")
+
+    for line in taxkey.body:
+        outfile.write(replace_species_in_string(line, True, do_print, "../../"))
+
+    if do_print:
+        end_page_division(outfile)
+    else:
+        common_html_footer(outfile)
+
+
+def write_taxonomic_key_guide(outfile: TextIO, do_print: bool) -> None:
+    """
+    output a general guide and description for the taxonomic keys
+    """
+    if do_print:
+        start_page_division(outfile, "base_page")
+    else:
+        common_html_header(outfile, "Fiddler Crab Taxonomic Key Guide", indexpath="../../")
+    outfile.write("    <header id=\"key_index.html\">\n")
+    outfile.write("      <h1 class=\"nobookmark\">Taxonomic Key Guide</h1>\n")
+    if not do_print:
+        outfile.write("      <nav>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("          <li><a href=\"../index.html\">" + fetch_fa_glyph("index") +
+                      "Location Index</a></li>\n")
+        outfile.write("        </ul>\n")
+        outfile.write("      </nav>\n")
+    outfile.write("    </header>\n")
+    outfile.write("\n")
+    outfile.write("    <section class=\"topspsection\">\n")
+    outfile.write("      <p>\n")
+    outfile.write("          The taxonomic keys on this sites are explicitly designed to serve as field/photographic "
+                  "identification keys for fiddler crabs and thus only focus on characters that may reasonably "
+                  "be seen without dissection, microscopy, or other invasive procedures. As such there may be "
+                  "occasional ambiguity in the division of very similar species. The keys include both male and "
+                  "female fiddler crabs for each species as diagnostic characters may vary between the sexes.")
+    outfile.write("      </p>\n")
+    outfile.write("      <p>\n")
+    outfile.write("          All of these guides are classic dichotomous keys where at each step of the process a "
+                  "single decision is made to follow one of two paths, based on differential characteristics, until "
+                  "a species is identified or no further division is possible. Figures and descriptions of characters "
+                  "and variants are generally included as part of the key. Additional details and caveats may be "
+                  "found in footnotes.")
+    outfile.write("      </p>\n")
+    outfile.write("      <p>\n")
+    outfile.write("          All of the keys are algorithmically generated from a data matrix of species "
+                  "characteristics. This allows us to create an individual key for every location, based only on "
+                  "the species thought to be present at that location. It also means that the order of splits in "
+                  "each key are driven by an algorithm rather than explicit human design and different keys may "
+                  "prioritize different characters at different stages.")
+    outfile.write("      </p>\n")
+    outfile.write("      <p>\n")
+    outfile.write("          A discussion of the development of this key generating algorithm can be found in "
+                  "<a href=\"http://www.rosenberglab.net/blog/2019/05/02/"
+                  "automatic-taxonomic-key-generation-part-1-introduction/\">a series of 10 blog posts</a> on my "
+                  "lab website. The <a href=\"https://github.com/msrosenberg/TaxKeyGen\">original code is found on "
+                  "Github</a>, although it has since been modified to work within the larger framework of this "
+                  "website generator.")
+    outfile.write("      </p>\n")
+    outfile.write("      <p>\n")
+    outfile.write("          We welcome comments or corrections about these guides and hope they prove to be "
+                  "useful.")
+    outfile.write("      </p>\n")
+    outfile.write("    </section>\n")
+    if do_print:
+        end_page_division(outfile)
+    else:
+        common_html_footer(outfile)
+
+
 def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None:
     """
     output geographic ranges to HTML
@@ -2586,7 +2733,7 @@ def fetch_child_data(loc: TMB_Classes.LocationClass, location_dict: dict) -> set
 def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.LocationClass, point_locations: dict,
                         location_species: dict, location_bi_names: dict, location_sp_names: dict,
                         location_direct_refs: dict, location_cited_refs: dict, references: list,
-                        locations_range_species: dict) -> None:
+                        locations_range_species: dict, location_keys: Optional[dict]) -> None:
     """
     write the output page for an individual location
     """
@@ -2782,19 +2929,28 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
     else:
         common_html_footer(outfile)
 
+    # output place specific taxonomic key
+    if (location_keys is not None) and (len(all_species) > 0):
+        if do_print:
+            write_taxonomic_key(outfile, do_print, location_keys[frozenset(all_species)], loc)
+        else:
+            with open(WEBOUT_PATH + "locations/keys/" + place_to_filename(loc.name) + "_taxkey.html", "w",
+                      encoding="utf-8") as suboutfile:
+                write_taxonomic_key(suboutfile, do_print, location_keys[frozenset(all_species)], loc)
+
     # write out children pages (primary children only)
     if loc.n_children() > 0:
         for c in loc.children:
             if do_print:
                 write_location_page(outfile, do_print, c, point_locations, location_species, location_bi_names,
                                     location_sp_names, location_direct_refs, location_cited_refs, references,
-                                    locations_range_species)
+                                    locations_range_species, location_keys)
             else:
                 with open(WEBOUT_PATH + "locations/" + place_to_filename(c.name) + ".html", "w",
                           encoding="utf-8") as suboutfile:
                     write_location_page(suboutfile, do_print, c, point_locations, location_species, location_bi_names,
                                         location_sp_names, location_direct_refs, location_cited_refs, references,
-                                        locations_range_species)
+                                        locations_range_species, location_keys)
 
 
 def write_location_index_entry(outfile: TextIO, do_print: bool, loc: TMB_Classes.LocationClass,
@@ -2822,7 +2978,7 @@ def write_location_index_entry(outfile: TextIO, do_print: bool, loc: TMB_Classes
 def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict, location_dict: dict,
                          location_species: dict, location_sp_names: dict, location_bi_names: dict,
                          location_direct_refs: dict, location_cited_refs: dict, references: list,
-                         locations_range_species: dict) -> None:
+                         locations_range_species: dict, location_keys: Optional[dict]) -> None:
     """
     output observation location index to HTML
     """
@@ -2905,19 +3061,26 @@ def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict,
     else:
         common_html_footer(outfile)
 
+    if location_keys is not None:
+        if do_print:
+            write_taxonomic_key_guide(outfile, do_print)
+        else:
+            with open(WEBOUT_PATH + "locations/keys/index.html", "w", encoding="utf-8") as suboutfile:
+                write_taxonomic_key_guide(suboutfile, do_print)
+
     # for p in tqdm(top_list):
     for p in top_list:
         loc = point_locations[p]
         if do_print:
             write_location_page(outfile, do_print, loc, point_locations, location_species, location_bi_names,
                                 location_sp_names, location_direct_refs, location_cited_refs, references,
-                                locations_range_species)
+                                locations_range_species, location_keys)
         else:
             with open(WEBOUT_PATH + "locations/" + place_to_filename(loc.name) + ".html", "w",
                       encoding="utf-8") as suboutfile:
                 write_location_page(suboutfile, do_print, loc, point_locations, location_species, location_bi_names,
                                     location_sp_names, location_direct_refs, location_cited_refs, references,
-                                    locations_range_species)
+                                    locations_range_species, location_keys)
 
 
 def check_location_page(loc: TMB_Classes.LocationClass, location_species: dict, location_bi_names: dict,
@@ -4975,6 +5138,7 @@ def create_web_output_paths() -> None:
     create_path_and_index("images/flag-icon-css/flags/")
     create_path_and_index("images/flag-icon-css/flags/4x3/")
     create_path_and_index("locations/")
+    create_path_and_index("locations/keys/")
     create_path_and_index("js/")
 
 
@@ -5364,7 +5528,18 @@ def build_site() -> None:
          location_cited_refs, questionable_id_locations) = match_names_to_locations(species, specific_point_locations,
                                                                                     binomial_point_locations,
                                                                                     point_locations, citelist)
-        locations_range_species = compare_ranges_to_locations(species_range_blocks, point_locations)
+        location_range_species = compare_ranges_to_locations(species_range_blocks, point_locations)
+
+        print("...Creating Taxonomic Keys...")
+        (tk_trait_data, tk_generic_notes,
+         tk_taxa_data) = TMB_TaxKeyGen.read_data_files(init_data().tax_key_trait_file,
+                                                       init_data().tax_key_trait_var_file,
+                                                       init_data().tax_key_generic_file, init_data().tax_key_taxa_file)
+        TMB_TaxKeyGen.link_taxonomic_key_data(tk_trait_data, tk_generic_notes, tk_taxa_data)
+        # clean_key_taxa(tk_taxa_data, species)
+
+        location_keys = create_all_taxonomic_keys(point_locations, location_species, location_range_species,
+                                                  tk_trait_data, tk_taxa_data)
 
         genera_tree, species_tree = create_html_phylogenies()
 
@@ -5389,7 +5564,7 @@ def build_site() -> None:
             with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
                 write_location_index(outfile, False, point_locations, location_dict, location_species,
                                      location_sp_names, location_bi_names, location_direct_refs,
-                                     location_cited_refs, references, locations_range_species)
+                                     location_cited_refs, references, location_range_species, location_keys)
         else:
             if DRAW_MAPS:
                 print("...Creating Maps...")
@@ -5431,7 +5606,7 @@ def build_site() -> None:
                 with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
                     write_location_index(outfile, False, point_locations, location_dict, location_species,
                                          location_sp_names, location_bi_names, location_direct_refs,
-                                         location_cited_refs, references, locations_range_species)
+                                         location_cited_refs, references, location_range_species, location_keys)
                 with open(WEBOUT_PATH + init_data().map_url, "w", encoding="utf-8") as outfile:
                     write_geography_page(outfile, False, species)
                 print("......Writing Media Pages......")
@@ -5478,7 +5653,7 @@ def build_site() -> None:
                     write_geography_page(printfile, True, species)
                     write_location_index(printfile, True, point_locations, location_dict, location_species,
                                          location_sp_names, location_bi_names, location_direct_refs,
-                                         location_cited_refs, references, locations_range_species)
+                                         location_cited_refs, references, location_range_species, None)
                     print("......Writing Media Pages......")
                     write_main_morphology_pages(printfile, True, morphology)
                     write_photo_index(printfile, True, species, photos)

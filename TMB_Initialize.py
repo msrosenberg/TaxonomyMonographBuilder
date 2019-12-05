@@ -33,6 +33,12 @@ class InitializationData:
         self.species_changes_synonyms = "data/species_changes_synonyms.txt"
         self.species_range_blocks = "data/species_range_blocks.txt"
 
+        # taxonomic key data
+        self.tax_key_trait_file = "data/tax_key_trait_data.txt"
+        self.tax_key_trait_var_file = "data/tax_key_variant_data.txt"
+        self.tax_key_generic_file = "data/tax_key_generic_notes.txt"
+        self.tax_key_taxa_file = "data/tax_key_taxa_data.txt"
+
         self.error_log = "errorlog.txt"
 
         # map data
