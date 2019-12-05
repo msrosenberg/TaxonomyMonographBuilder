@@ -2483,19 +2483,25 @@ def create_all_taxonomic_keys(point_locations: dict, location_species: dict, loc
             species_sets.add(frozenset(all_species))
 
     # create keys for each unique set of species
+    warnings = set()
     for sp_set in species_sets:
         taxa_data = {}
         for s in sp_set:
             try:
-                taxa_data["Male " + s.binomial()] = all_taxa_data["Male {{" + s.species + "}}"]
-                taxa_data["Female " + s.binomial()] = all_taxa_data["Female {{" + s.species + "}}"]
+                taxa_data["Male " + s.binomial()] = all_taxa_data["♂ Male {{" + s.species + "}}"]
+                taxa_data["Female " + s.binomial()] = all_taxa_data["♀ Female {{" + s.species + "}}"]
             except KeyError:
                 report_error("Missing taxonomic key data: " + s.species)
 
-        all_keys[sp_set] = TMB_TaxKeyGen.generate_taxonomic_key(trait_data, taxa_data, verbose=False)
+        all_keys[sp_set], new_warning = TMB_TaxKeyGen.generate_taxonomic_key(trait_data, taxa_data, verbose=False)
+        warnings |= new_warning
 
     # global key for all species
-    all_keys["all"] = TMB_TaxKeyGen.generate_taxonomic_key(trait_data, all_taxa_data, verbose=False)
+    all_keys["all"], new_warning = TMB_TaxKeyGen.generate_taxonomic_key(trait_data, all_taxa_data, verbose=False)
+    warnings |= new_warning
+
+    for w in sorted(warnings):
+        report_error(w)
 
     return all_keys
 

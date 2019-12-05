@@ -163,7 +163,7 @@ def sorted_taxa_keys(tax_dict: dict) -> list:
 
 def read_taxa_data(inname: str) -> dict:
     taxa_dict = {}
-    with open(inname, "r") as infile:
+    with open(inname, "r", encoding="UTF-8") as infile:
         full_file = infile.readlines()
         for line in full_file[1:]:
             data = line.strip().split("\t")
@@ -352,10 +352,11 @@ def match_variants(t_list: list, taxon: Taxon):
     return [taxon.find_variant(t) for t in t_list]
 
 
-def create_key_tree(taxa_data: dict, trait_data: dict, node: KeyNode):
+def create_key_tree(taxa_data: dict, trait_data: dict, node: KeyNode) -> set:
     """
     primary key tree creation function
     """
+    warning_set = set()
     var_freqs = determine_variant_freqs(taxa_data, trait_data)
     var_freqs = filter_var_freqs(var_freqs)
     if len(var_freqs) > 0:
@@ -369,12 +370,16 @@ def create_key_tree(taxa_data: dict, trait_data: dict, node: KeyNode):
         node.child1variants = match_variants(node.traits, taxa1[0])
         if len(taxa0) > 1:
             new_node = node.new_child_node(0)
-            create_key_tree({t.name: t for t in taxa0}, trait_data, new_node)
+            tset = create_key_tree({t.name: t for t in taxa0}, trait_data, new_node)
+            if len(tset) > 0:
+                warning_set |= tset
         else:
             node.child0 = taxa0[0]
         if len(taxa1) > 1:
             new_node = node.new_child_node(1)
-            create_key_tree({t.name: t for t in taxa1}, trait_data, new_node)
+            tset = create_key_tree({t.name: t for t in taxa1}, trait_data, new_node)
+            if len(tset) > 0:
+                warning_set |= tset
         else:
             node.child1 = taxa1[0]
     else:  # taxa are undivisible
@@ -382,7 +387,9 @@ def create_key_tree(taxa_data: dict, trait_data: dict, node: KeyNode):
             node.parent.child0 = taxa_data
         else:
             node.parent.child1 = taxa_data
-        report_error("Warning. Undivisable group: " + ", ".join(sorted_taxa_keys(taxa_data)))
+        # report_error("Warning. Undivisable group: " + ", ".join(sorted_taxa_keys(taxa_data)))
+        warning_set.add("Warning. Undivisable group: " + ", ".join(sorted_taxa_keys(taxa_data)))
+    return warning_set
 
 
 def number_nodes(tree: KeyNode, node_number: int) -> int:
@@ -516,9 +523,9 @@ def write_key(tree: KeyNode, output: list, footnotes: set, append_footnotes: boo
 
 
 def generate_taxonomic_key(trait_data: dict, taxa_data: dict, out_name: Optional[str] = None,
-                           verbose: bool = True) -> KeyText:
+                           verbose: bool = True) -> Tuple[KeyText, set]:
     key_tree = KeyNode()
-    create_key_tree(taxa_data, trait_data, key_tree)
+    warning_set = create_key_tree(taxa_data, trait_data, key_tree)
     total_nodes = number_nodes(key_tree, 1)
     # output = []
     output = KeyText()
@@ -547,7 +554,9 @@ def generate_taxonomic_key(trait_data: dict, taxa_data: dict, out_name: Optional
             print("Key written to {}".format(out_name))
     if verbose:
         print("Finished")
-    return output
+        for w in sorted(warning_set):
+            report_error(w)
+    return output, warning_set
 
 
 def input_query(query: str, default: str) -> str:
