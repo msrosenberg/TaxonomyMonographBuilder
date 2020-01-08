@@ -46,15 +46,18 @@ AUTHOR_TAXON = 2        # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = False
+DRAW_MAPS = True
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
-CHECK_LOCATIONS = True
+CHECK_LOCATIONS = False
 # this flag controls whether additional location data should be fetched from iNaturalist
-INCLUDE_INAT = False
+INCLUDE_INAT = True
+# Suppress some of the more time-consuming output; only meant for when testing others elements
+OUTPUT_REFS = True
+OUTPUT_LOCS = True
 # these flags control creating print and web output, respectively
-OUTPUT_PRINT = False
+OUTPUT_PRINT = True
 OUTPUT_WEB = True
 
 # randSeed = random.randint(0, 10000)
@@ -5599,13 +5602,14 @@ def build_site() -> None:
                 create_web_output_paths()
                 print("...Creating Web Version...")
                 copy_support_files()
-                print("......Writing References......")
-                with open(WEBOUT_PATH + init_data().ref_url, "w", encoding="utf-8") as outfile:
-                    write_reference_bibliography(outfile, False, references)
-                with open(WEBOUT_PATH + init_data().ref_sum_url, "w", encoding="utf-8") as outfile:
-                    write_reference_summary(outfile, False, len(references), yeardat, yeardat1900, citecount,
-                                            languages, languages_by_year)
-                write_reference_pages(None, False, references, refdict, citelist, name_table, point_locations)
+                if OUTPUT_REFS:
+                    print("......Writing References......")
+                    with open(WEBOUT_PATH + init_data().ref_url, "w", encoding="utf-8") as outfile:
+                        write_reference_bibliography(outfile, False, references)
+                    with open(WEBOUT_PATH + init_data().ref_sum_url, "w", encoding="utf-8") as outfile:
+                        write_reference_summary(outfile, False, len(references), yeardat, yeardat1900, citecount,
+                                                languages, languages_by_year)
+                    write_reference_pages(None, False, references, refdict, citelist, name_table, point_locations)
                 print("......Writing Names Info......")
                 with open(WEBOUT_PATH + "names/index.html", "w", encoding="utf-8") as outfile:
                     write_all_name_pages(outfile, False, refdict, citelist, all_names, specific_names, name_table,
@@ -5618,13 +5622,14 @@ def build_site() -> None:
                 if DRAW_MAPS:
                     print("......Copying Maps......")
                     copy_map_files(species, all_names, specific_names, point_locations)
-                print("......Writing Locations......")
-                with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
-                    write_location_index(outfile, False, point_locations, location_dict, location_species,
-                                         location_sp_names, location_bi_names, location_direct_refs,
-                                         location_cited_refs, references, location_range_species, location_keys)
-                with open(WEBOUT_PATH + init_data().map_url, "w", encoding="utf-8") as outfile:
-                    write_geography_page(outfile, False, species)
+                if OUTPUT_LOCS:
+                    print("......Writing Locations......")
+                    with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
+                        write_location_index(outfile, False, point_locations, location_dict, location_species,
+                                             location_sp_names, location_bi_names, location_direct_refs,
+                                             location_cited_refs, references, location_range_species, location_keys)
+                    with open(WEBOUT_PATH + init_data().map_url, "w", encoding="utf-8") as outfile:
+                        write_geography_page(outfile, False, species)
                 print("......Writing Media Pages......")
                 with open(WEBOUT_PATH + init_data().photo_url, "w", encoding="utf-8") as outfile:
                     write_photo_index(outfile, False, species, photos)
@@ -5665,21 +5670,24 @@ def build_site() -> None:
                     write_all_name_pages(printfile, True, refdict, citelist, all_names, specific_names, name_table,
                                          species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
                                          binomial_point_locations, specific_point_locations, point_locations)
-                    print("......Writing Location Pages......")
-                    write_geography_page(printfile, True, species)
-                    write_location_index(printfile, True, point_locations, location_dict, location_species,
-                                         location_sp_names, location_bi_names, location_direct_refs,
-                                         location_cited_refs, references, location_range_species, None)
+                    if OUTPUT_LOCS:
+                        print("......Writing Location Pages......")
+                        write_geography_page(printfile, True, species)
+                        write_location_index(printfile, True, point_locations, location_dict, location_species,
+                                             location_sp_names, location_bi_names, location_direct_refs,
+                                             location_cited_refs, references, location_range_species, None)
                     print("......Writing Media Pages......")
                     write_main_morphology_pages(printfile, True, morphology)
                     write_photo_index(printfile, True, species, photos)
                     write_video_index(printfile, True, videos)
                     write_all_art_pages(printfile, True, art)
-                    print("......Writing Reference Pages......")
-                    write_reference_summary(printfile, True, len(references), yeardat, yeardat1900, citecount,
-                                            languages, languages_by_year)
-                    write_reference_bibliography(printfile, True, references)
-                    write_reference_pages(printfile, True, references, refdict, citelist, name_table, point_locations)
+                    if OUTPUT_REFS:
+                        print("......Writing Reference Pages......")
+                        write_reference_summary(printfile, True, len(references), yeardat, yeardat1900, citecount,
+                                                languages, languages_by_year)
+                        write_reference_bibliography(printfile, True, references)
+                        write_reference_pages(printfile, True, references, refdict, citelist, name_table,
+                                              point_locations)
                     end_print(printfile)
     end_time = datetime.datetime.now()
     print("End Time:", end_time)
