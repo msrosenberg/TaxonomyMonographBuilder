@@ -3820,24 +3820,24 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
 
     if mdata is not None:
         if do_print:
-            create_species_cw_page(outfile, do_print, species, mdata)
+            create_species_cb_page(outfile, do_print, species, mdata, refdict)
         else:
-            with open(WEBOUT_PATH + "sizes/" + species.species + "_cw.html", "w", encoding="utf-8") as suboutfile:
-                create_species_cw_page(suboutfile, do_print, species, mdata)
+            with open(WEBOUT_PATH + "sizes/" + species.species + "_cb.html", "w", encoding="utf-8") as suboutfile:
+                create_species_cb_page(suboutfile, do_print, species, mdata, refdict)
 
 
-def create_species_cw_page(outfile: TextIO, do_print: bool, species: TMB_Classes.SpeciesClass,
-                           measurement_data: TMB_Classes.SpeciesMeasurements):
+def create_species_cb_page(outfile: TextIO, do_print: bool, species: TMB_Classes.SpeciesClass,
+                           measurement_data: TMB_Classes.SpeciesMeasurements, refdict: dict):
     """
     write species carapace width page
     """
     if do_print:
         start_page_division(outfile, "base_page")
     else:
-        common_html_header(outfile, species.binomial() + " Carapace Width", indexpath="../")
-    outfile.write("    <header id=\"" + species.species + "_cw.html\">\n")
+        common_html_header(outfile, species.binomial() + " Carapace Breadth", indexpath="../")
+    outfile.write("    <header id=\"" + species.species + "_cb.html\">\n")
     outfile.write("      <h1 class=\"nobookmark\"><em class=\"species\">" + species.binomial() +
-                  "</em> Carapace Width</h1>\n")
+                  "</em> Carapace Breadth</h1>\n")
 
     if not do_print:
         outfile.write("      <nav>\n")
@@ -3853,90 +3853,118 @@ def create_species_cw_page(outfile: TextIO, do_print: bool, species: TMB_Classes
     cdat = TMB_Measurements.combine_measurement_data(measurement_data.all)
     mdat = TMB_Measurements.combine_measurement_data(measurement_data.male)
     fdat = TMB_Measurements.combine_measurement_data(measurement_data.female)
-    filename = WEBOUT_PATH + "sizes/" + species.species + "_cw.png"
+    filename = WEBOUT_PATH + "sizes/" + species.species + "_cb.png"
     TMB_Measurements.plot_measurement_data(measurement_data, cdat, mdat, fdat, filename)
 
     outfile.write("    <figure class=\"sizeimg\">\n")
-    outfile.write("      <img src=\"{0}_cw.png\" alt=\"size data for {1}\" "
+    outfile.write("      <img src=\"{0}_cb.png\" alt=\"size data for {1}\" "
                   "title=\"size data for {1}\"/>\n".format(species.species, species.binomial()))
     outfile.write("    </figure>\n")
-    # outfile.write("    <p>&nbsp;</p>\n")
-    with open(WEBOUT_PATH + "sizes/" + species.species + "_cw.txt", "w") as datfile:
+
+    with open(WEBOUT_PATH + "sizes/" + species.species + "_cb.txt", "w") as datfile:
         outfile.write("    <h2>Data</h2>\n")
-        outfile.write("    <p><a href=\"" + species.species + "_cw.txt\">Download Data</a></p>")
+        outfile.write("    <p>All measurements are in millimeters (mm). "
+                      "<a href=\"" + species.species + "_cb.txt\">Download Data</a></p>")
         if "individual" in measurement_data.all:
             outfile.write("    <h3>Individuals</h3>\n")
-            outfile.write("<p>Reference Sex Width Notes</p>\n")
+            outfile.write("<table class=\"size_data_table\">\n")
+            outfile.write("<tr><th>Reference</th><th>Sex</th><th>Width</th><th>Notes</th></tr>\n")
             datfile.write("Individuals\n")
             datfile.write("Reference\tSex\tWidth\tNotes\n")
             idata = measurement_data.all["individual"]
             for d in idata:
-                outfile.write("<p>{} {} {} {}</p>\n".format(d.ref, d.sex, d.value, d.notes))
+                rstr = format_reference_cite(refdict[d.ref], do_print, AUTHOR_PAREN, "../")
+                outfile.write("<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>\n".format(rstr, d.sex, d.value,
+                                                                                               d.notes))
                 datfile.write("{}\t{}\t{}\t{}\n".format(d.ref, d.sex, d.value, d.notes))
+            outfile.write("</table>\n")
             datfile.write("\n")
 
         if "range" in measurement_data.all:
             outfile.write("    <h3>Ranges</h3>\n")
-            outfile.write("<p>Reference Sex n Min Max Notes</p>\n")
+            outfile.write("<table class=\"size_data_table\">\n")
+            outfile.write("<tr><th>Reference</th><th>Sex</th><th>n</th><th>Min</th><th>Max</th><th>Notes</th></tr>\n")
             datfile.write("Ranges\n")
             datfile.write("Reference\tSex\tn\tMin\tMax\tNotes\n")
             idata = measurement_data.all["range"]
             for d in idata:
-                outfile.write("<p>{} {} {} {} {} {}</p>\n".format(d.ref, d.sex, d.n, d.value.min_val, d.value.max_val,
-                                                                  d.notes))
+                rstr = format_reference_cite(refdict[d.ref], do_print, AUTHOR_PAREN, "../")
+                outfile.write("<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td>"
+                              "<td>{}</td><td>{}</td></tr>\n".format(rstr, d.sex, d.n, d.value.min_val,
+                                                                     d.value.max_val, d.notes))
                 datfile.write("{}\t{}\t{}\t{}\t{}\t{}\n".format(d.ref, d.sex, d.n, d.value.min_val, d.value.max_val,
                                                                 d.notes))
+            outfile.write("</table>\n")
             datfile.write("\n")
 
         if "mean" in measurement_data.all:
             outfile.write("    <h3>Means</h3>\n")
-            outfile.write("<p>Reference Sex n Mean Notes</p>\n")
+            outfile.write("<table class=\"size_data_table\">\n")
+            outfile.write("<tr><th>Reference</th><th>Sex</th><th>n</th><th>Mean</th><th>Notes</th></tr>\n")
             datfile.write("Means\n")
             datfile.write("Reference\tSex\tn\tMean\tNotes\n")
             idata = measurement_data.all["mean"]
             for d in idata:
-                outfile.write("<p>{} {} {} {} {}</p>\n".format(d.ref, d.sex, d.n, d.value.mean, d.notes))
+                rstr = format_reference_cite(refdict[d.ref], do_print, AUTHOR_PAREN, "../")
+                outfile.write("<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td>"
+                              "<td>{}</td></tr>\n".format(rstr, d.sex, d.n, d.value.mean, d.notes))
                 datfile.write("{}\t{}\t{}\t{}\t{}\n".format(d.ref, d.sex, d.n, d.value.mean, d.notes))
+            outfile.write("</table>\n")
             datfile.write("\n")
 
         if "mean/sd" in measurement_data.all:
             outfile.write("    <h3>Means w/Standard Deviation</h3>\n")
-            outfile.write("<p>Reference Sex n Mean SD Notes</p>\n")
+            outfile.write("<table class=\"size_data_table\">\n")
+            outfile.write("<tr><th>Reference</th><th>Sex</th><th>n</th><th>Mean</th><th>SD</th><th>Notes</th></tr>\n")
             datfile.write("Means w/Standard Deviation\n")
             datfile.write("Reference\tSex\tn\tMean\tSD\tNotes\n")
             idata = measurement_data.all["mean/sd"]
             for d in idata:
-                outfile.write("<p>{} {} {} {} {} {}</p>\n".format(d.ref, d.sex, d.n, d.value.mean, d.value.sd, d.notes))
+                rstr = format_reference_cite(refdict[d.ref], do_print, AUTHOR_PAREN, "../")
+                outfile.write("<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td>"
+                              "<td>{}</td></tr>\n".format(rstr, d.sex, d.n, d.value.mean, d.value.sd, d.notes))
                 datfile.write("{}\t{}\t{}\t{}\t{}\t{}\n".format(d.ref, d.sex, d.n, d.value.mean, d.value.sd, d.notes))
+            outfile.write("</table>\n")
             datfile.write("\n")
 
         if "mean/se" in measurement_data.all:
             outfile.write("    <h3>Means w/Standard Error</h3>\n")
-            outfile.write("<p>Reference Sex n Mean SE Notes</p>\n")
+            outfile.write("<table class=\"size_data_table\">\n")
+            outfile.write("<tr><th>Reference</th><th>Sex</th><th>n</th><th>Mean</th><th>SE</th><th>Notes</th></tr>\n")
             datfile.write("Means w/Standard Error\n")
             datfile.write("Reference\tSex\tn\tMean\tSE\tNotes\n")
             idata = measurement_data.all["mean/se"]
             for d in idata:
-                outfile.write("<p>{} {} {} {} {} {}</p>\n".format(d.ref, d.sex, d.n, d.value.mean, d.value.se, d.notes))
+                rstr = format_reference_cite(refdict[d.ref], do_print, AUTHOR_PAREN, "../")
+                outfile.write("<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td>"
+                              "<td>{}</td></tr>\n".format(rstr, d.sex, d.n, d.value.mean, d.value.se, d.notes))
                 datfile.write("{}\t{}\t{}\t{}\t{}\t{}\n".format(d.ref, d.sex, d.n, d.value.mean, d.value.se, d.notes))
+            outfile.write("</table>\n")
             datfile.write("\n")
 
         if "mean/sd/min/max" in measurement_data.all:
             outfile.write("    <h3>Means w/Range and Standard Deviation</h3>\n")
-            outfile.write("<p>Reference Sex n Mean SD Min Max Notes</p>\n")
+            outfile.write("<table class=\"size_data_table\">\n")
+            outfile.write("<tr><th>Reference</th><th>Sex</th><th>n</th><th>Mean</th><th>SD</th><th>Min</th>"
+                          "<th>Max</th><th>Notes</th></tr>\n")
             datfile.write("Means w/Range and Standard Deviation\n")
             datfile.write("Reference\tSex\tn\tMean\tSD\tMin\tMax\tNotes\n")
             idata = measurement_data.all["mean/sd/min/max"]
             for d in idata:
-                outfile.write("<p>{} {} {} {} {} {} {} {}</p>\n".format(d.ref, d.sex, d.n, d.value.mean, d.value.sd,
-                                                                        d.value.min_val, d.value.max_val, d.notes))
+                rstr = format_reference_cite(refdict[d.ref], do_print, AUTHOR_PAREN, "../")
+                outfile.write("<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td>"
+                              "<td>{}</td></tr>\n".format(rstr, d.sex, d.n, d.value.mean, d.value.sd,
+                                                          d.value.min_val, d.value.max_val, d.notes))
                 outfile.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(d.ref, d.sex, d.n, d.value.mean, d.value.sd,
                                                                         d.value.min_val, d.value.max_val, d.notes))
+            outfile.write("</table>\n")
             datfile.write("\n")
 
         if "classcount" in measurement_data.all:
             outfile.write("    <h3>Histogram Counts</h3>\n")
-            outfile.write("<p>Reference Set Sex n Min Max Notes</p>\n")
+            outfile.write("<table class=\"size_data_table\">\n")
+            outfile.write("<tr><th>Reference</th><th>Set</th><th>Sex</th><th>n</th><th>Min</th><th>Max</th>"
+                          "<th>Notes</th></tr>\n")
             datfile.write("Histogram Counts\n")
             datfile.write("Reference\tSet\tSex\tn\tMin\tMax\tNotes\n")
             idata = measurement_data.all["classcount"]
@@ -3949,11 +3977,15 @@ def create_species_cw_page(outfile: TextIO, do_print: bool, species: TMB_Classes
                     if c == d.class_id:
                         current_class.append(d)
                 for d in current_class:
-                    outfile.write("<p>{} {} {} {} {} {} {}</p>\n".format(d.ref, c, d.sex, d.n, d.value.min_val,
-                                                                         d.value.max_val, d.notes))
+                    rstr = format_reference_cite(refdict[d.ref], do_print, AUTHOR_PAREN, "../")
+                    outfile.write("<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td>"
+                                  "<td>{}</td></tr>\n".format(rstr, c, d.sex, d.n, d.value.min_val, d.value.max_val,
+                                                              d.notes))
                     datfile.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(d.ref, c, d.sex, d.n, d.value.min_val,
                                                                         d.value.max_val, d.notes))
+                outfile.write("<tr><td colspan=7>&nbsp;</td></tr>\n")
                 datfile.write("\n")
+            outfile.write("</table>\n")
 
     if do_print:
         end_page_division(outfile)
