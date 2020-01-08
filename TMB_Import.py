@@ -390,3 +390,53 @@ def read_species_blocks(filename: str) -> dict:
             blocks.setdefault(species, []).append(TMB_Classes.RangeBlock(eval(startlat), eval(startlon),
                                                                          eval(endlat), eval(endlon)))
     return blocks
+
+
+def read_measurement_data(filename: str) -> list:
+    data = []
+    with open(filename, "r") as infile:
+        dat = infile.readlines()
+        for line in dat[2:]:
+            d = line.strip().split("\t")
+            if d[6] != "skip" and (d[9] != "." or d[10] != "."):  # used to skip redundant data or non-CW data
+                new = TMB_Classes.Measurement()
+                new.ref = d[0]
+                new.location = d[1]
+                new.id = d[2]
+                new.species = d[3]
+                new.sex = d[4]
+                new.notes = d[5]
+                new.type = d[7]
+                if new.type == "individual":
+                    new.value = eval(d[9])
+                elif new.type == "range":
+                    try:
+                        new.n = int(d[8])
+                    except ValueError:
+                        new.n = 2  # a range requires a minimum of two individuals
+                    new.value = TMB_Classes.MeasurementRange()
+                    new.value.min_val = eval(d[10])
+                    new.value.max_val = eval(d[11])
+                elif "mean" in new.type:
+                    try:
+                        new.n = int(d[8])
+                    except ValueError:
+                        new.n = 1  # a mean requires a minimumof one individual
+                    new.value = TMB_Classes.MeasurementMean()
+                    new.value.mean = eval(d[9])
+                    if new.type == "mean/sd":
+                        new.value.sd = eval(d[12])
+                    elif new.type == "mean/se":
+                        new.value.se = eval(d[13])
+                    elif new.type == "mean/sd/min/max":
+                        new.value.sd = eval(d[12])
+                        new.value.min_val = eval(d[10])
+                        new.value.max_val = eval(d[11])
+                elif "classcount" in new.type:
+                    new.n = eval(d[8])  # allow for floating sample sizes due to averaging across samples
+                    new.value = TMB_Classes.MeasurementRange()
+                    new.value.min_val = eval(d[10])
+                    new.value.max_val = eval(d[11])
+                    new.class_id = d[6]
+                data.append(new)
+    return data

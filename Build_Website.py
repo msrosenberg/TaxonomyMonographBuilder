@@ -4,7 +4,7 @@ Taxonomy Monograph Builder
 
 # built-in dependencies
 import datetime
-# import random
+import random
 import os
 import shutil
 import re
@@ -24,6 +24,7 @@ import TMB_Initialize
 import TMB_Classes
 import TMB_Create_Graphs
 import TMB_TaxKeyGen
+import TMB_Measurements
 from TMB_SpeciesXRef import init_species_crossref, find_species_by_name
 import phy2html
 
@@ -46,18 +47,18 @@ AUTHOR_TAXON = 2        # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = True
+DRAW_MAPS = False
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
 CHECK_LOCATIONS = False
 # this flag controls whether additional location data should be fetched from iNaturalist
-INCLUDE_INAT = True
+INCLUDE_INAT = False
 # Suppress some of the more time-consuming output; only meant for when testing others elements
-OUTPUT_REFS = True
-OUTPUT_LOCS = True
+OUTPUT_REFS = False
+OUTPUT_LOCS = False
 # these flags control creating print and web output, respectively
-OUTPUT_PRINT = True
+OUTPUT_PRINT = False
 OUTPUT_WEB = True
 
 # randSeed = random.randint(0, 10000)
@@ -3520,7 +3521,7 @@ def write_reference_list(outfile: TextIO, do_print: bool, references: list, cita
 def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.SpeciesClass, references: list,
                        specific_names: list, all_names: list, photos: list, videos: list, artlist: list,
                        sprefs: dict, refdict: dict, binomial_name_counts: dict, specific_name_cnts: dict,
-                       higher_dict: dict) -> None:
+                       higher_dict: dict, measurement_data: dict) -> None:
     """
     create the master page for a valid species
     """
@@ -3547,12 +3548,16 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
             end_google_map_header(outfile)
             common_header_part2(outfile, include_map=True)
 
+    if species.species in measurement_data:
+        mdata = measurement_data[species.species]
+    else:
+        mdata = None
+
     outfile.write("    <header id=\"u_" + species.species + ".html\">\n")
     if is_fossil:
         sc = FOSSIL_IMAGE
     else:
         sc = ""
-    # outfile.write("      <h1 class=\"species bookmark2\">Uca " + species.species + sc + "</h1>\n")
     outfile.write("      <h1 class=\"species bookmark2\">" + species.binomial() + sc + "</h1>\n")
     if is_fossil:
         outfile.write("      <h2 class=\"nobookmark\">Fossil</h2>\n")
@@ -3812,6 +3817,50 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
             with open(WEBOUT_PATH + "names/synonyms_" + species.species + ".html", "w", encoding="utf-8") as suboutfile:
                 create_synonym_chronology(suboutfile, do_print, species.species, binomial_synlist, binomial_name_counts,
                                           specific_synlist, specific_name_cnts)
+
+    if mdata is not None:
+        if do_print:
+            create_species_cw_page(outfile, do_print, species, mdata)
+        else:
+            with open(WEBOUT_PATH + "sizes/" + species.species + "_cw.html", "w", encoding="utf-8") as suboutfile:
+                create_species_cw_page(suboutfile, do_print, species, mdata)
+
+
+def create_species_cw_page(outfile: TextIO, do_print: bool, species: TMB_Classes.SpeciesClass,
+                           measurement_data: TMB_Classes.SpeciesMeasurements):
+    """
+    write species carapace width page
+    """
+    if do_print:
+        start_page_division(outfile, "base_page")
+    else:
+        common_html_header(outfile, species.binomial() + " Carapace Width", indexpath="../")
+    outfile.write("    <header id=\"" + species.species + "_cw.html\">\n")
+    outfile.write("      <h1 class=\"nobookmark\">" + species.binomial() + " Carapace Width</h1>\n")
+
+    if not do_print:
+        outfile.write("      <nav>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + species.species +
+                      ".html\">" + fetch_fa_glyph("info") + "Species page</a></li>\n")
+        outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("tax key") +
+                      "Measurement Guide</a></li>\n")
+        outfile.write("        </ul>\n")
+        outfile.write("      </nav>\n")
+    outfile.write("    </header>\n")
+    outfile.write("    <p>&nbsp;</p>\n")
+
+    cdat = TMB_Measurements.combine_measurement_data(measurement_data.all)
+    mdat = TMB_Measurements.combine_measurement_data(measurement_data.male)
+    fdat = TMB_Measurements.combine_measurement_data(measurement_data.female)
+    TMB_Measurements.plot_measurement_data(species.species, measurement_data, cdat, mdat, fdat)
+
+    outfile.write("    <img src=\"" + species.species + "_cw.png\" />\n")
+
+    if do_print:
+        end_page_division(outfile)
+    else:
+        common_html_footer(outfile)
 
 
 def write_photo_index(outfile: TextIO, do_print: bool, specieslist: list, photos: list) -> None:
@@ -4237,7 +4286,7 @@ def write_all_art_pages(outfile: Optional[TextIO], do_print: bool, artlist: list
 def write_species_info_pages(outfile: Optional[TextIO], do_print: bool, specieslist: list, references: list,
                              specific_names: list, all_names: list, photos: list, videos: list, art: list,
                              species_refs: dict, refdict: dict, binomial_name_cnts: dict,
-                             specific_name_cnts: dict, higher_dict: dict) -> None:
+                             specific_name_cnts: dict, higher_dict: dict, measurement_data: dict) -> None:
     """
     create the species index and all individual species pages
     """
@@ -4251,11 +4300,12 @@ def write_species_info_pages(outfile: Optional[TextIO], do_print: bool, speciesl
         sprefs = species_refs[species.species]
         if do_print:
             write_species_page(outfile, True, species, references, specific_names, all_names, photos, videos, art,
-                               sprefs, refdict, binomial_name_cnts, specific_name_cnts, higher_dict)
+                               sprefs, refdict, binomial_name_cnts, specific_name_cnts, higher_dict, measurement_data)
         else:
             with open(WEBOUT_PATH + "u_" + species.species + ".html", "w", encoding="utf-8") as suboutfile:
                 write_species_page(suboutfile, False, species, references, specific_names, all_names, photos, videos,
-                                   art, sprefs, refdict, binomial_name_cnts, specific_name_cnts, higher_dict)
+                                   art, sprefs, refdict, binomial_name_cnts, specific_name_cnts, higher_dict,
+                                   measurement_data)
 
 
 # def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: list, higher_taxa_list: list,
@@ -5159,6 +5209,7 @@ def create_web_output_paths() -> None:
     create_path_and_index("locations/")
     create_path_and_index("locations/keys/")
     create_path_and_index("js/")
+    create_path_and_index("sizes/")
 
 
 def create_temp_output_paths() -> None:
@@ -5562,6 +5613,9 @@ def build_site() -> None:
 
         genera_tree, species_tree = create_html_phylogenies()
 
+        measurement_data = TMB_Import.read_measurement_data(init_data().measurement_file)
+        measurement_data = TMB_Measurements.sort_measurement_data(measurement_data)
+
         if INCLUDE_INAT and (not CHECK_DATA):
             species_inat = TMB_Import.fetch_inat_data(species)
             # for s in species:
@@ -5618,7 +5672,7 @@ def build_site() -> None:
                 print("......Writing Species......")
                 write_species_info_pages(None, False, species, references, specific_names, all_names, photos, videos,
                                          art, species_refs, refdict, binomial_name_cnts, specific_name_cnts,
-                                         higher_dict)
+                                         higher_dict, measurement_data)
                 if DRAW_MAPS:
                     print("......Copying Maps......")
                     copy_map_files(species, all_names, specific_names, point_locations)
@@ -5665,7 +5719,7 @@ def build_site() -> None:
                     print("......Writing Species Pages......")
                     write_species_info_pages(printfile, True, species, references, specific_names, all_names, photos,
                                              videos, art, species_refs, refdict, binomial_name_cnts, specific_name_cnts,
-                                             higher_dict)
+                                             higher_dict, measurement_data)
                     print("......Writing Name Pages......")
                     write_all_name_pages(printfile, True, refdict, citelist, all_names, specific_names, name_table,
                                          species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
@@ -5698,6 +5752,7 @@ def build_site() -> None:
 def main():
     # will eventually need to put options here for choosing different paths, etc.
     TMB_Initialize.initialize()
+    random.seed()
     # will need to read options from file
     build_site()
 

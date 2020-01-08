@@ -32,6 +32,7 @@ class InitializationData:
         self.species_changes_spelling = "data/species_changes_spelling.txt"
         self.species_changes_synonyms = "data/species_changes_synonyms.txt"
         self.species_range_blocks = "data/species_range_blocks.txt"
+        self.measurement_file = "data/measurement_data.txt"
 
         # taxonomic key data
         self.tax_key_trait_file = "data/tax_key_trait_data.txt"

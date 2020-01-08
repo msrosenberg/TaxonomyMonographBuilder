@@ -291,3 +291,43 @@ class INatData:
     def __init__(self, coords: Point = None, url: str = ""):
         self.coords = coords
         self.url = url
+
+
+class MeasurementRange:
+    def __init__(self):
+        self.min_val = 0
+        self.max_val = 0
+
+    def midpoint(self):
+        return self.min_val + (self.max_val - self.min_val)/2
+
+
+class MeasurementMean:
+    def __init__(self):
+        self.mean = 0
+        self.sd = None
+        self.se = None
+        self.min_val = None
+        self.max_val = None
+
+
+class Measurement:
+    def __init__(self):
+        self.ref = ""
+        self.location = ""
+        self.id = ""
+        self.species = ""
+        self.sex = ""
+        self.notes = ""
+        self.type = ""
+        self.n = 0
+        self.value = None
+        self.class_id = None
+
+
+class SpeciesMeasurements:
+    def __init__(self):
+        self.other = {}
+        self.male = {}
+        self.female = {}
+        self.all = {}
