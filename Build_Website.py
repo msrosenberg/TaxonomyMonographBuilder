@@ -3836,7 +3836,8 @@ def create_species_cw_page(outfile: TextIO, do_print: bool, species: TMB_Classes
     else:
         common_html_header(outfile, species.binomial() + " Carapace Width", indexpath="../")
     outfile.write("    <header id=\"" + species.species + "_cw.html\">\n")
-    outfile.write("      <h1 class=\"nobookmark\">" + species.binomial() + " Carapace Width</h1>\n")
+    outfile.write("      <h1 class=\"nobookmark\"><em class=\"species\">" + species.binomial() +
+                  "</em> Carapace Width</h1>\n")
 
     if not do_print:
         outfile.write("      <nav>\n")
@@ -3856,7 +3857,10 @@ def create_species_cw_page(outfile: TextIO, do_print: bool, species: TMB_Classes
     filename = WEBOUT_PATH + "sizes/" + species.species + "_cw.png"
     TMB_Measurements.plot_measurement_data(measurement_data, cdat, mdat, fdat, filename)
 
-    outfile.write("    <img src=\"" + species.species + "_cw.png\" />\n")
+    outfile.write("    <figure class=\"sizeimg\">\n")
+    outfile.write("      <img src=\"{0}_cw.png\" alt=\"size data for {1}\" "
+                  "title=\"size data for {1}\"/>\n".format(species.species, species.binomial()))
+    outfile.write("    </figure>\n")
 
     if do_print:
         end_page_division(outfile)
