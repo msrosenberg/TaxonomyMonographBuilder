@@ -270,7 +270,7 @@ def plot_combined_data(faxes, combined_data, yv, color):
     return yv
 
 
-def plot_measurement_data(species, species_dat, combined_data, comb_male_data, comb_female_data):
+def plot_measurement_data(species_dat, combined_data, comb_male_data, comb_female_data, filename):
     fig, faxes = mplpy.subplots(figsize=[6, 6])
     faxes.spines["right"].set_visible(False)
     faxes.spines["top"].set_visible(False)
@@ -321,7 +321,7 @@ def plot_measurement_data(species, species_dat, combined_data, comb_male_data, c
                     Line2D([0], [0], color="red", lw=4)]
     faxes.legend(custom_lines, ["All", "Males", "Females"], ncol=3, loc="lower center", bbox_to_anchor=(0.5, 1.01))
 
-    mplpy.savefig("sizes/" + species + "_cw.png", format="png", dpi=600)
+    mplpy.savefig(filename, format="png", dpi=600)
     mplpy.close("all")
 
 

@@ -3853,7 +3853,8 @@ def create_species_cw_page(outfile: TextIO, do_print: bool, species: TMB_Classes
     cdat = TMB_Measurements.combine_measurement_data(measurement_data.all)
     mdat = TMB_Measurements.combine_measurement_data(measurement_data.male)
     fdat = TMB_Measurements.combine_measurement_data(measurement_data.female)
-    TMB_Measurements.plot_measurement_data(species.species, measurement_data, cdat, mdat, fdat)
+    filename = WEBOUT_PATH + "sizes/" + species.species + "_cw.png"
+    TMB_Measurements.plot_measurement_data(measurement_data, cdat, mdat, fdat, filename)
 
     outfile.write("    <img src=\"" + species.species + "_cw.png\" />\n")
 
