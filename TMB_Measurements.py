@@ -129,8 +129,6 @@ def combine_measurement_data(data):
     return cdata
 
 
-
-
 def plot_individuals(faxes, data, yv, color):
     if "individual" in data:
         idata = data["individual"]

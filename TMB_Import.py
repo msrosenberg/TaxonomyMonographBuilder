@@ -405,7 +405,8 @@ def read_measurement_data(filename: str) -> list:
                 new.id = d[2]
                 new.species = d[3]
                 new.sex = d[4]
-                new.notes = d[5]
+                if d[5] != ".":
+                    new.notes = d[5]
                 new.type = d[7]
                 if new.type == "individual":
                     new.value = eval(d[9])

@@ -3849,7 +3849,6 @@ def create_species_cw_page(outfile: TextIO, do_print: bool, species: TMB_Classes
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
-    outfile.write("    <p>&nbsp;</p>\n")
 
     cdat = TMB_Measurements.combine_measurement_data(measurement_data.all)
     mdat = TMB_Measurements.combine_measurement_data(measurement_data.male)
@@ -3861,6 +3860,100 @@ def create_species_cw_page(outfile: TextIO, do_print: bool, species: TMB_Classes
     outfile.write("      <img src=\"{0}_cw.png\" alt=\"size data for {1}\" "
                   "title=\"size data for {1}\"/>\n".format(species.species, species.binomial()))
     outfile.write("    </figure>\n")
+    # outfile.write("    <p>&nbsp;</p>\n")
+    with open(WEBOUT_PATH + "sizes/" + species.species + "_cw.txt", "w") as datfile:
+        outfile.write("    <h2>Data</h2>\n")
+        outfile.write("    <p><a href=\"" + species.species + "_cw.txt\">Download Data</a></p>")
+        if "individual" in measurement_data.all:
+            outfile.write("    <h3>Individuals</h3>\n")
+            outfile.write("<p>Reference Sex Width Notes</p>\n")
+            datfile.write("Individuals\n")
+            datfile.write("Reference\tSex\tWidth\tNotes\n")
+            idata = measurement_data.all["individual"]
+            for d in idata:
+                outfile.write("<p>{} {} {} {}</p>\n".format(d.ref, d.sex, d.value, d.notes))
+                datfile.write("{}\t{}\t{}\t{}\n".format(d.ref, d.sex, d.value, d.notes))
+            datfile.write("\n")
+
+        if "range" in measurement_data.all:
+            outfile.write("    <h3>Ranges</h3>\n")
+            outfile.write("<p>Reference Sex n Min Max Notes</p>\n")
+            datfile.write("Ranges\n")
+            datfile.write("Reference\tSex\tn\tMin\tMax\tNotes\n")
+            idata = measurement_data.all["range"]
+            for d in idata:
+                outfile.write("<p>{} {} {} {} {} {}</p>\n".format(d.ref, d.sex, d.n, d.value.min_val, d.value.max_val,
+                                                                  d.notes))
+                datfile.write("{}\t{}\t{}\t{}\t{}\t{}\n".format(d.ref, d.sex, d.n, d.value.min_val, d.value.max_val,
+                                                                d.notes))
+            datfile.write("\n")
+
+        if "mean" in measurement_data.all:
+            outfile.write("    <h3>Means</h3>\n")
+            outfile.write("<p>Reference Sex n Mean Notes</p>\n")
+            datfile.write("Means\n")
+            datfile.write("Reference\tSex\tn\tMean\tNotes\n")
+            idata = measurement_data.all["mean"]
+            for d in idata:
+                outfile.write("<p>{} {} {} {} {}</p>\n".format(d.ref, d.sex, d.n, d.value.mean, d.notes))
+                datfile.write("{}\t{}\t{}\t{}\t{}\n".format(d.ref, d.sex, d.n, d.value.mean, d.notes))
+            datfile.write("\n")
+
+        if "mean/sd" in measurement_data.all:
+            outfile.write("    <h3>Means w/Standard Deviation</h3>\n")
+            outfile.write("<p>Reference Sex n Mean SD Notes</p>\n")
+            datfile.write("Means w/Standard Deviation\n")
+            datfile.write("Reference\tSex\tn\tMean\tSD\tNotes\n")
+            idata = measurement_data.all["mean/sd"]
+            for d in idata:
+                outfile.write("<p>{} {} {} {} {} {}</p>\n".format(d.ref, d.sex, d.n, d.value.mean, d.value.sd, d.notes))
+                datfile.write("{}\t{}\t{}\t{}\t{}\t{}\n".format(d.ref, d.sex, d.n, d.value.mean, d.value.sd, d.notes))
+            datfile.write("\n")
+
+        if "mean/se" in measurement_data.all:
+            outfile.write("    <h3>Means w/Standard Error</h3>\n")
+            outfile.write("<p>Reference Sex n Mean SE Notes</p>\n")
+            datfile.write("Means w/Standard Error\n")
+            datfile.write("Reference\tSex\tn\tMean\tSE\tNotes\n")
+            idata = measurement_data.all["mean/se"]
+            for d in idata:
+                outfile.write("<p>{} {} {} {} {} {}</p>\n".format(d.ref, d.sex, d.n, d.value.mean, d.value.se, d.notes))
+                datfile.write("{}\t{}\t{}\t{}\t{}\t{}\n".format(d.ref, d.sex, d.n, d.value.mean, d.value.se, d.notes))
+            datfile.write("\n")
+
+        if "mean/sd/min/max" in measurement_data.all:
+            outfile.write("    <h3>Means w/Range and Standard Deviation</h3>\n")
+            outfile.write("<p>Reference Sex n Mean SD Min Max Notes</p>\n")
+            datfile.write("Means w/Range and Standard Deviation\n")
+            datfile.write("Reference\tSex\tn\tMean\tSD\tMin\tMax\tNotes\n")
+            idata = measurement_data.all["mean/sd/min/max"]
+            for d in idata:
+                outfile.write("<p>{} {} {} {} {} {} {} {}</p>\n".format(d.ref, d.sex, d.n, d.value.mean, d.value.sd,
+                                                                        d.value.min_val, d.value.max_val, d.notes))
+                outfile.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(d.ref, d.sex, d.n, d.value.mean, d.value.sd,
+                                                                        d.value.min_val, d.value.max_val, d.notes))
+            datfile.write("\n")
+
+        if "classcount" in measurement_data.all:
+            outfile.write("    <h3>Histogram Counts</h3>\n")
+            outfile.write("<p>Reference Set Sex n Min Max Notes</p>\n")
+            datfile.write("Histogram Counts\n")
+            datfile.write("Reference\tSet\tSex\tn\tMin\tMax\tNotes\n")
+            idata = measurement_data.all["classcount"]
+            classes = set()
+            for d in idata:
+                classes.add(d.class_id)
+            for c in classes:
+                current_class = []
+                for d in idata:
+                    if c == d.class_id:
+                        current_class.append(d)
+                for d in current_class:
+                    outfile.write("<p>{} {} {} {} {} {} {}</p>\n".format(d.ref, c, d.sex, d.n, d.value.min_val,
+                                                                         d.value.max_val, d.notes))
+                    datfile.write("{}\t{}\t{}\t{}\t{}\t{}\t{}\n".format(d.ref, c, d.sex, d.n, d.value.min_val,
+                                                                        d.value.max_val, d.notes))
+                datfile.write("\n")
 
     if do_print:
         end_page_division(outfile)
