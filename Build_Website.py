@@ -346,6 +346,8 @@ def fetch_fa_glyph(glyph: Optional[str]) -> str:
             x += " fa-check-circle\" aria-hidden"
         elif glyph == "download":
             x += " fa-download\" aria-hidden"
+        elif glyph == "file download":
+            x += " fa-file-download\" aria-hidden"
         elif glyph == "maps":
             x += "r fa-map\" aria-hidden"
         elif glyph == "photo":
@@ -356,6 +358,8 @@ def fetch_fa_glyph(glyph: Optional[str]) -> str:
             x += " fa-book\" aria-hidden"
         elif glyph == "art":
             x += " fa-paint-brush\" aria-hidden"
+        elif glyph == "measure":
+            x += "r fa-ruler\" aria-hidden"
         elif glyph == "list pdf":
             x += "-li far fa-file-pdf\" aria-hidden"
         elif glyph == "list github":
@@ -3844,7 +3848,7 @@ def create_species_cb_page(outfile: TextIO, do_print: bool, species: TMB_Classes
         outfile.write("        <ul>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + species.species +
                       ".html\">" + fetch_fa_glyph("info") + "Species page</a></li>\n")
-        outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("tax key") +
+        outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("measure") +
                       "Measurement Guide</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
@@ -3863,8 +3867,8 @@ def create_species_cb_page(outfile: TextIO, do_print: bool, species: TMB_Classes
 
     with open(WEBOUT_PATH + "sizes/" + species.species + "_cb.txt", "w") as datfile:
         outfile.write("    <h2>Data</h2>\n")
-        outfile.write("    <p>All measurements are in millimeters (mm). "
-                      "<a href=\"" + species.species + "_cb.txt\">Download Data</a></p>")
+        outfile.write("    <p>All measurements are in millimeters (mm). <a href=\"" + species.species + "_cb.txt\">" +
+                      fetch_fa_glyph("file download") + " Download Data</a></p>")
         if "individual" in measurement_data.all:
             outfile.write("    <h3>Individuals</h3>\n")
             outfile.write("<table class=\"size_data_table\">\n")
@@ -4436,6 +4440,163 @@ def write_species_info_pages(outfile: Optional[TextIO], do_print: bool, speciesl
                 write_species_page(suboutfile, False, species, references, specific_names, all_names, photos, videos,
                                    art, sprefs, refdict, binomial_name_cnts, specific_name_cnts, higher_dict,
                                    measurement_data)
+
+    if do_print:
+        write_measurement_guide(outfile, True)
+    else:
+        with open(WEBOUT_PATH + "sizes/index.html", "w") as suboutfile:
+            write_measurement_guide(suboutfile, False)
+
+
+def write_measurement_guide(outfile: TextIO, do_print: bool):
+    """
+    output a general guide to the measurement data
+    """
+    if do_print:
+        start_page_division(outfile, "base_page")
+    else:
+        common_html_header(outfile, "Fiddler Crab Carapace Breadth Measurements", indexpath="../")
+    outfile.write("    <header id=\"size_index.html\">\n")
+    outfile.write("      <h1 class=\"nobookmark\">Carapace Breadth Guide</h1>\n")
+    if not do_print:
+        outfile.write("      <nav>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("          <li><a href=\"../" + init_data().species_url + "\">" + fetch_fa_glyph("index") +
+                      "Species List</a></li>\n")
+        outfile.write("        </ul>\n")
+        outfile.write("      </nav>\n")
+    outfile.write("    </header>\n")
+    outfile.write("\n")
+    outfile.write("    <section class=\"topspsection\">\n")
+    outfile.write("      <p>\n")
+    outfile.write("          This is a general guide to the data and figures on fiddler crab size on the site. At "
+                  "this time size is presented as carapace width (or breadth). This is either measured as the "
+                  "maximum breadth of the carapace or the distance between the tips of the antero-lateral angles; "
+                  "usually (although not always) these are the same thing, although the difference is always "
+                  "minor when there is one. All measurements are presented in millimeters (mm).")
+    outfile.write("      </p>\n")
+    outfile.write("<figure class=\"morphimg\">\n")
+    outfile.write("  <img src=\"../morphology/carapace2.png\" "
+                  "alt=\"Illustration of carpace width and length. Figure modified from Crane (1975).\" "
+                  "title=\"Illustration of carpace width and length. Figure modified from Crane (1975).\" />\n")
+    outfile.write("  <figcaption>Illustration of carpace width and length. "
+                  "Figure modified from Crane (1975).</figcaption>\n")
+    outfile.write("</figure>\n")
+    outfile.write("      <p>\n")
+    outfile.write("          For each species, the bottom part of its size page lists all of the data values, "
+                  "including source. In some cases data was extracted from figues (should be indicated in the notes). "
+                  "The data for each species can also be downloaded as a tab-separated text document. The top "
+                  "of each page begins with a graphical illustration of all of the data, including a summary "
+                  "figure which integrates all of the data into a single estimated distribution. Different types of "
+                  "data are displayed in a different manner in the figures, and are described below.")
+    outfile.write("      </p>\n")
+    outfile.write("      <p>\n")
+    outfile.write("         As a general rule, data are added to the figure from the bottom up. Blue data points and "
+                  "images refer to male data, red refers to female data, and black refers to mixed/combined/"
+                  "sex-unspecified data. Male data and female data are always plotted separately, except when "
+                  "combined into the summary distribution (black) at the top of each figure.")
+    outfile.write("      </p>\n")
+    outfile.write("      <h2>Individuals</h2>\n")
+    outfile.write("      <p>\n")
+    outfile.write("         The most sraight-forward data are direct measurements of individuals. These are "
+                  "graphically displayed as round points at the bottom of each figure. The vertical shifting of the "
+                  "points is meaningless, arbitrary noise used to help better display the density of similar "
+                  "measurements.")
+    outfile.write("      </p>\n")
+    outfile.write("<figure class=\"morphimg\">\n")
+    outfile.write("  <img src=\"../images/size_ind.png\" alt=\"Example of individual size plot.\" "
+                  "title=\"Example of individual size plot.\" />\n")
+    outfile.write("</figure>\n")
+    outfile.write("      <h2>Ranges</h2>\n")
+    outfile.write("      <p>\n")
+    outfile.write("         Range data represents the largest and smallest values for a group of individuals, "
+                  "including sample size when available. When unavailable, the sample size was assumed to be 2 as "
+                  "this is the miniumm number necessary to create a range. Ranges are drawn as horizontal lines with "
+                  "vertical endcaps representing the minimum and maximum widths. Each range is drawn separately; "
+                  "sample size is not indicated on the graph (but is in the data table).")
+    outfile.write("      </p>\n")
+    outfile.write("<figure class=\"morphimg\">\n")
+    outfile.write("  <img src=\"../images/size_range.png\" alt=\"Example of range plots.\" "
+                  "title=\"Example of range plots.\" />\n")
+    outfile.write("</figure>\n")
+    outfile.write("      <h2>Means</h2>\n")
+    outfile.write("      <p>\n")
+    outfile.write("         Means represent average sizes of a sample. Reported means may include sample size, "
+                  "standard deviation, standard error, and even minimum and maximum values. Sometimes they include "
+                  "none of these (in which case the sample size is assumed to be 1, <em>i.e.,</em> equivalent to an "
+                  "individual. Each combination of data reporting is listed in a separate data table. Visually, "
+                  "means are drawn on the figure as diamonds, each on it's own line. A 95% confidence interval is "
+                  "included when an SD or SE is available. If both SD and min/max are available, the figure "
+                  "includes both a thicker line indicating the 95% CI and a thinner line with vertical endcaps "
+                  "indicating the maximum and minimum values.")
+    outfile.write("      </p>\n")
+    outfile.write("<figure class=\"morphimg\">\n")
+    outfile.write("  <img src=\"../images/size_mean.png\" alt=\"Example of means plots.\" "
+                  "title=\"Example of means plots.\" />\n")
+    outfile.write("</figure>\n")
+    outfile.write("      <h2>Histograms</h2>\n")
+    outfile.write("      <p>\n")
+    outfile.write("       Occasionally a size distribution is available as a histogram. In this case, the data is "
+                  "presented as the min and max of each histogram bar and the sample size (height) of the bar. "
+                  "Bars for the same histogram are labeled in the data by a unique set name. Histograms are drawn "
+                  "on the figure as standard histograms, except that each unique histogram is scaled to the "
+                  "identical maximum height, thus the drawn histograms can be used for general distribution comparison "
+                  "but do not indicate the case where one may be based on a much larger sample than another (all "
+                  "sample sizes are part of the data table).")
+    outfile.write("      </p>\n")
+    outfile.write("<figure class=\"morphimg\">\n")
+    outfile.write("  <img src=\"../images/size_hist.png\" alt=\"Example of histogram plots.\" "
+                  "title=\"Example of histogram plots.\" />\n")
+    outfile.write("</figure>\n")
+    outfile.write("      <h2>Summary Distributions</h2>\n")
+    outfile.write("      <p>\n")
+    outfile.write("       The summary distributions are calculated for males and females independently, as well as "
+                  "combined (the top figure in black). These distributions are created through a simulated integration "
+                  "across all of the data for that species. The simulation creates a large &ldquo;data set&rdquo; of "
+                  "individual measurements from all of the distinct data sets and types. The data set with the "
+                  "largest sample size is scaled to provide 1,000 values to our simulated data set. All other data "
+                  "sets provide values proportionally (<em>e.g.</em>, if the largest data set has <em>n</em>=50, that "
+                  "data set will provide 1,000 values, while one with an <em>n</em>=10 would provide 200). (In the "
+                  "unlikely event that the largest observed data set has n > 1,000, the algorithm automatically "
+                  "rescales the largest sample by orders of magnitude until it exceeds the largest n). Data values are "
+                  "&ldquo;simulated&rdquo; based on each data set depending on the type of data. Individual measures, "
+                  "which definitionally have <em>n</em>=1, are added directly to the simulated set in numbers "
+                  "proportional to the largest sample. Frequency histograms are also directly added to the simulated "
+                  "set with the midpoint of each bin representing the value added and the total count of the bin "
+                  "representing the <em>n</em> to scale to the largest sample. For measures represented by means with "
+                  "an estimate of variance; values are simulated from a normal distribution (with expected mean and "
+                  "variance). If a mean is reported without a variance, it is treated as if the variance were "
+                  "zero; this has the obvious potential to give too much weight to that estimate, but generally "
+                  "these have very small sample sizes so the effect appears to be minor.")
+    outfile.write("      <p>\n")
+    outfile.write("       Range data is the most complicated part of the simulation. First, the end points of the "
+                  "range are added as if they were individual measures. If the sample size of the range is greater "
+                  "than two, then the remaining samples (after those representing the endpoints are accounted for) "
+                  "are drawn from a restricted normal distribution whose mean is represented by the midpoint of the "
+                  "range and whose standard deviation is estimated as the width of the range divided by four "
+                  "(the &ldquo;range rule of thumb&rdquo;). The restriction is that only simulated values that fall "
+                  "within the reported range are accepted.")
+    outfile.write("      </p>\n")
+    outfile.write("      <p>\n")
+    outfile.write("All of these simulated data points from all of these data types are combined together into one "
+                  "overall set. From this set, 1,000 values are then randomly subsampled to estimate the overall "
+                  "distribution, mean, median, etc.")
+    outfile.write("      </p>\n")
+    outfile.write("      <p>\n")
+    outfile.write("       The simulated summary results are shown by the violin graphs at the tops of each figure. "
+                  "These reveal a lot of information. Each of these graphs show the full range of the distribution, "
+                  "a density estimate of sizes (based on the colored, curvy background), the mean (diamond), "
+                  "median (circle), and quartile (thick center line).")
+    outfile.write("      </p>\n")
+    outfile.write("<figure class=\"morphimg\">\n")
+    outfile.write("  <img src=\"../images/size_summary.png\" alt=\"Example of size summary plot.\" "
+                  "title=\"Example of size summary plot.\" />\n")
+    outfile.write("</figure>\n")
+    outfile.write("    </section>\n")
+    if do_print:
+        end_page_division(outfile)
+    else:
+        common_html_footer(outfile)
 
 
 # def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: list, higher_taxa_list: list,
@@ -5024,7 +5185,7 @@ def write_morphology_page(outfile: TextIO, do_print: bool, morph: TMB_Classes.Mo
         clist = [morph.caption]
     for i in range(len(plist)):
         outfile.write("    <figure class=\"morphimg\">\n")
-        outfile.write("      <img src=\"" + media_path + plist[i] + "\" alt=\"" + clist[i] + " image\" "
+        outfile.write("      <img src=\"" + media_path + plist[i] + "\" alt=\"" + clist[i] + "\" "
                       "title=\"" + clist[i] + "\" />\n")
         outfile.write("      <figcaption>" + clist[i] + "</figcaption>\n")
         outfile.write("    </figure>\n")
@@ -5381,7 +5542,12 @@ def copy_support_files() -> None:
             report_error("Missing file: resources/" + filename)
     filelist = {"film.png",
                 "stylifera75.png",
-                "DOI_logo.svg"}
+                "DOI_logo.svg",
+                "size_hist.png",
+                "size_ind.png",
+                "size_mean.png",
+                "size_range.png",
+                "size_summary.png"}
     for filename in filelist:
         try:
             shutil.copy2("resources/images/" + filename, WEBOUT_PATH + "images/")
