@@ -51,7 +51,7 @@ DRAW_MAPS = False
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
-CHECK_LOCATIONS = False
+CHECK_LOCATIONS = True
 # this flag controls whether additional location data should be fetched from iNaturalist
 INCLUDE_INAT = False
 # Suppress some of the more time-consuming output; only meant for when testing others elements
@@ -59,7 +59,7 @@ OUTPUT_REFS = False
 OUTPUT_LOCS = False
 # these flags control creating print and web output, respectively
 OUTPUT_PRINT = False
-OUTPUT_WEB = True
+OUTPUT_WEB = False
 
 # randSeed = random.randint(0, 10000)
 
@@ -2999,7 +2999,7 @@ def write_location_index_entry(outfile: TextIO, do_print: bool, loc: TMB_Classes
 def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict, location_dict: dict,
                          location_species: dict, location_sp_names: dict, location_bi_names: dict,
                          location_direct_refs: dict, location_cited_refs: dict, references: list,
-                         locations_range_species: dict, location_keys: Optional[dict]) -> None:
+                         location_range_species: dict, location_keys: Optional[dict]) -> None:
     """
     output observation location index to HTML
     """
@@ -3098,13 +3098,13 @@ def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict,
         if do_print:
             write_location_page(outfile, do_print, loc, point_locations, location_species, location_bi_names,
                                 location_sp_names, location_direct_refs, location_cited_refs, references,
-                                locations_range_species, location_keys)
+                                location_range_species, location_keys)
         else:
             with open(WEBOUT_PATH + "locations/" + place_to_filename(loc.name) + ".html", "w",
                       encoding="utf-8") as suboutfile:
                 write_location_page(suboutfile, do_print, loc, point_locations, location_species, location_bi_names,
                                     location_sp_names, location_direct_refs, location_cited_refs, references,
-                                    locations_range_species, location_keys)
+                                    location_range_species, location_keys)
 
 
 def check_location_page(loc: TMB_Classes.LocationClass, location_species: dict, location_bi_names: dict,
@@ -3172,13 +3172,14 @@ def match_names_to_locations(species: list, specific_point_locations: dict,  bin
                         p = strip_location_subtext(p)
                         if p in point_locations:
                             places.add(p)
-                            location_species[p] |= {s}
+                            # location_species[p] |= {s}
                             if "<!>" in c.application:
                                 invalid_places.add(p)
                             elif "<?>" in c.application:
                                 questionable_ids.add(p)
                             else:
                                 good_ids.add(p)
+                                location_species[p] |= {s}
                         elif p != "?":
                             missing_set |= {p}
             species_plot_locations[s] = sorted(list(places))
