@@ -2874,10 +2874,12 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
     is_error = True
     print_star = False
     print_double = False
+    outfile.write("  <section class=\"spsection\">\n")
+    outfile.write("    <h3 class=\"nobookmark\">Currently Recognized Species</h3>\n")
     if len(all_species) > 0:
         is_error = False
-        outfile.write("  <section class=\"spsection\">\n")
-        outfile.write("    <h3 class=\"nobookmark\">Currently Recognized Species</h3>\n")
+        # outfile.write("  <section class=\"spsection\">\n")
+        # outfile.write("    <h3 class=\"nobookmark\">Currently Recognized Species</h3>\n")
         outfile.write("    <ul class=\"locpagelist\">\n")
         for s in sorted(list(all_species)):
             if s in location_species[loc.name]:
@@ -2892,7 +2894,9 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
                           create_species_link(s.genus, s.species, do_print, status=s.status, path="../") +
                           suffix + "</li>\n")
         outfile.write("    </ul>\n")
-        outfile.write("  </section>\n")
+    else:
+        outfile.write("  <p>None</p>\n")
+    outfile.write("  </section>\n")
 
     if len(all_bi_names) > 0:
         is_error = False
