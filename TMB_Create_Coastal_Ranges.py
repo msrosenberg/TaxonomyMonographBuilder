@@ -79,7 +79,7 @@ def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseM
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     TMB_Create_Maps.adjust_longitude_tick_values(faxes)
-    # mplpy.savefig(__OUTPUT_PATH__ + "blocks_" + species + "_test_range.png", format="png", dpi=600)
+    mplpy.savefig(__OUTPUT_PATH__ + "blocks_" + species + "_test_range.png", format="png", dpi=600)
     mplpy.savefig(__OUTPUT_PATH__ + "blocks_" + species + "_test_range.svg", format="svg", dpi=600)
     mplpy.close("all")
 
@@ -177,16 +177,15 @@ def calculate_ranges(init_data: TMB_Initialize.InitializationData, verbose: bool
     # for species in species_blocks:
     #     test_draw_blocks(species, species_blocks[species], base_map)
 
-    # ranges = {}
-    # for species in species_blocks:
-    #     if verbose:
-    #         print("Determining {} range".format(species))
-    #     ranges[species] = TMB_Create_Maps.get_range_map_overlap(species_blocks[species], coastline_map)
-    # for species in ranges:
-    #     test_draw_ranges(species, ranges[species], base_map)
+    ranges = {}
+    for species in species_blocks:
+        if verbose:
+            print("Determining {} range".format(species))
+        ranges[species] = TMB_Create_Maps.get_range_map_overlap(species_blocks[species], coastline_map)
+    for species in ranges:
+        test_draw_ranges(species, ranges[species], base_map)
 
     # test_draw_all_ranges(base_map, ranges)
-
     all_blocks = []
     for species in species_blocks:
         all_blocks.extend(species_blocks[species])
