@@ -14,6 +14,7 @@ import collections
 # from typing import Optional, Tuple, Union, TextIO
 from typing import Optional, Tuple, TextIO
 # from tqdm import tqdm
+import numpy
 # local dependencies
 import TMB_Import
 import TMB_Create_Maps
@@ -47,18 +48,18 @@ AUTHOR_TAXON = 2        # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = True
+DRAW_MAPS = False
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
 CHECK_LOCATIONS = False
 # this flag controls whether additional location data should be fetched from iNaturalist
-INCLUDE_INAT = True
+INCLUDE_INAT = False
 # Suppress some of the more time-consuming output; only meant for when testing others elements
-OUTPUT_REFS = True
-OUTPUT_LOCS = True
+OUTPUT_REFS = False
+OUTPUT_LOCS = False
 # these flags control creating print and web output, respectively
-OUTPUT_PRINT = True
+OUTPUT_PRINT = False
 OUTPUT_WEB = True
 
 # randSeed = random.randint(0, 10000)
@@ -3559,8 +3560,15 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
 
     if species.species in measurement_data:
         mdata = measurement_data[species.species]
+        if do_print:
+            mean, std = create_species_cb_page(outfile, do_print, species, mdata, refdict)
+        else:
+            with open(WEBOUT_PATH + "sizes/" + species.species + "_cb.html", "w", encoding="utf-8") as suboutfile:
+                mean, std = create_species_cb_page(suboutfile, do_print, species, mdata, refdict)
     else:
         mdata = None
+        mean = 0
+        std = 0
 
     outfile.write("    <header id=\"u_" + species.species + ".html\">\n")
     if is_fossil:
@@ -3583,6 +3591,9 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
             outfile.write("          <li><a href=\"#video\">" + fetch_fa_glyph("video") + "Video</a></li>\n")
             outfile.write("          <li><a href=\"#art\">" + fetch_fa_glyph("art") + "Art</a></li>\n")
         outfile.write("          <li><a href=\"#references\">" + fetch_fa_glyph("references") + "References</a></li>\n")
+        if mdata is not None:
+            outfile.write("          <li><a href=\"sizes/{}_cb.html\">".format(species.species) +
+                          fetch_fa_glyph("measure") + "Size Data</a></li>\n")
         outfile.write("          <li><a href=\"" + init_data().species_url + "\">" + fetch_fa_glyph("index") +
                       "Species List</a></li>\n")
         outfile.write("        </ul>\n")
@@ -3652,6 +3663,12 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
                   ".html\">Chronology</a>)"
         outfile.write("       <dt>" + tmpstr + "</dt>\n")
         outfile.write("         <dd><em class=\"species\">" + ", ".join(llist) + "</em></dd>\n")
+
+    # Size Data
+    if mdata is not None:
+        outfile.write("       <dt>Size</dt>\n")
+        outfile.write("         <dd>Carapace Breadth: {:0.1f} mm ± {:0.2f} &sigma; "
+                      "(<a href=\"sizes/{}_cb.html\">more info</a>)</dd>\n".format(mean, std, species.species))
 
     # Geographic Range
     outfile.write("       <dt class=\"pagebreak\">Geographic Range</dt>\n")
@@ -3827,16 +3844,9 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
                 create_synonym_chronology(suboutfile, do_print, species.species, binomial_synlist, binomial_name_counts,
                                           specific_synlist, specific_name_cnts)
 
-    if mdata is not None:
-        if do_print:
-            create_species_cb_page(outfile, do_print, species, mdata, refdict)
-        else:
-            with open(WEBOUT_PATH + "sizes/" + species.species + "_cb.html", "w", encoding="utf-8") as suboutfile:
-                create_species_cb_page(suboutfile, do_print, species, mdata, refdict)
-
 
 def create_species_cb_page(outfile: TextIO, do_print: bool, species: TMB_Classes.SpeciesClass,
-                           measurement_data: TMB_Classes.SpeciesMeasurements, refdict: dict):
+                           measurement_data: TMB_Classes.SpeciesMeasurements, refdict: dict) -> Tuple[float, float]:
     """
     write species carapace width page
     """
@@ -3864,6 +3874,9 @@ def create_species_cb_page(outfile: TextIO, do_print: bool, species: TMB_Classes
     fdat = TMB_Measurements.combine_measurement_data(measurement_data.female)
     filename = WEBOUT_PATH + "sizes/" + species.species + "_cb.png"
     TMB_Measurements.plot_measurement_data(measurement_data, cdat, mdat, fdat, filename)
+
+    mean = numpy.mean(cdat)
+    std = numpy.std(cdat)
 
     outfile.write("    <figure class=\"sizeimg\">\n")
     outfile.write("      <img src=\"{0}_cb.png\" alt=\"size data for {1}\" "
@@ -4000,6 +4013,8 @@ def create_species_cb_page(outfile: TextIO, do_print: bool, species: TMB_Classes
         end_page_division(outfile)
     else:
         common_html_footer(outfile)
+
+    return float(mean), float(std)
 
 
 def write_photo_index(outfile: TextIO, do_print: bool, specieslist: list, photos: list) -> None:
