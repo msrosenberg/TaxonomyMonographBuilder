@@ -3528,6 +3528,19 @@ def write_reference_list(outfile: TextIO, do_print: bool, references: list, cita
     outfile.write("    </section>\n")
 
 
+def size_label(w: float) -> str:
+    if w < 10:
+        return "Very Small"
+    elif w < 20:
+        return "Small"
+    elif w < 30:
+        return "Medium"
+    elif w < 40:
+        return "Large"
+    else:
+        return "Very Large"
+
+
 def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.SpeciesClass, references: list,
                        specific_names: list, all_names: list, photos: list, videos: list, artlist: list,
                        sprefs: dict, refdict: dict, binomial_name_counts: dict, specific_name_cnts: dict,
@@ -3667,8 +3680,21 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
     # Size Data
     if mdata is not None:
         outfile.write("       <dt>Size</dt>\n")
-        outfile.write("         <dd>Carapace Breadth: {:0.1f} mm ± {:0.2f} &sigma; "
-                      "(<a href=\"sizes/{}_cb.html\">more info</a>)</dd>\n".format(mean, std, species.species))
+        slabel = size_label(mean + 1.96*std)
+        outfile.write("         <dd>{} Carapace Breadth: {:0.1f} mm ± {:0.2f} (sd), 95% range: "
+                      "{:0.1f}&ndash;{:0.1f} mm, (<a href=\"sizes/{}_cb.html\">Data"
+                      "</a>)</dd>\n".format(slabel, mean, std, max(mean - 1.96*std, 0), mean + 1.96*std,
+                                            species.species))
+        # outfile.write("         <dd>{}</dd>\n".format(slabel))
+        # outfile.write("         <dd>Carapace Breadth: {:0.1f} mm ± {:0.2f} (sd), 95% range: "
+        #               "{}&ndash;&{} mm</dd>\n".format(mean, std, mean - 1.96*std, mean + 1.96*std))
+        # outfile.write("         <dd>(<a href=\"sizes/{}_cb.html\">Size Data</a>)</dd>\n".format(species.species))
+        # outfile.write("         <dd>Carapace Breadth: {:0.1f} mm (95%: {:0.1f}&ndash;{:0.1f}) "
+        #               "(<a href=\"sizes/{}_cb.html\">data</a>)</dd>\n".format(mean, mean - 1.96*std,
+        #                                                                       mean + 1.96*std, species.species))
+
+        # temp
+        # print("{}\t{}\t{}\n".format(species.species, mean, std))
 
     # Geographic Range
     outfile.write("       <dt class=\"pagebreak\">Geographic Range</dt>\n")
@@ -3877,6 +3903,11 @@ def create_species_cb_page(outfile: TextIO, do_print: bool, species: TMB_Classes
 
     mean = numpy.mean(cdat)
     std = numpy.std(cdat)
+
+    outfile.write("       <h2>Summary</h2>\n")
+    slabel = size_label(mean + 1.96*std)
+    outfile.write("         <p>{} Carapace Breadth: {:0.1f} mm ± {:0.2f} (sd), 95% range: "
+                  "{:0.1f}&ndash;{:0.1f} mm</p>\n".format(slabel, mean, std, max(mean - 1.96*std, 0), mean + 1.96*std))
 
     outfile.write("    <figure class=\"sizeimg\">\n")
     outfile.write("      <img src=\"{0}_cb.png\" alt=\"size data for {1}\" "
