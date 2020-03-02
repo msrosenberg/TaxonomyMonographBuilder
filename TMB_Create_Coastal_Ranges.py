@@ -12,18 +12,22 @@ import TMB_Initialize
 import TMB_ImportShape
 import TMB_Import
 import matplotlib.pyplot as mplpy
+from matplotlib.collections import PatchCollection
 
 
 __TMP_PATH__ = "temp/"
 __OUTPUT_PATH__ = __TMP_PATH__ + "maps/"
 
 
-def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseMap, draw_blank=False) -> None:
+def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseMap, draw_blank: bool = False,
+                     do_bw: bool = False) -> None:
     """
     only for testing purposes
     """
-    # fig, faxes = mplpy.subplots(figsize=[TMB_Create_Maps.FIG_WIDTH, TMB_Create_Maps.FIG_HEIGHT])
-    fig, faxes = mplpy.subplots(figsize=[9, 4.5])
+    if do_bw:
+        fig, faxes = mplpy.subplots(figsize=[3.75, 1.875])
+    else:
+        fig, faxes = mplpy.subplots(figsize=[9, 4.5])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
     maxlat = -90
@@ -58,8 +62,8 @@ def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseM
         mplpy.rcParams["svg.fonttype"] = "none"
         mplpy.tight_layout()
         TMB_Create_Maps.adjust_longitude_tick_values(faxes)
-        mplpy.savefig(__OUTPUT_PATH__ + "blocks_blank_test_range.png", format="png", dpi=600)
-        mplpy.savefig(__OUTPUT_PATH__ + "blocks_blank_test_range.svg", format="svg", dpi=600)
+        mplpy.savefig(__OUTPUT_PATH__ + "blocks_blank_test_range.png", format="png", dpi=1200)
+        mplpy.savefig(__OUTPUT_PATH__ + "blocks_blank_test_range.svg", format="svg", dpi=1200)
 
     for line in ranges:
         lons = []
@@ -70,8 +74,13 @@ def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseM
                 lon += 360
             lons.append(lon)
             lats.append(p.lat)
-        faxes.plot(lons, lats, color="red", linewidth=1)
+        if do_bw:
+            faxes.plot(lons, lats, color="black", linewidth=1)
+        else:
+            faxes.plot(lons, lats, color="red", linewidth=1)
 
+    if do_bw:
+        mplpy.rcParams.update({"font.size": 8})
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)
     mplpy.xlabel("longitude")
@@ -79,9 +88,73 @@ def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseM
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     TMB_Create_Maps.adjust_longitude_tick_values(faxes)
-    mplpy.savefig(__OUTPUT_PATH__ + "blocks_" + species + "_test_range.png", format="png", dpi=600)
-    mplpy.savefig(__OUTPUT_PATH__ + "blocks_" + species + "_test_range.svg", format="svg", dpi=600)
+    mplpy.savefig(__OUTPUT_PATH__ + "blocks_" + species + "_test_range.png", format="png", dpi=1200)
+    mplpy.savefig(__OUTPUT_PATH__ + "blocks_" + species + "_test_range.svg", format="svg", dpi=1200)
     mplpy.close("all")
+
+
+# def test_draw_provinces(provinces: dict, base_map: TMB_Create_Maps.BaseMap) -> None:
+#     """
+#     only for testing purposes
+#     """
+#     colors = ("red", "blue", "green", "yellow", "magenta", "cyan", "salmon")
+#
+#     fig, faxes = mplpy.subplots(figsize=[9, 4.5])
+#     for spine in faxes.spines:
+#         faxes.spines[spine].set_visible(False)
+#     maxlat = -90
+#     minlat = 90
+#     maxlon = -180
+#     minlon = 180
+#
+#     mid_atlantic = False
+#     all_lons = []
+#     all_lats = []
+#     for province in provinces:
+#         ranges = provinces[province]
+#         for line in ranges:
+#             for p in line:
+#                 maxlon = max(maxlon, p.lon)
+#                 maxlat = max(maxlat, p.lat)
+#                 minlon = min(minlon, p.lon)
+#                 minlat = min(minlat, p.lat)
+#                 if 0 > p.lon > -50:
+#                     mid_atlantic = True
+#                 all_lons.append(p.lon)
+#                 all_lats.append(p.lat)
+#     minlon, maxlon, minlat, maxlat = TMB_Create_Maps.adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
+#
+#     (minlon, maxlon, minlat, maxlat,
+#      wrap_lons) = TMB_Create_Maps.draw_and_adjust_basemap(faxes, base_map, mid_atlantic, minlon, maxlon, minlat,
+#                                                           maxlat, all_lons, all_lats)
+#
+#     for i, province in enumerate(provinces):
+#         ranges = provinces[province]
+#         if i < 7:
+#             c = colors[i]
+#         else:
+#             c = "black"
+#         for line in ranges:
+#             lons = []
+#             lats = []
+#             for p in line:
+#                 lon = p.lon
+#                 if wrap_lons and lon < 0:
+#                     lon += 360
+#                 lons.append(lon)
+#                 lats.append(p.lat)
+#             faxes.plot(lons, lats, color=c, linewidth=3)
+#
+#     mplpy.xlim(minlon, maxlon)
+#     mplpy.ylim(minlat, maxlat)
+#     mplpy.xlabel("longitude")
+#     mplpy.ylabel("latitude")
+#     mplpy.rcParams["svg.fonttype"] = "none"
+#     mplpy.tight_layout()
+#     TMB_Create_Maps.adjust_longitude_tick_values(faxes)
+#     mplpy.savefig(__OUTPUT_PATH__ + "blocks_provinces_test_range.png", format="png", dpi=1200)
+#     mplpy.savefig(__OUTPUT_PATH__ + "blocks_provinces_test_range.svg", format="svg", dpi=1200)
+#     mplpy.close("all")
 
 
 def test_draw_blocks(species: str, blocks: list, base_map: TMB_Create_Maps.BaseMap) -> None:
@@ -193,7 +266,24 @@ def calculate_ranges(init_data: TMB_Initialize.InitializationData, verbose: bool
     test_draw_ranges("all_combined", all_range, base_map, draw_blank=True)
 
 
+def draw_provinces(init_data: TMB_Initialize.InitializationData) -> None:
+    base_map = TMB_Create_Maps.read_base_map(init_data.map_primary, None, init_data.map_islands)
+    coastline_map = import_coastline_data(init_data)
+    print("Number of coastline elements:", len(coastline_map))
+    provinces = TMB_Import.read_species_blocks("data/provinces.txt")
+    for province in provinces:
+        test_draw_blocks(province, provinces[province], base_map)
+    ranges = {}
+    for province in provinces:
+        print("Determining {} range".format(province))
+        ranges[province] = TMB_Create_Maps.get_range_map_overlap(provinces[province], coastline_map)
+    for species in ranges:
+        test_draw_ranges(species, ranges[species], base_map, do_bw=True)
+    # test_draw_provinces(ranges, base_map)
+
+
 if __name__ == "__main__":
     TMB_Initialize.initialize()
     t_init_data = TMB_Initialize.INIT_DATA
-    calculate_ranges(t_init_data, True)
+    # calculate_ranges(t_init_data, True)
+    draw_provinces(t_init_data)
