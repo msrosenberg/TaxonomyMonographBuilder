@@ -50,7 +50,7 @@ SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
 DRAW_MAPS = True
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
-CHECK_DATA = True
+CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
 CHECK_LOCATIONS = False
 # this flag controls whether additional location data should be fetched from iNaturalist
@@ -59,7 +59,7 @@ INCLUDE_INAT = True
 OUTPUT_REFS = True
 OUTPUT_LOCS = True
 # these flags control creating print and web output, respectively
-OUTPUT_PRINT = True
+OUTPUT_PRINT = False
 OUTPUT_WEB = True
 
 # randSeed = random.randint(0, 10000)
@@ -5569,6 +5569,7 @@ def copy_support_files() -> None:
     copy a variety of resource and output files into the correct web output directories
     this includes icons, supporting images, and css files
     """
+    # root folder files
     filelist = {"favicon128.png",
                 "favicon96.png",
                 "favicon72.png",
@@ -5591,6 +5592,7 @@ def copy_support_files() -> None:
             shutil.copy2("resources/" + filename, WEBOUT_PATH)
         except FileNotFoundError:
             report_error("Missing file: resources/" + filename)
+    # image folder files
     filelist = {"film.png",
                 "stylifera75.png",
                 "DOI_logo.svg",

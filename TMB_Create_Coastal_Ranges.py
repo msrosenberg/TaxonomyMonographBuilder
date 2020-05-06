@@ -26,6 +26,7 @@ def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseM
     """
     if do_bw:
         fig, faxes = mplpy.subplots(figsize=[3.75, 1.875])
+        # fig, faxes = mplpy.subplots(figsize=[7.5, 3.75])
     else:
         fig, faxes = mplpy.subplots(figsize=[9, 4.5])
     for spine in faxes.spines:
@@ -57,8 +58,8 @@ def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseM
     if draw_blank:
         mplpy.xlim(minlon, maxlon)
         mplpy.ylim(minlat, maxlat)
-        mplpy.xlabel("longitude")
-        mplpy.ylabel("latitude")
+        # mplpy.xlabel("longitude")
+        # mplpy.ylabel("latitude")
         mplpy.rcParams["svg.fonttype"] = "none"
         mplpy.tight_layout()
         TMB_Create_Maps.adjust_longitude_tick_values(faxes)
@@ -83,8 +84,8 @@ def test_draw_ranges(species: str, ranges: list, base_map: TMB_Create_Maps.BaseM
         mplpy.rcParams.update({"font.size": 8})
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)
-    mplpy.xlabel("longitude")
-    mplpy.ylabel("latitude")
+    # mplpy.xlabel("longitude")
+    # mplpy.ylabel("latitude")
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     TMB_Create_Maps.adjust_longitude_tick_values(faxes)
@@ -247,8 +248,8 @@ def calculate_ranges(init_data: TMB_Initialize.InitializationData, verbose: bool
         print("Number of coastline elements:", len(coastline_map))
 
     species_blocks = TMB_Import.read_species_blocks(init_data.species_range_blocks)
-    # for species in species_blocks:
-    #     test_draw_blocks(species, species_blocks[species], base_map)
+    for species in species_blocks:
+        test_draw_blocks(species, species_blocks[species], base_map)
 
     ranges = {}
     for species in species_blocks:
@@ -263,7 +264,7 @@ def calculate_ranges(init_data: TMB_Initialize.InitializationData, verbose: bool
     for species in species_blocks:
         all_blocks.extend(species_blocks[species])
     all_range = TMB_Create_Maps.get_range_map_overlap(all_blocks, coastline_map)
-    test_draw_ranges("all_combined", all_range, base_map, draw_blank=True)
+    test_draw_ranges("all_combined", all_range, base_map, draw_blank=True, do_bw=True)
 
 
 def draw_provinces(init_data: TMB_Initialize.InitializationData) -> None:
