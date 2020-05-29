@@ -3362,7 +3362,7 @@ def write_species_list(outfile: TextIO, do_print: bool, specieslist: list) -> No
 
 
 def write_species_photo_page(outfile: TextIO, do_print: bool, fname: str, species_name: str, common_name: str,
-                             caption: str, pn: int, pspecies: str) -> None:
+                             caption: str, pn: int, pspecies: str, refdict: dict) -> None:
     """
     create a page for a specific photo
     """
@@ -3414,6 +3414,7 @@ def write_species_photo_page(outfile: TextIO, do_print: bool, fname: str, specie
     outfile.write("    <figure class=\"fullpic\">\n")
     outfile.write("      <img src=\"" + media_path + "U_" + spname + format(pn, "0>2") + ".jpg\" alt=\"" +
                   ptitle + " photo\" title=\"" + ptitle + " photo\" />\n")
+    caption = replace_reference_in_string(caption, refdict, do_print)
     outfile.write("      <figcaption>" + replace_species_in_string(caption) + "</figcaption>\n")
     outfile.write("    </figure>\n")
     if do_print:
@@ -4048,7 +4049,7 @@ def create_species_cb_page(outfile: TextIO, do_print: bool, species: TMB_Classes
     return float(mean), float(std)
 
 
-def write_photo_index(outfile: TextIO, do_print: bool, specieslist: list, photos: list) -> None:
+def write_photo_index(outfile: TextIO, do_print: bool, specieslist: list, photos: list, refdict: dict) -> None:
     """
     create an index of all photos
     """
@@ -4118,7 +4119,7 @@ def write_photo_index(outfile: TextIO, do_print: bool, specieslist: list, photos
                 pfname = "photo_u_" + spname + format(pn, "0>2") + ".html"
                 if do_print:
                     write_species_photo_page(outfile, True, pfname, species, sp.common, photo.caption, pn,
-                                             photo.species)
+                                             photo.species, refdict)
                 else:
                     # copy photos and thumbnails to web output directory
                     tmp_name = "photos/U_" + spname + format(pn, "0>2")
@@ -4132,7 +4133,7 @@ def write_photo_index(outfile: TextIO, do_print: bool, specieslist: list, photos
                         report_error("Missing file: " + tmp_name + "tn.jpg")
                     with open(WEBOUT_PATH + "photos/" + pfname, "w", encoding="utf-8") as suboutfile:
                         write_species_photo_page(suboutfile, False, pfname, species, sp.common, photo.caption, pn,
-                                                 photo.species)
+                                                 photo.species, refdict)
 
 
 def write_video_index(outfile: TextIO, do_print: bool, videos: list) -> None:
@@ -4217,11 +4218,17 @@ def write_video_index(outfile: TextIO, do_print: bool, videos: list) -> None:
 
 
 def write_specific_art_page(outfile: TextIO, do_print: bool, art: TMB_Classes.ArtClass, backurl: str,
-                            backtext: str) -> None:
+                            backtext: str, refdict: dict) -> None:
     """
     create a page for a piece of art
     """
-    ptitle = art.title + " (" + art.author + " " + art.year + ")"
+    if art.art_type == "science":
+        ref = refdict[art.cite_key]
+        author = ref.citation
+    else:
+        author = art.author + " (" + art.year + ")"
+    ptitle = art.title + ": " + author
+
     if do_print:
         start_page_division(outfile, "art_page")
         media_path = MEDIA_PATH + "art/"
@@ -4230,7 +4237,7 @@ def write_specific_art_page(outfile: TextIO, do_print: bool, art: TMB_Classes.Ar
         media_path = ""
     outfile.write("    <header id=\"" + art.image + ".html\">\n")
     outfile.write("      <h1 class=\"nobookmark\"><em class=\"species\">" + art.title + "</em></h1>\n")
-    outfile.write("      <h2 class=\"nobookmark\">" + art.author + " (" + art.year + ")</h2>\n")
+    outfile.write("      <h2 class=\"nobookmark\">" + author + "</h2>\n")
     if (art.species != "n/a") or (art.cite_key != "n/a") or (not do_print):
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
@@ -4250,7 +4257,8 @@ def write_specific_art_page(outfile: TextIO, do_print: bool, art: TMB_Classes.Ar
     outfile.write("    <figure class=\"fullpic\">\n")
     outfile.write("      <img src=\"" + media_path + art.image + "." + art.ext + "\" alt=\"" + ptitle +
                   " image\" title=\"" + ptitle + "\" />\n")
-    outfile.write("      <figcaption>" + replace_species_in_string(art.notes) + "</figcaption>\n")
+    outstr = replace_reference_in_string(art.notes, refdict, do_print)
+    outfile.write("      <figcaption>" + replace_species_in_string(outstr) + "</figcaption>\n")
     outfile.write("    </figure>\n")
     if do_print:
         end_page_division(outfile)
@@ -4258,7 +4266,7 @@ def write_specific_art_page(outfile: TextIO, do_print: bool, art: TMB_Classes.Ar
         common_html_footer(outfile, indexpath="../")
 
 
-def write_art_science_pages(outfile: TextIO, do_print: bool, artlist: list) -> None:
+def write_art_science_pages(outfile: TextIO, do_print: bool, artlist: list, refdict: dict) -> None:
     """
     create an index for all scientific art
     """
@@ -4277,7 +4285,9 @@ def write_art_science_pages(outfile: TextIO, do_print: bool, artlist: list) -> N
     for art in artlist:
         if art.art_type == "science":
             cnt += 1
-            artist = art.author + " (" + art.year + ")"
+            ref = refdict[art.cite_key]
+            artist = ref.citation
+            # artist = art.author + " (" + art.year + ")"
             try:
                 artsource.index(artist)
             except ValueError:
@@ -4293,7 +4303,9 @@ def write_art_science_pages(outfile: TextIO, do_print: bool, artlist: list) -> N
         outfile.write("      <h3 class=\"nobookmark\">" + a + "</h3>\n")
         for art in artlist:
             if art.art_type == "science":
-                artist = art.author + " (" + art.year + ")"
+                ref = refdict[art.cite_key]
+                artist = ref.citation
+                # artist = art.author + " (" + art.year + ")"
                 if artist == a:
                     outfile.write("      <figure class=\"sppic\">\n")
                     outfile.write("        <a href=\"" + rel_link_prefix(do_print, "art/") + art.image +
@@ -4308,18 +4320,21 @@ def write_art_science_pages(outfile: TextIO, do_print: bool, artlist: list) -> N
     for a in artsource:
         for art in artlist:
             if art.art_type == "science":
-                artist = art.author + " (" + art.year + ")"
+                ref = refdict[art.cite_key]
+                artist = ref.citation
+
+                # artist = art.author + " (" + art.year + ")"
                 if artist == a:
                     if do_print:
                         write_specific_art_page(outfile, do_print, art, init_data().art_sci_url,
-                                                "All Scientific Drawings")
+                                                "All Scientific Drawings", refdict)
                     else:
                         with open(WEBOUT_PATH + "art/" + art.image + ".html", "w", encoding="utf-8") as suboutfile:
                             write_specific_art_page(suboutfile, do_print, art, init_data().art_sci_url,
-                                                    "All Scientific Drawings")
+                                                    "All Scientific Drawings", refdict)
 
 
-def write_art_stamps_pages(outfile: TextIO, do_print: bool, artlist: list) -> None:
+def write_art_stamps_pages(outfile: TextIO, do_print: bool, artlist: list, refdict: dict) -> None:
     """
     create an index for all stamps
     """
@@ -4371,13 +4386,15 @@ def write_art_stamps_pages(outfile: TextIO, do_print: bool, artlist: list) -> No
             if art.art_type == "stamp":
                 if art.author == a:
                     if do_print:
-                        write_specific_art_page(outfile, do_print, art, init_data().art_stamp_url, "All Stamps")
+                        write_specific_art_page(outfile, do_print, art, init_data().art_stamp_url, "All Stamps",
+                                                refdict)
                     else:
                         with open(WEBOUT_PATH + "art/" + art.image + ".html", "w", encoding="utf-8") as suboutfile:
-                            write_specific_art_page(suboutfile, do_print, art, init_data().art_stamp_url, "All Stamps")
+                            write_specific_art_page(suboutfile, do_print, art, init_data().art_stamp_url, "All Stamps",
+                                                    refdict)
 
     
-def write_art_crafts_pages(outfile: TextIO, do_print: bool, artlist: list) -> None:
+def write_art_crafts_pages(outfile: TextIO, do_print: bool, artlist: list, refdict: dict) -> None:
     """
     create an index for all crafts
     """
@@ -4434,27 +4451,29 @@ def write_art_crafts_pages(outfile: TextIO, do_print: bool, artlist: list) -> No
             if art.art_type == "origami":
                 if art.author == a:
                     if do_print:
-                        write_specific_art_page(outfile, do_print, art, init_data().art_craft_url, "All Crafts")
+                        write_specific_art_page(outfile, do_print, art, init_data().art_craft_url, "All Crafts",
+                                                refdict)
                     else:
                         with open(WEBOUT_PATH + "art/" + art.image + ".html", "w", encoding="utf-8") as suboutfile:
-                            write_specific_art_page(suboutfile, do_print, art, init_data().art_craft_url, "All Crafts")
+                            write_specific_art_page(suboutfile, do_print, art, init_data().art_craft_url, "All Crafts",
+                                                    refdict)
 
 
-def write_all_art_pages(outfile: Optional[TextIO], do_print: bool, artlist: list) -> None:
+def write_all_art_pages(outfile: Optional[TextIO], do_print: bool, artlist: list, refdict: dict) -> None:
     """
     create all art pages
     """
     if do_print:
-        write_art_science_pages(outfile, do_print, artlist)
-        write_art_stamps_pages(outfile, do_print, artlist)
-        write_art_crafts_pages(outfile, do_print, artlist)
+        write_art_science_pages(outfile, do_print, artlist, refdict)
+        write_art_stamps_pages(outfile, do_print, artlist, refdict)
+        write_art_crafts_pages(outfile, do_print, artlist, refdict)
     else:
         with open(WEBOUT_PATH + init_data().art_craft_url, "w", encoding="utf-8") as suboutfile:
-            write_art_crafts_pages(suboutfile, do_print, artlist)
+            write_art_crafts_pages(suboutfile, do_print, artlist, refdict)
         with open(WEBOUT_PATH + init_data().art_stamp_url, "w", encoding="utf-8") as suboutfile:
-            write_art_stamps_pages(suboutfile, do_print, artlist)
+            write_art_stamps_pages(suboutfile, do_print, artlist, refdict)
         with open(WEBOUT_PATH + init_data().art_sci_url, "w", encoding="utf-8") as suboutfile:
-            write_art_science_pages(suboutfile, do_print, artlist)
+            write_art_science_pages(suboutfile, do_print, artlist, refdict)
     # copy art files
     if not do_print:
         for art in artlist:
@@ -6031,8 +6050,8 @@ def build_site() -> None:
                         write_geography_page(outfile, False, species)
                 print("......Writing Media Pages......")
                 with open(WEBOUT_PATH + init_data().photo_url, "w", encoding="utf-8") as outfile:
-                    write_photo_index(outfile, False, species, photos)
-                write_all_art_pages(None, False, art)
+                    write_photo_index(outfile, False, species, photos, refdict)
+                write_all_art_pages(None, False, art, refdict)
                 with open(WEBOUT_PATH + init_data().video_url, "w", encoding="utf-8") as outfile:
                     write_video_index(outfile, False, videos)
                 print("......Writing Misc......")
@@ -6077,9 +6096,9 @@ def build_site() -> None:
                                              location_cited_refs, references, location_range_species, None)
                     print("......Writing Media Pages......")
                     write_main_morphology_pages(printfile, True, morphology)
-                    write_photo_index(printfile, True, species, photos)
+                    write_photo_index(printfile, True, species, photos, refdictd)
                     write_video_index(printfile, True, videos)
-                    write_all_art_pages(printfile, True, art)
+                    write_all_art_pages(printfile, True, art, refdict)
                     if OUTPUT_REFS:
                         print("......Writing Reference Pages......")
                         write_reference_summary(printfile, True, len(references), yeardat, yeardat1900, citecount,
