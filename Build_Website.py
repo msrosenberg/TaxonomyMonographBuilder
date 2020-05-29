@@ -6096,7 +6096,7 @@ def build_site() -> None:
                                              location_cited_refs, references, location_range_species, None)
                     print("......Writing Media Pages......")
                     write_main_morphology_pages(printfile, True, morphology)
-                    write_photo_index(printfile, True, species, photos, refdictd)
+                    write_photo_index(printfile, True, species, photos, refdict)
                     write_video_index(printfile, True, videos)
                     write_all_art_pages(printfile, True, art, refdict)
                     if OUTPUT_REFS:
