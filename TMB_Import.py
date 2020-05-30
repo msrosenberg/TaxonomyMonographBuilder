@@ -441,3 +441,12 @@ def read_measurement_data(filename: str) -> list:
                     new.class_id = d[6]
                 data.append(new)
     return data
+
+
+def read_abnormal_development_data(filename: str) -> list:
+    """
+    read abnormal development text info
+    """
+    with open(filename, "r", encoding="utf-8") as infile:
+        lines = infile.readlines()
+    return lines

@@ -33,6 +33,7 @@ class InitializationData:
         self.species_changes_synonyms = "data/species_changes_synonyms.txt"
         self.species_range_blocks = "data/species_range_blocks.txt"
         self.measurement_file = "data/measurement_data.txt"
+        self.abnormal_development_file = "data/abnormal_development.txt"
 
         # taxonomic key data
         self.tax_key_trait_file = "data/tax_key_trait_data.txt"
@@ -66,6 +67,7 @@ class InitializationData:
         self.video_url = "uca_videos.html"
         self.map_url = "uca_ranges.html"
         self.lifecycle_url = "uca_lifecycle.html"
+        self.abnormal_dev_url = "uca_abnormal_development.html"
         self.tree_url = "uca_phylogeny.html"
         self.art_sci_url = "uca_art_science.html"
         self.art_stamp_url = "uca_art_stamps.html"
