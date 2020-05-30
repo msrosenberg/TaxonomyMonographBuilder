@@ -389,6 +389,8 @@ def fetch_fa_glyph(glyph: Optional[str]) -> str:
             x += "-li fa fa-paint-brush\" aria-hidden"
         elif glyph == "list site cite":
             x += "-li fa fa-pencil-alt\" aria-hidden"
+        elif glyph == "list unusual dev":
+            x += "-li fa fa-transgender-alt\" aria-hidden"
         elif glyph == "bad location":
             x += " fa-exclamation-triangle\" style=\"color: red\" title=\"Problematic Location: Outside range of " \
                  "all fiddler crabs or this particular species.\""
@@ -4966,22 +4968,22 @@ def summarize_languages(refs: list) -> Tuple[dict, dict]:
     return languages, languages_by_year
 
 
-def write_abnormal_development_pages(outfile: TextIO, abdevdata: list, refdict: dict, do_print: bool) -> None:
+def write_unusual_development_pages(outfile: TextIO, abdevdata: list, refdict: dict, do_print: bool) -> None:
     """
-    create the abnormal development page
+    create the unusual development page
     """
     if do_print:
         start_page_division(outfile, "base_page")
         # media_path = MEDIA_PATH
     else:
-        common_html_header(outfile, "Abnormal Development in Fiddler Crabs")
+        common_html_header(outfile, "Unusual Development in Fiddler Crabs")
         # media_path = ""
-    outfile.write("    <header id=\"" + init_data().abnormal_dev_url + "\">\n")
-    outfile.write("      <h1 class=\"bookmark1\">Abnormal Development</h1>\n")
+    outfile.write("    <header id=\"" + init_data().unsuual_dev_url + "\">\n")
+    outfile.write("      <h1 class=\"bookmark1\">Unusual Development</h1>\n")
     outfile.write("    </header>\n")
     outfile.write("\n")
     outfile.write("    <p>\n")
-    outfile.write("      The following is a collection of references to abnormal development of secondary "
+    outfile.write("      The following is a collection of references to unusual development of secondary "
                   "sexual characters in fiddler crabs, divided by basic type. It is not meant bo be a thorough "
                   "overview of developmental studies. This also does not include anomalies in claw size due to "
                   "regeneration status.\n")
@@ -5568,6 +5570,11 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list, higher_ta
         outfile.write("      </li>\n")
         outfile.write("      <li>" + fetch_fa_glyph("list lifecycle") + "<a href=\"" + init_data().lifecycle_url +
                       "\">Life Cycle</a></li>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("           <li>" + fetch_fa_glyph("list unusual dev") + "<a href=\"" +
+                      init_data().unsuual_dev_url + "\">Unusual Development</a></li>\n")
+        outfile.write("        </ul>\n")
+
         outfile.write("      <li>" + fetch_fa_glyph("list morphology") + "<a href=\"" + init_data().morph_url +
                       "\">Morphology</a></li>\n")
         outfile.write("      <li>" + fetch_fa_glyph("list references") + "<a href=\"" + init_data().ref_url +
@@ -5876,6 +5883,10 @@ def print_table_of_contents(outfile: TextIO, species_list: list) -> None:
     outfile.write("       </li>\n")
     outfile.write("       <li><a href=\"#" + init_data().tree_url + "\">Phylogeny</a></li>\n")
     outfile.write("       <li><a href=\"#" + init_data().lifecycle_url + "\">Life Cycle</a></li>\n")
+    outfile.write("         <ul>\n")
+    outfile.write("           <li><a href=\"#" + init_data().unsuual_dev_url + "\">Unusual Development</a></li>\n")
+    outfile.write("         </ul>\n")
+
     outfile.write("       <li><a href=\"#" + init_data().species_url + "\">Species</a>\n")
     outfile.write("         <ul>\n")
     for species in species_list:
@@ -6005,7 +6016,7 @@ def build_site() -> None:
         videos = TMB_Import.read_video_data(init_data().video_file)
         art = TMB_Import.read_art_data(init_data().art_file)
         morphology = TMB_Import.read_morphology_data(init_data().morphology_file)
-        abnormal_development = TMB_Import.read_abnormal_development_data(init_data().abnormal_development_file)
+        unusual_development_data = TMB_Import.read_unusual_development_data(init_data().unusual_development_file)
 
         print("...Reading Ranges...")
         species_range_blocks = TMB_Import.read_species_blocks(init_data().species_range_blocks)
@@ -6119,8 +6130,8 @@ def build_site() -> None:
                     write_common_names_pages(outfile, False, replace_references(common_name_data, refdict, False))
                 with open(WEBOUT_PATH + init_data().lifecycle_url, "w", encoding="utf-8") as outfile:
                     write_life_cycle_pages(outfile, False)
-                with open(WEBOUT_PATH + init_data().abnormal_dev_url, "w", encoding="utf-8") as outfile:
-                    write_abnormal_development_pages(outfile, abnormal_development, refdict, False)
+                with open(WEBOUT_PATH + init_data().unsuual_dev_url, "w", encoding="utf-8") as outfile:
+                    write_unusual_development_pages(outfile, unusual_development_data, refdict, False)
 
                 with open(WEBOUT_PATH + init_data().tree_url, "w", encoding="utf-8") as outfile:
                     write_phylogeny_pages(outfile, genera_tree, species_tree, False, refdict)
@@ -6141,7 +6152,7 @@ def build_site() -> None:
                     write_systematics_overview(printfile, True, taxon_ranks, higher_taxa, species, refdict)
                     write_phylogeny_pages(printfile, genera_tree, species_tree, True, refdict)
                     write_life_cycle_pages(printfile, True)
-                    write_abnormal_development_pages(printfile, abnormal_development, refdict, True)
+                    write_unusual_development_pages(printfile, unusual_development_data, refdict, True)
                     print("......Writing Species Pages......")
                     write_species_info_pages(printfile, True, species, references, specific_names, all_names, photos,
                                              videos, art, species_refs, refdict, binomial_name_cnts, specific_name_cnts,

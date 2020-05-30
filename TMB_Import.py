@@ -443,7 +443,7 @@ def read_measurement_data(filename: str) -> list:
     return data
 
 
-def read_abnormal_development_data(filename: str) -> list:
+def read_unusual_development_data(filename: str) -> list:
     """
     read abnormal development text info
     """
