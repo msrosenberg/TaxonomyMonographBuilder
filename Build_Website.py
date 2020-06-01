@@ -48,7 +48,7 @@ AUTHOR_TAXON = 2        # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = True
+DRAW_MAPS = False
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
@@ -1277,7 +1277,10 @@ def check_citation_cross_references(citelist: list, refdict: dict, name_table: d
                                 _ = name_table[c.application][int(nstr)]
                             except ValueError:
                                 report_error("Citation " + c.cite_key + " tried to cite " + c.application +
-                                             " #" + nstr)
+                                             " #" + nstr + " (Value error)")
+                            except KeyError:
+                                report_error("Citation " + c.cite_key + " tried to cite " + c.application +
+                                             " #" + nstr + " (Key error)")
             else:
                 report_error("Citation not in DB: " + c.cite_key + " cites " + c.application)
 
@@ -4224,7 +4227,7 @@ def write_specific_art_page(outfile: TextIO, do_print: bool, art: TMB_Classes.Ar
     """
     create a page for a piece of art
     """
-    if art.art_type == "science":
+    if (art.art_type == "science") and (art.cite_key != "n/a"):
         ref = refdict[art.cite_key]
         author = ref.citation
     else:
@@ -4287,9 +4290,11 @@ def write_art_science_pages(outfile: TextIO, do_print: bool, artlist: list, refd
     for art in artlist:
         if art.art_type == "science":
             cnt += 1
-            ref = refdict[art.cite_key]
-            artist = ref.citation
-            # artist = art.author + " (" + art.year + ")"
+            if art.cite_key != "n/a":
+                ref = refdict[art.cite_key]
+                artist = ref.citation
+            else:
+                artist = art.author + " (" + art.year + ")"
             try:
                 artsource.index(artist)
             except ValueError:
@@ -4305,9 +4310,11 @@ def write_art_science_pages(outfile: TextIO, do_print: bool, artlist: list, refd
         outfile.write("      <h3 class=\"nobookmark\">" + a + "</h3>\n")
         for art in artlist:
             if art.art_type == "science":
-                ref = refdict[art.cite_key]
-                artist = ref.citation
-                # artist = art.author + " (" + art.year + ")"
+                if art.cite_key != "n/a":
+                    ref = refdict[art.cite_key]
+                    artist = ref.citation
+                else:
+                    artist = art.author + " (" + art.year + ")"
                 if artist == a:
                     outfile.write("      <figure class=\"sppic\">\n")
                     outfile.write("        <a href=\"" + rel_link_prefix(do_print, "art/") + art.image +
@@ -4322,10 +4329,11 @@ def write_art_science_pages(outfile: TextIO, do_print: bool, artlist: list, refd
     for a in artsource:
         for art in artlist:
             if art.art_type == "science":
-                ref = refdict[art.cite_key]
-                artist = ref.citation
-
-                # artist = art.author + " (" + art.year + ")"
+                if art.cite_key != "n/a":
+                    ref = refdict[art.cite_key]
+                    artist = ref.citation
+                else:
+                    artist = art.author + " (" + art.year + ")"
                 if artist == a:
                     if do_print:
                         write_specific_art_page(outfile, do_print, art, init_data().art_sci_url,
