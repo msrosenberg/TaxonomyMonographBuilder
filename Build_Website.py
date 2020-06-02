@@ -4679,6 +4679,10 @@ def write_measurement_guide(outfile: TextIO, do_print: bool):
         common_html_footer(outfile)
 
 
+def replace_media_path(x: str, p: str) -> str:
+    return x.replace("%%MEDIA_PATH%%", p)
+
+
 # def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: list, higher_taxa_list: list,
 #                                specieslist: list, refdict: dict, species_changes_new: list,
 #                                species_changes_synonyms: list, species_changes_spelling: list) -> None:
@@ -4711,9 +4715,6 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
     #         outfile.write("          </tr>\n")
     #     outfile.write("        </tbody>\n")
     #     outfile.write("      </table>\n")
-
-    def replace_media_path(x: str, p: str) -> str:
-        return x.replace("%%MEDIA_PATH%%", p)
 
     # def rank_tags(x: str) -> Tuple[str, str]:
     #     if ("genus" in x) or ("species" in x):
@@ -4982,10 +4983,10 @@ def write_unusual_development_pages(outfile: TextIO, abdevdata: list, refdict: d
     """
     if do_print:
         start_page_division(outfile, "base_page")
-        # media_path = MEDIA_PATH
+        media_path = MEDIA_PATH
     else:
         common_html_header(outfile, "Unusual Development in Fiddler Crabs")
-        # media_path = ""
+        media_path = ""
     outfile.write("    <header id=\"" + init_data().unsuual_dev_url + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Unusual Development</h1>\n")
     outfile.write("    </header>\n")
@@ -5008,7 +5009,9 @@ def write_unusual_development_pages(outfile: TextIO, abdevdata: list, refdict: d
                 else:
                     not_first = True
                 outfile.write("    <section class=\"spsection\">\n")
-                outfile.write("      <h2 class=\"bookmark2\">" + data[1] + "</h2>\n")
+                outstr = replace_media_path(data[1], media_path)
+                outfile.write("      <h2 class=\"bookmark2\">" + replace_species_in_string(outstr, do_print=do_print) +
+                              "</h2>\n")
                 outfile.write("      <p>\n")
                 outfile.write(data[2] + "\n")
                 outfile.write("      </p>\n")
@@ -5045,6 +5048,14 @@ def write_life_cycle_pages(outfile: TextIO, do_print: bool) -> None:
 
     outfile.write("    <header id=\"" + init_data().lifecycle_url + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Life Cycle</h1>\n")
+    if not do_print:
+        outfile.write("      <nav>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("          <li><a href=\"#{}\">{}</a></li>\n".format(init_data().unsuual_dev_url,
+                                                                           "Unusual Development"))
+        outfile.write("        </ul>\n")
+        outfile.write("      </nav>\n")
+
     outfile.write("    </header>\n")
     outfile.write("\n")
     outfile.write("    <p>\n")
@@ -5222,7 +5233,7 @@ def write_phylogeny_pages(outfile: TextIO, genera_tree: list, species_tree: list
     outfile.write("    <p>\n")
     outfile.write("     The phylogeny of fiddler crabs is still largely unresolved. Two trees are shown below: one "
                   "of just the genera and one including all species. The tree of genera is fairly solid, "
-                  "but the species tree is a rough estimate with many polytomies. Both are predominantly on the "
+                  "but the species tree is a rough estimate with many polytomies. Both are predominantly based on the "
                   "work of " + format_reference_cite(refdict["Shih2016.2"], do_print, AUTHOR_PAREN) + ".\n")
     outfile.write("    </p>\n")
     outfile.write("\n")
@@ -5579,8 +5590,9 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list, higher_ta
         outfile.write("      <li>" + fetch_fa_glyph("list lifecycle") + "<a href=\"" + init_data().lifecycle_url +
                       "\">Life Cycle</a></li>\n")
         outfile.write("        <ul>\n")
-        outfile.write("           <li>" + fetch_fa_glyph("list unusual dev") + "<a href=\"" +
-                      init_data().unsuual_dev_url + "\">Unusual Development</a></li>\n")
+        # outfile.write("           <li>" + fetch_fa_glyph("list unusual dev") + "<a href=\"" +
+        #               init_data().unsuual_dev_url + "\">Unusual Development</a></li>\n")
+        outfile.write("           <li><a href=\"" + init_data().unsuual_dev_url + "\">Unusual Development</a></li>\n")
         outfile.write("        </ul>\n")
 
         outfile.write("      <li>" + fetch_fa_glyph("list morphology") + "<a href=\"" + init_data().morph_url +
@@ -5690,7 +5702,8 @@ def copy_support_files() -> None:
                 "size_ind.png",
                 "size_mean.png",
                 "size_range.png",
-                "size_summary.png"}
+                "size_summary.png",
+                "double_clawed.jpg"}
     for filename in filelist:
         try:
             shutil.copy2("resources/images/" + filename, WEBOUT_PATH + "images/")
