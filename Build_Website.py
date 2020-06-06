@@ -889,23 +889,20 @@ def compute_species_from_citation_linking(citelist: list) -> None:
     for i, cite in enumerate(citelist):
         if cite.actual == "=":
             cname = ""
-            # crossnames = {}
             crossnames = collections.Counter()
             for j in range(i):  # only look at entries up to the current one
                 tmp = citelist[j]
                 if (tmp.cite_key == cite.application) and match_num_ref(tmp.name_key, cite.cite_n):
                     cname = tmp.name
                     crossnames.update([tmp.actual])
-                    # if tmp.actual in crossnames:
-                    #     crossnames[tmp.actual] += 1
-                    # else:
-                    #     crossnames[tmp.actual] = 1
             if len(crossnames) == 0:
                 pass
             elif len(crossnames) == 1:
-                for tmp in crossnames:
-                    cite.actual = tmp
+                cite.actual = crossnames[0]
+                # for tmp in crossnames:
+                #     cite.actual = tmp
             else:
+                # find name(s) with largest count
                 mcnt = max(crossnames.values())
 
                 keylist = []
