@@ -50,7 +50,7 @@ SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
 DRAW_MAPS = False
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
-CHECK_DATA = False
+CHECK_DATA = True
 # this flag creates the location web pages only; it is for checking changes and not general use
 CHECK_LOCATIONS = False
 # this flag controls whether additional location data should be fetched from iNaturalist
@@ -886,7 +886,10 @@ def compute_species_from_citation_linking(citelist: list) -> None:
     function to update correct species citations through cross-references to earlier works
     """
     # for i, cite in enumerate(tqdm(citelist)):
+    unrecorded_xrefs = []
+    recorded_refs = set()
     for i, cite in enumerate(citelist):
+        recorded_refs.add(cite.cite_key)
         if cite.actual == "=":
             cname = ""
             crossnames = collections.Counter()
@@ -896,7 +899,7 @@ def compute_species_from_citation_linking(citelist: list) -> None:
                     cname = tmp.name
                     crossnames.update([tmp.actual])
             if len(crossnames) == 0:
-                pass
+                unrecorded_xrefs.append([cite.cite_key, cite.application, cite.name_key, cite.cite_n])
             elif len(crossnames) == 1:
                 cite.actual = crossnames[0]
                 # for tmp in crossnames:
@@ -930,6 +933,10 @@ def compute_species_from_citation_linking(citelist: list) -> None:
                     cite.name_note = "in part"
                 else:
                     cite.name_note = "in part; " + cite.name_note
+    for x in unrecorded_xrefs:
+        if x[1] in recorded_refs:
+            report_error("Reference {} ({}) does not appear until after citation from {} ({})".format(x[1], x[3],
+                                                                                                      x[0], x[2]))
 
 
 def create_species_link(genus: str, species: str, do_print: bool, status: str = "", path: str = "") -> str:
