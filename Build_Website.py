@@ -48,9 +48,9 @@ AUTHOR_TAXON = 2        # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = False
+DRAW_MAPS = True
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
-CHECK_DATA = True
+CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
 CHECK_LOCATIONS = False
 # this flag controls whether additional location data should be fetched from iNaturalist
@@ -901,13 +901,10 @@ def compute_species_from_citation_linking(citelist: list) -> None:
             if len(crossnames) == 0:
                 unrecorded_xrefs.append([cite.cite_key, cite.application, cite.name_key, cite.cite_n])
             elif len(crossnames) == 1:
-                cite.actual = crossnames[0]
-                # for tmp in crossnames:
-                #     cite.actual = tmp
+                cite.actual = list(crossnames.keys())[0]
             else:
                 # find name(s) with largest count
                 mcnt = max(crossnames.values())
-
                 keylist = []
                 for key in crossnames:
                     if crossnames[key] == mcnt:
@@ -933,6 +930,7 @@ def compute_species_from_citation_linking(citelist: list) -> None:
                     cite.name_note = "in part"
                 else:
                     cite.name_note = "in part; " + cite.name_note
+
     for x in unrecorded_xrefs:
         if x[1] in recorded_refs:
             report_error("Reference {} ({}) does not appear until after citation from {} ({})".format(x[1], x[3],
@@ -1202,7 +1200,7 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
         else:  # "n/a"
             outfile.write("      <td>&nbsp;</td>\n")
 
-        # accepted species name                                
+        # accepted species name
         if n.actual == "?":
             outfile.write("      <td>?</td>\n")
         elif n.actual in {".", "="}:
