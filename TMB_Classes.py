@@ -211,10 +211,6 @@ class LocationClass:
         self.secondary_children = []
         self.alternates = []
         self.validity = ""
-        # self.ne_lat = None
-        # self.ne_lon = None
-        # self.sw_lat = None
-        # self.sw_lon = None
         self.unknown = False
 
     def n_children(self) -> int:
