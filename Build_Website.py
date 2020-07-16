@@ -10,10 +10,7 @@ import shutil
 import re
 import math
 import collections
-# import subprocess
-# from typing import Optional, Tuple, Union, TextIO
 from typing import Optional, Tuple, TextIO
-# from tqdm import tqdm
 import numpy
 # local dependencies
 import TMB_Import
@@ -48,13 +45,13 @@ AUTHOR_TAXON = 2        # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = True
+DRAW_MAPS = False
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
 CHECK_LOCATIONS = False
 # this flag controls whether additional location data should be fetched from iNaturalist
-INCLUDE_INAT = True
+INCLUDE_INAT = False
 # Suppress some of the more time-consuming output; only meant for when testing others elements
 OUTPUT_REFS = True
 OUTPUT_LOCS = True
@@ -1055,6 +1052,7 @@ def clean_specific_name(x: str) -> str:
                  "serratus",
                  "cordimana",
                  "spec.",
+                 "complex",
                  "5",
                  "6",
                  "1",
@@ -2493,6 +2491,7 @@ def create_all_taxonomic_keys(point_locations: dict, location_species: dict, loc
         if loc.n_direct_children() > 0:
             for c in loc.direct_children():
                 all_species |= fetch_child_data(c, location_species)
+
         range_species = set(find_species_by_name(s) for s in location_range_species[loc])
         all_species |= range_species
         if len(all_species) > 0:
@@ -3254,18 +3253,22 @@ def match_names_to_locations(species: list, specific_point_locations: dict,  bin
 
 
 def compare_ranges_to_locations(species_range_blocks: dict, point_locations: dict) -> dict:
+    """
+    create a list of point locations that should contain a species, based on the official range data
+    """
     point_range_species = {}
     for p in point_locations:
         dat = point_locations[p]
         slist = []
-        for species in species_range_blocks:
-            blocks = species_range_blocks[species]
-            inside = False
-            for b in blocks:
-                if b.inside(dat.latitude, dat.longitude):
-                    inside = True
-            if inside:
-                slist.append(species)
+        if not dat.unknown:
+            for species in species_range_blocks:
+                blocks = species_range_blocks[species]
+                inside = False
+                for b in blocks:
+                    if b.inside(dat.latitude, dat.longitude):
+                        inside = True
+                if inside:
+                    slist.append(species)
         point_range_species[dat] = slist
     return point_range_species
 
@@ -6006,9 +6009,6 @@ def build_site() -> None:
         languages, languages_by_year = summarize_languages(references)
         print("...Reading Species...")
         species = TMB_Import.read_species_data(init_data().species_data_file)
-        # species_changes_new = TMB_Import.read_simple_file(init_data().species_changes_new)
-        # species_changes_synonyms = TMB_Import.read_simple_file(init_data().species_changes_synonyms)
-        # species_changes_spelling = TMB_Import.read_simple_file(init_data().species_changes_spelling)
         init_species_crossref(species)
         connect_type_references(species, refdict)
 
