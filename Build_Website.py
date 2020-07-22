@@ -45,13 +45,13 @@ AUTHOR_TAXON = 2        # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = False
+DRAW_MAPS = True
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
 CHECK_LOCATIONS = False
 # this flag controls whether additional location data should be fetched from iNaturalist
-INCLUDE_INAT = False
+INCLUDE_INAT = True
 # Suppress some of the more time-consuming output; only meant for when testing others elements
 OUTPUT_REFS = True
 OUTPUT_LOCS = True
@@ -5014,18 +5014,21 @@ def write_unusual_development_pages(outfile: TextIO, abdevdata: list, refdict: d
                 else:
                     not_first = True
                 outfile.write("    <section class=\"spsection\">\n")
-                outstr = replace_media_path(data[1], media_path)
-                outfile.write("      <h2 class=\"bookmark2\">" + replace_species_in_string(outstr, do_print=do_print) +
-                              "</h2>\n")
+                outfile.write("      <h2 class=\"bookmark2\">" + data[1] + "</h2>\n")
+                outstr = replace_media_path(data[2], media_path)
                 outfile.write("      <p>\n")
-                outfile.write(data[2] + "\n")
+                outfile.write(replace_species_in_string(outstr, do_print=do_print) + "\n")
                 outfile.write("      </p>\n")
                 outfile.write("      <table>\n")
             else:
-                ref = refdict[data[0]]
                 species = find_species_by_name(data[1])
                 outfile.write("        <tr>\n")
-                outfile.write("          <td>" + format_reference_cite(ref, do_print, AUTHOR_PAREN) + "</td>\n")
+                if data[0].startswith("http"):
+                    url, caption = data[0].split("|")
+                    outfile.write("          <td><a href=\"" + url + "\">" + caption + "</a></td>\n")
+                else:
+                    ref = refdict[data[0]]
+                    outfile.write("          <td>" + format_reference_cite(ref, do_print, AUTHOR_PAREN) + "</td>\n")
                 outfile.write("          <td>" + create_species_link(species.genus, species.species, do_print) +
                               "</td>\n")
                 if data[2] != ".":
