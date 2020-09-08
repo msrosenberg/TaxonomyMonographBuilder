@@ -12,7 +12,7 @@ import TMB_Initialize
 import TMB_ImportShape
 import TMB_Import
 import matplotlib.pyplot as mplpy
-from matplotlib.collections import PatchCollection
+# from matplotlib.collections import PatchCollection
 
 
 __TMP_PATH__ = "temp/"

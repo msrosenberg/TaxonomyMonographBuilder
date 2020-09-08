@@ -4,6 +4,7 @@ __pycache__/
 private/
 temp/
 venv/
+venv38/
 
 
 # Windows image file caches
