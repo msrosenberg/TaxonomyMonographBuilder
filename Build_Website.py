@@ -1067,7 +1067,7 @@ def clean_specific_name(x: str) -> str:
             x = x[:x.find("{")-1]
         y = x.split(" ")
         x = y[len(y)-1].lower()
-        if x in skip_list or ("gruppe" in x):
+        if (x in skip_list) or ("gruppe" in x) or ("group" in x) or ("complex" in x):
             return ""
         else:
             return x.lower()
