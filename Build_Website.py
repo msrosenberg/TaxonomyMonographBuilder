@@ -567,6 +567,8 @@ def format_language(x: str) -> str:
         ["Arabic", "<span class=\"flag-icon flag-icon-sa\"></span> Arabic"],
         ["Indonesian", "<span class=\"flag-icon flag-icon-id\"></span> Indonesian"],
         ["Afrikaans", "<span class=\"flag-icon flag-icon-za\"></span> Afrikaans"],
+        ["Malay", "<span class=\"flag-icon flag-icon-my\"></span> Malay"],
+        ["Malagasy", "<span class=\"flag-icon flag-icon-mg\"></span> Malagasy"],
         ["Burmese", "<span class=\"flag-icon flag-icon-mm\"></span> Burmese"]
     ]
     for r in language_replace_list:
@@ -5774,6 +5776,8 @@ def copy_support_files() -> None:
                 "sa.svg",  # Saudi Arabia (best option for Arabic of those available)
                 "id.svg",  # Indonesia
                 "za.svg",  # South Africa (best option for Afrikaans)
+                "my.svg",  # Malaysia (for Malay)
+                "mg.svg",  # Madagascar (for Malagasy)
                 "vn.svg"}  # Vietnam
     for filename in filelist:
         try:
