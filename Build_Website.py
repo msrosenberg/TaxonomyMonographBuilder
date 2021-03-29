@@ -3661,7 +3661,20 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
 
     if not is_fossil:
         outfile.write("       <dt>Common Names</dt>\n")
-        outfile.write("         <dd>" + species.commonext + "</dd>\n")
+        # outfile.write("         <dd>" + species.commonext + "</dd>\n")
+        common_name_list = species.commonext.split(";")
+        name_languages = set()
+        name_dict = {}
+        for c in common_name_list:
+            language, com_name = c.split("|")
+            name_languages.add(language)
+            if language not in name_dict:
+                name_dict[language] = []
+            name_dict[language].append(com_name)
+        name_languages = sorted(name_languages)
+        for language in name_languages:
+            name_list = sorted(name_dict[language])
+            outfile.write("        <dd>{}: {}</dd>\n".format(format_language(language), ", ".join(name_list)))
 
     # Synonyms
     binomial_synlist = []
