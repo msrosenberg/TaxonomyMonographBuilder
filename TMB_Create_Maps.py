@@ -13,6 +13,7 @@ import zipfile
 import multiprocessing
 from typing import Tuple, Optional
 import matplotlib.pyplot as mplpy
+import matplotlib.ticker
 from matplotlib.collections import PatchCollection
 import matplotlib.patches as mplp
 from tqdm import tqdm
@@ -21,13 +22,15 @@ from TMB_Error import report_error
 from TMB_Common import *
 from TMB_Classes import Point
 import TMB_ImportShape
+import numpy
+# import TMB_Create_Coastal_Ranges
 
 
 __TMP_PATH__ = "temp/"
 __OUTPUT_PATH__ = __TMP_PATH__ + "maps/"
 FIG_WIDTH = 6.5
 FIG_HEIGHT = 3.25
-MAX_PROCESSOR_COUNT = 2  # maximum number of processors which can be used for map creation
+MAX_PROCESSOR_COUNT = 2  # maximum number of processors which can be used for map creation; set to 1 to skip
 
 
 class BaseMap:
@@ -46,11 +49,13 @@ def point_in_blocks(p: Point, blocks: list) -> bool:
     """
     test whether the point is in any of the blocks
     """
-    result = False
+    # result = False
     for b in blocks:
-        if not result:
-            result = b.inside(p.lat, p.lon)
-    return result
+        # if not result:
+        #     result = b.inside(p.lat, p.lon)
+        if b.inside(p.lat, p.lon):
+            return True
+    return False
 
 
 def get_range_map_overlap(blocks: list, coastline: list) -> list:
@@ -560,6 +565,8 @@ def adjust_longitude_tick_values(faxes: mplpy.Axes) -> None:
         if all_ints:  # if all of the values are integers, force to display as integers
             for i, x in enumerate(xlabels):
                 xlabels[i] = int(x)
+        ticks_loc = faxes.get_xticks().tolist()
+        faxes.xaxis.set_major_locator(matplotlib.ticker.FixedLocator(ticks_loc))
         faxes.set_xticklabels(xlabels)
 
 
@@ -674,6 +681,44 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
     mplpy.close("all")
 
 
+def create_cell_density_map(latitudes, longitudes, cell_counts, title: str, base_map: BaseMap, skip_axes: bool = True,
+                            graph_font: Optional[str] = None) -> None:
+    fig, faxes = mplpy.subplots(figsize=[FIG_WIDTH, FIG_HEIGHT])
+    for spine in faxes.spines:
+        faxes.spines[spine].set_visible(False)
+    # maxlat = -90
+    # minlat = 90
+    # maxlon = -180
+    # minlon = 180
+    # mid_atlantic = False
+    # lats = []
+    # lons = []
+    # _ = draw_and_adjust_basemap(faxes, base_map, mid_atlantic, minlon, maxlon, minlat, maxlat, lons, lats)
+    draw_base_map(faxes, base_map)
+
+    x, y = numpy.meshgrid(longitudes, latitudes)
+    faxes.pcolormesh(x, y, cell_counts, cmap="Reds")
+
+    maxlat = 90
+    minlat = -90
+    maxlon = 180
+    minlon = -180
+    mplpy.xlim(minlon, maxlon)
+    mplpy.ylim(minlat, maxlat)
+    if skip_axes:
+        faxes.axes.get_yaxis().set_visible(False)
+        faxes.axes.get_xaxis().set_visible(False)
+    else:
+        mplpy.xlabel("longitude", fontname=graph_font)
+        mplpy.ylabel("latitude", fontname=graph_font)
+    mplpy.rcParams["svg.fonttype"] = "none"
+    mplpy.tight_layout()
+    adjust_longitude_tick_values(faxes)
+
+    mplpy.savefig(__OUTPUT_PATH__ + "density_map.png", format="png", dpi=600)
+    mplpy.close("all")
+
+
 def create_all_species_point_maps(species: list, point_locations: dict, species_plot_locations: dict,
                                   invalid_species_locations: dict, base_map: BaseMap,
                                   init_data: TMB_Initialize.InitializationData,
@@ -681,7 +726,10 @@ def create_all_species_point_maps(species: list, point_locations: dict, species_
                                   questionable_id_locations: Optional[dict] = None) -> None:
     all_places = set()
     print(".........Species Point Maps.........")
-    pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
+    if MAX_PROCESSOR_COUNT > 1:
+        pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
+    else:
+        pool = None
     png_inputs = []
     for s in species:
         if s.status != "fossil":
@@ -694,15 +742,20 @@ def create_all_species_point_maps(species: list, point_locations: dict, species_
                 inat_data = inat_species_locations[s.species]
             else:
                 inat_data = None
-            png_inputs.append(("u_" + s.species, places, point_locations, invalid_places, questionable_ids, inat_data,
-                               base_map, False, None, init_data.graph_font))
+            if MAX_PROCESSOR_COUNT > 1:
+                png_inputs.append(("u_" + s.species, places, point_locations, invalid_places, questionable_ids,
+                                   inat_data, base_map, False, None, init_data.graph_font))
+            else:
+                write_point_map("u_" + s.species, places, point_locations, invalid_places, questionable_ids, inat_data,
+                                base_map, False, None, init_data.graph_font)
             write_point_map_kml("u_" + s.species, places, point_locations, invalid_places, questionable_ids, inat_data,
                                 init_data, None)
             all_places |= set(places)
-    pool.starmap(write_point_map, png_inputs)
+    if MAX_PROCESSOR_COUNT > 1:
+        pool.starmap(write_point_map, png_inputs)
+        pool.close()
+        pool.join()
     all_list = sorted(list(all_places))
-    pool.close()
-    pool.join()
     write_point_map("fiddlers_all", all_list, point_locations, None, None, None, base_map, True, None,
                     init_data.graph_font)
     write_point_map_kml("fiddlers_all", all_list, point_locations, None, None, None, init_data, None)
@@ -714,14 +767,21 @@ def create_all_species_maps(base_map: BaseMap, init_data: TMB_Initialize.Initial
                             questionable_id_locations: Optional[dict] = None) -> None:
     # create range maps
     print(".........Species Range Maps.........")
-    pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
+    if MAX_PROCESSOR_COUNT > 1:
+        pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
+    else:
+        pool = None
     inputs = []
     for s in species_ranges:
         write_species_range_map_kml(s, species_ranges[s])
-        inputs.append((base_map, s, species_ranges[s], init_data.graph_font))
-    pool.starmap(write_species_range_map, inputs)
-    pool.close()
-    pool.join()
+        if MAX_PROCESSOR_COUNT > 1:
+            inputs.append((base_map, s, species_ranges[s], init_data.graph_font))
+        else:
+            write_species_range_map(base_map, s, species_ranges[s], init_data.graph_font)
+    if MAX_PROCESSOR_COUNT > 1:
+        pool.starmap(write_species_range_map, inputs)
+        pool.close()
+        pool.join()
     write_all_range_map_kml(species_ranges)
     write_all_range_map(base_map, species_ranges)
 
@@ -733,30 +793,46 @@ def create_all_species_maps(base_map: BaseMap, init_data: TMB_Initialize.Initial
 def create_all_name_maps(base_map: BaseMap, all_names: list, specific_names: list, point_locations: dict,
                          specific_plot_locations: dict, binomial_plot_locations: dict,
                          init_data: TMB_Initialize.InitializationData) -> None:
-    pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
+    if MAX_PROCESSOR_COUNT > 1:
+        pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
+    else:
+        pool = None
     bi_inputs_png = []
     sp_inputs_png = []
     for i, name in enumerate(all_names):
+        print("......." + name)
         namefile = "name_" + name_to_filename(name)
         place_list = binomial_plot_locations[name]
-        bi_inputs_png.append((namefile, place_list, point_locations, None, None, None, base_map, False, None,
-                              init_data.graph_font))
+        if MAX_PROCESSOR_COUNT > 1:
+            bi_inputs_png.append((namefile, place_list, point_locations, None, None, None, base_map, False, None,
+                                  init_data.graph_font))
+        else:
+            write_point_map(namefile, place_list, point_locations, None, None, None, base_map, False, None,
+                            init_data.graph_font)
         write_point_map_kml(namefile, place_list, point_locations, None, None, None, init_data, None)
     for i, name in enumerate(specific_names):
         namefile = "sn_" + name.name
         place_list = specific_plot_locations[name]
-        sp_inputs_png.append((namefile, place_list, point_locations, None, None, None, base_map, False, None,
-                              init_data.graph_font))
+        if MAX_PROCESSOR_COUNT > 1:
+            sp_inputs_png.append((namefile, place_list, point_locations, None, None, None, base_map, False, None,
+                                  init_data.graph_font))
+        else:
+            write_point_map(namefile, place_list, point_locations, None, None, None, base_map, False, None,
+                            init_data.graph_font)
         write_point_map_kml(namefile, place_list, point_locations, None, None, None, init_data, None)
-    pool.starmap(write_point_map, bi_inputs_png)
-    pool.starmap(write_point_map, sp_inputs_png)
-    pool.close()
-    pool.join()
+    if MAX_PROCESSOR_COUNT > 1:
+        pool.starmap(write_point_map, bi_inputs_png)
+        pool.starmap(write_point_map, sp_inputs_png)
+        pool.close()
+        pool.join()
 
 
 def create_all_location_maps(base_map: BaseMap, point_locations: dict,
                              init_data: TMB_Initialize.InitializationData) -> None:
-    pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
+    if MAX_PROCESSOR_COUNT > 1:
+        pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
+    else:
+        pool = None
     png_inputs = []
     for i, loc in enumerate(point_locations):
         point = point_locations[loc]
@@ -772,12 +848,17 @@ def create_all_location_maps(base_map: BaseMap, point_locations: dict,
                 place_list.append(p.name)
             place_list.append(loc)  # put the primary location at end so it is drawn above children
             namefile = "location_" + place_to_filename(loc)
-            png_inputs.append((namefile, place_list, point_locations, None, None, None, base_map, False, sub_list,
-                               init_data.graph_font))
+            if MAX_PROCESSOR_COUNT > 1:
+                png_inputs.append((namefile, place_list, point_locations, None, None, None, base_map, False, sub_list,
+                                   init_data.graph_font))
+            else:
+                write_point_map(namefile, place_list, point_locations, None, None, None, base_map, False, sub_list,
+                                init_data.graph_font)
             write_point_map_kml(namefile, place_list, point_locations, None, None, None, init_data, sub_list)
-    pool.starmap(write_point_map, png_inputs)
-    pool.close()
-    pool.join()
+    if MAX_PROCESSOR_COUNT > 1:
+        pool.starmap(write_point_map, png_inputs)
+        pool.close()
+        pool.join()
 
 
 def create_all_maps(init_data: TMB_Initialize.InitializationData, point_locations: dict, species: Optional[list] = None,
