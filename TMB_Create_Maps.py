@@ -697,7 +697,8 @@ def create_cell_density_map(latitudes, longitudes, cell_counts, title: str, base
     draw_base_map(faxes, base_map)
 
     x, y = numpy.meshgrid(longitudes, latitudes)
-    faxes.pcolormesh(x, y, cell_counts, cmap="Reds")
+    mesh = faxes.pcolormesh(x, y, cell_counts, cmap="plasma")
+    fig.colorbar(mesh)
 
     maxlat = 90
     minlat = -90
