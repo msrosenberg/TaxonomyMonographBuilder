@@ -6,7 +6,7 @@ import TMB_Create_Maps
 import TMB_Initialize
 import TMB_Import
 import TMB_Create_Coastal_Ranges
-from TMB_Classes import RangeBlock
+from TMB_Classes import RangeCell
 
 
 """
@@ -68,7 +68,7 @@ def calculate_coastal_length(block_coast: list) -> float:
     return length
 
 
-def block_count(block: RangeBlock, ranges: dict) -> Tuple[int, set]:
+def block_count(block: RangeCell, ranges: dict) -> Tuple[int, set]:
     cnt = 0
     species = set()
     for s in ranges:
@@ -110,7 +110,7 @@ def block_calcluations(init_data: TMB_Initialize.INIT_DATA):
         for lon in range(-180, 180):
             for lat in range(-45, 45):  # actual range is ~-38 to 43
                 print("Working on cell {} {}".format(lat, lon))
-                new_block = RangeBlock(lat, lon, lat+1, lon+1)
+                new_block = RangeCell(lat, lon, lat + 1, lon + 1)
                 block_coast = TMB_Create_Maps.get_range_map_overlap([new_block], coastline_map)
                 if len(block_coast) > 0:
                     coast_len = calculate_coastal_length(block_coast)

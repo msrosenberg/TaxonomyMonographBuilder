@@ -252,7 +252,7 @@ class Point:
         self.lon = lon
 
 
-class RangeBlock:
+class RangeCell:
     def __init__(self, startlat=0, startlon=0, endlat=0, endlon=0):
         self.lower_left_lat = startlat
         self.lower_left_lon = startlon
