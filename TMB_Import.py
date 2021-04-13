@@ -145,7 +145,7 @@ def read_species_data(filename: str) -> list:
         newspecies.commonext = s[6]
         newspecies.range = s[7]
         newspecies.range_references = s[8]
-        newspecies.region = s[9]
+        newspecies.realm = s[9]
         newspecies.status = s[10]
         newspecies.taxonid = s[11]
         newspecies.eolid = s[12]

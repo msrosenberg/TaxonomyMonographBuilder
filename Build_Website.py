@@ -2633,16 +2633,16 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
     """
     output geographic ranges to HTML
     """
-    regions = ("Eastern Atlantic",
-               "Western Atlantic",
-               "Eastern Pacific",
-               "Indo-West Pacific")
+    regions = ("Eastern Atlantic Realm",
+               "Western Atlantic Realm",
+               "Eastern Pacific Realm",
+               "Indo-West Pacific Realm")
     if do_print:
         start_page_division(outfile, "index_page")
     else:
         common_header_part1(outfile, "Fiddler Crab Geographic Ranges")
         start_google_map_header(outfile)
-        write_google_map_range_header(outfile, "fiddlers_all")
+        # write_google_map_range_header(outfile, "fiddlers_all")
         write_google_map_point_header(outfile, "fiddlers_all")
         end_google_map_header(outfile)
         common_header_part2(outfile, include_map=True)
@@ -2670,22 +2670,25 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
                       "title=\"Point map of fiddler crab distribution\" />\n")
         outfile.write("      </figure>\n")
     else:
-        outfile.write("        <div id=\"range_map_canvas\"></div>\n")
+        # outfile.write("        <div id=\"range_map_canvas\"></div>\n")
+        outfile.write("        <div id=\"map_density\"><a href=\"maps/" + rangemap_name("fiddlers_all") +
+                      ".png\"><img src=\"maps/" + rangemap_name("fiddlers_all") + ".png\"></a></div>\n")
         outfile.write("        <div id=\"point_map_canvas\"></div>\n")
         outfile.write("        <div class=\"map_download\">\n")
-        outfile.write("          <a href=\"maps/" + rangemap_name("fiddlers_all") + ".png\">" +
-                      fetch_fa_glyph("download") + "Download PNG line map of ranges.</a> \n")
+        # outfile.write("          <a href=\"maps/" + rangemap_name("fiddlers_all") + ".png\">" +
+        #               fetch_fa_glyph("download") + "Download PNG line map of ranges.</a> \n")
         outfile.write("          <a href=\"maps/" + pointmap_name("fiddlers_all") + ".png\">" +
                       fetch_fa_glyph("download") + "Download PNG line map of point locations.</a>\n")
         outfile.write("        </div>\n")
     outfile.write("      </div>\n")
     outfile.write("      <p>\n")
-    outfile.write("        The first map shows the approximate density of species richness, with denser color "
-                  "where more species are found. ")
+    outfile.write("        The first map shows the approximate density of species richness")
     if do_print:
         index_page = "#location_index.html"
+        outfile.write(". ")
     else:
         index_page = "locations/index.html"
+        outfile.write(" (click on map for larger view). ")
     outfile.write("The second map shows approximate point locations where fiddler crabs "
                   "have been recorded in the scientific record. Red markers indicate points where fiddler crabs are "
                   "found; purple indicates fossil-only locations; blue indicate false location records. See "
@@ -2693,7 +2696,7 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
     outfile.write("\n      </p>\n")
     outfile.write("      <p>\n")
     outfile.write("        Specific ranges for a species or name can be found on its associated pages. "
-                  "The list below sorts the species by major geographic region.\n")
+                  "The list below sorts the species by major zoogeographic realm.\n")
     outfile.write("      </p>\n")
 
     outfile.write("    </section>\n")
@@ -2703,7 +2706,7 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
         outfile.write("      <h2 class=\"nobookmark\">" + r + "</h2>\n")
         outfile.write("      <ul class=\"splist\">\n")
         for s in species:
-            if s.region == r:
+            if s.realm == r:
                 if s.status != "fossil":
                     outfile.write("        <li>" + create_species_link(s.genus, s.species, do_print) + "</li>\n")
         outfile.write("      </ul>\n")
@@ -3725,7 +3728,7 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
 
     # Geographic Range
     outfile.write("       <dt class=\"pagebreak\">Geographic Range</dt>\n")
-    outfile.write("         <dd>" + species.region + ": " + species.range + "</dd>\n")
+    outfile.write("         <dd>" + species.realm + ": " + species.range + "</dd>\n")
     if not is_fossil:
         outfile.write("         <dd>\n")
         if do_print:
@@ -5818,7 +5821,7 @@ def copy_map_files(species: list, all_names: list, specific_names: list, point_l
             copy_file(TMP_MAP_PATH + rangemap_name("u_" + s.species) + ".png")
             copy_file(TMP_MAP_PATH + pointmap_name("u_" + s.species) + ".png")
     # combined map
-    copy_file(TMP_MAP_PATH + rangemap_name("fiddlers_all") + ".kmz")
+    # copy_file(TMP_MAP_PATH + rangemap_name("fiddlers_all") + ".kmz")
     copy_file(TMP_MAP_PATH + pointmap_name("fiddlers_all") + ".kmz")
     copy_file(TMP_MAP_PATH + rangemap_name("fiddlers_all") + ".png")
     copy_file(TMP_MAP_PATH + pointmap_name("fiddlers_all") + ".png")

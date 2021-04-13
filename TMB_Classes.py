@@ -141,7 +141,7 @@ class SpeciesClass:
         self.commonext = ""
         self.range = ""
         self.range_references = ""
-        self.region = ""
+        self.realm = ""
         self.status = ""
         self.taxonid = ""
         self.eolid = ""
