@@ -11,19 +11,19 @@ completion of the code.
 
 import zipfile
 import multiprocessing
+import bisect
 from typing import Tuple, Optional
 import matplotlib.pyplot as mplpy
 import matplotlib.ticker
 from matplotlib.collections import PatchCollection
 import matplotlib.patches as mplp
 from tqdm import tqdm
+import numpy
 import TMB_Initialize
 from TMB_Error import report_error
 from TMB_Common import *
 from TMB_Classes import Point
 import TMB_ImportShape
-import numpy
-# import TMB_Create_Coastal_Ranges
 
 
 __TMP_PATH__ = "temp/"
@@ -49,10 +49,7 @@ def point_in_blocks(p: Point, blocks: list) -> bool:
     """
     test whether the point is in any of the blocks
     """
-    # result = False
     for b in blocks:
-        # if not result:
-        #     result = b.inside(p.lat, p.lon)
         if b.inside(p.lat, p.lon):
             return True
     return False
@@ -82,68 +79,6 @@ def get_range_map_overlap(blocks: list, coastline: list) -> list:
         if len(newline) > 0:
             species_range.append(newline)
     return species_range
-
-
-# def read_kml_placemark(infile: TextIO) -> list:
-#     namestr = infile.readline().strip()  # read name
-#     line = infile.readline().strip()
-#     while (not line.startswith("<LineString>") and not line.startswith("<Polygon>") and
-#            not line.startswith("<MultiGeometry>")):
-#         line = infile.readline().strip()
-#     typestr = line
-#     if typestr.startswith("<MultiGeometry>"):
-#         coords = []
-#         while not line.startswith("</Placemark>"):
-#             line = infile.readline().strip()
-#             if line.startswith("<coordinates>"):
-#                 line = infile.readline().strip()
-#                 coords.append(line)
-#         return [namestr, True, coords]
-#     else:
-#         line = infile.readline().strip()
-#         while not line.startswith("<coordinates>"):
-#             line = infile.readline().strip()
-#         coords = infile.readline().strip()
-#         line = infile.readline().strip()
-#         while not line.startswith("</Placemark>"):
-#             line = infile.readline().strip()
-#         return [namestr, False, coords]
-
-
-# def read_species_from_kml(infile: TextIO, namestr: str) -> list:
-#     line = infile.readline().strip()
-#     crabplaces = []
-#     while not line.startswith("</Folder>"):
-#         if line.startswith("<Placemark>"):
-#             newplace = read_kml_placemark(infile)
-#             crabplaces.append(newplace)
-#         line = infile.readline().strip()
-#     return [namestr, crabplaces]
-
-
-# def read_kml_folder(infile: TextIO) -> list:
-#     line = infile.readline().strip()
-#     crab = None
-#     while not line.startswith("</Folder>"):
-#         if line.startswith("<name>Uca"):
-#             crab = read_species_from_kml(infile, line)
-#             line = "</Folder>"
-#         else:
-#             line = infile.readline().strip()
-#     return crab
-
-
-# def read_raw_kml(filename: str) -> list:
-#     maplist = []
-#     with open(filename, "r", encoding="utf-8") as infile:
-#         line = infile.readline()
-#         while line != "":
-#             line = line.strip()
-#             if line.startswith("<Folder>"):
-#                 new_map = read_kml_folder(infile)
-#                 maplist.append(new_map)
-#             line = infile.readline()
-#     return maplist
 
 
 def write_species_range_map_kml(name, species_range: list) -> None:
@@ -400,7 +335,6 @@ def write_species_range_map(base_map: BaseMap, species, species_map: list, graph
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     adjust_longitude_tick_values(faxes)
-    # mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("u_" + name) + ".svg", format="svg")
     mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("u_" + species) + ".png", format="png", dpi=600)
     mplpy.close("all")
 
@@ -479,7 +413,6 @@ def write_point_map_kml(title: str, place_list: list, point_locations: dict, inv
         outfile.write("    </Style>\n")
 
         if inat_locations is not None:
-            # for point in inat_locations:
             for p in inat_locations:
                 point = p.coords
                 outfile.write("    <Placemark>\n")
@@ -653,7 +586,6 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
     (minlon, maxlon, minlat, maxlat, _) = draw_and_adjust_basemap(faxes, base_map, mid_atlantic, minlon, maxlon,
                                                                   minlat, maxlat, lons, lats)
 
-    # faxes.scatter(lons, lats, s=20, color=colors, edgecolors=edges, alpha=1, zorder=2, clip_on=False)
     faxes.scatter(lons, lats, s=sizes, color=colors, edgecolors=edges, alpha=1, zorder=2, clip_on=False, linewidth=0.5)
 
     # uncomment to force full world map
@@ -676,36 +608,83 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
     mplpy.tight_layout()
     adjust_longitude_tick_values(faxes)
 
-    # mplpy.savefig(__OUTPUT_PATH__ + pointmap_name(title) + ".svg", format="svg")
     mplpy.savefig(__OUTPUT_PATH__ + pointmap_name(title) + ".png", format="png", dpi=600)
     mplpy.close("all")
 
 
-def create_cell_density_map(latitudes, longitudes, cell_counts, title: str, base_map: BaseMap, skip_axes: bool = True,
+def identify_species_coastal_cells(species_range, cells_per_degree=4) -> list:
+    latitudes = [-90 + x/cells_per_degree for x in range(180*cells_per_degree)]
+    longitudes = [-180 + x/cells_per_degree for x in range(360*cells_per_degree)]
+    world_cells = {}
+    for lat in latitudes:
+        for lon in longitudes:
+            world_cells[lat, lon] = False
+    for part in species_range:
+        for p in part:
+            lat = latitudes[bisect.bisect(latitudes, p.lat)-1]
+            lon = longitudes[bisect.bisect(longitudes, p.lon)-1]
+            world_cells[lat, lon] = True
+    species_cells = []
+    for lat in latitudes:
+        if abs(lat) < 45:
+            for lon in longitudes:
+                if world_cells[lat, lon]:
+                    species_cells.append((lat, lon))
+    return species_cells
+
+
+def count_species_in_coastal_cells(species_ranges: dict, cells_per_degree=4):
+        latitudes = [-90 + x / cells_per_degree for x in range(180 * cells_per_degree)]
+        longitudes = [-180 + x / cells_per_degree for x in range(360 * cells_per_degree)]
+        nlats = len(latitudes)
+        nlons = len(longitudes)
+        counts = numpy.zeros((nlats, nlons))
+
+        x_ref = {}
+        for i, lat in enumerate(latitudes):
+            for j, lon in enumerate(longitudes):
+                x_ref[lat, lon] = (i, j)
+
+        # if species_ranges is None:  # calculate if not directly input
+        #     print("...Determining Species Coastlines...")
+        #     coastline_map = import_coastline_data(init_data)
+        #     species_range_blocks = TMB_Import.read_species_blocks(init_data.species_range_blocks)
+        #     species_ranges = {}
+        #     for s in tqdm(species_range_blocks):
+        #         species_ranges[s] = TMB_Create_Maps.get_range_map_overlap(species_range_blocks[s], coastline_map)
+
+        print("...Determining Species Cells...")
+        for species in tqdm(species_ranges):
+            species_cells = identify_species_coastal_cells(species_ranges[species], cells_per_degree)
+            for cell in species_cells:
+                i, j = x_ref[cell[0], cell[1]]
+                counts[i, j] = counts[i, j] + 1
+
+        for i in range(nlats):
+            for j in range(nlons):
+                if counts[i, j] == 0:
+                    counts[i, j] = numpy.nan
+
+        # need these to complete the colormesh grid
+        latitudes.append(90)
+        longitudes.append(180)
+        return latitudes, longitudes, counts
+
+
+def create_cell_density_map(latitudes, longitudes, cell_counts, base_map: BaseMap, skip_axes: bool = True,
                             graph_font: Optional[str] = None) -> None:
     fig, faxes = mplpy.subplots(figsize=[FIG_WIDTH, FIG_HEIGHT])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
-    # maxlat = -90
-    # minlat = 90
-    # maxlon = -180
-    # minlon = 180
-    # mid_atlantic = False
-    # lats = []
-    # lons = []
-    # _ = draw_and_adjust_basemap(faxes, base_map, mid_atlantic, minlon, maxlon, minlat, maxlat, lons, lats)
+
     draw_base_map(faxes, base_map)
 
     x, y = numpy.meshgrid(longitudes, latitudes)
     mesh = faxes.pcolormesh(x, y, cell_counts, cmap="plasma")
     fig.colorbar(mesh)
 
-    maxlat = 90
-    minlat = -90
-    maxlon = 180
-    minlon = -180
-    mplpy.xlim(minlon, maxlon)
-    mplpy.ylim(minlat, maxlat)
+    mplpy.xlim(-180, 180)
+    mplpy.ylim(-90, 90)
     if skip_axes:
         faxes.axes.get_yaxis().set_visible(False)
         faxes.axes.get_xaxis().set_visible(False)
@@ -715,8 +694,7 @@ def create_cell_density_map(latitudes, longitudes, cell_counts, title: str, base
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     adjust_longitude_tick_values(faxes)
-
-    mplpy.savefig(__OUTPUT_PATH__ + "density_map.png", format="png", dpi=600)
+    mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("fiddlers_all") + ".png", format="png", dpi=600)
     mplpy.close("all")
 
 
@@ -783,8 +761,11 @@ def create_all_species_maps(base_map: BaseMap, init_data: TMB_Initialize.Initial
         pool.starmap(write_species_range_map, inputs)
         pool.close()
         pool.join()
-    write_all_range_map_kml(species_ranges)
-    write_all_range_map(base_map, species_ranges)
+
+    # write_all_range_map_kml(species_ranges)
+    # write_all_range_map(base_map, species_ranges)
+    cell_lats, cell_lons, cell_cnts = count_species_in_coastal_cells(species_ranges, 4)
+    create_cell_density_map(cell_lats, cell_lons, cell_cnts, base_map)
 
     # create point maps
     create_all_species_point_maps(species, point_locations, species_plot_locations, invalid_species_locations, base_map,

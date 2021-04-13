@@ -5,19 +5,18 @@ This module is for creating and testing species range maps outside of the normal
 In addition to calculating and drawing the range maps, it will also draw the maps of the blocks from
 which the ranges are derived.
 
+The code in this module does not make up part of the regular pipeline and is not used in regular site updates
 """
 
-from typing import Tuple, Optional
-import bisect
+# from typing import Tuple, Optional
+# import bisect
+import matplotlib.pyplot as mplpy
 import TMB_Create_Maps
 import TMB_Initialize
 import TMB_ImportShape
 import TMB_Import
-from TMB_Classes import RangeCell
-import matplotlib.pyplot as mplpy
-import numpy
-from tqdm import tqdm
-# from matplotlib.collections import PatchCollection
+# import numpy
+# from tqdm import tqdm
 
 
 __TMP_PATH__ = "temp/"
@@ -409,69 +408,69 @@ def draw_provinces(init_data: TMB_Initialize.InitializationData) -> None:
 #     return coastal_cells
 
 
-def identify_species_coastal_cells(species_range, cells_per_degree=4) -> list:
-    latitudes = [-90 + x/cells_per_degree for x in range(180*cells_per_degree)]
-    longitudes = [-180 + x/cells_per_degree for x in range(360*cells_per_degree)]
-    world_cells = {}
-    for lat in latitudes:
-        for lon in longitudes:
-            world_cells[lat, lon] = False
-    for part in species_range:
-        for p in part:
-            lat = latitudes[bisect.bisect(latitudes, p.lat)-1]
-            lon = longitudes[bisect.bisect(longitudes, p.lon)-1]
-            world_cells[lat, lon] = True
-    species_cells = []
-    for lat in latitudes:
-        if abs(lat) < 45:
-            for lon in longitudes:
-                if world_cells[lat, lon]:
-                    species_cells.append((lat, lon))
-    return species_cells
-
-
-def count_species_in_coastal_cells(init_data: TMB_Initialize.InitializationData, cells_per_degree=4,
-                                   species_ranges: Optional[dict] = None):
-        latitudes = [-90 + x / cells_per_degree for x in range(180 * cells_per_degree)]
-        longitudes = [-180 + x / cells_per_degree for x in range(360 * cells_per_degree)]
-        nlats = len(latitudes)
-        nlons = len(longitudes)
-        counts = numpy.zeros((nlats, nlons))
-
-        x_ref = {}
-        for i, lat in enumerate(latitudes):
-            for j, lon in enumerate(longitudes):
-                x_ref[lat, lon] = (i, j)
-
-        if species_ranges is None:  # calculate if not directly input
-            print("...Determining Species Coastlines...")
-            coastline_map = import_coastline_data(init_data)
-            species_range_blocks = TMB_Import.read_species_blocks(init_data.species_range_blocks)
-            species_ranges = {}
-            for s in tqdm(species_range_blocks):
-                species_ranges[s] = TMB_Create_Maps.get_range_map_overlap(species_range_blocks[s], coastline_map)
-
-        print("...Determining Species Cells...")
-        for species in tqdm(species_ranges):
-            species_cells = identify_species_coastal_cells(species_ranges[species], cells_per_degree)
-            for cell in species_cells:
-                i, j = x_ref[cell[0], cell[1]]
-                counts[i, j] = counts[i, j] + 1
-
-        for i in range(nlats):
-            for j in range(nlons):
-                if counts[i, j] == 0:
-                    counts[i, j] = numpy.nan
-
-        # need these to complete the colormesh grid
-        latitudes.append(90)
-        longitudes.append(180)
-        return latitudes, longitudes, counts
+# def identify_species_coastal_cells(species_range, cells_per_degree=4) -> list:
+#     latitudes = [-90 + x/cells_per_degree for x in range(180*cells_per_degree)]
+#     longitudes = [-180 + x/cells_per_degree for x in range(360*cells_per_degree)]
+#     world_cells = {}
+#     for lat in latitudes:
+#         for lon in longitudes:
+#             world_cells[lat, lon] = False
+#     for part in species_range:
+#         for p in part:
+#             lat = latitudes[bisect.bisect(latitudes, p.lat)-1]
+#             lon = longitudes[bisect.bisect(longitudes, p.lon)-1]
+#             world_cells[lat, lon] = True
+#     species_cells = []
+#     for lat in latitudes:
+#         if abs(lat) < 45:
+#             for lon in longitudes:
+#                 if world_cells[lat, lon]:
+#                     species_cells.append((lat, lon))
+#     return species_cells
+#
+#
+# def count_species_in_coastal_cells(init_data: TMB_Initialize.InitializationData, cells_per_degree=4,
+#                                    species_ranges: Optional[dict] = None):
+#         latitudes = [-90 + x / cells_per_degree for x in range(180 * cells_per_degree)]
+#         longitudes = [-180 + x / cells_per_degree for x in range(360 * cells_per_degree)]
+#         nlats = len(latitudes)
+#         nlons = len(longitudes)
+#         counts = numpy.zeros((nlats, nlons))
+#
+#         x_ref = {}
+#         for i, lat in enumerate(latitudes):
+#             for j, lon in enumerate(longitudes):
+#                 x_ref[lat, lon] = (i, j)
+#
+#         if species_ranges is None:  # calculate if not directly input
+#             print("...Determining Species Coastlines...")
+#             coastline_map = import_coastline_data(init_data)
+#             species_range_blocks = TMB_Import.read_species_blocks(init_data.species_range_blocks)
+#             species_ranges = {}
+#             for s in tqdm(species_range_blocks):
+#                 species_ranges[s] = TMB_Create_Maps.get_range_map_overlap(species_range_blocks[s], coastline_map)
+#
+#         print("...Determining Species Cells...")
+#         for species in tqdm(species_ranges):
+#             species_cells = identify_species_coastal_cells(species_ranges[species], cells_per_degree)
+#             for cell in species_cells:
+#                 i, j = x_ref[cell[0], cell[1]]
+#                 counts[i, j] = counts[i, j] + 1
+#
+#         for i in range(nlats):
+#             for j in range(nlons):
+#                 if counts[i, j] == 0:
+#                     counts[i, j] = numpy.nan
+#
+#         # need these to complete the colormesh grid
+#         latitudes.append(90)
+#         longitudes.append(180)
+#         return latitudes, longitudes, counts
 
 
 def test_range_density_map():
     TMB_Initialize.initialize()
-    t_init_data = TMB_Initialize.INIT_DATA
+    # t_init_data = TMB_Initialize.INIT_DATA
 
     # cell_per_degree = 1
     # coastal_file = "coastal_cells_1_degree.txt"
@@ -486,12 +485,12 @@ def test_range_density_map():
     #
     # lats, lons, cnts = count_species_in_grid(t_init_data, coastal_cells, cells_per_degree=cell_per_degree)
 
-    cell_per_degree = 4
-    lats, lons, cnts = count_species_in_coastal_cells(t_init_data, cells_per_degree=cell_per_degree)
-
-    base_map = TMB_Create_Maps.read_base_map(t_init_data.map_primary, t_init_data.map_secondary,
-                                             t_init_data.map_islands)
-    TMB_Create_Maps.create_cell_density_map(lats, lons, cnts, "", base_map)
+    # cell_per_degree = 4
+    # lats, lons, cnts = count_species_in_coastal_cells(t_init_data, cells_per_degree=cell_per_degree)
+    #
+    # base_map = TMB_Create_Maps.read_base_map(t_init_data.map_primary, t_init_data.map_secondary,
+    #                                          t_init_data.map_islands)
+    # TMB_Create_Maps.create_cell_density_map(lats, lons, cnts, "", base_map)
 
 
 if __name__ == "__main__":
