@@ -2,13 +2,11 @@
 Functions to read data from files
 """
 
-# import codecs
 import collections
 from typing import Tuple
 import urllib.request
 import csv
 import time
-# from collections import namedtuple
 from tqdm import tqdm
 import TMB_Classes
 from TMB_Error import report_error
@@ -349,9 +347,6 @@ def fetch_inat_data(species: list) -> dict:
     """
     function to fetch species observation data from iNaturalist
     """
-
-    # INatData = namedtuple("INatData", ["coords", "url"])
-
     inat_data = {}
     print("...Importing iNaturalist Data...")
     for s in tqdm(species):
@@ -370,7 +365,6 @@ def fetch_inat_data(species: list) -> dict:
                             try:
                                 point = TMB_Classes.Point(eval(data[4]), eval(data[5]))
                                 urlstr = data[8]
-                                # coords.append(point)
                                 coords.append(TMB_Classes.INatData(coords=point, url=urlstr))
                             except SyntaxError:
                                 pass

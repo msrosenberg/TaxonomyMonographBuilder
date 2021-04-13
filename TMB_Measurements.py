@@ -321,21 +321,3 @@ def plot_measurement_data(species_dat, combined_data, comb_male_data, comb_femal
 
     mplpy.savefig(filename, format="png", dpi=600)
     mplpy.close("all")
-
-
-# def main():
-#     random.seed()
-#
-#     data = read_data()
-#     # print(len(data))
-#     species_data = sort_data(data)
-#     for i, s in enumerate(species_data):
-#         print("Creating size distribution of species {}: {}".format(i, s))
-#         cdat = combine_data(species_data[s].all)
-#         mdat = combine_data(species_data[s].male)
-#         fdat = combine_data(species_data[s].female)
-#         plot_data(s, species_data[s], cdat, mdat, fdat)
-#
-#
-# if __name__ == "__main__":
-#     main()

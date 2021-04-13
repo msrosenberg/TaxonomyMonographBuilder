@@ -3,9 +3,9 @@ Module containing the various graph and chart drawing algorithms (except for tho
 """
 
 # external dependencies
+from typing import Optional
 import matplotlib.pyplot as mplpy
 from wordcloud import WordCloud
-from typing import Optional
 
 __TMP_PATH__ = "temp/"
 # my approximation of the pygal color scheme
@@ -73,7 +73,6 @@ def create_language_bar_chart_file(filename: str, lang_by_year: dict, graph_font
     panel1.spines["top"].set_visible(False)
 
     bottoms = [0 for _ in range(len(x_list) - split_index)]
-    # bars = []
     for j, ylist in enumerate(y_lists):
         panel2.bar(x_list[split_index:], ylist[split_index:], bottom=bottoms, color=color_list[j], edgecolor="black",
                    linewidth=0.25)
@@ -197,7 +196,6 @@ def create_chronology_chart_file(filename: str, miny: int, maxy: int, maxcnt: in
 
 
 def create_word_cloud_image(binomial_cnts: dict, specific_cnts: dict, font_path: Optional[str] = None) -> None:
-    # fiddler_mask = np.array(Image.open("private/silhouette.png"))
     # generate wordcloud image from binomials
     wordcloud = WordCloud(width=2000, height=1500, background_color="white", max_words=1000, normalize_plurals=False,
                           collocations=False, font_path=font_path).generate_from_frequencies(binomial_cnts)
@@ -210,7 +208,6 @@ def create_word_cloud_image(binomial_cnts: dict, specific_cnts: dict, font_path:
 
 
 if __name__ == "__main__":
-    pass
     # the following creates a quick chart of each type to check formatting changes
     test_data = {
         "English": 100,
