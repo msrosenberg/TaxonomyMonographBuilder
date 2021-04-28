@@ -327,3 +327,15 @@ class SpeciesMeasurements:
         self.male = {}
         self.female = {}
         self.all = {}
+
+
+class Handedness:
+    def __init__(self):
+        self.ref = ""
+        self.species = ""
+        self.total_cnt = 0
+        self.right_cnt = 0
+        self.left_cnt = 0
+        self.right_p = 0
+        self.left_p = 0
+        self.notes = ""

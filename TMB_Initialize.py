@@ -34,6 +34,7 @@ class InitializationData:
         self.species_range_blocks = "data/species_range_blocks.txt"
         self.measurement_file = "data/measurement_data.txt"
         self.unusual_development_file = "data/unusual_development.txt"
+        self.handedness_file = "data/handedness.txt"
 
         # taxonomic key data
         self.tax_key_trait_file = "data/tax_key_trait_data.txt"

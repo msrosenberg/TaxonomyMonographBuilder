@@ -358,6 +358,8 @@ def fetch_fa_glyph(glyph: Optional[str]) -> str:
             x += " fa-paint-brush\" aria-hidden"
         elif glyph == "measure":
             x += "r fa-ruler\" aria-hidden"
+        elif glyph == "handedness":
+            x += " fa-hands\" aria-hidden"
         elif glyph == "list pdf":
             x += "-li far fa-file-pdf\" aria-hidden"
         elif glyph == "list github":
@@ -569,6 +571,7 @@ def format_language(x: str) -> str:
         ["Afrikaans", "<span class=\"flag-icon flag-icon-za\"></span> Afrikaans"],
         ["Malay", "<span class=\"flag-icon flag-icon-my\"></span> Malay"],
         ["Malagasy", "<span class=\"flag-icon flag-icon-mg\"></span> Malagasy"],
+        ["Persian", "<span class=\"flag-icon flag-icon-ir\"></span> Persian"],
         ["Burmese", "<span class=\"flag-icon flag-icon-mm\"></span> Burmese"]
     ]
     for r in language_replace_list:
@@ -3561,7 +3564,7 @@ def size_label(w: float) -> str:
 def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.SpeciesClass, references: list,
                        specific_names: list, all_names: list, photos: list, videos: list, artlist: list,
                        sprefs: dict, refdict: dict, binomial_name_counts: dict, specific_name_cnts: dict,
-                       higher_dict: dict, measurement_data: dict) -> None:
+                       higher_dict: dict, measurement_data: dict, handedness_data: list) -> None:
     """
     create the master page for a valid species
     """
@@ -3600,6 +3603,14 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
         mean = 0
         std = 0
 
+    if not is_fossil:
+        if do_print:
+            create_species_handedness_page(outfile, species, handedness_data, refdict, do_print)
+        else:
+            with open(WEBOUT_PATH + "handedness/" + species.species + "_handedness.html", "w",
+                      encoding="utf-8") as suboutfile:
+                create_species_handedness_page(suboutfile, species, handedness_data, refdict, do_print)
+
     outfile.write("    <header id=\"u_" + species.species + ".html\">\n")
     if is_fossil:
         sc = FOSSIL_IMAGE
@@ -3624,6 +3635,9 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
         if mdata is not None:
             outfile.write("          <li><a href=\"sizes/{}_cb.html\">".format(species.species) +
                           fetch_fa_glyph("measure") + "Size Data</a></li>\n")
+        if not is_fossil:
+            outfile.write("          <li><a href=\"handedness/{}_handedness.html\">".format(species.species) +
+                          fetch_fa_glyph("handedness") + "Handedness</a></li>\n")
         outfile.write("          <li><a href=\"" + init_data().species_url + "\">" + fetch_fa_glyph("index") +
                       "Species List</a></li>\n")
         outfile.write("        </ul>\n")
@@ -3899,6 +3913,87 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
             with open(WEBOUT_PATH + "names/synonyms_" + species.species + ".html", "w", encoding="utf-8") as suboutfile:
                 create_synonym_chronology(suboutfile, do_print, species.species, binomial_synlist, binomial_name_counts,
                                           specific_synlist, specific_name_cnts)
+
+
+def create_species_handedness_page(outfile: TextIO, species: TMB_Classes.SpeciesClass, handedness_data: list,
+                                   refdict: dict, do_print: bool = False):
+    """
+    write species handedness data page
+    """
+    if do_print:
+        start_page_division(outfile, "base_page")
+    else:
+        common_html_header(outfile, species.binomial() + " Handedness", indexpath="../")
+    outfile.write("    <header id=\"" + species.species + "_handedness.html\">\n")
+    outfile.write("      <h1 class=\"nobookmark\"><em class=\"species\">" + species.binomial() +
+                  "</em> Handedness</h1>\n")
+
+    if not do_print:
+        outfile.write("      <nav>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + species.species +
+                      ".html\">" + fetch_fa_glyph("info") + "Species page</a></li>\n")
+        # outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("measure") +
+        #               "Measurement Guide</a></li>\n")
+        outfile.write("        </ul>\n")
+        outfile.write("      </nav>\n")
+    outfile.write("    </header>\n")
+
+    outfile.write("       <h2>Summary</h2>\n")
+    if species.genus == "Gelasimus":
+        expected = "95% or more right-handed"
+    else:
+        expected = "50% right-handed and 50% left-handed"
+    outfile.write("<p>Expected handedness for <em class=\"species\">{}</em> is {}</p>\n".format(species.binomial(),
+                                                                                                expected))
+
+    data = []
+    for d in handedness_data:
+        if d.species == species.species:
+            data.append(d)
+
+    if len(data) > 0:
+        right_total, left_total = 0, 0
+        for d in data:
+            right_total += d.right_cnt
+            left_total += d.left_cnt
+        outfile.write("<p>Observed handedness (based on raw totals across all data sets) is {:0.2%} right-handed, "
+                      "{:0.2%} left-handed</p>\n".format(right_total/(right_total + left_total),
+                                                         left_total/(right_total + left_total)))
+
+        filename = WEBOUT_PATH + "handedness/" + species.species + "_handedness.png"
+        TMB_Create_Graphs.create_handedness_chart_file(filename, data)
+
+        outfile.write("    <p>The following figure displays the left and right counts for each individual data "
+                      "set.</p>\n")
+        outfile.write("    <figure class=\"sizeimg\">\n")
+        outfile.write("      <img src=\"{0}_handedness.png\" alt=\"handedness data for {1}\" "
+                      "title=\"handedness data for {1}\"/>\n".format(species.species, species.binomial()))
+        outfile.write("    </figure>\n")
+
+        with open(WEBOUT_PATH + "handedness/" + species.species + "_handedness.txt", "w") as datfile:
+            outfile.write("    <h2>Data</h2>\n")
+            outfile.write("    <p><a href=\"" + species.species + "_handedness.txt\">" +
+                          fetch_fa_glyph("file download") + " Download Data</a></p>")
+            outfile.write("<table class=\"size_data_table\">\n")
+            outfile.write("<tr><th>Reference</th><th>Right Count</th><th>Left Count</th>"
+                          "<th>Right %</th><th>Left %</th><th>Notes</th></tr>\n")
+            datfile.write("Reference\tRight Count\tLeft Count\tRight %\tLeft %\tNotes\n")
+            for d in data:
+                rstr = format_reference_cite(refdict[d.ref], do_print, AUTHOR_PAREN, "../")
+                outfile.write("<tr><td>{}</td><td>{}</td><td>{}</td><td>{:0.3f}</td><td>{:0.3f}</td>"
+                              "<td>{}</td></tr>\n".format(rstr, d.right_cnt, d.left_cnt, d.right_p, d.left_p, d.notes))
+                datfile.write("{}\t{}\t{}\t{:0.3f}\t{:0.3f}\t{}\n".format(d.ref, d.right_cnt, d.left_cnt, d.right_p,
+                                                                          d.left_p, d.notes))
+            outfile.write("</table>\n")
+            datfile.write("\n")
+    else:
+        outfile.write("<p><em>No data available at this time.</em></p>\n")
+
+    if do_print:
+        end_page_division(outfile)
+    else:
+        common_html_footer(outfile)
 
 
 def create_species_cb_page(outfile: TextIO, do_print: bool, species: TMB_Classes.SpeciesClass,
@@ -4524,7 +4619,8 @@ def write_all_art_pages(outfile: Optional[TextIO], do_print: bool, artlist: list
 def write_species_info_pages(outfile: Optional[TextIO], do_print: bool, specieslist: list, references: list,
                              specific_names: list, all_names: list, photos: list, videos: list, art: list,
                              species_refs: dict, refdict: dict, binomial_name_cnts: dict,
-                             specific_name_cnts: dict, higher_dict: dict, measurement_data: dict) -> None:
+                             specific_name_cnts: dict, higher_dict: dict, measurement_data: dict,
+                             handedness_data: list) -> None:
     """
     create the species index and all individual species pages
     """
@@ -4538,12 +4634,13 @@ def write_species_info_pages(outfile: Optional[TextIO], do_print: bool, speciesl
         sprefs = species_refs[species.species]
         if do_print:
             write_species_page(outfile, True, species, references, specific_names, all_names, photos, videos, art,
-                               sprefs, refdict, binomial_name_cnts, specific_name_cnts, higher_dict, measurement_data)
+                               sprefs, refdict, binomial_name_cnts, specific_name_cnts, higher_dict, measurement_data,
+                               handedness_data)
         else:
             with open(WEBOUT_PATH + "u_" + species.species + ".html", "w", encoding="utf-8") as suboutfile:
                 write_species_page(suboutfile, False, species, references, specific_names, all_names, photos, videos,
                                    art, sprefs, refdict, binomial_name_cnts, specific_name_cnts, higher_dict,
-                                   measurement_data)
+                                   measurement_data, handedness_data)
 
     if do_print:
         write_measurement_guide(outfile, True)
@@ -5681,6 +5778,7 @@ def create_web_output_paths() -> None:
     create_path_and_index("locations/keys/")
     create_path_and_index("js/")
     create_path_and_index("sizes/")
+    create_path_and_index("handedness/")
 
 
 def create_temp_output_paths() -> None:
@@ -5781,6 +5879,7 @@ def copy_support_files() -> None:
                 "za.svg",  # South Africa (best option for Afrikaans)
                 "my.svg",  # Malaysia (for Malay)
                 "mg.svg",  # Madagascar (for Malagasy)
+                "ir.svg",  # Iran (for Persian)
                 "vn.svg"}  # Vietnam
     for filename in filelist:
         try:
@@ -6100,6 +6199,8 @@ def build_site() -> None:
         measurement_data = TMB_Import.read_measurement_data(init_data().measurement_file)
         measurement_data = TMB_Measurements.sort_measurement_data(measurement_data)
 
+        handedness_data = TMB_Import.read_handedness_data(init_data().handedness_file)
+
         if INCLUDE_INAT and (not CHECK_DATA) and DRAW_MAPS:
             species_inat = TMB_Import.fetch_inat_data(species)
         else:
@@ -6153,7 +6254,7 @@ def build_site() -> None:
                 print("......Writing Species......")
                 write_species_info_pages(None, False, species, references, specific_names, all_names, photos, videos,
                                          art, species_refs, refdict, binomial_name_cnts, specific_name_cnts,
-                                         higher_dict, measurement_data)
+                                         higher_dict, measurement_data, handedness_data)
                 if DRAW_MAPS:
                     print("......Copying Maps......")
                     copy_map_files(species, all_names, specific_names, point_locations)
@@ -6204,7 +6305,7 @@ def build_site() -> None:
                     print("......Writing Species Pages......")
                     write_species_info_pages(printfile, True, species, references, specific_names, all_names, photos,
                                              videos, art, species_refs, refdict, binomial_name_cnts, specific_name_cnts,
-                                             higher_dict, measurement_data)
+                                             higher_dict, measurement_data, handedness_data)
                     print("......Writing Name Pages......")
                     write_all_name_pages(printfile, True, refdict, citelist, all_names, specific_names, name_table,
                                          species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,

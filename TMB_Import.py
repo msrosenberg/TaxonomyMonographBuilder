@@ -444,3 +444,23 @@ def read_unusual_development_data(filename: str) -> list:
     with open(filename, "r", encoding="utf-8") as infile:
         lines = infile.readlines()
     return lines
+
+
+def read_handedness_data(filename: str) -> list:
+    data = []
+    with open(filename, "r") as infile:
+        dat = infile.readlines()
+        for line in dat[2:]:
+            d = line.strip().split("\t")
+            new = TMB_Classes.Handedness()
+            new.ref = d[0]
+            new.species = d[1]
+            new.total = int(d[2])
+            new.right_cnt = int(d[3])
+            new.left_cnt = int(d[4])
+            new.right_p = float(d[5])
+            new.left_p = float(d[6])
+            if d[7] != ".":
+                new.notes = d[7]
+            data.append(new)
+    return data

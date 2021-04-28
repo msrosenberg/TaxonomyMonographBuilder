@@ -5,6 +5,7 @@ Module containing the various graph and chart drawing algorithms (except for tho
 # external dependencies
 from typing import Optional
 import matplotlib.pyplot as mplpy
+import matplotlib.ticker
 from wordcloud import WordCloud
 
 __TMP_PATH__ = "temp/"
@@ -265,3 +266,38 @@ if __name__ == "__main__":
         "tangeri": 12
     }
     create_qual_bar_chart_file("testqualbar.png", ["pugilator", "pugnax", "tangeri"], test_data, 20)
+
+
+def create_handedness_chart_file(filename: str, data: list, graph_font: Optional[str] = None) -> None:
+    y_list = [i for i in range(len(data))]
+    right_x = [d.right_cnt for d in data]
+    left_x = [-d.left_cnt for d in data]
+    max_cnt = max(right_x)
+    if -min(left_x) > max_cnt:
+        max_cnt = -min(left_x)
+    height = max(1.0, (len(y_list)+1)*0.2)
+    fig, faxes = mplpy.subplots(figsize=[6.5, height])
+    mplpy.xlim(-max_cnt, max_cnt)
+    faxes.barh(y_list, right_x)
+    faxes.barh(y_list, left_x)
+
+    # fix labels
+    xlabels = list(faxes.get_xticks())
+    for i, x in enumerate(xlabels):
+        if x < 0:
+            xlabels[i] = -x
+    for i, x in enumerate(xlabels):
+        xlabels[i] = int(x)
+    ticks_loc = faxes.get_xticks().tolist()
+    faxes.xaxis.set_major_locator(matplotlib.ticker.FixedLocator(ticks_loc))
+    faxes.set_xticklabels(xlabels)
+
+    mplpy.xlabel("Left Count / Right Count", fontname=graph_font)
+    faxes.spines["right"].set_visible(False)
+    faxes.spines["top"].set_visible(False)
+    faxes.spines["left"].set_visible(False)
+    faxes.yaxis.set_visible(False)
+    mplpy.rcParams["svg.fonttype"] = "none"
+    mplpy.tight_layout()
+    mplpy.savefig(filename, format="png", dpi=600)
+    mplpy.close("all")
