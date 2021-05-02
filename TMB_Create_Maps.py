@@ -634,41 +634,41 @@ def identify_species_coastal_cells(species_range, cells_per_degree=4) -> list:
 
 
 def count_species_in_coastal_cells(species_ranges: dict, cells_per_degree=4):
-        latitudes = [-90 + x / cells_per_degree for x in range(180 * cells_per_degree)]
-        longitudes = [-180 + x / cells_per_degree for x in range(360 * cells_per_degree)]
-        nlats = len(latitudes)
-        nlons = len(longitudes)
-        counts = numpy.zeros((nlats, nlons))
+    latitudes = [-90 + x / cells_per_degree for x in range(180 * cells_per_degree)]
+    longitudes = [-180 + x / cells_per_degree for x in range(360 * cells_per_degree)]
+    nlats = len(latitudes)
+    nlons = len(longitudes)
+    counts = numpy.zeros((nlats, nlons))
 
-        x_ref = {}
-        for i, lat in enumerate(latitudes):
-            for j, lon in enumerate(longitudes):
-                x_ref[lat, lon] = (i, j)
+    x_ref = {}
+    for i, lat in enumerate(latitudes):
+        for j, lon in enumerate(longitudes):
+            x_ref[lat, lon] = (i, j)
 
-        # if species_ranges is None:  # calculate if not directly input
-        #     print("...Determining Species Coastlines...")
-        #     coastline_map = import_coastline_data(init_data)
-        #     species_range_blocks = TMB_Import.read_species_blocks(init_data.species_range_blocks)
-        #     species_ranges = {}
-        #     for s in tqdm(species_range_blocks):
-        #         species_ranges[s] = TMB_Create_Maps.get_range_map_overlap(species_range_blocks[s], coastline_map)
+    # if species_ranges is None:  # calculate if not directly input
+    #     print("...Determining Species Coastlines...")
+    #     coastline_map = import_coastline_data(init_data)
+    #     species_range_blocks = TMB_Import.read_species_blocks(init_data.species_range_blocks)
+    #     species_ranges = {}
+    #     for s in tqdm(species_range_blocks):
+    #         species_ranges[s] = TMB_Create_Maps.get_range_map_overlap(species_range_blocks[s], coastline_map)
 
-        print("...Determining Species Cells...")
-        for species in tqdm(species_ranges):
-            species_cells = identify_species_coastal_cells(species_ranges[species], cells_per_degree)
-            for cell in species_cells:
-                i, j = x_ref[cell[0], cell[1]]
-                counts[i, j] = counts[i, j] + 1
+    print("...Determining Species Cells...")
+    for species in tqdm(species_ranges):
+        species_cells = identify_species_coastal_cells(species_ranges[species], cells_per_degree)
+        for cell in species_cells:
+            i, j = x_ref[cell[0], cell[1]]
+            counts[i, j] = counts[i, j] + 1
 
-        for i in range(nlats):
-            for j in range(nlons):
-                if counts[i, j] == 0:
-                    counts[i, j] = numpy.nan
+    for i in range(nlats):
+        for j in range(nlons):
+            if counts[i, j] == 0:
+                counts[i, j] = numpy.nan
 
-        # need these to complete the colormesh grid
-        latitudes.append(90)
-        longitudes.append(180)
-        return latitudes, longitudes, counts
+    # need these to complete the colormesh grid
+    latitudes.append(90)
+    longitudes.append(180)
+    return latitudes, longitudes, counts
 
 
 def create_cell_density_map(latitudes, longitudes, cell_counts, base_map: BaseMap, skip_axes: bool = True,
@@ -782,7 +782,7 @@ def create_all_name_maps(base_map: BaseMap, all_names: list, specific_names: lis
     bi_inputs_png = []
     sp_inputs_png = []
     for i, name in enumerate(all_names):
-        print("......." + name)
+        # print("......." + name)
         namefile = "name_" + name_to_filename(name)
         place_list = binomial_plot_locations[name]
         if MAX_PROCESSOR_COUNT > 1:
