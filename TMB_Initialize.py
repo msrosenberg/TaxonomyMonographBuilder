@@ -77,6 +77,7 @@ class InitializationData:
         self.cite_url = "citation.html"
         self.name_sum_url = "name_graphs.html"
         self.synonyms_genera = "synonymys_uca.html"
+        self.handedness_url = "handedness\index.html"
 
         # customization of fonts on graphs and charts
         self.graph_font = "Noto Serif"  # font to use for PNG versions of graphs

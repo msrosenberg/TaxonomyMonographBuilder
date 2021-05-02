@@ -1043,6 +1043,7 @@ def clean_specific_name(x: str) -> str:
     skip_list = ("sp.",
                  "spp.",
                  "var.",
+                 "nov.",
                  "a",
                  "ete",
                  "panema",
@@ -2947,8 +2948,8 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
         outfile.write("  </section>\n")
 
     # the following is to identify locations which may no longer used in the DB and can be removed
-    if is_error:
-        report_error("Phantom Location: " + loc.name)
+    # if is_error:
+    #     report_error("Phantom Location: " + loc.name)
 
     write_annotated_reference_list(outfile, do_print, references, all_refs, location_direct_refs[loc.name],
                                    location_cited_refs[loc.name], "../")
@@ -3144,8 +3145,8 @@ def check_location_page(loc: TMB_Classes.LocationClass, location_species: dict, 
             all_bi_names |= fetch_child_data(c, location_bi_names)
             all_sp_names |= fetch_child_data(c, location_sp_names)
 
-    if (len(all_species) == 0) and (len(all_bi_names) == 0) and (len(all_sp_names) == 0):
-        report_error("Phantom Location: " + loc.name)
+    # if (len(all_species) == 0) and (len(all_bi_names) == 0) and (len(all_sp_names) == 0):
+    #     report_error("Phantom Location: " + loc.name)
 
     if loc.n_children() > 0:
         for c in loc.children:
@@ -3933,8 +3934,8 @@ def create_species_handedness_page(outfile: TextIO, species: TMB_Classes.Species
         outfile.write("        <ul>\n")
         outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + species.species +
                       ".html\">" + fetch_fa_glyph("info") + "Species page</a></li>\n")
-        # outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("measure") +
-        #               "Measurement Guide</a></li>\n")
+        outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("handedness") +
+                      "About Handedness</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -3980,11 +3981,12 @@ def create_species_handedness_page(outfile: TextIO, species: TMB_Classes.Species
                           "<th>Right %</th><th>Left %</th><th>Notes</th></tr>\n")
             datfile.write("Reference\tRight Count\tLeft Count\tRight %\tLeft %\tNotes\n")
             for d in data:
+                note_str = replace_species_in_string(d.notes)
                 rstr = format_reference_cite(refdict[d.ref], do_print, AUTHOR_PAREN, "../")
                 outfile.write("<tr><td>{}</td><td>{}</td><td>{}</td><td>{:0.3f}</td><td>{:0.3f}</td>"
-                              "<td>{}</td></tr>\n".format(rstr, d.right_cnt, d.left_cnt, d.right_p, d.left_p, d.notes))
+                              "<td>{}</td></tr>\n".format(rstr, d.right_cnt, d.left_cnt, d.right_p, d.left_p, note_str))
                 datfile.write("{}\t{}\t{}\t{:0.3f}\t{:0.3f}\t{}\n".format(d.ref, d.right_cnt, d.left_cnt, d.right_p,
-                                                                          d.left_p, d.notes))
+                                                                          d.left_p, note_str))
             outfile.write("</table>\n")
             datfile.write("\n")
     else:
@@ -4644,9 +4646,104 @@ def write_species_info_pages(outfile: Optional[TextIO], do_print: bool, speciesl
 
     if do_print:
         write_measurement_guide(outfile, True)
+        write_handedness_guide(outfile, refdict, True)
     else:
         with open(WEBOUT_PATH + "sizes/index.html", "w") as suboutfile:
             write_measurement_guide(suboutfile, False)
+        with open(WEBOUT_PATH + "handedness/index.html", "w") as suboutfile:
+            write_handedness_guide(suboutfile, refdict, False)
+
+
+def write_handedness_guide(outfile: TextIO, refdict: dict, do_print: bool = False):
+    """
+    output a general guide to the measurement data
+    """
+    if do_print:
+        start_page_division(outfile, "base_page")
+    else:
+        common_html_header(outfile, "Male Fiddler Crab Handedness", indexpath="../")
+    outfile.write("    <header id=\"handedness_index.html\">\n")
+    outfile.write("      <h1 class=\"nobookmark\">Male Handedness</h1>\n")
+    if not do_print:
+        outfile.write("      <nav>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("          <li><a href=\"../" + init_data().species_url + "\">" + fetch_fa_glyph("index") +
+                      "Species List</a></li>\n")
+        outfile.write("        </ul>\n")
+        outfile.write("      </nav>\n")
+    outfile.write("    </header>\n")
+    outfile.write("\n")
+    outfile.write("    <section class=\"topspsection\">\n")
+    outfile.write("      <p>\n")
+    outfile.write("          One of the most striking features of fiddler crabs is the extreme claw asymmetry found "
+                  "in males and one of the most common questions I get asked is whether males tend to be right- or "
+                  "left-handed. Most people seem to assume they are mostly one or the other, but in fact, most "
+                  "fiddler crab species appear to be evenly split 50:50 between right- and left-handed males. "
+                  "The exceptions are the species in the genus <em>Gelasimus</em>, where males are almost entirely "
+                  "right-handed (generally >95%).\n")
+    outfile.write("      </p>\n")
+    weis_ref = format_reference_cite(refdict["Weis2019"], do_print, AUTHOR_NOPAREN)
+    outfile.write("      <p>\n")
+    outfile.write("          An extremely common misconception is that when a male fiddler crab loses its large "
+                  "claw that the handedness switches and the small claws grows into a new large one. This is simply "
+                  "wrong! The crab will regenerate a large claw on the same side; the small claw remains small. "
+                  "This urban legend is so persistent that it's appeared (and been removed) from Wikipedia multiple "
+                  "times. Judith Weis recently wrote a paper about the origins and persistence of this "
+                  "myth ({}).\n".format(weis_ref))
+    outfile.write("      </p>\n")
+
+    morgan23_ref = format_reference_cite(refdict["Morgan1923.1"], do_print, AUTHOR_PAREN)
+    morgan24_ref = format_reference_cite(refdict["Morgan1924"], do_print, AUTHOR_PAREN)
+    vernberg66_ref = format_reference_cite(refdict["Vernberg1966.1"], do_print, AUTHOR_PAREN)
+    yamaguchi77_ref = format_reference_cite(refdict["Yamaguchi1977"], do_print, AUTHOR_PAREN)
+    yamaguchi78_ref = format_reference_cite(refdict["Yamaguchi1978"], do_print, AUTHOR_PAREN)
+    ahmed781_ref = format_reference_cite(refdict["Ahmed1978.1"], do_print, AUTHOR_PAREN)
+    ahmed782_ref = format_reference_cite(refdict["Ahmed1978.2"], do_print, AUTHOR_PAREN)
+    krishnan92_ref = format_reference_cite(refdict["Krishnan1992.3"], do_print, AUTHOR_PAREN)
+    yamaguchi01_ref = format_reference_cite(refdict["Yamaguchi2001.8"], do_print, AUTHOR_PAREN)
+
+    outfile.write("      <p>\n")
+    outfile.write("          How handedness is determined has been studied by researchers numerous times, but the "
+                  "answer is still not entirely clear, as different studies have not always come to the same "
+                  "conclusion and there are a number of possible explanations for the variation in results. "
+                  "For the mostly right-handed species, right-handedness is likely genetically hardwired with the "
+                  "occasional left-handed individuals probably due to environmental damage at a critical "
+                  "developmental stage leading to the development of left-handedness. For the rest of the species, "
+                  "it is probably randomly determined by the environment, although there could be a genetic factor or "
+                  "a combination of both. "
+                  "Breeding experiments to examine heritability in fiddlers are not particularly easy or feasible. "
+                  "Some of the studies on this question include "
+                  "{}, {}, {}, {}, {}, {}, {}, {}, and {}.\n".format(morgan23_ref, morgan24_ref, vernberg66_ref,
+                                                                     yamaguchi77_ref, yamaguchi78_ref, ahmed781_ref,
+                                                                     ahmed782_ref, krishnan92_ref, yamaguchi01_ref))
+    outfile.write("      </p>\n")
+    alt_ref = format_reference_cite(refdict["Altevogt1979"], do_print, AUTHOR_PAREN)
+    outfile.write("      <p>\n")
+    outfile.write("          Species information pages on this site include a link to information about the "
+                  "handedness for that species, including the predicted handedness based on taxonomy and the "
+                  "observed data that has been recorded (if any), including an overall estimate of the handedness "
+                  "based on the (usually limited) available data. Data has been updated to reflect our current "
+                  "taxonomy rather than the name used in the publication; some samples may include mixed species "
+                  "if certain species boundaries were not recognized at the time of original publication. "
+                  "Not all papers that "
+                  "record handedness have been entered yet, but many species have not been formally examined for "
+                  "handedness ratios, particularly with large sample sizes. Sometimes when they are commented upon, "
+                  "key data and specifics are not provided. For example, {} report that 23 non-specified "
+                  "species have 50:50 ratios, and that "
+                  "more recent re-examination of three of these species still have 50:50 rations, while a fourth "
+                  "has a 50:50 from over 400 specimens examined. No actual counts are specified. They then state that "
+                  "in another species, only one left-handed male was found out of more than 1,000 examined. "
+                  "While useful general statements, these numbers lack the specificity one would want for "
+                  "computational analysis (For what it's worth, they also claim that the right-handed skewed species "
+                  "used to be 50:50 and shifted to the skew, but it is more likely that they never paid close "
+                  "attention in previous years.)\n".format(alt_ref))
+    outfile.write("      </p>\n")
+
+    outfile.write("    </section>\n")
+    if do_print:
+        end_page_division(outfile)
+    else:
+        common_html_footer(outfile)
 
 
 def write_measurement_guide(outfile: TextIO, do_print: bool):
@@ -4674,7 +4771,7 @@ def write_measurement_guide(outfile: TextIO, do_print: bool):
                   "this time size is presented as carapace width (or breadth). This is either measured as the "
                   "maximum breadth of the carapace or the distance between the tips of the antero-lateral angles; "
                   "usually (although not always) these are the same thing, although the difference is always "
-                  "minor when there is one. All measurements are presented in millimeters (mm).")
+                  "minor when there is one. All measurements are presented in millimeters (mm).\n")
     outfile.write("      </p>\n")
     outfile.write("<figure class=\"morphimg\">\n")
     outfile.write("  <img src=\"../morphology/carapace2.png\" "
@@ -4689,20 +4786,20 @@ def write_measurement_guide(outfile: TextIO, do_print: bool):
                   "The data for each species can also be downloaded as a tab-separated text document. The top "
                   "of each page begins with a graphical illustration of all of the data, including a summary "
                   "figure which integrates all of the data into a single estimated distribution. Different types of "
-                  "data are displayed in a different manner in the figures, and are described below.")
+                  "data are displayed in a different manner in the figures, and are described below.\n")
     outfile.write("      </p>\n")
     outfile.write("      <p>\n")
     outfile.write("         As a general rule, data are added to the figure from the bottom up. Blue data points and "
                   "images refer to male data, red refers to female data, and black refers to mixed/combined/"
                   "sex-unspecified data. Male data and female data are always plotted separately, except when "
-                  "combined into the summary distribution (black) at the top of each figure.")
+                  "combined into the summary distribution (black) at the top of each figure.\n")
     outfile.write("      </p>\n")
     outfile.write("      <h2>Individuals</h2>\n")
     outfile.write("      <p>\n")
     outfile.write("         The most sraight-forward data are direct measurements of individuals. These are "
                   "graphically displayed as round points at the bottom of each figure. The vertical shifting of the "
                   "points is meaningless, arbitrary noise used to help better display the density of similar "
-                  "measurements.")
+                  "measurements.\n")
     outfile.write("      </p>\n")
     outfile.write("<figure class=\"morphimg\">\n")
     outfile.write("  <img src=\"../images/size_ind.png\" alt=\"Example of individual size plot.\" "
@@ -4714,7 +4811,7 @@ def write_measurement_guide(outfile: TextIO, do_print: bool):
                   "including sample size when available. When unavailable, the sample size was assumed to be 2 as "
                   "this is the miniumm number necessary to create a range. Ranges are drawn as horizontal lines with "
                   "vertical endcaps representing the minimum and maximum widths. Each range is drawn separately; "
-                  "sample size is not indicated on the graph (but is in the data table).")
+                  "sample size is not indicated on the graph (but is in the data table).\n")
     outfile.write("      </p>\n")
     outfile.write("<figure class=\"morphimg\">\n")
     outfile.write("  <img src=\"../images/size_range.png\" alt=\"Example of range plots.\" "
@@ -4729,7 +4826,7 @@ def write_measurement_guide(outfile: TextIO, do_print: bool):
                   "means are drawn on the figure as diamonds, each on it's own line. A 95% confidence interval is "
                   "included when an SD or SE is available. If both SD and min/max are available, the figure "
                   "includes both a thicker line indicating the 95% CI and a thinner line with vertical endcaps "
-                  "indicating the maximum and minimum values.")
+                  "indicating the maximum and minimum values.\n")
     outfile.write("      </p>\n")
     outfile.write("<figure class=\"morphimg\">\n")
     outfile.write("  <img src=\"../images/size_mean.png\" alt=\"Example of means plots.\" "
@@ -4743,7 +4840,7 @@ def write_measurement_guide(outfile: TextIO, do_print: bool):
                   "on the figure as standard histograms, except that each unique histogram is scaled to the "
                   "identical maximum height, thus the drawn histograms can be used for general distribution comparison "
                   "but do not indicate the case where one may be based on a much larger sample than another (all "
-                  "sample sizes are part of the data table).")
+                  "sample sizes are part of the data table).\n")
     outfile.write("      </p>\n")
     outfile.write("<figure class=\"morphimg\">\n")
     outfile.write("  <img src=\"../images/size_hist.png\" alt=\"Example of histogram plots.\" "
@@ -4768,7 +4865,7 @@ def write_measurement_guide(outfile: TextIO, do_print: bool):
                   "an estimate of variance; values are simulated from a normal distribution (with expected mean and "
                   "variance). If a mean is reported without a variance, it is treated as if the variance were "
                   "zero; this has the obvious potential to give too much weight to that estimate, but generally "
-                  "these have very small sample sizes so the effect appears to be minor.")
+                  "these have very small sample sizes so the effect appears to be minor.\n")
     outfile.write("      <p>\n")
     outfile.write("       Range data is the most complicated part of the simulation. First, the end points of the "
                   "range are added as if they were individual measures. If the sample size of the range is greater "
@@ -4776,18 +4873,18 @@ def write_measurement_guide(outfile: TextIO, do_print: bool):
                   "are drawn from a restricted normal distribution whose mean is represented by the midpoint of the "
                   "range and whose standard deviation is estimated as the width of the range divided by four "
                   "(the &ldquo;range rule of thumb&rdquo;). The restriction is that only simulated values that fall "
-                  "within the reported range are accepted.")
+                  "within the reported range are accepted.\n")
     outfile.write("      </p>\n")
     outfile.write("      <p>\n")
     outfile.write("All of these simulated data points from all of these data types are combined together into one "
                   "overall set. From this set, 1,000 values are then randomly subsampled to estimate the overall "
-                  "distribution, mean, median, etc.")
+                  "distribution, mean, median, etc.\n")
     outfile.write("      </p>\n")
     outfile.write("      <p>\n")
     outfile.write("       The simulated summary results are shown by the violin graphs at the tops of each figure. "
                   "These reveal a lot of information. Each of these graphs show the full range of the distribution, "
                   "a density estimate of sizes (based on the colored, curvy background), the mean (diamond), "
-                  "median (circle), and quartile (thick center line).")
+                  "median (circle), and quartile (thick center line).\n")
     outfile.write("      </p>\n")
     outfile.write("<figure class=\"morphimg\">\n")
     outfile.write("  <img src=\"../images/size_summary.png\" alt=\"Example of size summary plot.\" "
@@ -5712,15 +5809,18 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list, higher_ta
         outfile.write("        </ul>\n")
         outfile.write("      </li>\n")
         outfile.write("      <li>" + fetch_fa_glyph("list lifecycle") + "<a href=\"" + init_data().lifecycle_url +
-                      "\">Life Cycle</a></li>\n")
+                      "\">Life Cycle</a>\n")
         outfile.write("        <ul>\n")
         # outfile.write("           <li>" + fetch_fa_glyph("list unusual dev") + "<a href=\"" +
         #               init_data().unsuual_dev_url + "\">Unusual Development</a></li>\n")
         outfile.write("           <li><a href=\"" + init_data().unsuual_dev_url + "\">Unusual Development</a></li>\n")
-        outfile.write("        </ul>\n")
+        outfile.write("        </ul></li>\n")
 
         outfile.write("      <li>" + fetch_fa_glyph("list morphology") + "<a href=\"" + init_data().morph_url +
-                      "\">Morphology</a></li>\n")
+                      "\">Morphology</a>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("           <li><a href=\"" + init_data().handedness_url + "\">Male Handedness</a></li>\n")
+        outfile.write("        </ul></li>\n")
         outfile.write("      <li>" + fetch_fa_glyph("list references") + "<a href=\"" + init_data().ref_url +
                       "\">Comprehensive Reference List</a></li>\n")
         outfile.write("    </ul>\n")
