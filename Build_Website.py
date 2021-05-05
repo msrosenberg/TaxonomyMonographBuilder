@@ -45,13 +45,13 @@ AUTHOR_TAXON = 2        # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = True
+DRAW_MAPS = False
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
 CHECK_LOCATIONS = False
 # this flag controls whether additional location data should be fetched from iNaturalist
-INCLUDE_INAT = True
+INCLUDE_INAT = False
 # Suppress some of the more time-consuming output; only meant for when testing others elements
 OUTPUT_REFS = True
 OUTPUT_LOCS = True
@@ -487,28 +487,28 @@ def replace_species_references(in_list: list) -> list:
     return out_list
 
 
-def replace_reference_in_string(instr: str, refdict: dict, do_print: bool) -> str:
+def replace_reference_in_string(instr: str, refdict: dict, do_print: bool, path: str = "") -> str:
     search_str = r"\[\[(?P<key>.+?),(?P<format>.+?)\]\]"
     # for every citation reference in the string
     for match in re.finditer(search_str, instr):
         # create the new link text
         ref = refdict[match.group("key")]
         if match.group("format") == ".out":
-            link_str = format_reference_cite(ref, do_print, AUTHOR_PAREN)
+            link_str = format_reference_cite(ref, do_print, AUTHOR_PAREN, path=path)
         elif match.group("format") == ".in":
-            link_str = format_reference_cite(ref, do_print, AUTHOR_NOPAREN)
+            link_str = format_reference_cite(ref, do_print, AUTHOR_NOPAREN, path=path)
         else:
-            link_str = "<a href=\"" + rel_link_prefix(do_print, "references/") + ref.cite_key + ".html\">" + \
+            link_str = "<a href=\"" + rel_link_prefix(do_print, path + "references/") + ref.cite_key + ".html\">" + \
                        match.group("format") + "</a>"
         # replace the cross-reference with the correct text
         instr = re.sub(search_str, link_str, instr, 1)
     return instr
 
 
-def replace_references(in_list: list, refdict: dict, do_print: bool) -> list:
+def replace_references(in_list: list, refdict: dict, do_print: bool, path: str = "") -> list:
     out_list = []
     for line in in_list:
-        out_list.append(replace_reference_in_string(line, refdict, do_print))
+        out_list.append(replace_reference_in_string(line, refdict, do_print, path))
     return out_list
 
 
@@ -3434,7 +3434,7 @@ def write_species_photo_page(outfile: TextIO, do_print: bool, fname: str, specie
     outfile.write("    <figure class=\"fullpic\">\n")
     outfile.write("      <img src=\"" + media_path + "U_" + spname + format(pn, "0>2") + ".jpg\" alt=\"" +
                   ptitle + " photo\" title=\"" + ptitle + " photo\" />\n")
-    caption = replace_reference_in_string(caption, refdict, do_print)
+    caption = replace_reference_in_string(caption, refdict, do_print, path="../")
     outfile.write("      <figcaption>" + replace_species_in_string(caption) + "</figcaption>\n")
     outfile.write("    </figure>\n")
     if do_print:
@@ -4383,7 +4383,7 @@ def write_specific_art_page(outfile: TextIO, do_print: bool, art: TMB_Classes.Ar
     outfile.write("    <figure class=\"fullpic\">\n")
     outfile.write("      <img src=\"" + media_path + art.image + "." + art.ext + "\" alt=\"" + ptitle +
                   " image\" title=\"" + ptitle + "\" />\n")
-    outstr = replace_reference_in_string(art.notes, refdict, do_print)
+    outstr = replace_reference_in_string(art.notes, refdict, do_print, path="../")
     outfile.write("      <figcaption>" + replace_species_in_string(outstr) + "</figcaption>\n")
     outfile.write("    </figure>\n")
     if do_print:
@@ -4682,7 +4682,7 @@ def write_handedness_guide(outfile: TextIO, refdict: dict, do_print: bool = Fals
                   "The exceptions are the species in the genus <em>Gelasimus</em>, where males are almost entirely "
                   "right-handed (generally >95%).\n")
     outfile.write("      </p>\n")
-    weis_ref = format_reference_cite(refdict["Weis2019"], do_print, AUTHOR_NOPAREN)
+    weis_ref = format_reference_cite(refdict["Weis2019"], do_print, AUTHOR_NOPAREN, path="../")
     outfile.write("      <p>\n")
     outfile.write("          An extremely common misconception is that when a male fiddler crab loses its large "
                   "claw that the handedness switches and the small claws grows into a new large one. This is simply "
@@ -4692,15 +4692,15 @@ def write_handedness_guide(outfile: TextIO, refdict: dict, do_print: bool = Fals
                   "myth ({}).\n".format(weis_ref))
     outfile.write("      </p>\n")
 
-    morgan23_ref = format_reference_cite(refdict["Morgan1923.1"], do_print, AUTHOR_PAREN)
-    morgan24_ref = format_reference_cite(refdict["Morgan1924"], do_print, AUTHOR_PAREN)
-    vernberg66_ref = format_reference_cite(refdict["Vernberg1966.1"], do_print, AUTHOR_PAREN)
-    yamaguchi77_ref = format_reference_cite(refdict["Yamaguchi1977"], do_print, AUTHOR_PAREN)
-    yamaguchi78_ref = format_reference_cite(refdict["Yamaguchi1978"], do_print, AUTHOR_PAREN)
-    ahmed781_ref = format_reference_cite(refdict["Ahmed1978.1"], do_print, AUTHOR_PAREN)
-    ahmed782_ref = format_reference_cite(refdict["Ahmed1978.2"], do_print, AUTHOR_PAREN)
-    krishnan92_ref = format_reference_cite(refdict["Krishnan1992.3"], do_print, AUTHOR_PAREN)
-    yamaguchi01_ref = format_reference_cite(refdict["Yamaguchi2001.8"], do_print, AUTHOR_PAREN)
+    morgan23_ref = format_reference_cite(refdict["Morgan1923.1"], do_print, AUTHOR_PAREN, path="../")
+    morgan24_ref = format_reference_cite(refdict["Morgan1924"], do_print, AUTHOR_PAREN, path="../")
+    vernberg66_ref = format_reference_cite(refdict["Vernberg1966.1"], do_print, AUTHOR_PAREN, path="../")
+    yamaguchi77_ref = format_reference_cite(refdict["Yamaguchi1977"], do_print, AUTHOR_PAREN, path="../")
+    yamaguchi78_ref = format_reference_cite(refdict["Yamaguchi1978"], do_print, AUTHOR_PAREN, path="../")
+    ahmed781_ref = format_reference_cite(refdict["Ahmed1978.1"], do_print, AUTHOR_PAREN, path="../")
+    ahmed782_ref = format_reference_cite(refdict["Ahmed1978.2"], do_print, AUTHOR_PAREN, path="../")
+    krishnan92_ref = format_reference_cite(refdict["Krishnan1992.3"], do_print, AUTHOR_PAREN, path="../")
+    yamaguchi01_ref = format_reference_cite(refdict["Yamaguchi2001.8"], do_print, AUTHOR_PAREN, path="../")
 
     outfile.write("      <p>\n")
     outfile.write("          How handedness is determined has been studied by researchers numerous times, but the "
@@ -4717,7 +4717,7 @@ def write_handedness_guide(outfile: TextIO, refdict: dict, do_print: bool = Fals
                                                                      yamaguchi77_ref, yamaguchi78_ref, ahmed781_ref,
                                                                      ahmed782_ref, krishnan92_ref, yamaguchi01_ref))
     outfile.write("      </p>\n")
-    alt_ref = format_reference_cite(refdict["Altevogt1979"], do_print, AUTHOR_PAREN)
+    alt_ref = format_reference_cite(refdict["Altevogt1979"], do_print, AUTHOR_PAREN, path="../")
     outfile.write("      <p>\n")
     outfile.write("          Species information pages on this site include a link to information about the "
                   "handedness for that species, including the predicted handedness based on taxonomy and the "
