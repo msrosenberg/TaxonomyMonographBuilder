@@ -412,6 +412,10 @@ def read_measurement_data(filename: str) -> list:
                     new.value = TMB_Classes.MeasurementRange()
                     new.value.min_val = eval(d[10])
                     new.value.max_val = eval(d[11])
+                    if new.value.min_val > new.value.max_val:
+                        report_error("Size Data Error: min greater than max, "
+                                     "{} / {} / {}".format(new.species, new.value.min_val, new.value.max_val))
+                        raise ValueError
                 elif "mean" in new.type:
                     try:
                         new.n = int(d[8])
@@ -427,6 +431,10 @@ def read_measurement_data(filename: str) -> list:
                         new.value.sd = eval(d[12])
                         new.value.min_val = eval(d[10])
                         new.value.max_val = eval(d[11])
+                        if new.value.min_val > new.value.max_val:
+                            report_error("Size Data Error: min greater than max, "
+                                         "{} / {} / {}".format(new.species, new.value.min_val, new.value.max_val))
+                            raise ValueError
                 elif "classcount" in new.type:
                     new.n = eval(d[8])  # allow for floating sample sizes due to averaging across samples
                     new.value = TMB_Classes.MeasurementRange()
