@@ -147,6 +147,7 @@ class SpeciesClass:
         self.eolid = ""
         self.inatid = ""
         self.gbifid = ""
+        self.key_photo = ""
 
     def __lt__(self, x):
         # return self.species < x.species

@@ -3646,6 +3646,12 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
     outfile.write("    </header>\n")
     outfile.write("\n")
     outfile.write("    <section class=\"topspsection\">\n")
+    if species.key_photo != ".":
+        outfile.write("        <figure class=\"species_key_fig\">\n")
+        outfile.write("          <img class=\"species_key_photo\" src=\"" + media_path + "photos/" + species.key_photo +
+                      "\" alt=\"" + species.binomial() + "\" title=\"" + species.binomial() + "\" />\n")
+        outfile.write("        </figure>\n")
+
     if do_print:
         outfile.write("      <h2 class=\"nobookmark\">Type Description</h2>\n")
     else:

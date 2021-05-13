@@ -147,10 +147,11 @@ def read_species_data(filename: str) -> list:
         newspecies.range_references = s[8]
         newspecies.realm = s[9]
         newspecies.status = s[10]
-        newspecies.taxonid = s[11]
-        newspecies.eolid = s[12]
-        newspecies.inatid = s[13]
-        newspecies.gbifid = s[14]
+        newspecies.key_photo = s[11]
+        newspecies.taxonid = s[12]
+        newspecies.eolid = s[13]
+        newspecies.inatid = s[14]
+        newspecies.gbifid = s[15]
         species_list.append(newspecies)
     species_list.sort()  # sort into alphabetical order
     return species_list
