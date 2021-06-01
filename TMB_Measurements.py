@@ -8,7 +8,7 @@ from matplotlib.collections import PatchCollection
 import numpy
 import TMB_Classes
 
-DATA_TYPES = ["individual", "range", "mean", "mean/sd", "mean/se", "classcount", "mean/sd/min/max"]
+DATA_TYPES = ["individual", "range", "mean", "mean/sd", "mean/se", "classcount", "mean/sd/min/max", "mean/se/min/max"]
 
 
 def sort_measurement_data(data: list) -> dict:
@@ -119,6 +119,21 @@ def combine_measurement_data(data):
                         # don't allow simulated widths to exceed observed range
                         while (v < d.value.min_val) or (v > d.value.max_val):
                             v = random.gauss(d.value.mean, d.value.sd)
+                        cdata.append(v)
+
+        if "mean/se/min/max" in data:
+            dat = data["mean/se/min/max"]
+            for d in dat:
+                for r in range(pern):
+                    cdata.append(d.value.max_val)
+                    cdata.append(d.value.min_val)
+                if d.n > 2:
+                    sd = se_to_sd(d.value.se, d.n)
+                    for r in range(pern*(d.n - 2)):
+                        v = random.gauss(d.value.mean, sd)
+                        # don't allow simulated widths to exceed observed range
+                        while (v < d.value.min_val) or (v > d.value.max_val):
+                            v = random.gauss(d.value.mean, sd)
                         cdata.append(v)
 
         if "classcount" in data:
@@ -250,6 +265,31 @@ def plot_means_sd_min_max(faxes, data, yv, color):
     return yv
 
 
+def plot_means_se_min_max(faxes, data, yv, color):
+    if "mean/se/min/max" in data:
+        mdata = data["mean/se/min/max"]
+        mx = []
+        e = []
+        x = []
+        for i, d in enumerate(mdata):
+            sd = se_to_sd(d.value.se, d.n)
+            mx.append(d.value.mean)
+            e.append(sd*1.96)
+            x.append([d.value.min_val, d.value.max_val])
+        y = [yv + i for i in range(len(mdata))]
+        parts = faxes.violinplot(x, y, points=10, vert=False, widths=0.5, showextrema=True, showmedians=False,
+                                 showmeans=False)
+        for pc in parts["bodies"]:
+            pc.set_alpha(0)
+        for p in ["cmins", "cmaxes", "cbars"]:
+            parts[p].set_color(color)
+            parts[p].set_linewidths(0.5)
+        faxes.errorbar(mx, y, xerr=e, color=color, marker="d", markeredgecolor="black", markeredgewidth=0.25, ls="none")
+        yv += len(mdata)
+
+    return yv
+
+
 def plot_combined_data(faxes, combined_data, yv, color):
     if len(combined_data) > 0:
         quartile1, median, quartile3 = numpy.percentile(combined_data, [25, 50, 75])
@@ -303,6 +343,10 @@ def plot_measurement_data(species_dat, combined_data, comb_male_data, comb_femal
     y = plot_means_sd_min_max(faxes, species_dat.female, y, "red")
     y = plot_means_sd_min_max(faxes, species_dat.male, y, "blue")
     y = plot_means_sd_min_max(faxes, species_dat.other, y, "black")
+
+    y = plot_means_se_min_max(faxes, species_dat.female, y, "red")
+    y = plot_means_se_min_max(faxes, species_dat.male, y, "blue")
+    y = plot_means_se_min_max(faxes, species_dat.other, y, "black")
 
     # plot classcounts
     y = plot_classcount(faxes, species_dat.female, y, "red")

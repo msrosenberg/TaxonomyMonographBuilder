@@ -421,7 +421,7 @@ def read_measurement_data(filename: str) -> list:
                     try:
                         new.n = int(d[8])
                     except ValueError:
-                        new.n = 1  # a mean requires a minimumof one individual
+                        new.n = 1  # a mean requires a minimum of one individual
                     new.value = TMB_Classes.MeasurementMean()
                     new.value.mean = eval(d[9])
                     if new.type == "mean/sd":
@@ -430,6 +430,14 @@ def read_measurement_data(filename: str) -> list:
                         new.value.se = eval(d[13])
                     elif new.type == "mean/sd/min/max":
                         new.value.sd = eval(d[12])
+                        new.value.min_val = eval(d[10])
+                        new.value.max_val = eval(d[11])
+                        if new.value.min_val > new.value.max_val:
+                            report_error("Size Data Error: min greater than max, "
+                                         "{} / {} / {}".format(new.species, new.value.min_val, new.value.max_val))
+                            raise ValueError
+                    elif new.type == "mean/se/min/max":
+                        new.value.se = eval(d[13])
                         new.value.min_val = eval(d[10])
                         new.value.max_val = eval(d[11])
                         if new.value.min_val > new.value.max_val:

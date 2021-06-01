@@ -45,7 +45,7 @@ AUTHOR_TAXON = 2        # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
-DRAW_MAPS = False
+DRAW_MAPS = True
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
@@ -3651,6 +3651,11 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
         outfile.write("          <img class=\"species_key_photo\" src=\"" + media_path + "photos/" + species.key_photo +
                       "\" alt=\"" + species.binomial() + "\" title=\"" + species.binomial() + "\" />\n")
         outfile.write("        </figure>\n")
+        # copy photo to web output directory
+        try:
+            shutil.copy2(MEDIA_PATH + "photos/" + species.key_photo, WEBOUT_PATH + "photos/")
+        except FileNotFoundError:
+            report_error("Missing file: " + species.key_photo)
 
     if do_print:
         outfile.write("      <h2 class=\"nobookmark\">Type Description</h2>\n")
