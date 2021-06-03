@@ -5,6 +5,7 @@ private/
 temp/
 venv/
 venv38/
+venv39/
 
 
 # Windows image file caches
