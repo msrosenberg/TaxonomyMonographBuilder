@@ -234,7 +234,8 @@ def adjust_map_boundaries(minlon: Number, maxlon: Number, minlat: Number, maxlat
         return minlon, maxlon, minlat, maxlat
 
 
-def add_line_to_map(faxes: mplpy.Axes, points: list, wrap_lons: bool = False, lw: int = 1, a: Number = 1) -> None:
+def add_line_to_map(faxes: mplpy.Axes, points: list, wrap_lons: bool = False, lw: int = 1, a: Number = 1,
+                    color="red") -> None:
     lons = []
     lats = []
     for p in points:
@@ -242,7 +243,7 @@ def add_line_to_map(faxes: mplpy.Axes, points: list, wrap_lons: bool = False, lw
             p.lon += 360
         lons.append(p.lon)
         lats.append(p.lat)
-    faxes.plot(lons, lats, color="red", linewidth=lw, alpha=a)
+    faxes.plot(lons, lats, color=color, linewidth=lw, alpha=a)
 
 
 # def check_line_boundaries(points: str, minlon: Number, maxlon: Number, minlat: Number, maxlat: Number,
@@ -295,8 +296,12 @@ def draw_and_adjust_basemap(faxes: mplpy.Axes, base_map: BaseMap, mid_atlantic: 
 
 
 # def write_species_range_map(base_map: BaseMap, species_map: list, graph_font: Optional[str] = None) -> None:
-def write_species_range_map(base_map: BaseMap, species, species_map: list, graph_font: Optional[str] = None) -> None:
-    fig, faxes = mplpy.subplots(figsize=[FIG_WIDTH, FIG_HEIGHT])
+def write_species_range_map(base_map: BaseMap, species: str, species_map: list, graph_font: Optional[str] = None,
+                            fig_width: float = FIG_WIDTH, fig_height: float = FIG_HEIGHT,
+                            fminlat: Optional[float] = None, fmaxlat: Optional[float] = None,
+                            fminlon: Optional[float] = None, fmaxlon: Optional[float] = None,
+                            color="red") -> None:
+    fig, faxes = mplpy.subplots(figsize=[fig_width, fig_height])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
     maxlat = -90
@@ -321,9 +326,18 @@ def write_species_range_map(base_map: BaseMap, species, species_map: list, graph
     (minlon, maxlon, minlat, maxlat, wrap_lons) = draw_and_adjust_basemap(faxes, base_map, mid_atlantic, minlon,
                                                                           maxlon, minlat, maxlat, all_lons, all_lats)
 
+    if fminlon is not None:
+        minlon = fminlon
+    if fmaxlon is not None:
+        maxlon = fmaxlon
+    if fminlat is not None:
+        minlat = fminlat
+    if fmaxlat is not None:
+        maxlat = fmaxlat
+
     # draw range lines
     for line in species_map:
-        add_line_to_map(faxes, line, wrap_lons)
+        add_line_to_map(faxes, line, wrap_lons, color=color)
 
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)
@@ -589,10 +603,10 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
     faxes.scatter(lons, lats, s=sizes, color=colors, edgecolors=edges, alpha=1, zorder=2, clip_on=False, linewidth=0.5)
 
     # uncomment to force full world map
-    # maxlat = 90
-    # minlat = -90
-    # maxlon = 180
-    # minlon = -180
+    # maxlat = -27
+    # minlat = -35
+    # maxlon = 31
+    # minlon = 15
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)
     if skip_axes:
@@ -671,9 +685,10 @@ def count_species_in_coastal_cells(species_ranges: dict, cells_per_degree=4):
     return latitudes, longitudes, counts
 
 
-def create_cell_density_map(latitudes, longitudes, cell_counts, base_map: BaseMap, skip_axes: bool = True,
-                            graph_font: Optional[str] = None) -> None:
-    fig, faxes = mplpy.subplots(figsize=[FIG_WIDTH, FIG_HEIGHT])
+def create_cell_density_map(latitudes, longitudes, cell_counts, base_map: BaseMap, name: str = "fiddlers_all",
+                            skip_axes: bool = True, graph_font: Optional[str] = None, fig_width=FIG_WIDTH,
+                            fig_height=FIG_HEIGHT, minlon=-180, maxlon=180, minlat=-90, maxlat=90) -> None:
+    fig, faxes = mplpy.subplots(figsize=[fig_width, fig_height])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
 
@@ -683,8 +698,8 @@ def create_cell_density_map(latitudes, longitudes, cell_counts, base_map: BaseMa
     mesh = faxes.pcolormesh(x, y, cell_counts, cmap="plasma")
     fig.colorbar(mesh)
 
-    mplpy.xlim(-180, 180)
-    mplpy.ylim(-90, 90)
+    mplpy.xlim(minlon, maxlon)
+    mplpy.ylim(minlat, maxlat)
     if skip_axes:
         faxes.axes.get_yaxis().set_visible(False)
         faxes.axes.get_xaxis().set_visible(False)
@@ -694,7 +709,7 @@ def create_cell_density_map(latitudes, longitudes, cell_counts, base_map: BaseMa
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     adjust_longitude_tick_values(faxes)
-    mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("fiddlers_all") + ".png", format="png", dpi=600)
+    mplpy.savefig(__OUTPUT_PATH__ + rangemap_name(name) + ".png", format="png", dpi=600)
     mplpy.close("all")
 
 
@@ -871,10 +886,17 @@ def create_all_maps(init_data: TMB_Initialize.InitializationData, point_location
 
 
 def main():
-    pass
+    # pass
     # temp code to produce a blank map
-    # base_map = read_base_map("fiddlercrab.info/private/ne_50m_land.txt", None)
-    # write_point_map_svg("blank", [], [], None, base_map, True, False)
+    TMB_Initialize.initialize()
+    init_data = TMB_Initialize.INIT_DATA
+    base_map = read_base_map(init_data.map_primary, init_data.map_secondary, init_data.map_islands)
+    write_point_map("blank", [], {}, None, None, None, base_map, True, [])
+
+
+# def write_point_map(title: str, place_list: list, point_locations: dict, invalid_places: Optional[set],
+#                     questionable_ids: Optional[set], inat_locations: Optional[list], base_map: BaseMap,
+#                     skip_axes: bool, sub_locations: Optional[list], graph_font: Optional[str] = None) -> None:
 
 
 if __name__ == "__main__":
