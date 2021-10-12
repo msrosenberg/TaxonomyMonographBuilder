@@ -51,7 +51,7 @@ CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
 CHECK_LOCATIONS = False
 # this flag controls whether additional location data should be fetched from iNaturalist
-INCLUDE_INAT = False
+INCLUDE_INAT = True
 # Suppress some of the more time-consuming output; only meant for when testing others elements
 OUTPUT_REFS = True
 OUTPUT_LOCS = True
@@ -133,8 +133,8 @@ def common_header_part2(outfile: TextIO, indexpath: str = "", include_map: bool 
     outfile.write("      <a href=\"" + indexpath + "index.html\" class=\"home-title\">Fiddler Crabs</a>\n")
     outfile.write("      <a href=\"" + indexpath +
                   "index.html\" class=\"home-link\">" + fetch_fa_glyph("home") + "Home</a>\n")
-    outfile.write("      <a href=\"" + indexpath +
-                  "blog\" class=\"home-link\">" + fetch_fa_glyph("blog") + "Blog</a>\n")
+    # outfile.write("      <a href=\"" + indexpath +
+    #               "blog\" class=\"home-link\">" + fetch_fa_glyph("blog") + "Blog</a>\n")
     outfile.write("    </div>\n")
 
 
@@ -2614,14 +2614,14 @@ def write_taxonomic_key_guide(outfile: TextIO, do_print: bool) -> None:
                   "each key are driven by an algorithm rather than explicit human design and different keys may "
                   "prioritize different characters at different stages.")
     outfile.write("      </p>\n")
-    outfile.write("      <p>\n")
-    outfile.write("          A discussion of the development of this key generating algorithm can be found in "
-                  "<a href=\"http://www.rosenberglab.net/blog/2019/05/02/"
-                  "automatic-taxonomic-key-generation-part-1-introduction/\">a series of 10 blog posts</a> on my "
-                  "lab website. The <a href=\"https://github.com/msrosenberg/TaxKeyGen\">original code is found on "
-                  "Github</a>, although it has since been modified to work within the larger framework of this "
-                  "website generator.")
-    outfile.write("      </p>\n")
+    # outfile.write("      <p>\n")
+    # outfile.write("          A discussion of the development of this key generating algorithm can be found in "
+    #               "<a href=\"http://www.rosenberglab.net/blog/2019/05/02/"
+    #               "automatic-taxonomic-key-generation-part-1-introduction/\">a series of 10 blog posts</a> on my "
+    #               "lab website. The <a href=\"https://github.com/msrosenberg/TaxKeyGen\">original code is found on "
+    #               "Github</a>, although it has since been modified to work within the larger framework of this "
+    #               "website generator.")
+    # outfile.write("      </p>\n")
     outfile.write("      <p>\n")
     outfile.write("          We welcome comments or corrections about these guides and hope they prove to be "
                   "useful.")
@@ -3663,7 +3663,6 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
         outfile.write("      <h2 id=\"type\" class=\"nobookmark\">Type Description</h2>\n")
     outfile.write("      <dl>\n")
     outfile.write("        <dt><em class=\"species\">" + species.type_species + "</em></dt>\n")
-    # tref = refdict[species.type_reference]
     outfile.write("        <dd>" + species.type_reference.formatted_html + "</dd>\n")
     outfile.write("      </dl>\n")
     outfile.write("    </section>\n")
