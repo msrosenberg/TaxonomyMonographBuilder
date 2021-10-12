@@ -10,6 +10,7 @@ import time
 from tqdm import tqdm
 import TMB_Classes
 from TMB_Error import report_error
+from TMB_Common import str_to_number
 
 
 def read_simple_file(filename: str) -> list:
@@ -364,7 +365,8 @@ def fetch_inat_data(species: list) -> dict:
                     for data in csv.reader(raw_data[1:]):
                         if len(data) > 0:
                             try:
-                                point = TMB_Classes.Point(eval(data[4]), eval(data[5]))
+                                point = TMB_Classes.Point(str_to_number(data[4]), str_to_number(data[5]))
+                                # point = TMB_Classes.Point(eval(data[4]), eval(data[5]))
                                 urlstr = data[8]
                                 coords.append(TMB_Classes.INatData(coords=point, url=urlstr))
                             except SyntaxError:
@@ -382,8 +384,12 @@ def read_species_blocks(filename: str) -> dict:
     for line in lines[1:]:
         if line.strip() != "":
             species, startlat, startlon, endlat, endlon = line.strip().split("\t")
-            blocks.setdefault(species, []).append(TMB_Classes.RangeCell(eval(startlat), eval(startlon),
-                                                                        eval(endlat), eval(endlon)))
+            blocks.setdefault(species, []).append(TMB_Classes.RangeCell(str_to_number(startlat),
+                                                                        str_to_number(startlon),
+                                                                        str_to_number(endlat),
+                                                                        str_to_number(endlon)))
+            # blocks.setdefault(species, []).append(TMB_Classes.RangeCell(eval(startlat), eval(startlon),
+            #                                                             eval(endlat), eval(endlon)))
     return blocks
 
 
@@ -404,15 +410,18 @@ def read_measurement_data(filename: str) -> list:
                     new.notes = d[5]
                 new.type = d[7]
                 if new.type == "individual":
-                    new.value = eval(d[9])
+                    # new.value = eval(d[9])
+                    new.value = str_to_number(d[9])
                 elif new.type == "range":
                     try:
                         new.n = int(d[8])
                     except ValueError:
                         new.n = 2  # a range requires a minimum of two individuals
                     new.value = TMB_Classes.MeasurementRange()
-                    new.value.min_val = eval(d[10])
-                    new.value.max_val = eval(d[11])
+                    new.value.min_val = str_to_number(d[10])
+                    new.value.max_val = str_to_number(d[11])
+                    # new.value.min_val = eval(d[10])
+                    # new.value.max_val = eval(d[11])
                     if new.value.min_val > new.value.max_val:
                         report_error("Size Data Error: min greater than max, "
                                      "{} / {} / {}".format(new.species, new.value.min_val, new.value.max_val))
@@ -423,32 +432,44 @@ def read_measurement_data(filename: str) -> list:
                     except ValueError:
                         new.n = 1  # a mean requires a minimum of one individual
                     new.value = TMB_Classes.MeasurementMean()
-                    new.value.mean = eval(d[9])
+                    new.value.mean = str_to_number(d[9])
+                    # new.value.mean = eval(d[9])
                     if new.type == "mean/sd":
-                        new.value.sd = eval(d[12])
+                        new.value.sd = str_to_number(d[12])
+                        # new.value.sd = eval(d[12])
                     elif new.type == "mean/se":
-                        new.value.se = eval(d[13])
+                        new.value.se = str_to_number(d[13])
+                        # new.value.se = eval(d[13])
                     elif new.type == "mean/sd/min/max":
-                        new.value.sd = eval(d[12])
-                        new.value.min_val = eval(d[10])
-                        new.value.max_val = eval(d[11])
+                        new.value.sd = str_to_number(d[12])
+                        new.value.min_val = str_to_number(d[10])
+                        new.value.max_val = str_to_number(d[11])
+                        # new.value.sd = eval(d[12])
+                        # new.value.min_val = eval(d[10])
+                        # new.value.max_val = eval(d[11])
                         if new.value.min_val > new.value.max_val:
                             report_error("Size Data Error: min greater than max, "
                                          "{} / {} / {}".format(new.species, new.value.min_val, new.value.max_val))
                             raise ValueError
                     elif new.type == "mean/se/min/max":
-                        new.value.se = eval(d[13])
-                        new.value.min_val = eval(d[10])
-                        new.value.max_val = eval(d[11])
+                        new.value.se = str_to_number(d[13])
+                        new.value.min_val = str_to_number(d[10])
+                        new.value.max_val = str_to_number(d[11])
+                        # new.value.se = eval(d[13])
+                        # new.value.min_val = eval(d[10])
+                        # new.value.max_val = eval(d[11])
                         if new.value.min_val > new.value.max_val:
                             report_error("Size Data Error: min greater than max, "
                                          "{} / {} / {}".format(new.species, new.value.min_val, new.value.max_val))
                             raise ValueError
                 elif "classcount" in new.type:
-                    new.n = eval(d[8])  # allow for floating sample sizes due to averaging across samples
+                    new.n = str_to_number(d[8])  # allow for floating sample sizes due to averaging across samples
+                    # new.n = eval(d[8])  # allow for floating sample sizes due to averaging across samples
                     new.value = TMB_Classes.MeasurementRange()
-                    new.value.min_val = eval(d[10])
-                    new.value.max_val = eval(d[11])
+                    new.value.min_val = str_to_number(d[10])
+                    new.value.max_val = str_to_number(d[11])
+                    # new.value.min_val = eval(d[10])
+                    # new.value.max_val = eval(d[11])
                     new.class_id = d[6]
                 data.append(new)
     return data

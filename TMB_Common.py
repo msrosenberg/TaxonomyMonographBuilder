@@ -89,3 +89,13 @@ def unicode_to_html_encoding(x: str) -> str:
     for r in unicode_replace_list:
         x = x.replace(r[0], r[1])
     return x
+
+
+def str_to_number(number: str) -> Number:
+    """
+    Convert a string to either an int or float, avoiding the use of eval() for security reasons
+    """
+    try:
+        return int(number)
+    except ValueError:
+        return float(number)

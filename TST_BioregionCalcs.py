@@ -7,6 +7,7 @@ import TMB_Initialize
 import TMB_Import
 import TMB_Create_Coastal_Ranges
 from TMB_Classes import RangeCell
+from TMB_Common import str_to_number
 
 
 """
@@ -136,9 +137,12 @@ def latitude_summary():
         coastline = {lat: 0 for lat in range(-45, 45)}
         for line in infile:
             data = line.strip().split("\t")
-            lat = eval(data[0])
-            coastline[lat] += eval(data[2])
-            if eval(data[3]) > 0:
+            # lat = eval(data[0])
+            # coastline[lat] += eval(data[2])
+            # if eval(data[3]) > 0:
+            lat = str_to_number(data[0])
+            coastline[lat] += str_to_number(data[2])
+            if str_to_number(data[3]) > 0:
                 instr = data[4]
                 instr = instr.replace("'", "")  # delete single quotes
                 instr = instr.replace("{", "")  # delete {
