@@ -113,7 +113,7 @@ def common_header_part1(outfile: TextIO, title: str, indexpath: str = "") -> Non
     outfile.write("    <script defer src=\"" + indexpath + "js/brands.min.js\"></script>\n")
     outfile.write("    <script defer src=\"" + indexpath + "js/fontawesome.min.js\"></script>\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath +
-                  "images/flag-icon-css/css/flag-icon.min.css\" />\n")
+                  "images/flag-icon-css/css/flag-icons.min.css\" />\n")
     outfile.write("    <link rel=\"author\" href=\"" + init_data().site_author_email + "\" />\n")
 
 
@@ -5962,7 +5962,7 @@ def copy_support_files() -> None:
         except FileNotFoundError:
             report_error("Missing file: resources/font-awesome/js/" + TMP_PATH + filename)
     # flag-icon files
-    filelist = {"flag-icon.min.css"}
+    filelist = {"flag-icons.min.css"}
     for filename in filelist:
         try:
             shutil.copy2("resources/flag-icon-css/css/" + filename, WEBOUT_PATH + "images/flag-icon-css/css/")
@@ -6212,7 +6212,7 @@ def start_print(outfile: TextIO) -> None:
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/font-awesome/css/solid.min.css\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/font-awesome/css/brands.min.css\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/font-awesome/css/regular.min.css\" />\n")
-    outfile.write("    <link rel=\"stylesheet\" href=\"resources/flag-icon-css/css/flag-icon.min.css\" />\n")
+    outfile.write("    <link rel=\"stylesheet\" href=\"resources/flag-icon-css/css/flag-icons.min.css\" />\n")
     outfile.write("  </head>\n")
     outfile.write("\n")
     outfile.write("  <body>\n")
