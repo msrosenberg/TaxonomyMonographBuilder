@@ -101,6 +101,7 @@ def read_reference_data(ref_filename: str, formatref_filename: str,
                 line = line.replace("<i>", "<em>")
                 line = line.replace("</i>", "</em>")
                 c += 1
+                # print(c, line)
                 newref = ref_list[c]
                 newref.formatted_html = line
     refdict = {}
@@ -370,6 +371,8 @@ def fetch_inat_data(species: list) -> dict:
                                 urlstr = data[8]
                                 coords.append(TMB_Classes.INatData(coords=point, url=urlstr))
                             except SyntaxError:
+                                pass
+                            except ValueError:
                                 pass
                 else:
                     next_page = False
