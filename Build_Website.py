@@ -6291,8 +6291,10 @@ def build_site() -> None:
 
         taxon_ranks = TMB_Import.read_taxon_rank_data(init_data().taxon_ranks_file)
         higher_taxa, higher_dict = TMB_Import.read_higher_taxa_data(init_data().higher_taxa_file)
-        print("...Creating Wordclouds...")
-        TMB_Create_Graphs.create_word_cloud_image(binomial_usage_cnts, specific_usage_cnts, init_data().wc_font_path)
+        if not CHECK_DATA:
+            print("...Creating Wordclouds...")
+            TMB_Create_Graphs.create_word_cloud_image(binomial_usage_cnts, specific_usage_cnts,
+                                                      init_data().wc_font_path)
 
         print("...Reading Photos and Videos...")
         photos = TMB_Import.read_photo_data(init_data().photo_file)
