@@ -328,6 +328,8 @@ def fetch_fa_glyph(glyph: Optional[str]) -> str:
             x += " fa-edit\" aria-hidden"
         elif glyph == "specimen":
             x += " fa-flask\" aria-hidden"
+        elif glyph == "sequence":
+            x += " fa-dna\" aria-hidden"
         elif glyph == "original":
             x += " fa-arrow-alt-left\" aria-hidden"
         elif glyph == "computed":
@@ -890,13 +892,13 @@ def compute_applied_name_contexts(citelist: list) -> None:
     function to gather list of primary contexts referred to by other citation entries
     """
     for i, cite in enumerate(citelist):
-        if (cite.context == "specimen") or (cite.context == "location"):
+        if (cite.context == "specimen") or (cite.context == "location") or (cite.context == "sequence"):
             cite.applied_cites = {cite}
         elif cite.context == "citation":
             for j in range(i):  # only look at entries up to the current one
                 tmp = citelist[j]
                 if (tmp.cite_key == cite.application) and match_num_ref(tmp.name_key, cite.cite_n):
-                    if (tmp.context == "specimen") or (tmp.context == "location"):
+                    if (tmp.context == "specimen") or (tmp.context == "location") or (tmp.context == "sequence"):
                         cite.applied_cites |= {tmp}
         if len(cite.applied_cites) == 0:
             cite.applied_cites = None
@@ -1225,6 +1227,13 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
             else:
                 outstr = create_location_sublink(n.application)
                 outfile.write("      <td>" + fetch_fa_glyph("specimen") + "specimen: " + outstr + "</td>\n")
+        elif n.context == "sequence":
+            if n.application == "?":
+                outfile.write("      <td>" + fetch_fa_glyph("sequence") + "sequence: unknown locality</td>\n")
+            else:
+                outstr = create_location_sublink(n.application)
+                outfile.write("      <td>" + fetch_fa_glyph("sequence") + "sequence: " + outstr + "</td>\n")
+
         elif n.context == "unpublished":
             outfile.write("      <td>unpublished name <em class=\"species\">" +
                           n.application + "</em></td>\n")
@@ -3213,7 +3222,8 @@ def match_names_to_locations(species: list, specific_point_locations: dict,  bin
             good_ids = set()
             for c in citelist:
                 if (c.actual == s.species) and ((c.context == "location") or
-                                                (c.context == "specimen")):
+                                                (c.context == "specimen") or
+                                                (c.context == "sequence")):
                     p = c.application
                     if p[0] != "[":
                         p = strip_location_subtext(p)
@@ -3239,7 +3249,7 @@ def match_names_to_locations(species: list, specific_point_locations: dict,  bin
 
     # create set of all citations that refer to each location
     for c in citelist:
-        if (c.context == "location") or (c.context == "specimen"):
+        if (c.context == "location") or (c.context == "specimen") or (c.context == "sequence"):
             p = c.application
             if (p != ".") and (p[0] != "[") and (p != "?"):
                 loc = strip_location_subtext(p)
