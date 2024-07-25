@@ -536,7 +536,7 @@ def generate_taxonomic_key(trait_data: dict, taxa_data: dict, out_name: Optional
     # end_output(output)
     if out_name is not None:
         pass
-        with open(out_name, "w") as outfile:
+        with open(out_name, "w", encoding="utf-8") as outfile:
             outfile.write("<html>\n")
             outfile.write("  <head>\n")
             outfile.writelines(output.header)
@@ -591,10 +591,10 @@ def read_data_files(trait_name: str, var_name: str, generic_name: str, taxa_name
 
 
 def main():
-    trait_file = input_query("Trait data file", "tax_key_trait_data.txt")
-    trait_var_file = input_query("Trait variant data file", "tax_key_variant_data.txt")
-    generic_file = input_query("Generic notes file", "tax_key_generic_notes.txt")
-    taxa_file = input_query("Taxa data file", "tax_key_taxa_data.txt")
+    trait_file = input_query("Trait data file", "fiddlercrab.info/data/tax_key_trait_data.txt")
+    trait_var_file = input_query("Trait variant data file", "fiddlercrab.info/data/tax_key_variant_data.txt")
+    generic_file = input_query("Generic notes file", "fiddlercrab.info/data/tax_key_generic_notes.txt")
+    taxa_file = input_query("Taxa data file", "fiddlercrab.info/data/tax_key_taxa_data.txt")
     output_file = input_query("Output HTML file", "output.html")
 
     trait_data, generic_notes, taxa_data = read_data_files(trait_file, trait_var_file, generic_file, taxa_file)

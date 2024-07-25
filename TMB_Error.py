@@ -7,4 +7,5 @@ LOGFILE = None
 
 def report_error(outstr: str) -> None:
     print(outstr)
-    LOGFILE.write(outstr + "\n")
+    if LOGFILE is not None:
+        LOGFILE.write(outstr + "\n")

@@ -264,11 +264,11 @@ def calculate_ranges(init_data: TMB_Initialize.InitializationData, verbose: bool
         test_draw_ranges(species, ranges[species], base_map)
 
     # test_draw_all_ranges(base_map, ranges)
-    all_blocks = []
-    for species in species_blocks:
-        all_blocks.extend(species_blocks[species])
-    all_range = TMB_Create_Maps.get_range_map_overlap(all_blocks, coastline_map)
-    test_draw_ranges("all_combined", all_range, base_map, draw_blank=True, do_bw=True)
+    # all_blocks = []
+    # for species in species_blocks:
+    #     all_blocks.extend(species_blocks[species])
+    # all_range = TMB_Create_Maps.get_range_map_overlap(all_blocks, coastline_map)
+    # test_draw_ranges("all_combined", all_range, base_map, draw_blank=True, do_bw=True)
 
 
 def draw_provinces(init_data: TMB_Initialize.InitializationData) -> None:
@@ -494,8 +494,8 @@ def test_range_density_map():
 
 
 if __name__ == "__main__":
-    # TMB_Initialize.initialize()
-    # t_init_data = TMB_Initialize.INIT_DATA
-    # calculate_ranges(t_init_data, True)
+    TMB_Initialize.initialize()
+    t_init_data = TMB_Initialize.INIT_DATA
+    calculate_ranges(t_init_data, True)
     # draw_provinces(t_init_data)
-    test_range_density_map()
+    # test_range_density_map()

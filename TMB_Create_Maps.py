@@ -174,7 +174,7 @@ def draw_base_map(faxes: mplpy.Axes, base_map: BaseMap, adj_lon: int = 0) -> Non
             plist = []
             for p in part:
                 plist.append([p.lon + adj_lon, p.lat])
-            newp = mplp.Polygon(plist, True)
+            newp = mplp.Polygon(numpy.array(plist), closed=True)
             parts_list.append(newp)
         pc = PatchCollection(parts_list, alpha=1, facecolor="gainsboro", edgecolor="silver", zorder=1, linewidths=0.3)
         faxes.add_collection(pc)
@@ -184,7 +184,7 @@ def draw_base_map(faxes: mplpy.Axes, base_map: BaseMap, adj_lon: int = 0) -> Non
         plist = []
         for p in part:
             plist.append([p.lon + adj_lon, p.lat])
-        newp = mplp.Polygon(plist, True)
+        newp = mplp.Polygon(numpy.array(plist), closed=True)
         parts_list.append(newp)
     if base_map.has_secondary():
         pc = PatchCollection(parts_list, alpha=1, facecolor="none", edgecolor="darkgrey", zorder=1, linewidths=0.5)
@@ -872,6 +872,7 @@ def create_all_maps(init_data: TMB_Initialize.InitializationData, point_location
         coastline_map.extend(TMB_ImportShape.import_arcinfo_shp(TMB_Initialize.INIT_DATA.map_islands))
         species_ranges = {}
         for s in tqdm(species_blocks):
+            # test_draw_blocks(s, species_blocks[s], coastline_map)
             species_ranges[s] = get_range_map_overlap(species_blocks[s], coastline_map)
 
         print(".........Drawing Species Maps.........")

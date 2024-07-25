@@ -44,7 +44,7 @@ AUTHOR_TAXON = 2        # Smith, 1970  <-- this one is needed for taxonomic name
 
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
-# this flag can be used to suppress redrawing all of the maps, which is fairly time consuming
+# this flag can be used to suppress redrawing all of the maps, which is fairly time-consuming
 DRAW_MAPS = True
 # this flag suppresses creation of output files, allowing data integrity checking without the output time cost
 CHECK_DATA = False
@@ -1078,6 +1078,7 @@ def clean_specific_name(x: str) -> str:
     # a fiddler genus
     skip_list = ("sp.",
                  "spp.",
+                 "spp",
                  "var.",
                  "nov.",
                  "a",
@@ -1102,17 +1103,32 @@ def clean_specific_name(x: str) -> str:
                  "afruca",
                  "gelasimus")
 
-    if (" " not in x) or ("(" in x):
+    # if (" " not in x) or ("(" in x):
+    #     return ""
+    # else:
+    #     if "{" in x:
+    #         x = x[:x.find("{")-1]
+    #     y = x.split(" ")
+    #     x = y[len(y)-1].lower()
+    #     if (x in skip_list) or ("gruppe" in x) or ("group" in x) or ("complex" in x):
+    #         return ""
+    #     else:
+    #         return x.lower()
+
+    # regex = r"\(.+?\)"
+    # x = re.sub(regex, "", x)
+    # regex = r"[.+?]"
+    # x = re.sub(regex, "", x)
+
+    if x.endswith(")") or (" " not in x):
         return ""
-    else:
-        if "{" in x:
-            x = x[:x.find("{")-1]
-        y = x.split(" ")
-        x = y[len(y)-1].lower()
-        if (x in skip_list) or ("gruppe" in x) or ("group" in x) or ("complex" in x):
-            return ""
-        else:
-            return x.lower()
+    if "{" in x:
+        x = x[:x.find("{")-1]
+    y = x.split(" ")
+    x = y[len(y)-1].lower()
+    if (x in skip_list) or ("gruppe" in x) or ("group" in x) or ("complex" in x):
+        return ""
+    return x.lower()
 
 
 def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: list, unique_set: set,
@@ -3629,7 +3645,10 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
             # common_html_header(outfile, "Uca " + species.species + " / Fossil")
         else:
             # common_header_part1(outfile, "Uca " + species.species + " / " + species.common)
-            common_header_part1(outfile, species.binomial() + " / " + species.common)
+            if species.common != ".":
+                common_header_part1(outfile, species.binomial() + " / " + species.common)
+            else:
+                common_header_part1(outfile, species.binomial())
             start_google_map_header(outfile)
             write_google_map_range_header(outfile, "u_" + species.species)
             write_google_map_point_header(outfile, "u_" + species.species)
@@ -3664,7 +3683,7 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
     outfile.write("      <h1 class=\"species bookmark2\">" + species.binomial() + sc + "</h1>\n")
     if is_fossil:
         outfile.write("      <h2 class=\"nobookmark\">Fossil</h2>\n")
-    else:
+    elif species.common != ".":
         outfile.write("      <h2 class=\"nobookmark\">" + species.common + "</h2>\n")
     # the species page navigation links only make sense on a webpage, not the printed version
     if not do_print:
@@ -3733,7 +3752,7 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
     outfile.write("       <dt>Taxonomy</dt>\n")
     outfile.write("       <dd>" + " &rarr; ".join(tlist) + "</dd>\n")
 
-    if not is_fossil:
+    if not is_fossil and (species.commonext != "."):
         outfile.write("       <dt>Common Names</dt>\n")
         # outfile.write("         <dd>" + species.commonext + "</dd>\n")
         common_name_list = species.commonext.split(";")
@@ -4079,6 +4098,7 @@ def create_species_cb_page(outfile: TextIO, do_print: bool, species: TMB_Classes
     cdat = TMB_Measurements.combine_measurement_data(measurement_data.all)
     mdat = TMB_Measurements.combine_measurement_data(measurement_data.male)
     fdat = TMB_Measurements.combine_measurement_data(measurement_data.female)
+
     filename = WEBOUT_PATH + "sizes/" + species.species + "_cb.png"
     TMB_Measurements.plot_measurement_data(measurement_data, cdat, mdat, fdat, filename)
 
@@ -6027,6 +6047,7 @@ def copy_support_files() -> None:
                 "it.svg",  # Italy
                 "kr.svg",  # South Korea
                 "pl.svg",  # Poland
+                "se.svg",  # Sweden
                 "mm.svg",  # Myanamar (Burma)
                 "sa.svg",  # Saudi Arabia (best option for Arabic of those available)
                 "id.svg",  # Indonesia
@@ -6363,7 +6384,7 @@ def build_site() -> None:
             species_inat = None
 
         if CHECK_DATA:
-            # run functions that cross check data but skip the output
+            # run functions that cross-check data but skip the output
             check_location_index(point_locations, location_species, location_sp_names, location_bi_names)
             check_citation_cross_references(citelist, refdict, name_table)
 
@@ -6394,6 +6415,7 @@ def build_site() -> None:
                 create_web_output_paths()
                 print("...Creating Web Version...")
                 copy_support_files()
+
                 if OUTPUT_REFS:
                     print("......Writing References......")
                     with open(WEBOUT_PATH + init_data().ref_url, "w", encoding="utf-8") as outfile:
@@ -6407,6 +6429,7 @@ def build_site() -> None:
                     write_all_name_pages(outfile, False, refdict, citelist, all_names, specific_names, name_table,
                                          species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
                                          binomial_point_locations, specific_point_locations, point_locations)
+
                 print("......Writing Species......")
                 write_species_info_pages(None, False, species, references, specific_names, all_names, photos, videos,
                                          art, species_refs, refdict, binomial_name_cnts, specific_name_cnts,
