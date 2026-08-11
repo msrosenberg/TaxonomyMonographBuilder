@@ -104,8 +104,7 @@ def combine_measurement_data(data: dict) -> list:
                     sd = (d.value.max_val - d.value.min_val)/4
                     mp = d.value.midpoint()
                     for r in range(pern*(d.n - 2)):
-                        # v = random.gauss(mp, sd)
-                        v = -1
+                        v = random.gauss(mp, sd)
                         # do not allow simulated widths to exceed observed range
                         while (v < d.value.min_val) or (v > d.value.max_val):
                             v = random.gauss(mp, sd)
@@ -166,26 +165,23 @@ def combine_measurement_data(data: dict) -> list:
 
 
 # --- plotting functions ---
-def plot_individuals(faxes, data: dict, yv: int, color) -> int:
+def plot_individuals(faxes, data: dict, yv: float, color) -> float:
     if "individual" in data:
         idata = data["individual"]
-        x = []
-        for d in idata:
-            x.append(d.value)
+        x = [d.value for d in idata]
         y = [yv + 0.75*random.random() for _ in idata]  # add some noise to y-value to create individual scatter
         faxes.scatter(x, y, color=color, edgecolors="black", linewidths=0.25)
         yv += 1
     return yv
 
 
-def plot_ranges(faxes, data: dict, yv: int, color) -> int:
+def plot_ranges(faxes, data: dict, yv: float, color) -> float:
     if "range" in data:
         rdata = data["range"]
         x = []
         y = []
         for i, d in enumerate(rdata):
             x.append([d.value.min_val, d.value.max_val])
-            # y.append(yv-i*1.5/len(rdata))
             y.append(yv)
             yv += 1
         parts = faxes.violinplot(x, y, points=10, vert=False, widths=0.5, showextrema=True, showmedians=False,
@@ -198,19 +194,17 @@ def plot_ranges(faxes, data: dict, yv: int, color) -> int:
     return yv
 
 
-def plot_means(faxes, data: dict, yv: int, color) -> int:
+def plot_means(faxes, data: dict, yv: float, color) -> float:
     if "mean" in data:
         mdata = data["mean"]
-        x = []
-        for d in mdata:
-            x.append(d.value.mean)
+        x = [d.value.mean for d in mdata]
         y = [yv for _ in mdata]
         faxes.scatter(x, y, color=color, edgecolors="black", linewidths=0.25, marker="d")
         yv += 1
     return yv
 
 
-def plot_means_sd(faxes, data: dict, yv: int, color) -> int:
+def plot_means_sd(faxes, data: dict, yv: float, color) -> float:
     if "mean/sd" in data:
         mdata = data["mean/sd"]
         x = []
@@ -224,7 +218,7 @@ def plot_means_sd(faxes, data: dict, yv: int, color) -> int:
     return yv
 
 
-def plot_means_se(faxes, data: dict, yv: int, color) -> int:
+def plot_means_se(faxes, data: dict, yv: float, color) -> float:
     if "mean/se" in data:
         mdata = data["mean/se"]
         x = []
@@ -239,13 +233,11 @@ def plot_means_se(faxes, data: dict, yv: int, color) -> int:
     return yv
 
 
-def plot_classcount(faxes, data: dict, yv: int, color) -> int:
+def plot_classcount(faxes, data: dict, yv: float, color) -> float:
     if "classcount" in data:
-        classes = set()
         cdata = data["classcount"]
+        classes = set(d.class_id for d in cdata)
         boxes = []
-        for d in cdata:
-            classes.add(d.class_id)
         for c in classes:
             current_class = []
             maxn = 0
@@ -263,7 +255,7 @@ def plot_classcount(faxes, data: dict, yv: int, color) -> int:
     return yv
 
 
-def plot_means_sd_min_max(faxes, data: dict, yv: int, color) -> int:
+def plot_means_sd_min_max(faxes, data: dict, yv: float, color) -> float:
     if "mean/sd/min/max" in data:
         mdata = data["mean/sd/min/max"]
         mx = []
@@ -287,7 +279,7 @@ def plot_means_sd_min_max(faxes, data: dict, yv: int, color) -> int:
     return yv
 
 
-def plot_means_se_min_max(faxes, data: dict, yv: int, color) -> int:
+def plot_means_se_min_max(faxes, data: dict, yv: float, color) -> float:
     if "mean/se/min/max" in data:
         mdata = data["mean/se/min/max"]
         mx = []
@@ -312,7 +304,7 @@ def plot_means_se_min_max(faxes, data: dict, yv: int, color) -> int:
     return yv
 
 
-def plot_combined_data(faxes, combined_data: list, yv: int, color) -> int:
+def plot_combined_data(faxes, combined_data: list, yv: float, color) -> float:
     if len(combined_data) > 0:
         quartile1, median, quartile3 = numpy.percentile(combined_data, [25, 50, 75])
         mean = numpy.mean(combined_data)
@@ -322,7 +314,6 @@ def plot_combined_data(faxes, combined_data: list, yv: int, color) -> int:
             pc.set_color(color)
         for p in ["cmins", "cmaxes", "cbars"]:
             parts[p].set_color(color)
-            # parts[p].set_linewidths(0.5)
         faxes.hlines(yv, quartile1, quartile3, color=color, linestyle='-', lw=5, alpha=0.5)
         faxes.scatter(median, yv, marker="o", color="white", edgecolor=color, zorder=3)
         faxes.scatter(mean, yv, marker="d", color="white", edgecolor=color, zorder=3)
