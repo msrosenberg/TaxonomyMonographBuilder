@@ -104,6 +104,10 @@ def read_reference_data(ref_filename: str, formatref_filename: str,
         c = -1
         for line in reffile:
             line = line.strip()
+            """
+            the following can help if input data file has the wrong number of lines due to an error in an
+            Endnote entry
+            """
             # if not line.endswith("<p>"):
             #     report_error(f"Potential formatted reference error: {line}")
             if line.endswith("<p>"):
@@ -126,8 +130,6 @@ def read_reference_data(ref_filename: str, formatref_filename: str,
 
     cite_count = 0
     year_dat = {y: [year_dat[y], 0] for y in year_dat}  # replace counter with dictionary containing lists
-    # for y in year_dat:
-    #     year_dat[y] = [year_dat[y], 0]
     for x in cite_done:
         c = cite_done[x]
         if c[0]:
@@ -381,8 +383,6 @@ def fetch_inat_data(species: list) -> dict:
                 page += 1
                 raw_data = get_webpage(f"https://www.inaturalist.org/observations.csv?taxon_id={s.inatid}"
                                        f"&per_page=200&quality_grade=research&page={page}", "utf-8")
-                # raw_data = get_webpage("https://www.inaturalist.org/observations.csv?taxon_id=" + s.inatid +
-                #                        "&per_page=200&quality_grade=research&page=" + str(page), "utf-8")
                 if len(raw_data) > 2:  # header plus the blank line at the end; data would require at least 3 lines
                     for data in csv.reader(raw_data[1:]):
                         if len(data) > 0:
@@ -443,8 +443,6 @@ def read_measurement_data(filename: str) -> list:
                     if new.value.min_val > new.value.max_val:
                         report_error(f"Size Data Error: min greater than max, {new.species} / {new.value.min_val} / "
                                      f"{new.value.max_val}")
-                        # report_error("Size Data Error: min greater than max, "
-                        #              "{} / {} / {}".format(new.species, new.value.min_val, new.value.max_val))
                         raise ValueError
                 elif "mean" in new.type:
                     try:
@@ -464,8 +462,6 @@ def read_measurement_data(filename: str) -> list:
                         if new.value.min_val > new.value.max_val:
                             report_error(f"Size Data Error: min greater than max, {new.species} / {new.value.min_val}"
                                          f" / {new.value.max_val}")
-                            # report_error("Size Data Error: min greater than max, "
-                            #              "{} / {} / {}".format(new.species, new.value.min_val, new.value.max_val))
                             raise ValueError
                     elif new.type == "mean/se/min/max":
                         new.value.se = str_to_number(d[13])
@@ -474,8 +470,6 @@ def read_measurement_data(filename: str) -> list:
                         if new.value.min_val > new.value.max_val:
                             report_error(f"Size Data Error: min greater than max, {new.species} / {new.value.min_val}"
                                          f" / {new.value.max_val}")
-                            # report_error("Size Data Error: min greater than max, "
-                            #              "{} / {} / {}".format(new.species, new.value.min_val, new.value.max_val))
                             raise ValueError
                 elif "classcount" in new.type:
                     new.n = str_to_number(d[8])  # allow for floating sample sizes due to averaging across samples
