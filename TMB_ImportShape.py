@@ -34,9 +34,12 @@ def read_int_value(x: bytes, byteorder: Literal["little", "big"], fpos: int) -> 
     return lval, fpos
 
 
-def import_arcinfo_shp(filename: str) -> list:
+def import_arcinfo_shp(filename: str, testout: bool = False) -> list:
+    """
+    testout allows for the printing of values as they are read from the file
+    """
+
     imported_data = []
-    testout = False  # set to True to print values as they are processed
     bn = 1
     with open(filename, "rb") as mapfile:
         mapdata = mapfile.read()
@@ -45,32 +48,32 @@ def import_arcinfo_shp(filename: str) -> list:
     lval, fpos = read_int_value(mapdata, "big", fpos)
     if testout:
         print("HEADER")  # for test purposes only
-        print("1: " + str(lval))
+        print(f"1: {lval}")
     if lval == 9994:
         # read header
         for i in range(5):
             lval, fpos = read_int_value(mapdata, "big", fpos)  # unused bytes
             if testout:
                 bn += 1
-                print("{}: {}   (unused)".format(bn, lval))
+                print(f"{bn}: {lval}   (unused)")
         lval, fpos = read_int_value(mapdata, "big", fpos)  # file length
         if testout:
             bn += 1
-            print("{}: {}   (file length)".format(bn, lval))
+            print(f"{bn}: {lval}   (file length)")
         lval, fpos = read_int_value(mapdata, "big", fpos)  # version
         if testout:
             bn += 1
-            print("{}: {}   (version)".format(bn, lval))
+            print(f"{bn}: {lval}   (version)")
         shp_type, fpos = read_int_value(mapdata, "little", fpos)  # shape type
         if testout:
             bn += 1
-            print("{}: {}   (shape type)".format(bn, shp_type))
+            print(f"{bn}: {shp_type}   (shape type)")
         if shp_type in VALIDSHAPES:
             for i in range(8):  # read boundaries
                 dval, fpos = read_double_value(mapdata, fpos)
                 if testout:
                     bn += 1
-                    print("{}: {:1.8f}   (boundary)".format(bn, dval))
+                    print(f"{bn}: {dval:1.8f}   (boundary)")
             # read records
             rcnt = - 1
             while fpos < len(mapdata):
@@ -81,9 +84,9 @@ def import_arcinfo_shp(filename: str) -> list:
                     print()
                     print("RECORD HEADER")
                     bn += 1
-                    print("{}: {}   (record number)".format(bn, lval))
+                    print(f"{bn}: {lval}   (record number)")
                     bn += 1
-                    print("{}: {}   (content length)".format(bn, rec_len))
+                    print(f"{bn}: {rec_len}   (content length)")
                     print()
                     print("RECORD")
                 if st == 0:
@@ -177,15 +180,15 @@ def import_arcinfo_shp(filename: str) -> list:
                         dval, fpos = read_double_value(mapdata, fpos)
                         if testout:
                             bn += 1
-                            print("{}: {:1.8f}   (boundary)".format(bn, dval))
+                            print(f"{bn}: {dval:1.8f}   (boundary)")
                     nparts, fpos = read_int_value(mapdata, "little", fpos)
                     if testout:
                         bn += 1
-                        print("{}: {}   (number of parts)".format(bn, nparts))
+                        print(f"{bn}: {nparts}   (number of parts)")
                     npoints, fpos = read_int_value(mapdata, "little", fpos)
                     if testout:
                         bn += 1
-                        print("{}: {}   (number of points)".format(bn, npoints))
+                        print(f"{bn}: {npoints}   (number of points)")
                     # read  number of points per part
                     pcnt = []
                     for i in range(nparts):
@@ -194,7 +197,7 @@ def import_arcinfo_shp(filename: str) -> list:
                     if testout:
                         for i, p in enumerate(pcnt):
                             bn += 1
-                            print("{}: {}   (first point for part {})".format(bn, p, i))
+                            print(f"{bn}: {p}   (first point for part {i})")
                     cur_part = 1
                     # read points
                     newpart = []
@@ -205,11 +208,11 @@ def import_arcinfo_shp(filename: str) -> list:
                             if j == pcnt[cur_part-1]:
                                 if testout:
                                     if cur_part == nparts:
-                                        print("{} {} {} {} {} {}".format(nparts, npoints, j, pcnt[cur_part-1],
-                                                                         cur_part, npoints-pcnt[cur_part-1]))
+                                        print(f"{nparts} {npoints} {j} {pcnt[cur_part-1]} {cur_part} "
+                                              f"{npoints-pcnt[cur_part-1]}")
                                     else:
-                                        print("{} {} {} {} {} {}".format(nparts, npoints, j, pcnt[cur_part-1],
-                                                                         cur_part, pcnt[cur_part]-pcnt[cur_part-1]))
+                                        print(f"{nparts} {npoints} {j} {pcnt[cur_part-1]} {cur_part} "
+                                              f"{pcnt[cur_part]-pcnt[cur_part-1]}")
                                 newpart = []
                                 imported_data.append(newpart)
                                 cur_part += 1
@@ -219,12 +222,12 @@ def import_arcinfo_shp(filename: str) -> list:
                         point.lon, fpos = read_double_value(mapdata, fpos)
                         if testout:
                             bn += 1
-                            print("{}: {:1.8f}   (longitude)".format(bn, point.lon))
+                            print(f"{bn}: {point.lon:1.8f}   (longitude)")
                         # y value
                         point.lat, fpos = read_double_value(mapdata, fpos)
                         if testout:
                             bn += 1
-                            print("{}: {:1.8f}   (latitude)".format(bn, point.lat))
+                            print(f"{bn}: {point.lat:1.8f}   (latitude)")
 
                     if st in {13, 15}:  # get z values
                         dval, fpos = read_double_value(mapdata, fpos)  # min z
@@ -265,8 +268,8 @@ def test_draw(map_data: list) -> None:
 
     mplpy.xlim(-180, 180)
     mplpy.ylim(-90, 90)
-    faxes.axes.get_yaxis().set_visible(False)
-    faxes.axes.get_xaxis().set_visible(False)
+    faxes.yaxis.set_visible(False)
+    faxes.xaxis.set_visible(False)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     mplpy.savefig("test_shp_import.png", format="png", dpi=600)
