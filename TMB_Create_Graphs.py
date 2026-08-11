@@ -9,7 +9,7 @@ import matplotlib.ticker
 from wordcloud import WordCloud
 
 __TMP_PATH__ = "temp/"
-# my approximation of the pygal color scheme
+# my approximation of the pygal color scheme, which I particularly liked
 __COLOR_LIST__ = ["salmon", "royalblue", "lightseagreen", "gold", "darkorange", "mediumorchid", "deepskyblue",
                   "lightgreen", "sandybrown", "palevioletred", "lightskyblue", "mediumaquamarine", "lemonchiffon",
                   "red", "green", "blue", "yellow"]
@@ -176,20 +176,18 @@ def create_line_chart_file(filename: str, data: list, minx: int, maxx: int, y: i
 
 def create_chronology_chart_file(filename: str, miny: int, maxy: int, maxcnt: int, yearly_data: dict,
                                  graph_font: Optional[str] = None) -> None:
-    # y_list = []
-    # for y in range(miny, maxy + 1):
-    #     y_list.append(float(yearly_data[y]))
     y_list = [float(yearly_data[y]) for y in range(miny, maxy+1)]
 
     x = [y for y in range(miny, maxy+1)]
     fig, faxes = mplpy.subplots(figsize=[6.5, 1.5])
     mplpy.ylim(-maxcnt, maxcnt)
     mplpy.xlim(miny, maxy)
+    # pycharm warning appears to be an error as it doesn't recognize that stackplot() is a valid subfunction of Axes
     faxes.stackplot(x, y_list, baseline="sym", colors=["black"])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
     cur_axes = mplpy.gca()
-    cur_axes.axes.get_yaxis().set_visible(False)
+    cur_axes.yaxis.set_visible(False)
     mplpy.xticks([i for i in range(miny, maxy+1, 20)], fontname=graph_font)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
@@ -197,7 +195,8 @@ def create_chronology_chart_file(filename: str, miny: int, maxy: int, maxcnt: in
     mplpy.close("all")
 
 
-def create_word_cloud_image(binomial_cnts: dict, specific_cnts: dict, font_path: Optional[str] = None) -> None:
+# def create_word_cloud_image(binomial_cnts: dict, specific_cnts: dict, font_path: Optional[str] = None) -> None:
+def create_word_cloud_image(binomial_cnts: dict, specific_cnts: dict, font_path: str) -> None:
     # generate wordcloud image from binomials
     wordcloud = WordCloud(width=2000, height=1500, background_color="white", max_words=1000, normalize_plurals=False,
                           collocations=False, font_path=font_path).generate_from_frequencies(binomial_cnts)
@@ -207,6 +206,41 @@ def create_word_cloud_image(binomial_cnts: dict, specific_cnts: dict, font_path:
     wordcloud = WordCloud(width=2000, height=1500, background_color="white", max_words=1000, normalize_plurals=False,
                           collocations=False, font_path=font_path).generate_from_frequencies(specific_cnts)
     wordcloud.to_file(__TMP_PATH__ + "specific_word_cloud.png")
+
+
+def create_handedness_chart_file(filename: str, data: list, graph_font: Optional[str] = None) -> None:
+    y_list = [i for i in range(len(data))]
+    right_x = [d.right_cnt for d in data]
+    left_x = [-d.left_cnt for d in data]
+    max_cnt = max(right_x)
+    if -min(left_x) > max_cnt:
+        max_cnt = -min(left_x)
+    height = max(1.0, (len(y_list)+1)*0.2)
+    fig, faxes = mplpy.subplots(figsize=[6.5, height])
+    mplpy.xlim(-max_cnt, max_cnt)
+    faxes.barh(y_list, right_x)
+    faxes.barh(y_list, left_x)
+
+    # fix labels
+    xlabels = list(faxes.get_xticks())
+    for i, x in enumerate(xlabels):
+        if x < 0:
+            xlabels[i] = -x
+    for i, x in enumerate(xlabels):
+        xlabels[i] = int(x)
+    ticks_loc = faxes.get_xticks().tolist()
+    faxes.xaxis.set_major_locator(matplotlib.ticker.FixedLocator(ticks_loc))
+    faxes.set_xticklabels(xlabels)
+
+    mplpy.xlabel("Left Count / Right Count", fontname=graph_font)
+    faxes.spines["right"].set_visible(False)
+    faxes.spines["top"].set_visible(False)
+    faxes.spines["left"].set_visible(False)
+    faxes.yaxis.set_visible(False)
+    mplpy.rcParams["svg.fonttype"] = "none"
+    mplpy.tight_layout()
+    mplpy.savefig(filename, format="png", dpi=600)
+    mplpy.close("all")
 
 
 if __name__ == "__main__":
@@ -230,7 +264,7 @@ if __name__ == "__main__":
         "Vietnamese": 3
     }
     create_pie_chart_file("testpie.png", test_data)
-    create_word_cloud_image(test_data, test_data, r"C:\Windows\Fonts\NotoSerif-regular.ttf")
+    create_word_cloud_image(test_data, test_data, r"fiddlercrab.info\resources\NotoSerif-regular.ttf")
     test_data = {
         1800: 5,
         1801: 4,
@@ -267,38 +301,3 @@ if __name__ == "__main__":
         "tangeri": 12
     }
     create_qual_bar_chart_file("testqualbar.png", ["pugilator", "pugnax", "tangeri"], test_data, 20)
-
-
-def create_handedness_chart_file(filename: str, data: list, graph_font: Optional[str] = None) -> None:
-    y_list = [i for i in range(len(data))]
-    right_x = [d.right_cnt for d in data]
-    left_x = [-d.left_cnt for d in data]
-    max_cnt = max(right_x)
-    if -min(left_x) > max_cnt:
-        max_cnt = -min(left_x)
-    height = max(1.0, (len(y_list)+1)*0.2)
-    fig, faxes = mplpy.subplots(figsize=[6.5, height])
-    mplpy.xlim(-max_cnt, max_cnt)
-    faxes.barh(y_list, right_x)
-    faxes.barh(y_list, left_x)
-
-    # fix labels
-    xlabels = list(faxes.get_xticks())
-    for i, x in enumerate(xlabels):
-        if x < 0:
-            xlabels[i] = -x
-    for i, x in enumerate(xlabels):
-        xlabels[i] = int(x)
-    ticks_loc = faxes.get_xticks().tolist()
-    faxes.xaxis.set_major_locator(matplotlib.ticker.FixedLocator(ticks_loc))
-    faxes.set_xticklabels(xlabels)
-
-    mplpy.xlabel("Left Count / Right Count", fontname=graph_font)
-    faxes.spines["right"].set_visible(False)
-    faxes.spines["top"].set_visible(False)
-    faxes.spines["left"].set_visible(False)
-    faxes.yaxis.set_visible(False)
-    mplpy.rcParams["svg.fonttype"] = "none"
-    mplpy.tight_layout()
-    mplpy.savefig(filename, format="png", dpi=600)
-    mplpy.close("all")

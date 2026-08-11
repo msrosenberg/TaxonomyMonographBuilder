@@ -32,6 +32,7 @@ class ReferenceClass:
                     y = int(y)
                 except ValueError:
                     report_error(f"Error finding year in reference citation info: {self.citation}")
+                    y = None
                 return y
         except IndexError:
             report_error(f"Citation Import Error: {self.formatted_html}")
@@ -151,13 +152,11 @@ class SpeciesClass:
         self.eolid = ""
         self.inatid = ""
         self.gbifid = ""
-        # self.key_photo = ""
         self.key_photo = False
         self.field_guides = []
         self.phy_photo = False
 
     def __lt__(self, x):
-        # return self.species < x.species
         return self.binomial() < x.binomial()
 
     def binomial(self) -> str:
@@ -168,7 +167,6 @@ class SpeciesClass:
             return self.binomial()
         else:
             return f"{self.genus} ({self.subgenus}) {self.species}"
-            # return self.genus + " (" + self.subgenus + ") " + self.species
 
     def authority(self) -> str:
         ogenus = self.type_species[:self.type_species.find(" ")].strip()
@@ -177,7 +175,6 @@ class SpeciesClass:
             return author
         else:
             return f"({author})"
-            # return "(" + author + ")"
 
 
 class CitationClass:
@@ -277,8 +274,6 @@ class RangeCell:
 
     def __repr__(self):
         return f"{self.lower_left_lat}, {self.lower_left_lon}, {self.upper_right_lat}, {self.upper_right_lon}"
-        # return "{}, {}, {}, {}".format(self.lower_left_lat, self.lower_left_lon, self.upper_right_lat,
-        #                                self.upper_right_lon)
 
     def inside(self, lat: Number, lon: Number) -> bool:
         if (self.lower_left_lat <= lat <= self.upper_right_lat) and \
@@ -297,7 +292,7 @@ class RangeCell:
 
 
 class INatData:
-    def __init__(self, coords: Point = None, url: str = ""):
+    def __init__(self, coords: Point, url: str = ""):
         self.coords = coords
         self.url = url
 
