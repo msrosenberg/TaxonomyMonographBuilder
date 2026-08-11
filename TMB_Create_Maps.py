@@ -1,15 +1,9 @@
 """
-This program takes a single KML file with folders for each species, and
-outputs cleaned-up KMZ files for each species, as well as a cleaned-up KMZ
-file for all species combined. Formatting is standardized across the individual
-species files and transparency automatically added to the combined output
-file to reflect species density.
+this code creates maps for the various species, locations, etc.
 
-A temporary file called doc.kml is produced and not automatically deleted upon
-completion of the code.
+I am removing the KML/Z functionality as Google has started charging for map usage
 """
 
-import zipfile
 import multiprocessing
 import bisect
 from typing import Tuple, Optional
@@ -21,7 +15,6 @@ import matplotlib.font_manager
 from tqdm import tqdm
 import numpy
 import TMB_Initialize
-# from Build_Website import init_data
 from TMB_Error import report_error
 from TMB_Common import *
 from TMB_Classes import Point
@@ -83,75 +76,75 @@ def get_range_map_overlap(blocks: list, coastline: list) -> list:
     return species_range
 
 
-def write_species_range_map_kml(name, species_range: list) -> None:
-    with open(__TMP_PATH__ + "doc.kml", "w", encoding="UTF-8") as outfile:
-        outfile.write("<?xml version=\"1.0\"?>\n")
-        outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
-        outfile.write("  <Document>\n")
-        outfile.write("    <Style id=\"species_range\">\n")
-        outfile.write("      <LineStyle>\n")
-        outfile.write("        <color>FFFF55FF</color>\n")
-        outfile.write("        <width>5</width>\n")
-        outfile.write("      </LineStyle>\n")
-        outfile.write("    </Style>\n")
-        outfile.write("    <Placemark>\n")
-        outfile.write("      <name/>\n")
-        outfile.write("      <description/>\n")
-        outfile.write("      <styleUrl>\n")
-        outfile.write("        #species_range\n")
-        outfile.write("      </styleUrl>\n")
-        outfile.write("      <MultiGeometry>\n")
-        for line in species_range:
-            outfile.write("        <LineString>\n")
-            outfile.write("          <coordinates>\n")
-            for p in line:
-                outfile.write("            {},{},0\n".format(p.lon, p.lat))
-            outfile.write("          </coordinates>\n")
-            outfile.write("        </LineString>\n")
-        outfile.write("      </MultiGeometry>\n")
-        outfile.write("    </Placemark>\n")
-        outfile.write("  </Document>\n")
-        outfile.write("</kml>\n")
-    with zipfile.ZipFile(__OUTPUT_PATH__ + rangemap_name("u_" + name) + ".kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
-        myzip.write(__TMP_PATH__ + "doc.kml")
-        myzip.close()
+# def write_species_range_map_kml(name, species_range: list) -> None:
+#     with open(__TMP_PATH__ + "doc.kml", "w", encoding="UTF-8") as outfile:
+#         outfile.write("<?xml version=\"1.0\"?>\n")
+#         outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
+#         outfile.write("  <Document>\n")
+#         outfile.write("    <Style id=\"species_range\">\n")
+#         outfile.write("      <LineStyle>\n")
+#         outfile.write("        <color>FFFF55FF</color>\n")
+#         outfile.write("        <width>5</width>\n")
+#         outfile.write("      </LineStyle>\n")
+#         outfile.write("    </Style>\n")
+#         outfile.write("    <Placemark>\n")
+#         outfile.write("      <name/>\n")
+#         outfile.write("      <description/>\n")
+#         outfile.write("      <styleUrl>\n")
+#         outfile.write("        #species_range\n")
+#         outfile.write("      </styleUrl>\n")
+#         outfile.write("      <MultiGeometry>\n")
+#         for line in species_range:
+#             outfile.write("        <LineString>\n")
+#             outfile.write("          <coordinates>\n")
+#             for p in line:
+#                 outfile.write("            {},{},0\n".format(p.lon, p.lat))
+#             outfile.write("          </coordinates>\n")
+#             outfile.write("        </LineString>\n")
+#         outfile.write("      </MultiGeometry>\n")
+#         outfile.write("    </Placemark>\n")
+#         outfile.write("  </Document>\n")
+#         outfile.write("</kml>\n")
+#     with zipfile.ZipFile(__OUTPUT_PATH__ + rangemap_name("u_" + name) + ".kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
+#         myzip.write(__TMP_PATH__ + "doc.kml")
+#         myzip.close()
 
 
-def write_all_range_map_kml(species_maps: dict) -> None:
-    with open(__TMP_PATH__ + "doc.kml", "w", encoding="UTF-8") as outfile:
-        outfile.write("<?xml version=\"1.0\"?>\n")
-        outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
-        outfile.write("  <Document>\n")
-        for species in species_maps:
-            outfile.write("    <Style id=\"" + species + "\">\n")
-            outfile.write("      <LineStyle>\n")
-            outfile.write("        <color>28FF78F0</color>\n")
-            outfile.write("        <width>5</width>\n")
-            outfile.write("      </LineStyle>\n")
-            outfile.write("    </Style>\n")
-        for species in species_maps:
-            species_range = species_maps[species]
-            outfile.write("    <Placemark>\n")
-            outfile.write("      <name>Uca " + species + "</name>\n")
-            outfile.write("      <description/>\n")
-            outfile.write("      <styleUrl>\n")
-            outfile.write("        #" + species + "\n")
-            outfile.write("      </styleUrl>\n")
-            outfile.write("      <MultiGeometry>\n")
-            for line in species_range:
-                outfile.write("        <LineString>\n")
-                outfile.write("          <coordinates>\n")
-                for p in line:
-                    outfile.write("            {},{},0\n".format(p.lon, p.lat))
-                outfile.write("          </coordinates>\n")
-                outfile.write("        </LineString>\n")
-            outfile.write("      </MultiGeometry>\n")
-            outfile.write("    </Placemark>\n")
-        outfile.write("  </Document>\n")
-        outfile.write("</kml>\n")
-    with zipfile.ZipFile(__OUTPUT_PATH__ + rangemap_name("fiddlers_all") + ".kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
-        myzip.write(__TMP_PATH__ + "doc.kml")
-        myzip.close()
+# def write_all_range_map_kml(species_maps: dict) -> None:
+#     with open(__TMP_PATH__ + "doc.kml", "w", encoding="UTF-8") as outfile:
+#         outfile.write("<?xml version=\"1.0\"?>\n")
+#         outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
+#         outfile.write("  <Document>\n")
+#         for species in species_maps:
+#             outfile.write("    <Style id=\"" + species + "\">\n")
+#             outfile.write("      <LineStyle>\n")
+#             outfile.write("        <color>28FF78F0</color>\n")
+#             outfile.write("        <width>5</width>\n")
+#             outfile.write("      </LineStyle>\n")
+#             outfile.write("    </Style>\n")
+#         for species in species_maps:
+#             species_range = species_maps[species]
+#             outfile.write("    <Placemark>\n")
+#             outfile.write("      <name>Uca " + species + "</name>\n")
+#             outfile.write("      <description/>\n")
+#             outfile.write("      <styleUrl>\n")
+#             outfile.write("        #" + species + "\n")
+#             outfile.write("      </styleUrl>\n")
+#             outfile.write("      <MultiGeometry>\n")
+#             for line in species_range:
+#                 outfile.write("        <LineString>\n")
+#                 outfile.write("          <coordinates>\n")
+#                 for p in line:
+#                     outfile.write("            {},{},0\n".format(p.lon, p.lat))
+#                 outfile.write("          </coordinates>\n")
+#                 outfile.write("        </LineString>\n")
+#             outfile.write("      </MultiGeometry>\n")
+#             outfile.write("    </Placemark>\n")
+#         outfile.write("  </Document>\n")
+#         outfile.write("</kml>\n")
+#     with zipfile.ZipFile(__OUTPUT_PATH__+rangemap_name("fiddlers_all") + ".kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
+#         myzip.write(__TMP_PATH__ + "doc.kml")
+#         myzip.close()
 
 
 def read_base_map(primary_file: str, secondary_file: Optional[str] = None,
@@ -202,7 +195,7 @@ def adjust_map_boundaries(minlon: Number, maxlon: Number, minlat: Number, maxlat
     Do not allow the boundaries to exceed 180/-180 in lon or 90/-90 in lat
     Force small areas to have a minimum size of 30x15 degrees
     """
-    min_width = 10  # mininmum width of map in degrees
+    min_width = 10  # minimum width of map in degrees
     min_height = min_width / 2
     buffer = 2  # buffer around points in degrees
 
@@ -359,11 +352,6 @@ def draw_and_adjust_basemap(faxes: mplpy.Axes, base_map: BaseMap, mid_atlantic: 
 #     mplpy.close("all")
 
 
-# def write_species_range_map(base_map: BaseMap, species: str, species_map: list, graph_font: Optional[str] = None,
-#                             fig_width: float = FIG_WIDTH, fig_height: float = FIG_HEIGHT,
-#                             fminlat: Optional[float] = None, fmaxlat: Optional[float] = None,
-#                             fminlon: Optional[float] = None, fmaxlon: Optional[float] = None,
-#                             color="red", prefix: Optional[str] = None, skip_axes: bool = False) -> None:
 def write_species_range_map(base_map: BaseMap, species: str, species_map: list,
                             init_data: TMB_Initialize.InitializationData, fig_width: float = FIG_WIDTH,
                             fig_height: float = FIG_HEIGHT, fminlat: Optional[float] = None,
@@ -415,12 +403,11 @@ def write_species_range_map(base_map: BaseMap, species: str, species_map: list,
     mplpy.ylim(minlat, maxlat)
 
     if skip_axes:
-        faxes.axes.get_yaxis().set_visible(False)
-        faxes.axes.get_xaxis().set_visible(False)
+        faxes.xaxis.set_visible(False)
+        faxes.yaxis.set_visible(False)
     else:
         mplpy.xlabel("longitude", fontname=graph_font)
         mplpy.ylabel("latitude", fontname=graph_font)
-        # temporarily disabled because the font I want to use is missing the negative symbol ?!?
         mplpy.xticks(fontname=graph_font)
         mplpy.yticks(fontname=graph_font)
         adjust_longitude_tick_values(faxes)
@@ -433,215 +420,215 @@ def write_species_range_map(base_map: BaseMap, species: str, species_map: list,
     mplpy.close("all")
 
 
-def write_all_range_map(base_map: BaseMap, species_maps: dict) -> None:
-    fig, faxes = mplpy.subplots(figsize=[FIG_WIDTH, FIG_HEIGHT])
-    for spine in faxes.spines:
-        faxes.spines[spine].set_visible(False)
-    draw_base_map(faxes, base_map)
-    for species in species_maps:
-        species_range = species_maps[species]
-        for line in species_range:
-            add_line_to_map(faxes, line, lw=2, a=0.1)
+# def write_all_range_map(base_map: BaseMap, species_maps: dict) -> None:
+#     fig, faxes = mplpy.subplots(figsize=[FIG_WIDTH, FIG_HEIGHT])
+#     for spine in faxes.spines:
+#         faxes.spines[spine].set_visible(False)
+#     draw_base_map(faxes, base_map)
+#     for species in species_maps:
+#         species_range = species_maps[species]
+#         for line in species_range:
+#             add_line_to_map(faxes, line, lw=2, a=0.1)
+#
+#     mplpy.xlim(-180, 180)
+#     mplpy.ylim(-90, 90)
+#     faxes.xaxis.set_visible(False)
+#     faxes.yaxis.set_visible(False)
+#     mplpy.rcParams["svg.fonttype"] = "none"
+#     mplpy.tight_layout()
+#     mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("fiddlers_all") + ".png", format="png", dpi=600)
+#     mplpy.close("all")
 
-    mplpy.xlim(-180, 180)
-    mplpy.ylim(-90, 90)
-    faxes.axes.get_yaxis().set_visible(False)
-    faxes.axes.get_xaxis().set_visible(False)
-    mplpy.rcParams["svg.fonttype"] = "none"
-    mplpy.tight_layout()
-    mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("fiddlers_all") + ".png", format="png", dpi=600)
-    mplpy.close("all")
 
-
-def write_point_map_kml(title: str, place_list: list, point_locations: dict, invalid_places: Optional[set],
-                        questionable_ids: Optional[set], inat_locations: Optional[list],
-                        init_data: TMB_Initialize.InitializationData, sub_locations: Optional[list]) -> None:
-    with open(__TMP_PATH__ + "doc.kml", "w", encoding="utf-8") as outfile:
-        outfile.write("<?xml version=\"1.0\"?>\n")
-        outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
-        outfile.write("  <Document>\n")
-        # outfile.write("    <Style id=\"good_location\">\n")
-        # outfile.write("      <IconStyle>\n")
-        # outfile.write("        <Icon>\n")
-        # outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/red-circle.png</href>\n")
-        # outfile.write("        </Icon >\n")
-        # outfile.write("      </IconStyle>\n")
-        # outfile.write("    </Style>\n")
-        # outfile.write("    <Style id=\"bad_location\">\n")
-        # outfile.write("      <IconStyle>\n")
-        # outfile.write("        <Icon>\n")
-        # outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/blu-circle.png</href>\n")
-        # outfile.write("        </Icon >\n")
-        # outfile.write("      </IconStyle>\n")
-        # outfile.write("    </Style>\n")
-        # outfile.write("    <Style id=\"questionable_id\">\n")
-        # outfile.write("      <IconStyle>\n")
-        # outfile.write("        <Icon>\n")
-        # outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/ylw-circle.png</href>\n")
-        # outfile.write("        </Icon >\n")
-        # outfile.write("      </IconStyle>\n")
-        # outfile.write("    </Style>\n")
-        # outfile.write("    <Style id=\"sub_location\">\n")
-        # outfile.write("      <IconStyle>\n")
-        # outfile.write("        <Icon>\n")
-        # outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/ylw-circle.png</href>\n")
-        # outfile.write("        </Icon >\n")
-        # outfile.write("      </IconStyle>\n")
-        # outfile.write("    </Style>\n")
-        # outfile.write("    <Style id=\"fossil_location\">\n")
-        # outfile.write("      <IconStyle>\n")
-        # outfile.write("        <Icon>\n")
-        # outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/purple-circle.png</href>\n")
-        # outfile.write("        </Icon >\n")
-        # outfile.write("      </IconStyle>\n")
-        # outfile.write("    </Style>\n")
-        # outfile.write("    <Style id=\"inat_location\">\n")
-        # outfile.write("      <IconStyle>\n")
-        # outfile.write("        <Icon>\n")
-        # outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/grn-circle.png</href>\n")
-        # outfile.write("        </Icon >\n")
-        # outfile.write("        <scale>\n")
-        # outfile.write("          0.75\n")
-        # outfile.write("        </scale >\n")
-        # outfile.write("      </IconStyle>\n")
-        # outfile.write("    </Style>\n")
-        outfile.write("    <Style id=\"good_location\">\n")
-        outfile.write("      <IconStyle>\n")
-        outfile.write("        <Icon>\n")
-        outfile.write("          <href>http://www.fiddlercrab.info/images/icon_fiddler_purple.png</href>\n")
-        outfile.write("        </Icon >\n")
-        outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
-        outfile.write("      </IconStyle>\n")
-        outfile.write("    </Style>\n")
-        outfile.write("    <Style id=\"bad_location\">\n")
-        outfile.write("      <IconStyle>\n")
-        outfile.write("        <Icon>\n")
-        outfile.write("          <href>http://www.fiddlercrab.info/images/icon_error.png</href>\n")
-        outfile.write("        </Icon >\n")
-        outfile.write("        <scale>\n")
-        outfile.write("          0.75\n")
-        outfile.write("        </scale >\n")
-        outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
-        outfile.write("      </IconStyle>\n")
-        outfile.write("    </Style>\n")
-        outfile.write("    <Style id=\"questionable_id\">\n")
-        outfile.write("      <IconStyle>\n")
-        outfile.write("        <Icon>\n")
-        outfile.write("          <href>http://www.fiddlercrab.info/images/icon_question.png</href>\n")
-        outfile.write("        </Icon >\n")
-        outfile.write("        <scale>\n")
-        outfile.write("          0.75\n")
-        outfile.write("        </scale >\n")
-        outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
-        outfile.write("      </IconStyle>\n")
-        outfile.write("    </Style>\n")
-        outfile.write("    <Style id=\"sub_location\">\n")
-        outfile.write("      <IconStyle>\n")
-        outfile.write("        <Icon>\n")
-        outfile.write("          <href>http://www.fiddlercrab.info/images/icon_fiddler_yellow.png</href>\n")
-        outfile.write("        </Icon >\n")
-        outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
-        outfile.write("      </IconStyle>\n")
-        outfile.write("    </Style>\n")
-        outfile.write("    <Style id=\"fossil_location\">\n")
-        outfile.write("      <IconStyle>\n")
-        outfile.write("        <Icon>\n")
-        outfile.write("          <href>http://www.fiddlercrab.info/images/icon_fossil.png</href>\n")
-        outfile.write("        </Icon >\n")
-        outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
-        outfile.write("      </IconStyle>\n")
-        outfile.write("    </Style>\n")
-        outfile.write("    <Style id=\"inat_location\">\n")
-        outfile.write("      <IconStyle>\n")
-        outfile.write("        <Icon>\n")
-        outfile.write("          <href>http://www.fiddlercrab.info/images/icon_fiddler_green.png</href>\n")
-        outfile.write("        </Icon >\n")
-        outfile.write("        <scale>\n")
-        outfile.write("          0.75\n")
-        outfile.write("        </scale >\n")
-        outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
-        outfile.write("      </IconStyle>\n")
-        outfile.write("    </Style>\n")
-        outfile.write("    <Style id=\"region_location\">\n")
-        outfile.write("      <IconStyle>\n")
-        outfile.write("        <Icon>\n")
-        outfile.write("          <href>http://www.fiddlercrab.info/images/icon_region.png</href>\n")
-        outfile.write("        </Icon >\n")
-        outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
-        outfile.write("      </IconStyle>\n")
-        outfile.write("    </Style>\n")
-
-        if inat_locations is not None:
-            for p in inat_locations:
-                point = p.coords
-                outfile.write("    <Placemark>\n")
-                outfile.write("      <name>iNaturalist import</name>\n")
-                outfile.write("      <description>" + p.url + "</description>\n")
-                outfile.write("      <styleUrl>\n")
-                outfile.write("        #inat_location\n")
-                outfile.write("      </styleUrl>\n")
-                outfile.write("      <Point>\n")
-                outfile.write("       <coordinates>\n")
-                outfile.write("          " + str(point.lon) + "," + str(point.lat) + "\n")
-                outfile.write("       </coordinates>\n")
-                outfile.write("      </Point>\n")
-                outfile.write("    </Placemark>\n")
-
-        for place in place_list:
-            pnt = point_locations[place]
-            if not pnt.unknown:
-                is_invalid = False
-                is_fossil = False
-                if invalid_places is not None:
-                    if place in invalid_places:
-                        is_invalid = True
-                if pnt.validity == "X":
-                    is_invalid = True
-                elif pnt.validity == "FOSSIL":
-                    is_fossil = True
-                is_question = False
-                if questionable_ids is not None:
-                    if place in questionable_ids:
-                        is_question = True
-                is_region = pnt.region
-                is_sub = False
-                if sub_locations is not None:
-                    if pnt in sub_locations:
-                        is_sub = True
-                outfile.write("    <Placemark>\n")
-                outfile.write("      <name>" + unicode_to_html_encoding(place) + "</name>\n")
-                outfile.write("      <description>" + init_data.site_url() + "/locations/" + place_to_filename(place) +
-                              ".html</description>\n")
-                outfile.write("      <styleUrl>\n")
-                if is_invalid:
-                    outfile.write("        #bad_location\n")
-                    # print(f"{title} - contains bad location")
-                elif is_question:
-                    outfile.write("        #questionable_id\n")
-                    # print(f"{title} - contains questionable location")
-                elif is_fossil:
-                    outfile.write("        #fossil_location\n")
-                    # print(f"{title} - contains fossil location")
-                elif is_sub:
-                    outfile.write("        #sub_location\n")
-                    # print(f"{title} - contains sublocation")
-                elif is_region:
-                    outfile.write("        #region_location\n")
-                    # print(f"{title} - region")
-                else:
-                    outfile.write("        #good_location\n")
-                outfile.write("      </styleUrl>\n")
-                outfile.write("      <Point>\n")
-                outfile.write("       <coordinates>\n")
-                outfile.write("          " + str(pnt.longitude) + "," + str(pnt.latitude) + "\n")
-                outfile.write("       </coordinates>\n")
-                outfile.write("      </Point>\n")
-                outfile.write("    </Placemark>\n")
-        outfile.write("  </Document>\n")
-        outfile.write("</kml>\n")
-    with zipfile.ZipFile(__OUTPUT_PATH__ + pointmap_name(title) + ".kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
-        myzip.write(__TMP_PATH__ + "doc.kml")
-        myzip.close()
+# def write_point_map_kml(title: str, place_list: list, point_locations: dict, invalid_places: Optional[set],
+#                         questionable_ids: Optional[set], inat_locations: Optional[list],
+#                         init_data: TMB_Initialize.InitializationData, sub_locations: Optional[list]) -> None:
+#     with open(__TMP_PATH__ + "doc.kml", "w", encoding="utf-8") as outfile:
+#         outfile.write("<?xml version=\"1.0\"?>\n")
+#         outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
+#         outfile.write("  <Document>\n")
+#         # outfile.write("    <Style id=\"good_location\">\n")
+#         # outfile.write("      <IconStyle>\n")
+#         # outfile.write("        <Icon>\n")
+#         # outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/red-circle.png</href>\n")
+#         # outfile.write("        </Icon >\n")
+#         # outfile.write("      </IconStyle>\n")
+#         # outfile.write("    </Style>\n")
+#         # outfile.write("    <Style id=\"bad_location\">\n")
+#         # outfile.write("      <IconStyle>\n")
+#         # outfile.write("        <Icon>\n")
+#         # outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/blu-circle.png</href>\n")
+#         # outfile.write("        </Icon >\n")
+#         # outfile.write("      </IconStyle>\n")
+#         # outfile.write("    </Style>\n")
+#         # outfile.write("    <Style id=\"questionable_id\">\n")
+#         # outfile.write("      <IconStyle>\n")
+#         # outfile.write("        <Icon>\n")
+#         # outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/ylw-circle.png</href>\n")
+#         # outfile.write("        </Icon >\n")
+#         # outfile.write("      </IconStyle>\n")
+#         # outfile.write("    </Style>\n")
+#         # outfile.write("    <Style id=\"sub_location\">\n")
+#         # outfile.write("      <IconStyle>\n")
+#         # outfile.write("        <Icon>\n")
+#         # outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/ylw-circle.png</href>\n")
+#         # outfile.write("        </Icon >\n")
+#         # outfile.write("      </IconStyle>\n")
+#         # outfile.write("    </Style>\n")
+#         # outfile.write("    <Style id=\"fossil_location\">\n")
+#         # outfile.write("      <IconStyle>\n")
+#         # outfile.write("        <Icon>\n")
+#         # outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/purple-circle.png</href>\n")
+#         # outfile.write("        </Icon >\n")
+#         # outfile.write("      </IconStyle>\n")
+#         # outfile.write("    </Style>\n")
+#         # outfile.write("    <Style id=\"inat_location\">\n")
+#         # outfile.write("      <IconStyle>\n")
+#         # outfile.write("        <Icon>\n")
+#         # outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/grn-circle.png</href>\n")
+#         # outfile.write("        </Icon >\n")
+#         # outfile.write("        <scale>\n")
+#         # outfile.write("          0.75\n")
+#         # outfile.write("        </scale >\n")
+#         # outfile.write("      </IconStyle>\n")
+#         # outfile.write("    </Style>\n")
+#         outfile.write("    <Style id=\"good_location\">\n")
+#         outfile.write("      <IconStyle>\n")
+#         outfile.write("        <Icon>\n")
+#         outfile.write("          <href>http://www.fiddlercrab.info/images/icon_fiddler_purple.png</href>\n")
+#         outfile.write("        </Icon >\n")
+#         outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
+#         outfile.write("      </IconStyle>\n")
+#         outfile.write("    </Style>\n")
+#         outfile.write("    <Style id=\"bad_location\">\n")
+#         outfile.write("      <IconStyle>\n")
+#         outfile.write("        <Icon>\n")
+#         outfile.write("          <href>http://www.fiddlercrab.info/images/icon_error.png</href>\n")
+#         outfile.write("        </Icon >\n")
+#         outfile.write("        <scale>\n")
+#         outfile.write("          0.75\n")
+#         outfile.write("        </scale >\n")
+#         outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
+#         outfile.write("      </IconStyle>\n")
+#         outfile.write("    </Style>\n")
+#         outfile.write("    <Style id=\"questionable_id\">\n")
+#         outfile.write("      <IconStyle>\n")
+#         outfile.write("        <Icon>\n")
+#         outfile.write("          <href>http://www.fiddlercrab.info/images/icon_question.png</href>\n")
+#         outfile.write("        </Icon >\n")
+#         outfile.write("        <scale>\n")
+#         outfile.write("          0.75\n")
+#         outfile.write("        </scale >\n")
+#         outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
+#         outfile.write("      </IconStyle>\n")
+#         outfile.write("    </Style>\n")
+#         outfile.write("    <Style id=\"sub_location\">\n")
+#         outfile.write("      <IconStyle>\n")
+#         outfile.write("        <Icon>\n")
+#         outfile.write("          <href>http://www.fiddlercrab.info/images/icon_fiddler_yellow.png</href>\n")
+#         outfile.write("        </Icon >\n")
+#         outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
+#         outfile.write("      </IconStyle>\n")
+#         outfile.write("    </Style>\n")
+#         outfile.write("    <Style id=\"fossil_location\">\n")
+#         outfile.write("      <IconStyle>\n")
+#         outfile.write("        <Icon>\n")
+#         outfile.write("          <href>http://www.fiddlercrab.info/images/icon_fossil.png</href>\n")
+#         outfile.write("        </Icon >\n")
+#         outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
+#         outfile.write("      </IconStyle>\n")
+#         outfile.write("    </Style>\n")
+#         outfile.write("    <Style id=\"inat_location\">\n")
+#         outfile.write("      <IconStyle>\n")
+#         outfile.write("        <Icon>\n")
+#         outfile.write("          <href>http://www.fiddlercrab.info/images/icon_fiddler_green.png</href>\n")
+#         outfile.write("        </Icon >\n")
+#         outfile.write("        <scale>\n")
+#         outfile.write("          0.75\n")
+#         outfile.write("        </scale >\n")
+#         outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
+#         outfile.write("      </IconStyle>\n")
+#         outfile.write("    </Style>\n")
+#         outfile.write("    <Style id=\"region_location\">\n")
+#         outfile.write("      <IconStyle>\n")
+#         outfile.write("        <Icon>\n")
+#         outfile.write("          <href>http://www.fiddlercrab.info/images/icon_region.png</href>\n")
+#         outfile.write("        </Icon >\n")
+#         outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
+#         outfile.write("      </IconStyle>\n")
+#         outfile.write("    </Style>\n")
+#
+#         if inat_locations is not None:
+#             for p in inat_locations:
+#                 point = p.coords
+#                 outfile.write("    <Placemark>\n")
+#                 outfile.write("      <name>iNaturalist import</name>\n")
+#                 outfile.write("      <description>" + p.url + "</description>\n")
+#                 outfile.write("      <styleUrl>\n")
+#                 outfile.write("        #inat_location\n")
+#                 outfile.write("      </styleUrl>\n")
+#                 outfile.write("      <Point>\n")
+#                 outfile.write("       <coordinates>\n")
+#                 outfile.write("          " + str(point.lon) + "," + str(point.lat) + "\n")
+#                 outfile.write("       </coordinates>\n")
+#                 outfile.write("      </Point>\n")
+#                 outfile.write("    </Placemark>\n")
+#
+#         for place in place_list:
+#             pnt = point_locations[place]
+#             if not pnt.unknown:
+#                 is_invalid = False
+#                 is_fossil = False
+#                 if invalid_places is not None:
+#                     if place in invalid_places:
+#                         is_invalid = True
+#                 if pnt.validity == "X":
+#                     is_invalid = True
+#                 elif pnt.validity == "FOSSIL":
+#                     is_fossil = True
+#                 is_question = False
+#                 if questionable_ids is not None:
+#                     if place in questionable_ids:
+#                         is_question = True
+#                 is_region = pnt.region
+#                 is_sub = False
+#                 if sub_locations is not None:
+#                     if pnt in sub_locations:
+#                         is_sub = True
+#                 outfile.write("    <Placemark>\n")
+#                 outfile.write("      <name>" + unicode_to_html_encoding(place) + "</name>\n")
+#                 outfile.write("      <description>"+init_data.site_url() + "/locations/" + place_to_filename(place) +
+#                               ".html</description>\n")
+#                 outfile.write("      <styleUrl>\n")
+#                 if is_invalid:
+#                     outfile.write("        #bad_location\n")
+#                     # print(f"{title} - contains bad location")
+#                 elif is_question:
+#                     outfile.write("        #questionable_id\n")
+#                     # print(f"{title} - contains questionable location")
+#                 elif is_fossil:
+#                     outfile.write("        #fossil_location\n")
+#                     # print(f"{title} - contains fossil location")
+#                 elif is_sub:
+#                     outfile.write("        #sub_location\n")
+#                     # print(f"{title} - contains sublocation")
+#                 elif is_region:
+#                     outfile.write("        #region_location\n")
+#                     # print(f"{title} - region")
+#                 else:
+#                     outfile.write("        #good_location\n")
+#                 outfile.write("      </styleUrl>\n")
+#                 outfile.write("      <Point>\n")
+#                 outfile.write("       <coordinates>\n")
+#                 outfile.write("          " + str(pnt.longitude) + "," + str(pnt.latitude) + "\n")
+#                 outfile.write("       </coordinates>\n")
+#                 outfile.write("      </Point>\n")
+#                 outfile.write("    </Placemark>\n")
+#         outfile.write("  </Document>\n")
+#         outfile.write("</kml>\n")
+#     with zipfile.ZipFile(__OUTPUT_PATH__ + pointmap_name(title) + ".kmz", "w", zipfile.ZIP_DEFLATED) as myzip:
+#         myzip.write(__TMP_PATH__ + "doc.kml")
+#         myzip.close()
 
 
 def adjust_longitude_tick_values(faxes: mplpy.Axes) -> None:
@@ -688,12 +675,6 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
     maxlon = -180
     minlon = 180
     mid_atlantic = False
-    # lats = []
-    # lons = []
-    # colors = []
-    # edges = []
-    # sizes = []
-    # markers = []
 
     inat_lats, inat_lons = [], []
     good_lats, good_lons = [], []
@@ -711,10 +692,6 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
             inat_lons.append(point.lon)
             all_lats.append(point.lat)
             all_lons.append(point.lon)
-            # colors.append("green")
-            # edges.append("darkgreen")
-            # sizes.append(10)
-            # markers.append("o")
             maxlon = max(maxlon, point.lon)
             minlon = min(minlon, point.lon)
             maxlat = max(maxlat, point.lat)
@@ -747,22 +724,6 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
                 all_lats.append(point.latitude)
                 all_lons.append(point.longitude)
 
-                # good location = purple
-                # bad location = invalid = error, smaller (0.75)
-                # questionable = question mark, smaller (0.75)
-                # sub location = yellow
-                # fossil = fossil
-                # iNat = green, smaller
-                # region = region
-
-                # inat_lats, inat_lons = [], []
-                # good_lats, good_lons = [], []
-                # invalid_lats, invalid_lons = [], []
-                # region_lats, region_lons = [], []
-                # fossil_lats, fossil_lons = [], []
-                # question_lats, question_lons = [], []
-                # sub_lats, sub_lons = [], []
-
                 if is_invalid:
                     invalid_lats.append(point.latitude)
                     invalid_lons.append(point.longitude)
@@ -782,38 +743,6 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
                     good_lats.append(point.latitude)
                     good_lons.append(point.longitude)
 
-                # if is_invalid:
-                #     colors.append("red")
-                #     edges.append("darkred")
-                #     sizes.append(10)
-                #     markers.append("X")
-                # elif is_question:
-                #     colors.append("yellow")
-                #     edges.append("goldenrod")
-                #     sizes.append(20)
-                #     markers.append("$?$")
-                # elif is_fossil:
-                #     colors.append("black")
-                #     edges.append("black")
-                #     sizes.append(20)
-                #     markers.append("$☠$")
-                # elif is_sub:
-                #     colors.append("yellow")
-                #     edges.append("goldenrod")
-                #     sizes.append(20)
-                #     markers.append("o")
-                # elif is_region:
-                #     colors.append("none")
-                #     edges.append("cornflowerblue")
-                #     sizes.append(20)
-                #     markers.append("o")
-                # else:
-                #     colors.append("mediumorchid")
-                #     edges.append("darkviolet")
-                #     sizes.append(20)
-                #     markers.append("o")
-
-                # sizes.append(20)
                 maxlon = max(maxlon, point.longitude)
                 minlon = min(minlon, point.longitude)
                 maxlat = max(maxlat, point.latitude)
@@ -848,9 +777,6 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
             if invalid_lons[i] < 0:
                 invalid_lons[i] += 360
 
-    # faxes.scatter(lons, lats, s=sizes, color=colors, edgecolors=edges, marker=markers, alpha=1, zorder=2,
-    #               clip_on=False, linewidth=0.5)
-
     if len(good_lats) > 0:
         faxes.scatter(good_lons, good_lats, s=20, color="mediumorchid", edgecolors="darkviolet", marker="o",
                       alpha=1, zorder=20, clip_on=False, linewidth=0.5)
@@ -881,12 +807,11 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)
     if skip_axes:
-        faxes.axes.get_yaxis().set_visible(False)
-        faxes.axes.get_xaxis().set_visible(False)
+        faxes.xaxis.set_visible(False)
+        faxes.yaxis.set_visible(False)
     elif graph_font is not None:
         mplpy.xlabel("longitude", fontname=graph_font)
         mplpy.ylabel("latitude", fontname=graph_font)
-        # temporarily disabled because the font I want to use is missing the negative symbol ?!?
         mplpy.xticks(fontname=graph_font)
         mplpy.yticks(fontname=graph_font)
     else:
@@ -933,20 +858,11 @@ def count_species_in_coastal_cells(species_ranges: dict, cells_per_degree=4):
         for j, lon in enumerate(longitudes):
             x_ref[lat, lon] = (i, j)
 
-    # if species_ranges is None:  # calculate if not directly input
-    #     print("...Determining Species Coastlines...")
-    #     coastline_map = import_coastline_data(init_data)
-    #     species_range_blocks = TMB_Import.read_species_blocks(init_data.species_range_blocks)
-    #     species_ranges = {}
-    #     for s in tqdm(species_range_blocks):
-    #         species_ranges[s] = TMB_Create_Maps.get_range_map_overlap(species_range_blocks[s], coastline_map)
-
     print("...Determining Species Cells...")
     for species in tqdm(species_ranges):
         species_cells = identify_species_coastal_cells(species_ranges[species], cells_per_degree)
         for cell in species_cells:
             i, j = x_ref[cell[0], cell[1]]
-            # counts[i, j] = counts[i, j] + 1
             counts[i, j] += 1
 
     for i in range(nlats):
@@ -983,8 +899,8 @@ def create_cell_density_map(latitudes, longitudes, cell_counts, base_map: BaseMa
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)
     if skip_axes:
-        faxes.axes.get_yaxis().set_visible(False)
-        faxes.axes.get_xaxis().set_visible(False)
+        faxes.xaxis.set_visible(False)
+        faxes.yaxis.set_visible(False)
     elif graph_font is not None:
         mplpy.xlabel("longitude", fontname=graph_font)
         mplpy.ylabel("latitude", fontname=graph_font)
@@ -999,23 +915,28 @@ def create_cell_density_map(latitudes, longitudes, cell_counts, base_map: BaseMa
     mplpy.close("all")
 
 
-def create_all_species_point_maps(species: list, point_locations: dict, species_plot_locations: dict,
-                                  invalid_species_locations: dict, base_map: BaseMap,
+def create_all_species_point_maps(species: list, point_locations: dict, species_plot_locations: Optional[dict],
+                                  invalid_species_locations: Optional[dict], base_map: BaseMap,
                                   init_data: TMB_Initialize.InitializationData,
                                   inat_species_locations: Optional[dict] = None,
                                   questionable_id_locations: Optional[dict] = None) -> None:
     all_places = set()
     print(".........Species Point Maps.........")
-    if MAX_PROCESSOR_COUNT > 1:
-        pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
-    else:
-        pool = None
     png_inputs = []
     for s in species:
         if s.status != "fossil":
-            places = species_plot_locations[s]
-            invalid_places = invalid_species_locations[s]
-            questionable_ids = questionable_id_locations[s]
+            if species_plot_locations is None:
+                places = []
+            else:
+                places = species_plot_locations[s]
+            if invalid_species_locations is None:
+                invalid_places = None
+            else:
+                invalid_places = invalid_species_locations[s]
+            if questionable_id_locations is None:
+                questionable_ids = None
+            else:
+                questionable_ids = questionable_id_locations[s]
             if inat_species_locations is None:
                 inat_data = None
             elif s.species in inat_species_locations:
@@ -1028,43 +949,42 @@ def create_all_species_point_maps(species: list, point_locations: dict, species_
             else:
                 write_point_map("u_" + s.species, places, point_locations, invalid_places, questionable_ids, inat_data,
                                 base_map, False, None, init_data)
-            write_point_map_kml("u_" + s.species, places, point_locations, invalid_places, questionable_ids, inat_data,
-                                init_data, None)
+            # write_point_map_kml("u_"+s.species, places, point_locations, invalid_places, questionable_ids, inat_data,
+            #                     init_data, None)
             all_places |= set(places)
     if MAX_PROCESSOR_COUNT > 1:
+        pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
         pool.starmap(write_point_map, png_inputs)
         pool.close()
         pool.join()
     all_list = sorted(list(all_places))
     write_point_map("fiddlers_all", all_list, point_locations, None, None, None, base_map, True, None,
                     init_data)
-    write_point_map_kml("fiddlers_all", all_list, point_locations, None, None, None, init_data, None)
+    # write_point_map_kml("fiddlers_all", all_list, point_locations, None, None, None, init_data, None)
 
 
 def create_all_species_maps(base_map: BaseMap, init_data: TMB_Initialize.InitializationData, species: list,
-                            species_ranges: dict, point_locations: dict, species_plot_locations: dict,
-                            invalid_species_locations: dict, inat_species_locations: Optional[dict] = None,
+                            species_ranges: dict, point_locations: dict, species_plot_locations: Optional[dict] = None,
+                            invalid_species_locations: Optional[dict] = None,
+                            inat_species_locations: Optional[dict] = None,
                             questionable_id_locations: Optional[dict] = None) -> None:
     # create range maps
     print(".........Species Range Maps.........")
-    if MAX_PROCESSOR_COUNT > 1:
-        pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
-    else:
-        pool = None
     inputs = []
     for s in species_ranges:
-        write_species_range_map_kml(s, species_ranges[s])
+        # write_species_range_map_kml(s, species_ranges[s])
         if MAX_PROCESSOR_COUNT > 1:
             inputs.append((base_map, s, species_ranges[s], init_data))
         else:
             write_species_range_map(base_map, s, species_ranges[s], init_data)
     if MAX_PROCESSOR_COUNT > 1:
+        pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
         pool.starmap(write_species_range_map, inputs)
         pool.close()
         pool.join()
 
     # write_all_range_map_kml(species_ranges)
-    # write_all_range_map(base_map, species_ranges)
+    # write_all_range_map(base_map, species_ranges)  # has been replaced by the cell density map
     cell_lats, cell_lons, cell_cnts = count_species_in_coastal_cells(species_ranges, 4)
     create_cell_density_map(cell_lats, cell_lons, cell_cnts, base_map, init_data=init_data)
 
@@ -1073,37 +993,37 @@ def create_all_species_maps(base_map: BaseMap, init_data: TMB_Initialize.Initial
                                   init_data, inat_species_locations, questionable_id_locations)
 
 
-def create_all_name_maps(base_map: BaseMap, all_names: list, specific_names: list, point_locations: dict,
-                         specific_plot_locations: dict, binomial_plot_locations: dict,
+def create_all_name_maps(base_map: BaseMap, all_names: Optional[list], specific_names: list, point_locations: dict,
+                         specific_plot_locations: Optional[dict], binomial_plot_locations: Optional[dict],
                          init_data: TMB_Initialize.InitializationData) -> None:
-    if MAX_PROCESSOR_COUNT > 1:
-        pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
-    else:
-        pool = None
     bi_inputs_png = []
     sp_inputs_png = []
-    for i, name in enumerate(all_names):
-        # print("......." + name)
-        namefile = "name_" + name_to_filename(name)
-        place_list = binomial_plot_locations[name]
-        if MAX_PROCESSOR_COUNT > 1:
-            bi_inputs_png.append((namefile, place_list, point_locations, None, None, None, base_map, False, None,
-                                  init_data))
-        else:
-            write_point_map(namefile, place_list, point_locations, None, None, None, base_map, False, None,
-                            init_data)
-        write_point_map_kml(namefile, place_list, point_locations, None, None, None, init_data, None)
+    if all_names is not None:
+        for i, name in enumerate(all_names):
+            if (all_names is not None) and (binomial_plot_locations is not None):
+                # print("......." + name)
+                namefile = "name_" + name_to_filename(name)
+                place_list = binomial_plot_locations[name]
+                if MAX_PROCESSOR_COUNT > 1:
+                    bi_inputs_png.append((namefile, place_list, point_locations, None, None, None, base_map, False,
+                                          None, init_data))
+                else:
+                    write_point_map(namefile, place_list, point_locations, None, None, None, base_map, False, None,
+                                    init_data)
+                # write_point_map_kml(namefile, place_list, point_locations, None, None, None, init_data, None)
     for i, name in enumerate(specific_names):
-        namefile = "sn_" + name.name
-        place_list = specific_plot_locations[name]
-        if MAX_PROCESSOR_COUNT > 1:
-            sp_inputs_png.append((namefile, place_list, point_locations, None, None, None, base_map, False, None,
-                                  init_data))
-        else:
-            write_point_map(namefile, place_list, point_locations, None, None, None, base_map, False, None,
-                            init_data)
-        write_point_map_kml(namefile, place_list, point_locations, None, None, None, init_data, None)
+        if specific_plot_locations is not None:
+            namefile = "sn_" + name.name
+            place_list = specific_plot_locations[name]
+            if MAX_PROCESSOR_COUNT > 1:
+                sp_inputs_png.append((namefile, place_list, point_locations, None, None, None, base_map, False, None,
+                                      init_data))
+            else:
+                write_point_map(namefile, place_list, point_locations, None, None, None, base_map, False, None,
+                                init_data)
+            # write_point_map_kml(namefile, place_list, point_locations, None, None, None, init_data, None)
     if MAX_PROCESSOR_COUNT > 1:
+        pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
         pool.starmap(write_point_map, bi_inputs_png)
         pool.starmap(write_point_map, sp_inputs_png)
         pool.close()
@@ -1112,10 +1032,6 @@ def create_all_name_maps(base_map: BaseMap, all_names: list, specific_names: lis
 
 def create_all_location_maps(base_map: BaseMap, point_locations: dict,
                              init_data: TMB_Initialize.InitializationData) -> None:
-    if MAX_PROCESSOR_COUNT > 1:
-        pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
-    else:
-        pool = None
     png_inputs = []
     for i, loc in enumerate(point_locations):
         point = point_locations[loc]
@@ -1137,8 +1053,9 @@ def create_all_location_maps(base_map: BaseMap, point_locations: dict,
             else:
                 write_point_map(namefile, place_list, point_locations, None, None, None, base_map, False, sub_list,
                                 init_data)
-            write_point_map_kml(namefile, place_list, point_locations, None, None, None, init_data, sub_list)
+            # write_point_map_kml(namefile, place_list, point_locations, None, None, None, init_data, sub_list)
     if MAX_PROCESSOR_COUNT > 1:
+        pool = multiprocessing.Pool(MAX_PROCESSOR_COUNT)
         pool.starmap(write_point_map, png_inputs)
         pool.close()
         pool.join()
@@ -1151,11 +1068,6 @@ def create_all_maps(init_data: TMB_Initialize.InitializationData, point_location
                     inat_locations: Optional[dict] = None, questionable_id_locations: Optional[dict] = None,
                     species_blocks: Optional[dict] = None) -> None:
 
-    # matplotlib.font_manager.fontManager.addfont(init_data.wc_font_path)
-    # fonts = set([f.name for f in matplotlib.font_manager.fontManager.ttflist])
-    # for f in sorted(fonts):
-    #     print(f)
-
     base_map = read_base_map(init_data.map_primary, init_data.map_secondary, init_data.map_islands)
     if species is not None:
         print("......Creating Species Maps......")
@@ -1163,9 +1075,10 @@ def create_all_maps(init_data: TMB_Initialize.InitializationData, point_location
         coastline_map = TMB_ImportShape.import_arcinfo_shp(TMB_Initialize.INIT_DATA.map_coastline)
         coastline_map.extend(TMB_ImportShape.import_arcinfo_shp(TMB_Initialize.INIT_DATA.map_islands))
         species_ranges = {}
-        for s in tqdm(species_blocks):
-            # test_draw_blocks(s, species_blocks[s], coastline_map)
-            species_ranges[s] = get_range_map_overlap(species_blocks[s], coastline_map)
+        if species_blocks is not None:
+            for s in tqdm(species_blocks):
+                # test_draw_blocks(s, species_blocks[s], coastline_map)
+                species_ranges[s] = get_range_map_overlap(species_blocks[s], coastline_map)
 
         print(".........Drawing Species Maps.........")
         create_all_species_maps(base_map, init_data, species, species_ranges, point_locations, species_plot_locations,
