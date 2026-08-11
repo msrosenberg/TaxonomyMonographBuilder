@@ -2912,7 +2912,7 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
         #     outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
 
         outfile.write("        <div class=\"map_download\">\n")
-        outfile.write("   A purple circles (local) or blue dotted circle (regional) indicates the coordinates used to "
+        outfile.write("   A purple circle (local) or blue dotted circle (regional) indicates the coordinates used to "
                       "represent this location; yellow circles indicate all "
                       "sublocations contained within this location; a skull and crossbones indicates fossil-only "
                       "locations or sub-locations; and red Xs indicate false or mistaken locations.\n")
@@ -3120,7 +3120,8 @@ def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict,
                   "pages).\n")
     outfile.write("    </p>\n")
     outfile.write("    <p>\n")
-    outfile.write("      The second list is strictly alphabetical and includes archaic and older place names.\n")
+    outfile.write("      The second list is strictly alphabetical and includes archaic and older place names, as "
+                  "well as common alternative names in local languages.\n")
     outfile.write("    </p>\n")
     outfile.write("    <p>\n")
     outfile.write("    Each location is expressed as a single pair of coordinates, so all plotted points "
@@ -5517,7 +5518,21 @@ def write_unusual_development_pages(outfile: TextIO, abdevdata: list, refdict: d
         media_path = ""
     outfile.write("    <header id=\"" + init_data().unsuual_dev_url + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Unusual Development</h1>\n")
+    if not do_print:
+        outfile.write("      <nav>\n")
+        outfile.write("        <ul>\n")
+        navlist = []
+        for line in abdevdata:
+            if line.strip() != "":
+                data = line.strip().split("\t")
+                if data[0].startswith(":"):
+                    navlist.append(data)
+        for d in navlist:
+            outfile.write(f"          <li><a href=\"#{d[3]}\">{d[1]}</a></li>\n")
+        outfile.write("        </ul>\n")
+        outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
+
     outfile.write("\n")
     outfile.write("    <p>\n")
     outfile.write("      The following is a collection of references to unusual development of secondary "
@@ -5536,8 +5551,8 @@ def write_unusual_development_pages(outfile: TextIO, abdevdata: list, refdict: d
                     outfile.write("    </section>\n")
                 else:
                     not_first = True
-                outfile.write("    <section class=\"spsection\">\n")
-                outfile.write("      <h2 class=\"bookmark2\">" + data[1] + "</h2>\n")
+                outfile.write('    <section class="spsection">\n')
+                outfile.write(f'      <h2 id="{data[3]}" class="bookmark2">{data[1]}</h2>\n')
                 outstr = replace_media_path(data[2], media_path)
                 outfile.write("      <p>\n")
                 outfile.write(replace_species_in_string(outstr, do_print=do_print) + "\n")
