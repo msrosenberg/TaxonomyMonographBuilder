@@ -1,3 +1,6 @@
+"""
+Module related to species size data
+"""
 
 import math
 import random
@@ -22,38 +25,45 @@ def sort_measurement_data(data: list) -> dict:
     for s in species:
         sdata = TMB_Classes.SpeciesMeasurements()
         for dtype in DATA_TYPES:
-            tall = []
-            tother = []
-            tmale = []
-            tfemale = []
+            tmp_all = []
+            tmp_other = []
+            tmp_male = []
+            tmp_female = []
             for d in data:
                 if d.species == s:
                     if d.type == dtype:
-                        tall.append(d)
+                        tmp_all.append(d)
                         if d.sex == "male":
-                            tmale.append(d)
+                            tmp_male.append(d)
                         elif d.sex == "female":
-                            tfemale.append(d)
+                            tmp_female.append(d)
                         else:
-                            tother.append(d)
-            if len(tall) > 0:
-                sdata.all[dtype] = tall
-            if len(tother) > 0:
-                sdata.other[dtype] = tother
-            if len(tmale) > 0:
-                sdata.male[dtype] = tmale
-            if len(tfemale) > 0:
-                sdata.female[dtype] = tfemale
+                            tmp_other.append(d)
+            if len(tmp_all) > 0:
+                sdata.all[dtype] = tmp_all
+            if len(tmp_other) > 0:
+                sdata.other[dtype] = tmp_other
+            if len(tmp_male) > 0:
+                sdata.male[dtype] = tmp_male
+            if len(tmp_female) > 0:
+                sdata.female[dtype] = tmp_female
         species_data[s] = sdata
     return species_data
 
 
-def se_to_sd(se, n):
+def se_to_sd(se: float, n: int) -> float:
+    # convert standard error to standard deviation
     return se * math.sqrt(n)
 
 
-def combine_measurement_data(data):
+def combine_measurement_data(data: dict) -> list:
+    """
+    create simulated distribution based on the various input data sets, scaling the relative sample size within
+    the simulation by the observed sample sizes of each data set
+    """
     cdata = []
+
+    # determine the data set with the largest sample size
     if "individual" in data:
         n = 1
     else:
@@ -64,12 +74,17 @@ def combine_measurement_data(data):
             dat = data[dtype]
             for d in dat:
                 n = max(n, d.n)
+
+    # create simulated data set
     if n > 0:
+        # determine size of simulated data set, defaulting to 1000 unless an individual data set is larger than that
         maxr = 1000
         while n > maxr:
             maxr *= 10
-        pern = round(maxr / n)
+        pern = round(maxr / n)  # simulated sample per observed sample
+
         if "individual" in data:
+            # add individual measurements directly to simulated data set
             dat = data["individual"]
             for d in dat:
                 for r in range(pern):
@@ -77,14 +92,20 @@ def combine_measurement_data(data):
         if "range" in data:
             dat = data["range"]
             for d in dat:
+                # for range data, first add the endpoint values
                 for r in range(pern):
                     cdata.append(d.value.max_val)
                     cdata.append(d.value.min_val)
+                """
+                if the sample size is greater than two, use the midpoint as the mean and the range/4 estimator 
+                of standard deviation to create additional simulated values
+                """
                 if d.n > 2:
                     sd = (d.value.max_val - d.value.min_val)/4
                     mp = d.value.midpoint()
                     for r in range(pern*(d.n - 2)):
-                        v = random.gauss(mp, sd)
+                        # v = random.gauss(mp, sd)
+                        v = -1
                         # do not allow simulated widths to exceed observed range
                         while (v < d.value.min_val) or (v > d.value.max_val):
                             v = random.gauss(mp, sd)
@@ -144,19 +165,20 @@ def combine_measurement_data(data):
     return cdata
 
 
-def plot_individuals(faxes, data, yv, color):
+# --- plotting functions ---
+def plot_individuals(faxes, data: dict, yv: int, color) -> int:
     if "individual" in data:
         idata = data["individual"]
         x = []
         for d in idata:
             x.append(d.value)
-        y = [yv + 0.75*random.random() for _ in idata]
+        y = [yv + 0.75*random.random() for _ in idata]  # add some noise to y-value to create individual scatter
         faxes.scatter(x, y, color=color, edgecolors="black", linewidths=0.25)
         yv += 1
     return yv
 
 
-def plot_ranges(faxes, data, yv, color):
+def plot_ranges(faxes, data: dict, yv: int, color) -> int:
     if "range" in data:
         rdata = data["range"]
         x = []
@@ -176,7 +198,7 @@ def plot_ranges(faxes, data, yv, color):
     return yv
 
 
-def plot_means(faxes, data, yv, color):
+def plot_means(faxes, data: dict, yv: int, color) -> int:
     if "mean" in data:
         mdata = data["mean"]
         x = []
@@ -188,7 +210,7 @@ def plot_means(faxes, data, yv, color):
     return yv
 
 
-def plot_means_sd(faxes, data, yv, color):
+def plot_means_sd(faxes, data: dict, yv: int, color) -> int:
     if "mean/sd" in data:
         mdata = data["mean/sd"]
         x = []
@@ -202,7 +224,7 @@ def plot_means_sd(faxes, data, yv, color):
     return yv
 
 
-def plot_means_se(faxes, data, yv, color):
+def plot_means_se(faxes, data: dict, yv: int, color) -> int:
     if "mean/se" in data:
         mdata = data["mean/se"]
         x = []
@@ -217,7 +239,7 @@ def plot_means_se(faxes, data, yv, color):
     return yv
 
 
-def plot_classcount(faxes, data, yv, color):
+def plot_classcount(faxes, data: dict, yv: int, color) -> int:
     if "classcount" in data:
         classes = set()
         cdata = data["classcount"]
@@ -241,7 +263,7 @@ def plot_classcount(faxes, data, yv, color):
     return yv
 
 
-def plot_means_sd_min_max(faxes, data, yv, color):
+def plot_means_sd_min_max(faxes, data: dict, yv: int, color) -> int:
     if "mean/sd/min/max" in data:
         mdata = data["mean/sd/min/max"]
         mx = []
@@ -265,7 +287,7 @@ def plot_means_sd_min_max(faxes, data, yv, color):
     return yv
 
 
-def plot_means_se_min_max(faxes, data, yv, color):
+def plot_means_se_min_max(faxes, data: dict, yv: int, color) -> int:
     if "mean/se/min/max" in data:
         mdata = data["mean/se/min/max"]
         mx = []
@@ -290,7 +312,7 @@ def plot_means_se_min_max(faxes, data, yv, color):
     return yv
 
 
-def plot_combined_data(faxes, combined_data, yv, color):
+def plot_combined_data(faxes, combined_data: list, yv: int, color) -> int:
     if len(combined_data) > 0:
         quartile1, median, quartile3 = numpy.percentile(combined_data, [25, 50, 75])
         mean = numpy.mean(combined_data)
@@ -308,7 +330,11 @@ def plot_combined_data(faxes, combined_data, yv, color):
     return yv
 
 
-def plot_measurement_data(species_dat, combined_data, comb_male_data, comb_female_data, filename):
+def plot_measurement_data(species_dat: TMB_Classes.SpeciesMeasurements, combined_data: list, comb_male_data: list,
+                          comb_female_data: list, filename: str) -> None:
+    """
+    create figure of all measurement data, including the simulated distribution
+    """
     fig, faxes = mplpy.subplots(figsize=[6, 6])
     faxes.spines["right"].set_visible(False)
     faxes.spines["top"].set_visible(False)

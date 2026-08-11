@@ -9,7 +9,7 @@ from TMB_Error import report_error
 SPECIES_XREF = {}
 
 
-def init_species_crossref(species: list):
+def init_species_crossref(species: list) -> None:
     global SPECIES_XREF
     SPECIES_XREF = {}
     for s in species:
@@ -20,5 +20,5 @@ def find_species_by_name(x: str) -> TMB_Classes.SpeciesClass:
     if x in SPECIES_XREF:
         return SPECIES_XREF[x]
     else:
-        report_error("Crossref Error: Cannot find species " + x)
+        report_error(f"Crossref Error: Cannot find species {x}")
         return SPECIES_XREF["vocans"]  # default to prevent crashing

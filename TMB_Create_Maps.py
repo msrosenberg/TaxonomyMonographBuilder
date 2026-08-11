@@ -17,9 +17,11 @@ import matplotlib.pyplot as mplpy
 import matplotlib.ticker
 from matplotlib.collections import PatchCollection
 import matplotlib.patches as mplp
+import matplotlib.font_manager
 from tqdm import tqdm
 import numpy
 import TMB_Initialize
+# from Build_Website import init_data
 from TMB_Error import report_error
 from TMB_Common import *
 from TMB_Classes import Point
@@ -30,7 +32,7 @@ __TMP_PATH__ = "temp/"
 __OUTPUT_PATH__ = __TMP_PATH__ + "maps/"
 FIG_WIDTH = 6.5
 FIG_HEIGHT = 3.25
-MAX_PROCESSOR_COUNT = 2  # maximum number of processors which can be used for map creation; set to 1 to skip
+MAX_PROCESSOR_COUNT = 6  # maximum number of processors which can be used for map creation; set to 1 to skip
 
 
 class BaseMap:
@@ -241,6 +243,11 @@ def add_line_to_map(faxes: mplpy.Axes, points: list, wrap_lons: bool = False, lw
     for p in points:
         if wrap_lons and p.lon < 0:
             p.lon += 360
+        elif p.lon > 180:
+            p.lon -= 360
+        elif p.lon < -180:
+            p.lon += 360
+
         lons.append(p.lon)
         lats.append(p.lat)
     faxes.plot(lons, lats, color=color, linewidth=lw, alpha=a)
@@ -295,12 +302,77 @@ def draw_and_adjust_basemap(faxes: mplpy.Axes, base_map: BaseMap, mid_atlantic: 
     return minlon, maxlon, minlat, maxlat, wrap_lons
 
 
-# def write_species_range_map(base_map: BaseMap, species_map: list, graph_font: Optional[str] = None) -> None:
-def write_species_range_map(base_map: BaseMap, species: str, species_map: list, graph_font: Optional[str] = None,
-                            fig_width: float = FIG_WIDTH, fig_height: float = FIG_HEIGHT,
-                            fminlat: Optional[float] = None, fmaxlat: Optional[float] = None,
-                            fminlon: Optional[float] = None, fmaxlon: Optional[float] = None,
-                            color="red") -> None:
+# def write_guide_map(base_map: BaseMap, guide: str, guide_range: list, graph_font: Optional[str] = None,
+#                     fig_width: float = FIG_WIDTH, fig_height: float = FIG_HEIGHT,
+#                     fminlat: Optional[float] = None, fmaxlat: Optional[float] = None,
+#                     fminlon: Optional[float] = None, fmaxlon: Optional[float] = None,
+#                     color="red"):
+#     fig, faxes = mplpy.subplots(figsize=[fig_width, fig_height])
+#     for spine in faxes.spines:
+#         faxes.spines[spine].set_visible(False)
+#     maxlat = -90
+#     minlat = 90
+#     maxlon = -180
+#     minlon = 180
+#     mid_atlantic = False
+#     # find boundaries from range lines
+#     all_lons = []
+#     all_lats = []
+#     for line in guide_range:
+#         for p in line:
+#             maxlon = max(maxlon, p.lon)
+#             maxlat = max(maxlat, p.lat)
+#             minlon = min(minlon, p.lon)
+#             minlat = min(minlat, p.lat)
+#             if 0 > p.lon > -50:
+#                 mid_atlantic = True
+#             all_lons.append(p.lon)
+#             all_lats.append(p.lat)
+#     minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
+#     (minlon, maxlon, minlat, maxlat, wrap_lons) = draw_and_adjust_basemap(faxes, base_map, mid_atlantic, minlon,
+#                                                                           maxlon, minlat, maxlat, all_lons, all_lats)
+#
+#     if fminlon is not None:
+#         minlon = fminlon
+#     if fmaxlon is not None:
+#         maxlon = fmaxlon
+#     if fminlat is not None:
+#         minlat = fminlat
+#     if fmaxlat is not None:
+#         maxlat = fmaxlat
+#
+#     # draw range lines
+#     for line in guide_range:
+#         add_line_to_map(faxes, line, wrap_lons, color=color)
+#
+#     mplpy.xlim(minlon, maxlon)
+#     mplpy.ylim(minlat, maxlat)
+#     mplpy.xlabel("longitude", fontname=graph_font)
+#     mplpy.ylabel("latitude", fontname=graph_font)
+#     # temporarily disabled because the font I want to use is missing the negative symbol ?!?
+#     # mplpy.xticks(fontname=graph_font)
+#     # mplpy.yticks(fontname=graph_font)
+#     mplpy.rcParams["svg.fonttype"] = "none"
+#     mplpy.tight_layout()
+#     adjust_longitude_tick_values(faxes)
+#     mplpy.savefig(__OUTPUT_PATH__ + "fg_map_" + guide + ".png", format="png", dpi=600)
+#     mplpy.close("all")
+
+
+# def write_species_range_map(base_map: BaseMap, species: str, species_map: list, graph_font: Optional[str] = None,
+#                             fig_width: float = FIG_WIDTH, fig_height: float = FIG_HEIGHT,
+#                             fminlat: Optional[float] = None, fmaxlat: Optional[float] = None,
+#                             fminlon: Optional[float] = None, fmaxlon: Optional[float] = None,
+#                             color="red", prefix: Optional[str] = None, skip_axes: bool = False) -> None:
+def write_species_range_map(base_map: BaseMap, species: str, species_map: list,
+                            init_data: TMB_Initialize.InitializationData, fig_width: float = FIG_WIDTH,
+                            fig_height: float = FIG_HEIGHT, fminlat: Optional[float] = None,
+                            fmaxlat: Optional[float] = None, fminlon: Optional[float] = None,
+                            fmaxlon: Optional[float] = None, color="red", prefix: Optional[str] = None,
+                            skip_axes: bool = False) -> None:
+    matplotlib.font_manager.fontManager.addfont(init_data.wc_font_path)
+    graph_font = init_data.graph_font
+
     fig, faxes = mplpy.subplots(figsize=[fig_width, fig_height])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
@@ -341,15 +413,23 @@ def write_species_range_map(base_map: BaseMap, species: str, species_map: list, 
 
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)
-    mplpy.xlabel("longitude", fontname=graph_font)
-    mplpy.ylabel("latitude", fontname=graph_font)
-    # temporarily disabled because the font I want to use is missing the negative symbol ?!?
-    # mplpy.xticks(fontname=graph_font)
-    # mplpy.yticks(fontname=graph_font)
+
+    if skip_axes:
+        faxes.axes.get_yaxis().set_visible(False)
+        faxes.axes.get_xaxis().set_visible(False)
+    else:
+        mplpy.xlabel("longitude", fontname=graph_font)
+        mplpy.ylabel("latitude", fontname=graph_font)
+        # temporarily disabled because the font I want to use is missing the negative symbol ?!?
+        mplpy.xticks(fontname=graph_font)
+        mplpy.yticks(fontname=graph_font)
+        adjust_longitude_tick_values(faxes)
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
-    adjust_longitude_tick_values(faxes)
-    mplpy.savefig(__OUTPUT_PATH__ + rangemap_name("u_" + species) + ".png", format="png", dpi=600)
+    if prefix is None:
+        prefix = rangemap_name("u_" + species)
+
+    mplpy.savefig(__OUTPUT_PATH__ + prefix + ".png", format="png", dpi=600)
     mplpy.close("all")
 
 
@@ -380,49 +460,114 @@ def write_point_map_kml(title: str, place_list: list, point_locations: dict, inv
         outfile.write("<?xml version=\"1.0\"?>\n")
         outfile.write("<kml xmlns=\"http://www.opengis.net/kml/2.2\">\n")
         outfile.write("  <Document>\n")
+        # outfile.write("    <Style id=\"good_location\">\n")
+        # outfile.write("      <IconStyle>\n")
+        # outfile.write("        <Icon>\n")
+        # outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/red-circle.png</href>\n")
+        # outfile.write("        </Icon >\n")
+        # outfile.write("      </IconStyle>\n")
+        # outfile.write("    </Style>\n")
+        # outfile.write("    <Style id=\"bad_location\">\n")
+        # outfile.write("      <IconStyle>\n")
+        # outfile.write("        <Icon>\n")
+        # outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/blu-circle.png</href>\n")
+        # outfile.write("        </Icon >\n")
+        # outfile.write("      </IconStyle>\n")
+        # outfile.write("    </Style>\n")
+        # outfile.write("    <Style id=\"questionable_id\">\n")
+        # outfile.write("      <IconStyle>\n")
+        # outfile.write("        <Icon>\n")
+        # outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/ylw-circle.png</href>\n")
+        # outfile.write("        </Icon >\n")
+        # outfile.write("      </IconStyle>\n")
+        # outfile.write("    </Style>\n")
+        # outfile.write("    <Style id=\"sub_location\">\n")
+        # outfile.write("      <IconStyle>\n")
+        # outfile.write("        <Icon>\n")
+        # outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/ylw-circle.png</href>\n")
+        # outfile.write("        </Icon >\n")
+        # outfile.write("      </IconStyle>\n")
+        # outfile.write("    </Style>\n")
+        # outfile.write("    <Style id=\"fossil_location\">\n")
+        # outfile.write("      <IconStyle>\n")
+        # outfile.write("        <Icon>\n")
+        # outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/purple-circle.png</href>\n")
+        # outfile.write("        </Icon >\n")
+        # outfile.write("      </IconStyle>\n")
+        # outfile.write("    </Style>\n")
+        # outfile.write("    <Style id=\"inat_location\">\n")
+        # outfile.write("      <IconStyle>\n")
+        # outfile.write("        <Icon>\n")
+        # outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/grn-circle.png</href>\n")
+        # outfile.write("        </Icon >\n")
+        # outfile.write("        <scale>\n")
+        # outfile.write("          0.75\n")
+        # outfile.write("        </scale >\n")
+        # outfile.write("      </IconStyle>\n")
+        # outfile.write("    </Style>\n")
         outfile.write("    <Style id=\"good_location\">\n")
         outfile.write("      <IconStyle>\n")
         outfile.write("        <Icon>\n")
-        outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/red-circle.png</href>\n")
+        outfile.write("          <href>http://www.fiddlercrab.info/images/icon_fiddler_purple.png</href>\n")
         outfile.write("        </Icon >\n")
+        outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
         outfile.write("      </IconStyle>\n")
         outfile.write("    </Style>\n")
         outfile.write("    <Style id=\"bad_location\">\n")
         outfile.write("      <IconStyle>\n")
         outfile.write("        <Icon>\n")
-        outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/blu-circle.png</href>\n")
+        outfile.write("          <href>http://www.fiddlercrab.info/images/icon_error.png</href>\n")
         outfile.write("        </Icon >\n")
+        outfile.write("        <scale>\n")
+        outfile.write("          0.75\n")
+        outfile.write("        </scale >\n")
+        outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
         outfile.write("      </IconStyle>\n")
         outfile.write("    </Style>\n")
         outfile.write("    <Style id=\"questionable_id\">\n")
         outfile.write("      <IconStyle>\n")
         outfile.write("        <Icon>\n")
-        outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/ylw-circle.png</href>\n")
+        outfile.write("          <href>http://www.fiddlercrab.info/images/icon_question.png</href>\n")
         outfile.write("        </Icon >\n")
+        outfile.write("        <scale>\n")
+        outfile.write("          0.75\n")
+        outfile.write("        </scale >\n")
+        outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
         outfile.write("      </IconStyle>\n")
         outfile.write("    </Style>\n")
         outfile.write("    <Style id=\"sub_location\">\n")
         outfile.write("      <IconStyle>\n")
         outfile.write("        <Icon>\n")
-        outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/ylw-circle.png</href>\n")
+        outfile.write("          <href>http://www.fiddlercrab.info/images/icon_fiddler_yellow.png</href>\n")
         outfile.write("        </Icon >\n")
+        outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
         outfile.write("      </IconStyle>\n")
         outfile.write("    </Style>\n")
         outfile.write("    <Style id=\"fossil_location\">\n")
         outfile.write("      <IconStyle>\n")
         outfile.write("        <Icon>\n")
-        outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/purple-circle.png</href>\n")
+        outfile.write("          <href>http://www.fiddlercrab.info/images/icon_fossil.png</href>\n")
         outfile.write("        </Icon >\n")
+        outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
         outfile.write("      </IconStyle>\n")
         outfile.write("    </Style>\n")
         outfile.write("    <Style id=\"inat_location\">\n")
         outfile.write("      <IconStyle>\n")
         outfile.write("        <Icon>\n")
-        outfile.write("          <href>http://maps.google.com/mapfiles/kml/paddle/grn-circle.png</href>\n")
+        outfile.write("          <href>http://www.fiddlercrab.info/images/icon_fiddler_green.png</href>\n")
         outfile.write("        </Icon >\n")
         outfile.write("        <scale>\n")
         outfile.write("          0.75\n")
         outfile.write("        </scale >\n")
+        outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
+        outfile.write("      </IconStyle>\n")
+        outfile.write("    </Style>\n")
+        outfile.write("    <Style id=\"region_location\">\n")
+        outfile.write("      <IconStyle>\n")
+        outfile.write("        <Icon>\n")
+        outfile.write("          <href>http://www.fiddlercrab.info/images/icon_region.png</href>\n")
+        outfile.write("        </Icon >\n")
+        outfile.write('        <hotSpot x="0.5" y="0.5" xunits="fraction" yunits="fraction" />')
         outfile.write("      </IconStyle>\n")
         outfile.write("    </Style>\n")
 
@@ -458,6 +603,7 @@ def write_point_map_kml(title: str, place_list: list, point_locations: dict, inv
                 if questionable_ids is not None:
                     if place in questionable_ids:
                         is_question = True
+                is_region = pnt.region
                 is_sub = False
                 if sub_locations is not None:
                     if pnt in sub_locations:
@@ -469,12 +615,19 @@ def write_point_map_kml(title: str, place_list: list, point_locations: dict, inv
                 outfile.write("      <styleUrl>\n")
                 if is_invalid:
                     outfile.write("        #bad_location\n")
+                    # print(f"{title} - contains bad location")
                 elif is_question:
                     outfile.write("        #questionable_id\n")
+                    # print(f"{title} - contains questionable location")
                 elif is_fossil:
                     outfile.write("        #fossil_location\n")
+                    # print(f"{title} - contains fossil location")
                 elif is_sub:
                     outfile.write("        #sub_location\n")
+                    # print(f"{title} - contains sublocation")
+                elif is_region:
+                    outfile.write("        #region_location\n")
+                    # print(f"{title} - region")
                 else:
                     outfile.write("        #good_location\n")
                 outfile.write("      </styleUrl>\n")
@@ -509,7 +662,7 @@ def adjust_longitude_tick_values(faxes: mplpy.Axes) -> None:
         if not x.is_integer():
             all_ints = False
     if adj_labels:
-        if all_ints:  # if all of the values are integers, force to display as integers
+        if all_ints:  # if all values are integers, force to display as integers
             for i, x in enumerate(xlabels):
                 xlabels[i] = int(x)
         ticks_loc = faxes.get_xticks().tolist()
@@ -519,7 +672,14 @@ def adjust_longitude_tick_values(faxes: mplpy.Axes) -> None:
 
 def write_point_map(title: str, place_list: list, point_locations: dict, invalid_places: Optional[set],
                     questionable_ids: Optional[set], inat_locations: Optional[list], base_map: BaseMap,
-                    skip_axes: bool, sub_locations: Optional[list], graph_font: Optional[str] = None) -> None:
+                    skip_axes: bool, sub_locations: Optional[list],
+                    init_data: Optional[TMB_Initialize.InitializationData] = None) -> None:
+    if init_data is not None:
+        matplotlib.font_manager.fontManager.addfont(init_data.wc_font_path)
+        graph_font = init_data.graph_font
+    else:
+        graph_font = None
+
     fig, faxes = mplpy.subplots(figsize=[FIG_WIDTH, FIG_HEIGHT])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
@@ -528,20 +688,33 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
     maxlon = -180
     minlon = 180
     mid_atlantic = False
-    lats = []
-    lons = []
-    colors = []
-    edges = []
-    sizes = []
+    # lats = []
+    # lons = []
+    # colors = []
+    # edges = []
+    # sizes = []
+    # markers = []
+
+    inat_lats, inat_lons = [], []
+    good_lats, good_lons = [], []
+    invalid_lats, invalid_lons = [], []
+    region_lats, region_lons = [], []
+    fossil_lats, fossil_lons = [], []
+    question_lats, question_lons = [], []
+    sub_lats, sub_lons = [], []
+    all_lats, all_lons = [], []
+
     if inat_locations is not None:
-        # for point in inat_locations:
         for p in inat_locations:
             point = p.coords
-            lats.append(point.lat)
-            lons.append(point.lon)
-            colors.append("green")
-            edges.append("darkgreen")
-            sizes.append(10)
+            inat_lats.append(point.lat)
+            inat_lons.append(point.lon)
+            all_lats.append(point.lat)
+            all_lons.append(point.lon)
+            # colors.append("green")
+            # edges.append("darkgreen")
+            # sizes.append(10)
+            # markers.append("o")
             maxlon = max(maxlon, point.lon)
             minlon = min(minlon, point.lon)
             maxlat = max(maxlat, point.lat)
@@ -570,24 +743,77 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
                 if sub_locations is not None:
                     if point in sub_locations:
                         is_sub = True
-                lats.append(point.latitude)
-                lons.append(point.longitude)
+                is_region = point.region
+                all_lats.append(point.latitude)
+                all_lons.append(point.longitude)
+
+                # good location = purple
+                # bad location = invalid = error, smaller (0.75)
+                # questionable = question mark, smaller (0.75)
+                # sub location = yellow
+                # fossil = fossil
+                # iNat = green, smaller
+                # region = region
+
+                # inat_lats, inat_lons = [], []
+                # good_lats, good_lons = [], []
+                # invalid_lats, invalid_lons = [], []
+                # region_lats, region_lons = [], []
+                # fossil_lats, fossil_lons = [], []
+                # question_lats, question_lons = [], []
+                # sub_lats, sub_lons = [], []
+
                 if is_invalid:
-                    colors.append("blue")
-                    edges.append("darkblue")
+                    invalid_lats.append(point.latitude)
+                    invalid_lons.append(point.longitude)
                 elif is_question:
-                    colors.append("yellow")
-                    edges.append("goldenrod")
+                    question_lats.append(point.latitude)
+                    question_lons.append(point.longitude)
                 elif is_fossil:
-                    colors.append("mediumpurple")
-                    edges.append("indigo")
+                    fossil_lats.append(point.latitude)
+                    fossil_lons.append(point.longitude)
                 elif is_sub:
-                    colors.append("yellow")
-                    edges.append("goldenrod")
+                    sub_lats.append(point.latitude)
+                    sub_lons.append(point.longitude)
+                elif is_region:
+                    region_lats.append(point.latitude)
+                    region_lons.append(point.longitude)
                 else:
-                    colors.append("red")
-                    edges.append("darkred")
-                sizes.append(20)
+                    good_lats.append(point.latitude)
+                    good_lons.append(point.longitude)
+
+                # if is_invalid:
+                #     colors.append("red")
+                #     edges.append("darkred")
+                #     sizes.append(10)
+                #     markers.append("X")
+                # elif is_question:
+                #     colors.append("yellow")
+                #     edges.append("goldenrod")
+                #     sizes.append(20)
+                #     markers.append("$?$")
+                # elif is_fossil:
+                #     colors.append("black")
+                #     edges.append("black")
+                #     sizes.append(20)
+                #     markers.append("$☠$")
+                # elif is_sub:
+                #     colors.append("yellow")
+                #     edges.append("goldenrod")
+                #     sizes.append(20)
+                #     markers.append("o")
+                # elif is_region:
+                #     colors.append("none")
+                #     edges.append("cornflowerblue")
+                #     sizes.append(20)
+                #     markers.append("o")
+                # else:
+                #     colors.append("mediumorchid")
+                #     edges.append("darkviolet")
+                #     sizes.append(20)
+                #     markers.append("o")
+
+                # sizes.append(20)
                 maxlon = max(maxlon, point.longitude)
                 minlon = min(minlon, point.longitude)
                 maxlat = max(maxlat, point.latitude)
@@ -597,27 +823,75 @@ def write_point_map(title: str, place_list: list, point_locations: dict, invalid
 
     minlon, maxlon, minlat, maxlat = adjust_map_boundaries(minlon, maxlon, minlat, maxlat)
 
-    (minlon, maxlon, minlat, maxlat, _) = draw_and_adjust_basemap(faxes, base_map, mid_atlantic, minlon, maxlon,
-                                                                  minlat, maxlat, lons, lats)
+    (minlon, maxlon, minlat, maxlat, wrap_lons) = draw_and_adjust_basemap(faxes, base_map, mid_atlantic, minlon, maxlon,
+                                                                          minlat, maxlat, all_lons, all_lats)
+    if wrap_lons:
+        for i in range(len(good_lons)):
+            if good_lons[i] < 0:
+                good_lons[i] += 360
+        for i in range(len(inat_lons)):
+            if inat_lons[i] < 0:
+                inat_lons[i] += 360
+        for i in range(len(region_lons)):
+            if region_lons[i] < 0:
+                region_lons[i] += 360
+        for i in range(len(sub_lons)):
+            if sub_lons[i] < 0:
+                sub_lons[i] += 360
+        for i in range(len(question_lons)):
+            if question_lons[i] < 0:
+                question_lons[i] += 360
+        for i in range(len(fossil_lons)):
+            if fossil_lons[i] < 0:
+                fossil_lons[i] += 360
+        for i in range(len(invalid_lons)):
+            if invalid_lons[i] < 0:
+                invalid_lons[i] += 360
 
-    faxes.scatter(lons, lats, s=sizes, color=colors, edgecolors=edges, alpha=1, zorder=2, clip_on=False, linewidth=0.5)
+    # faxes.scatter(lons, lats, s=sizes, color=colors, edgecolors=edges, marker=markers, alpha=1, zorder=2,
+    #               clip_on=False, linewidth=0.5)
+
+    if len(good_lats) > 0:
+        faxes.scatter(good_lons, good_lats, s=20, color="mediumorchid", edgecolors="darkviolet", marker="o",
+                      alpha=1, zorder=20, clip_on=False, linewidth=0.5)
+    if len(inat_lats) > 0:
+        faxes.scatter(inat_lons, inat_lats, s=15, color="green", edgecolors="darkgreen", marker="o", alpha=1, zorder=18,
+                      clip_on=False, linewidth=0.5)
+    if len(region_lats) > 0:
+        faxes.scatter(region_lons, region_lats, s=20, color="none", edgecolors="cornflowerblue",
+                      marker="o", alpha=1, zorder=16, clip_on=False, linewidth=1.0, linestyle=(0, (1, 1)))
+    if len(sub_lats) > 0:
+        faxes.scatter(sub_lons, sub_lats, s=20, color="yellow", edgecolors="goldenrod", marker="o", alpha=1, zorder=15,
+                      clip_on=False, linewidth=0.5)
+    if len(question_lats) > 0:
+        faxes.scatter(question_lons, question_lats, s=20, color="goldenrod", edgecolors="goldenrod", marker="$?$",
+                      alpha=1, zorder=16, clip_on=False, linewidth=0.5)
+    if len(fossil_lats) > 0:
+        faxes.scatter(fossil_lons, fossil_lats, s=20, color="black", edgecolors="black", marker="$☠$", alpha=1,
+                      zorder=14, clip_on=False, linewidth=0.5)
+    if len(invalid_lats) > 0:
+        faxes.scatter(invalid_lons, invalid_lats, s=15, color="red", edgecolors="darkred", marker="X", alpha=1,
+                      zorder=5, clip_on=False, linewidth=0.5)
 
     # uncomment to force full world map
-    # maxlat = -27
-    # minlat = -35
-    # maxlon = 31
-    # minlon = 15
+    # maxlat = 90
+    # minlat = -90
+    # maxlon = 180
+    # minlon = -180
     mplpy.xlim(minlon, maxlon)
     mplpy.ylim(minlat, maxlat)
     if skip_axes:
         faxes.axes.get_yaxis().set_visible(False)
         faxes.axes.get_xaxis().set_visible(False)
-    else:
+    elif graph_font is not None:
         mplpy.xlabel("longitude", fontname=graph_font)
         mplpy.ylabel("latitude", fontname=graph_font)
-    # temporarily disabled because the font I want to use is missing the negative symbol ?!?
-    # mplpy.xticks(fontname=graph_font)
-    # mplpy.yticks(fontname=graph_font)
+        # temporarily disabled because the font I want to use is missing the negative symbol ?!?
+        mplpy.xticks(fontname=graph_font)
+        mplpy.yticks(fontname=graph_font)
+    else:
+        mplpy.xlabel("longitude")
+        mplpy.ylabel("latitude")
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     adjust_longitude_tick_values(faxes)
@@ -672,7 +946,8 @@ def count_species_in_coastal_cells(species_ranges: dict, cells_per_degree=4):
         species_cells = identify_species_coastal_cells(species_ranges[species], cells_per_degree)
         for cell in species_cells:
             i, j = x_ref[cell[0], cell[1]]
-            counts[i, j] = counts[i, j] + 1
+            # counts[i, j] = counts[i, j] + 1
+            counts[i, j] += 1
 
     for i in range(nlats):
         for j in range(nlons):
@@ -686,8 +961,15 @@ def count_species_in_coastal_cells(species_ranges: dict, cells_per_degree=4):
 
 
 def create_cell_density_map(latitudes, longitudes, cell_counts, base_map: BaseMap, name: str = "fiddlers_all",
-                            skip_axes: bool = True, graph_font: Optional[str] = None, fig_width=FIG_WIDTH,
-                            fig_height=FIG_HEIGHT, minlon=-180, maxlon=180, minlat=-90, maxlat=90) -> None:
+                            skip_axes: bool = True, init_data: Optional[TMB_Initialize.InitializationData] = None,
+                            fig_width=FIG_WIDTH, fig_height=FIG_HEIGHT,
+                            minlon=-180, maxlon=180, minlat=-90, maxlat=90) -> None:
+    if init_data is not None:
+        matplotlib.font_manager.fontManager.addfont(init_data.wc_font_path)
+        graph_font = init_data.graph_font
+    else:
+        graph_font = None
+
     fig, faxes = mplpy.subplots(figsize=[fig_width, fig_height])
     for spine in faxes.spines:
         faxes.spines[spine].set_visible(False)
@@ -703,9 +985,13 @@ def create_cell_density_map(latitudes, longitudes, cell_counts, base_map: BaseMa
     if skip_axes:
         faxes.axes.get_yaxis().set_visible(False)
         faxes.axes.get_xaxis().set_visible(False)
-    else:
+    elif graph_font is not None:
         mplpy.xlabel("longitude", fontname=graph_font)
         mplpy.ylabel("latitude", fontname=graph_font)
+    else:
+        mplpy.xlabel("longitude")
+        mplpy.ylabel("latitude")
+
     mplpy.rcParams["svg.fonttype"] = "none"
     mplpy.tight_layout()
     adjust_longitude_tick_values(faxes)
@@ -738,10 +1024,10 @@ def create_all_species_point_maps(species: list, point_locations: dict, species_
                 inat_data = None
             if MAX_PROCESSOR_COUNT > 1:
                 png_inputs.append(("u_" + s.species, places, point_locations, invalid_places, questionable_ids,
-                                   inat_data, base_map, False, None, init_data.graph_font))
+                                   inat_data, base_map, False, None, init_data))
             else:
                 write_point_map("u_" + s.species, places, point_locations, invalid_places, questionable_ids, inat_data,
-                                base_map, False, None, init_data.graph_font)
+                                base_map, False, None, init_data)
             write_point_map_kml("u_" + s.species, places, point_locations, invalid_places, questionable_ids, inat_data,
                                 init_data, None)
             all_places |= set(places)
@@ -751,7 +1037,7 @@ def create_all_species_point_maps(species: list, point_locations: dict, species_
         pool.join()
     all_list = sorted(list(all_places))
     write_point_map("fiddlers_all", all_list, point_locations, None, None, None, base_map, True, None,
-                    init_data.graph_font)
+                    init_data)
     write_point_map_kml("fiddlers_all", all_list, point_locations, None, None, None, init_data, None)
 
 
@@ -769,9 +1055,9 @@ def create_all_species_maps(base_map: BaseMap, init_data: TMB_Initialize.Initial
     for s in species_ranges:
         write_species_range_map_kml(s, species_ranges[s])
         if MAX_PROCESSOR_COUNT > 1:
-            inputs.append((base_map, s, species_ranges[s], init_data.graph_font))
+            inputs.append((base_map, s, species_ranges[s], init_data))
         else:
-            write_species_range_map(base_map, s, species_ranges[s], init_data.graph_font)
+            write_species_range_map(base_map, s, species_ranges[s], init_data)
     if MAX_PROCESSOR_COUNT > 1:
         pool.starmap(write_species_range_map, inputs)
         pool.close()
@@ -780,7 +1066,7 @@ def create_all_species_maps(base_map: BaseMap, init_data: TMB_Initialize.Initial
     # write_all_range_map_kml(species_ranges)
     # write_all_range_map(base_map, species_ranges)
     cell_lats, cell_lons, cell_cnts = count_species_in_coastal_cells(species_ranges, 4)
-    create_cell_density_map(cell_lats, cell_lons, cell_cnts, base_map)
+    create_cell_density_map(cell_lats, cell_lons, cell_cnts, base_map, init_data=init_data)
 
     # create point maps
     create_all_species_point_maps(species, point_locations, species_plot_locations, invalid_species_locations, base_map,
@@ -802,20 +1088,20 @@ def create_all_name_maps(base_map: BaseMap, all_names: list, specific_names: lis
         place_list = binomial_plot_locations[name]
         if MAX_PROCESSOR_COUNT > 1:
             bi_inputs_png.append((namefile, place_list, point_locations, None, None, None, base_map, False, None,
-                                  init_data.graph_font))
+                                  init_data))
         else:
             write_point_map(namefile, place_list, point_locations, None, None, None, base_map, False, None,
-                            init_data.graph_font)
+                            init_data)
         write_point_map_kml(namefile, place_list, point_locations, None, None, None, init_data, None)
     for i, name in enumerate(specific_names):
         namefile = "sn_" + name.name
         place_list = specific_plot_locations[name]
         if MAX_PROCESSOR_COUNT > 1:
             sp_inputs_png.append((namefile, place_list, point_locations, None, None, None, base_map, False, None,
-                                  init_data.graph_font))
+                                  init_data))
         else:
             write_point_map(namefile, place_list, point_locations, None, None, None, base_map, False, None,
-                            init_data.graph_font)
+                            init_data)
         write_point_map_kml(namefile, place_list, point_locations, None, None, None, init_data, None)
     if MAX_PROCESSOR_COUNT > 1:
         pool.starmap(write_point_map, bi_inputs_png)
@@ -847,10 +1133,10 @@ def create_all_location_maps(base_map: BaseMap, point_locations: dict,
             namefile = "location_" + place_to_filename(loc)
             if MAX_PROCESSOR_COUNT > 1:
                 png_inputs.append((namefile, place_list, point_locations, None, None, None, base_map, False, sub_list,
-                                   init_data.graph_font))
+                                   init_data))
             else:
                 write_point_map(namefile, place_list, point_locations, None, None, None, base_map, False, sub_list,
-                                init_data.graph_font)
+                                init_data)
             write_point_map_kml(namefile, place_list, point_locations, None, None, None, init_data, sub_list)
     if MAX_PROCESSOR_COUNT > 1:
         pool.starmap(write_point_map, png_inputs)
@@ -864,6 +1150,12 @@ def create_all_maps(init_data: TMB_Initialize.InitializationData, point_location
                     specific_names: Optional[list] = None, specific_plot_locations: Optional[dict] = None,
                     inat_locations: Optional[dict] = None, questionable_id_locations: Optional[dict] = None,
                     species_blocks: Optional[dict] = None) -> None:
+
+    # matplotlib.font_manager.fontManager.addfont(init_data.wc_font_path)
+    # fonts = set([f.name for f in matplotlib.font_manager.fontManager.ttflist])
+    # for f in sorted(fonts):
+    #     print(f)
+
     base_map = read_base_map(init_data.map_primary, init_data.map_secondary, init_data.map_islands)
     if species is not None:
         print("......Creating Species Maps......")
@@ -886,6 +1178,19 @@ def create_all_maps(init_data: TMB_Initialize.InitializationData, point_location
     create_all_location_maps(base_map, point_locations, init_data)
 
 
+def draw_field_guide_maps(init_data: TMB_Initialize.InitializationData, field_guide_maps):
+    base_map = read_base_map(init_data.map_primary, init_data.map_secondary, init_data.map_islands)
+    coastline_map = TMB_ImportShape.import_arcinfo_shp(TMB_Initialize.INIT_DATA.map_coastline)
+    coastline_map.extend(TMB_ImportShape.import_arcinfo_shp(TMB_Initialize.INIT_DATA.map_islands))
+    all_range = []
+    for guide in field_guide_maps:
+        guide_range = get_range_map_overlap(field_guide_maps[guide], coastline_map)
+        all_range.extend(guide_range)
+        write_species_range_map(base_map, guide, guide_range, init_data, prefix="fg_map_" + guide)
+    write_species_range_map(base_map, "all", all_range, init_data, prefix="fg_map_all", skip_axes=True,
+                            fmaxlat=90, fminlat=-90, fmaxlon=180, fminlon=-180)
+
+
 def main():
     # pass
     # temp code to produce a blank map
@@ -893,11 +1198,6 @@ def main():
     init_data = TMB_Initialize.INIT_DATA
     base_map = read_base_map(init_data.map_primary, init_data.map_secondary, init_data.map_islands)
     write_point_map("blank", [], {}, None, None, None, base_map, True, [])
-
-
-# def write_point_map(title: str, place_list: list, point_locations: dict, invalid_places: Optional[set],
-#                     questionable_ids: Optional[set], inat_locations: Optional[list], base_map: BaseMap,
-#                     skip_axes: bool, sub_locations: Optional[list], graph_font: Optional[str] = None) -> None:
 
 
 if __name__ == "__main__":

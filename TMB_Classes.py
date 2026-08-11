@@ -16,21 +16,25 @@ class ReferenceClass:
         self.cite_key = ""
         self.language = ""
         self.doi = None
+        self.url = None
         self.taxon_author = None
 
     def year(self) -> Optional[int]:
-        y = self.citation
-        y = y[y.find("(") + 1:y.find(")")]
-        if (y != "?") and (y.lower() != "in press"):
-            if y[0] == "~":
-                y = y[1:]
-            if len(y) > 4:
-                y = y[:4]
-            try:
-                y = int(y)
-            except ValueError:
-                report_error("Error finding year in reference citation info: " + self.citation)
-            return y
+        try:
+            y = self.citation
+            y = y[y.find("(") + 1:y.find(")")]
+            if (y != "?") and (y.lower() != "in press"):
+                if y[0] == "~":
+                    y = y[1:]
+                if len(y) > 4:
+                    y = y[:4]
+                try:
+                    y = int(y)
+                except ValueError:
+                    report_error(f"Error finding year in reference citation info: {self.citation}")
+                return y
+        except IndexError:
+            report_error(f"Citation Import Error: {self.formatted_html}")
         else:
             return None
 
@@ -147,7 +151,10 @@ class SpeciesClass:
         self.eolid = ""
         self.inatid = ""
         self.gbifid = ""
-        self.key_photo = ""
+        # self.key_photo = ""
+        self.key_photo = False
+        self.field_guides = []
+        self.phy_photo = False
 
     def __lt__(self, x):
         # return self.species < x.species
@@ -160,7 +167,8 @@ class SpeciesClass:
         if self.subgenus == "":
             return self.binomial()
         else:
-            return self.genus + " (" + self.subgenus + ") " + self.species
+            return f"{self.genus} ({self.subgenus}) {self.species}"
+            # return self.genus + " (" + self.subgenus + ") " + self.species
 
     def authority(self) -> str:
         ogenus = self.type_species[:self.type_species.find(" ")].strip()
@@ -168,7 +176,8 @@ class SpeciesClass:
         if ogenus == self.genus:
             return author
         else:
-            return "(" + author + ")"
+            return f"({author})"
+            # return "(" + author + ")"
 
 
 class CitationClass:
@@ -213,6 +222,8 @@ class LocationClass:
         self.alternates = []
         self.validity = ""
         self.unknown = False
+        self.field_guide = None
+        self.region = False
 
     def n_children(self) -> int:
         return len(self.children)
@@ -265,8 +276,9 @@ class RangeCell:
             self.wrap = False
 
     def __repr__(self):
-        return "{}, {}, {}, {}".format(self.lower_left_lat, self.lower_left_lon, self.upper_right_lat,
-                                       self.upper_right_lon)
+        return f"{self.lower_left_lat}, {self.lower_left_lon}, {self.upper_right_lat}, {self.upper_right_lon}"
+        # return "{}, {}, {}, {}".format(self.lower_left_lat, self.lower_left_lon, self.upper_right_lat,
+        #                                self.upper_right_lon)
 
     def inside(self, lat: Number, lon: Number) -> bool:
         if (self.lower_left_lat <= lat <= self.upper_right_lat) and \

@@ -35,6 +35,9 @@ class InitializationData:
         self.measurement_file = "data/measurement_data.txt"
         self.unusual_development_file = "data/unusual_development.txt"
         self.handedness_file = "data/handedness.txt"
+        self.field_guide_file = "data/field_guide_list.txt"
+        self.field_guide_map_file = "data/field_guide_maps.txt"
+        self.field_guide_data_path = "data/field_guides/"
 
         # taxonomic key data
         self.tax_key_trait_file = "data/tax_key_trait_data.txt"
@@ -77,11 +80,13 @@ class InitializationData:
         self.cite_url = "citation.html"
         self.name_sum_url = "name_graphs.html"
         self.synonyms_genera = "synonymys_uca.html"
-        self.handedness_url = "handedness\index.html"
+        self.handedness_url = r"handedness\index.html"
 
         # customization of fonts on graphs and charts
+
         self.graph_font = "Noto Serif"  # font to use for PNG versions of graphs
-        self.wc_font_path = r"C:\Windows\Fonts\NotoSerif-regular.ttf"  # wordcloud requires a path to the font
+        # self.graph_font = "Cambria"  # font to use for PNG versions of graphs
+        self.wc_font_path = r"resources\NotoSerif-Regular.ttf"  # wordcloud requires a path to the font
 
         # general data
         self.version = datetime.datetime.now().strftime("%Y.%m.%d.%H.%M")

@@ -82,7 +82,7 @@ def create_language_bar_chart_file(filename: str, lang_by_year: dict, graph_font
     panel2.spines["right"].set_visible(False)
     panel2.spines["top"].set_visible(False)
 
-    panel3.axis("off")  # hide axes in second plot
+    panel3.axis("off")  # hide axes in third plot
     panel3.legend(bars, langlist, loc="center", frameon=False, ncol=4, prop={"family": graph_font})
 
     mplpy.xticks(fontname=graph_font)
@@ -176,9 +176,10 @@ def create_line_chart_file(filename: str, data: list, minx: int, maxx: int, y: i
 
 def create_chronology_chart_file(filename: str, miny: int, maxy: int, maxcnt: int, yearly_data: dict,
                                  graph_font: Optional[str] = None) -> None:
-    y_list = []
-    for y in range(miny, maxy + 1):
-        y_list.append(float(yearly_data[y]))
+    # y_list = []
+    # for y in range(miny, maxy + 1):
+    #     y_list.append(float(yearly_data[y]))
+    y_list = [float(yearly_data[y]) for y in range(miny, maxy+1)]
 
     x = [y for y in range(miny, maxy+1)]
     fig, faxes = mplpy.subplots(figsize=[6.5, 1.5])

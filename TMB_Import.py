@@ -3,7 +3,7 @@ Functions to read data from files
 """
 
 import collections
-from typing import Tuple
+from typing import Tuple, Optional
 import urllib.request
 import csv
 import time
@@ -23,10 +23,10 @@ def read_simple_file(filename: str) -> list:
         for line in infile:
             if got_header:
                 line = line.strip()
-                line = line.replace("\"\"", "\"")
+                line = line.replace('""', '"')  # replace consecutive double quotation marks with a single one
                 line_data = line.split("\t")
                 for i, x in enumerate(line_data):
-                    if x.startswith("\"") and x.endswith("\""):
+                    if x.startswith('"') and x.endswith('"'):  # strip double quotation marks off ends if present
                         line_data[i] = x[1:len(x)-1]
                 data_list.append(line_data)
             else:
@@ -67,13 +67,15 @@ def read_reference_data(ref_filename: str, formatref_filename: str,
     year_dat = collections.Counter()
     cite_done = {}
 
-    # citation style data (Author, Year), language, DOI, and Taxon Author for each reference
+    # citation style data (Author, Year), language, DOI, URL, and Taxon Author for each reference
     with open(ref_filename, "r", encoding="utf-8") as reffile:
         for line in reffile:
             line = line.replace("et al.", "<em>et al.</em>")
             line = line.replace(" & ", " &amp; ")
             ref = line.strip().split("\t")
-            while len(ref) < 5:
+            if len(ref) < 2:
+                report_error(f"Likely error in reference: {line}")
+            while len(ref) < 6:
                 ref.append("")
             newref = TMB_Classes.ReferenceClass()
             newref.citation = ref[0]
@@ -82,7 +84,9 @@ def read_reference_data(ref_filename: str, formatref_filename: str,
             if ref[3] != "":
                 newref.doi = ref[3]
             if ref[4] != "":
-                newref.taxon_author = ref[4]
+                newref.url = ref[4]
+            if ref[5] != "":
+                newref.taxon_author = ref[5]  # used to avoid et al. for papers with slightly unusual authority
 
             # calculate publishing trend
             y = newref.year()
@@ -91,23 +95,28 @@ def read_reference_data(ref_filename: str, formatref_filename: str,
             cite_done[newref.cite_key] = [False, y]
             ref_list.append(newref)
 
+            if newref.citation == "":
+                print(line)
+
+
     # html formatted full references
     with open(formatref_filename, "r", encoding="utf-8") as reffile:
         c = -1
         for line in reffile:
             line = line.strip()
+            # if not line.endswith("<p>"):
+            #     report_error(f"Potential formatted reference error: {line}")
             if line.endswith("<p>"):
                 line = line[:line.find("<p>")]
                 line = line.replace("<i>", "<em>")
                 line = line.replace("</i>", "</em>")
                 c += 1
-                # print(c, line)
                 newref = ref_list[c]
                 newref.formatted_html = line
     refdict = {}
     for ref in ref_list:
         if ref.cite_key in refdict and ref.cite_key != "<pending>":
-            report_error("Duplicate reference key:" + ref.cite_key)
+            report_error(f"Duplicate reference key: {ref.cite_key}")
         refdict[ref.cite_key] = ref
 
     # citation records information
@@ -116,8 +125,9 @@ def read_reference_data(ref_filename: str, formatref_filename: str,
         cite_done[c.cite_key][0] = True
 
     cite_count = 0
-    for y in year_dat:
-        year_dat[y] = [year_dat[y], 0]
+    year_dat = {y: [year_dat[y], 0] for y in year_dat}  # replace counter with dictionary containing lists
+    # for y in year_dat:
+    #     year_dat[y] = [year_dat[y], 0]
     for x in cite_done:
         c = cite_done[x]
         if c[0]:
@@ -140,7 +150,6 @@ def read_species_data(filename: str) -> list:
         newspecies.genus = s[1]
         if s[2] != ".":
             newspecies.subgenus = s[2]
-        # newspecies.subgenus = newspecies.genus  # this is temporary until other pieces are in place
         newspecies.type_species = s[3]
         newspecies.type_reference = s[4]
         newspecies.common = s[5]
@@ -149,11 +158,18 @@ def read_species_data(filename: str) -> list:
         newspecies.range_references = s[8]
         newspecies.realm = s[9]
         newspecies.status = s[10]
-        newspecies.key_photo = s[11]
+        if s[11] == "Yes":
+            newspecies.key_photo = True
+        else:
+            newspecies.key_photo = False
         newspecies.taxonid = s[12]
         newspecies.eolid = s[13]
         newspecies.inatid = s[14]
         newspecies.gbifid = s[15]
+        if s[16] == "Yes":
+            newspecies.phy_photo = True
+        else:
+            newspecies.phy_photo = False
         species_list.append(newspecies)
     species_list.sort()  # sort into alphabetical order
     return species_list
@@ -214,7 +230,7 @@ def read_higher_taxa_data(filename: str) -> Tuple[list, dict]:
                 new_taxon.parent = p
                 p.children.append(new_taxon)
             else:
-                report_error("Import Error: Taxon Parent Not Found: " + g[2])
+                report_error(f"Import Error: Taxon Parent Not Found: {g[2]}")
         new_taxon.author = g[3]
         new_taxon.type_species = g[4]
         new_taxon.notes = g[5]
@@ -302,8 +318,7 @@ def read_common_name_data(filename: str) -> list:
     read common name text info
     """
     with open(filename, "r", encoding="utf-8") as infile:
-        lines = infile.readlines()
-    return lines
+        return infile.readlines()
 
 
 def read_location_data(filename: str) -> dict:
@@ -331,6 +346,10 @@ def read_location_data(filename: str) -> dict:
         if loc[8] != ".":
             newloc.secondary_parents = list(loc[8].split(";"))
         newloc.validity = loc[9]
+        if (loc[10] != ".") and (loc[10] != "n/a"):
+            newloc.field_guide = loc[10]
+        if loc[11] == "region":
+            newloc.region = True
         locdict[newloc.name] = newloc
     return locdict
 
@@ -353,21 +372,22 @@ def fetch_inat_data(species: list) -> dict:
     inat_data = {}
     print("...Importing iNaturalist Data...")
     for s in tqdm(species):
-        time.sleep(5)
+        time.sleep(5)  # pause 5 seconds between each species
         if s.inatid != ".":
             coords = []
             page = 0
             next_page = True
             while next_page:
                 page += 1
-                raw_data = get_webpage("https://www.inaturalist.org/observations.csv?taxon_id=" + s.inatid +
-                                       "&per_page=200&quality_grade=research&page=" + str(page), "utf-8")
+                raw_data = get_webpage(f"https://www.inaturalist.org/observations.csv?taxon_id={s.inatid}"
+                                       f"&per_page=200&quality_grade=research&page={page}", "utf-8")
+                # raw_data = get_webpage("https://www.inaturalist.org/observations.csv?taxon_id=" + s.inatid +
+                #                        "&per_page=200&quality_grade=research&page=" + str(page), "utf-8")
                 if len(raw_data) > 2:  # header plus the blank line at the end; data would require at least 3 lines
                     for data in csv.reader(raw_data[1:]):
                         if len(data) > 0:
                             try:
                                 point = TMB_Classes.Point(str_to_number(data[4]), str_to_number(data[5]))
-                                # point = TMB_Classes.Point(eval(data[4]), eval(data[5]))
                                 urlstr = data[8]
                                 coords.append(TMB_Classes.INatData(coords=point, url=urlstr))
                             except SyntaxError:
@@ -391,8 +411,6 @@ def read_species_blocks(filename: str) -> dict:
                                                                         str_to_number(startlon),
                                                                         str_to_number(endlat),
                                                                         str_to_number(endlon)))
-            # blocks.setdefault(species, []).append(TMB_Classes.RangeCell(eval(startlat), eval(startlon),
-            #                                                             eval(endlat), eval(endlon)))
     return blocks
 
 
@@ -413,7 +431,6 @@ def read_measurement_data(filename: str) -> list:
                     new.notes = d[5]
                 new.type = d[7]
                 if new.type == "individual":
-                    # new.value = eval(d[9])
                     new.value = str_to_number(d[9])
                 elif new.type == "range":
                     try:
@@ -423,11 +440,11 @@ def read_measurement_data(filename: str) -> list:
                     new.value = TMB_Classes.MeasurementRange()
                     new.value.min_val = str_to_number(d[10])
                     new.value.max_val = str_to_number(d[11])
-                    # new.value.min_val = eval(d[10])
-                    # new.value.max_val = eval(d[11])
                     if new.value.min_val > new.value.max_val:
-                        report_error("Size Data Error: min greater than max, "
-                                     "{} / {} / {}".format(new.species, new.value.min_val, new.value.max_val))
+                        report_error(f"Size Data Error: min greater than max, {new.species} / {new.value.min_val} / "
+                                     f"{new.value.max_val}")
+                        # report_error("Size Data Error: min greater than max, "
+                        #              "{} / {} / {}".format(new.species, new.value.min_val, new.value.max_val))
                         raise ValueError
                 elif "mean" in new.type:
                     try:
@@ -436,43 +453,35 @@ def read_measurement_data(filename: str) -> list:
                         new.n = 1  # a mean requires a minimum of one individual
                     new.value = TMB_Classes.MeasurementMean()
                     new.value.mean = str_to_number(d[9])
-                    # new.value.mean = eval(d[9])
                     if new.type == "mean/sd":
                         new.value.sd = str_to_number(d[12])
-                        # new.value.sd = eval(d[12])
                     elif new.type == "mean/se":
                         new.value.se = str_to_number(d[13])
-                        # new.value.se = eval(d[13])
                     elif new.type == "mean/sd/min/max":
                         new.value.sd = str_to_number(d[12])
                         new.value.min_val = str_to_number(d[10])
                         new.value.max_val = str_to_number(d[11])
-                        # new.value.sd = eval(d[12])
-                        # new.value.min_val = eval(d[10])
-                        # new.value.max_val = eval(d[11])
                         if new.value.min_val > new.value.max_val:
-                            report_error("Size Data Error: min greater than max, "
-                                         "{} / {} / {}".format(new.species, new.value.min_val, new.value.max_val))
+                            report_error(f"Size Data Error: min greater than max, {new.species} / {new.value.min_val}"
+                                         f" / {new.value.max_val}")
+                            # report_error("Size Data Error: min greater than max, "
+                            #              "{} / {} / {}".format(new.species, new.value.min_val, new.value.max_val))
                             raise ValueError
                     elif new.type == "mean/se/min/max":
                         new.value.se = str_to_number(d[13])
                         new.value.min_val = str_to_number(d[10])
                         new.value.max_val = str_to_number(d[11])
-                        # new.value.se = eval(d[13])
-                        # new.value.min_val = eval(d[10])
-                        # new.value.max_val = eval(d[11])
                         if new.value.min_val > new.value.max_val:
-                            report_error("Size Data Error: min greater than max, "
-                                         "{} / {} / {}".format(new.species, new.value.min_val, new.value.max_val))
+                            report_error(f"Size Data Error: min greater than max, {new.species} / {new.value.min_val}"
+                                         f" / {new.value.max_val}")
+                            # report_error("Size Data Error: min greater than max, "
+                            #              "{} / {} / {}".format(new.species, new.value.min_val, new.value.max_val))
                             raise ValueError
                 elif "classcount" in new.type:
                     new.n = str_to_number(d[8])  # allow for floating sample sizes due to averaging across samples
-                    # new.n = eval(d[8])  # allow for floating sample sizes due to averaging across samples
                     new.value = TMB_Classes.MeasurementRange()
                     new.value.min_val = str_to_number(d[10])
                     new.value.max_val = str_to_number(d[11])
-                    # new.value.min_val = eval(d[10])
-                    # new.value.max_val = eval(d[11])
                     new.class_id = d[6]
                 data.append(new)
     return data
@@ -483,8 +492,7 @@ def read_unusual_development_data(filename: str) -> list:
     read abnormal development text info
     """
     with open(filename, "r", encoding="utf-8") as infile:
-        lines = infile.readlines()
-    return lines
+        return infile.readlines()
 
 
 def read_handedness_data(filename: str) -> list:
@@ -496,7 +504,7 @@ def read_handedness_data(filename: str) -> list:
             new = TMB_Classes.Handedness()
             new.ref = d[0]
             new.species = d[1]
-            new.total = int(d[2])
+            new.total_cnt = int(d[2])
             new.right_cnt = int(d[3])
             new.left_cnt = int(d[4])
             new.right_p = float(d[5])
@@ -505,3 +513,31 @@ def read_handedness_data(filename: str) -> list:
                 new.notes = d[7]
             data.append(new)
     return data
+
+
+def read_field_guide_list(filename: str, species: Optional[list] = None) -> dict:
+    with open(filename, "r", encoding="utf-8") as infile:
+        lines = infile.readlines()
+        guides = {}
+        for line in lines:
+            if line.strip() != "":
+                guide, realm, fg_species = line.strip().split("\t")
+                guides[guide] = realm
+                if species is not None:
+                    for s in species:
+                        if s.species in fg_species:
+                            s.field_guides.append(guide)
+        return guides
+
+
+def read_field_guide_data_file(filename: str) -> list:
+    with open(filename, "r", encoding="utf-8") as infile:
+        return infile.readlines()
+
+
+def read_field_guide_data(field_guide_list: dict, data_path: str) -> dict:
+    guides = {}
+    for guide in field_guide_list:
+        if guide != "":
+            guides[guide] = read_field_guide_data_file(data_path + guide + ".txt")
+    return guides

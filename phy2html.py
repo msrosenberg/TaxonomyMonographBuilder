@@ -2,7 +2,8 @@
 Phy2HTML
 """
 
-from typing import Tuple
+from TMB_SpeciesXRef import find_species_by_name
+from typing import Tuple, Optional
 import tree_utils
 
 
@@ -43,51 +44,70 @@ def end_html(outlist: list) -> None:
 
 
 def write_style_to_head(outlist: list, nrows: int, ncols: int, taxa: list, branches: list, vlines: list,
-                        col_width: str, row_height: str, name_width: str, prefix: str) -> None:
+                        col_width: str, row_height: str, name_width: str, prefix: str,
+                        inc_images: bool = False) -> None:
     outlist.append("    <style>\n")
-    outlist.append("      #{}phylogeny {{\n".format(prefix))
+    outlist.append(f"      #{prefix}phylogeny {{\n")
     outlist.append("                   display: grid;\n")
-    outlist.append("                   grid-template-rows: repeat({}, {});\n".format(nrows, row_height))
-    outlist.append("                   grid-template-columns: repeat({}, {}) {};\n".format(ncols-1, col_width,
-                                                                                           name_width))
+    outlist.append(f"                   grid-template-rows: repeat({nrows}, {row_height});\n")
+    if not inc_images:  # add column for images if present
+        img_width = ""
+    else:
+        img_width = " 150px"
+    outlist.append(f"                   grid-template-columns: repeat({ncols-1}, {col_width}) {name_width}"
+                   f"{img_width};\n")
     outlist.append("                 }\n")
-    outlist.append("      .{}taxon-name {{ align-self: center; padding-left: 10px }}\n".format(prefix))
-    outlist.append("      .{}genus-species-name {{ font-style: italic }}\n".format(prefix))
-    outlist.append("      .{}branch-line {{ border-bottom: solid black 1px; text-align: center }}\n".format(prefix))
-    outlist.append("      .{}vert-line {{ border-right: solid black 1px }}\n".format(prefix))
+    outlist.append(f"      .{prefix}taxon-name {{ align-self: center; padding-left: 10px }}\n")
+    outlist.append(f"      .{prefix}genus-species-name {{ font-style: italic }}\n")
+    outlist.append(f"      .{prefix}branch-line {{ border-bottom: solid black 1px; text-align: center }}\n")
+    outlist.append(f"      .{prefix}vert-line {{ border-right: solid black 1px }}\n")
     outlist.append("\n")
     for i, t in enumerate(taxa):
-        outlist.append("      #{}taxon{} {{ grid-area: {} / {} / span 2 / span 1 }}\n".format(prefix, i+1,
-                                                                                              t.row, ncols))
+        outlist.append(f"      #{prefix}taxon{i+1} {{ grid-area: {t.row} / {ncols} / span 2 / span 1 }}\n")
     outlist.append("\n")
+    if inc_images:  # add image positions if present
+        for i, t in enumerate(taxa):
+            outlist.append(f"      #{prefix}taxon{i+1}img {{ grid-area: {t.row} / {ncols+1} / span 2 / span 1 }}\n")
+        outlist.append("\n")
     for i, b in enumerate(branches):
-        outlist.append("      #{}branch{} {{ grid-area: {} / {} / span 1 / span {} }}\n".format(prefix, i+1, b.row,
-                                                                                                b.min_col, b.col_span))
+        outlist.append(f"      #{prefix}branch{i+1} {{ grid-area: {b.row} / {b.min_col} / span 1 / span "
+                       f"{b.col_span} }}\n")
     outlist.append("\n")
     for i, v in enumerate(vlines):
-        outlist.append("      #{}vline{} {{ grid-area: {} / {} / span {} / span 1 }}\n".format(prefix,  i+1, v.min_row,
-                                                                                               v.col, v.row_span))
+        outlist.append(f"      #{prefix}vline{i+1} {{ grid-area: {v.min_row} / {v.col} / span {v.row_span} / "
+                       f"span 1 }}\n")
     outlist.append("\n")
+    if inc_images:
+        outlist.append(".tree_img { height: 100px }\n")
+        outlist.append("\n")
     outlist.append("    </style>\n")
 
 
-def write_tree_to_body(outlist: list, taxa: list, branches: list, vlines: list, prefix: str) -> None:
-    outlist.append("    <div id=\"{}unique_phylogeny_container\" class=\"phylogeny_container\">\n".format(prefix))
-    outlist.append("      <div id=\"{}phylogeny\" class=\"phylogeny_grid\">\n".format(prefix))
+def write_tree_to_body(outlist: list, taxa: list, branches: list, vlines: list, prefix: str,
+                       inc_images: bool = False) -> None:
+    outlist.append(f'    <div id="{prefix}unique_phylogeny_container" class="phylogeny_container">\n')
+    outlist.append(f'      <div id="{prefix}phylogeny" class="phylogeny_grid">\n')
     outlist.append("\n")
     for i, t in enumerate(taxa):
-        outlist.append("        <div id=\"{0}taxon{1}\" "
-                       "class=\"{0}genus-species-name {0}taxon-name\">{2}</div>\n".format(prefix, i+1, t.node.name))
-    outlist.append("\n")
+        outlist.append(f'        <div id="{prefix}taxon{i+1}" class="{prefix}genus-species-name '
+                       f'{prefix}taxon-name">{t.node.name}</div>\n')
+        if inc_images:
+            sp_name = t.node.name.replace("{", "")
+            sp_name = sp_name.replace("}", "")
+            species = find_species_by_name(sp_name)
+            if species.phy_photo:
+                outlist.append(f'        <div id="{prefix}taxon{i+1}img" class="{prefix}genus-species-name '
+                               f'{prefix}taxon-name"><img role="presentation" '
+                               f'src="photos/phy_{sp_name}.jpg" class="tree_img" /></div>\n')
+    outlist.append('\n')
     for b, branch in enumerate(branches):
-        outlist.append("        <div id=\"{0}branch{1}\" class=\"{0}branch-line\">{2}</div>\n".format(prefix, b+1,
-                                                                                                      branch.label))
-    outlist.append("\n")
+        outlist.append(f'        <div id="{prefix}branch{b+1}" class="{prefix}branch-line">{branch.label}</div>\n')
+    outlist.append('\n')
     for v in range(len(vlines)):
-        outlist.append("        <div id=\"{0}vline{1}\" class=\"{0}vert-line\">&nbsp;</div>\n".format(prefix, v+1))
-    outlist.append("\n")
-    outlist.append("      </div>\n")
-    outlist.append("    </div>\n")
+        outlist.append(f'        <div id="{prefix}vline{v+1}" class="{prefix}vert-line">&nbsp;</div>\n')
+    outlist.append('\n')
+    outlist.append('      </div>\n')
+    outlist.append('    </div>\n')
 
 
 def total_rows_per_node(n: int, rows_per_tip: int) -> int:
@@ -186,7 +206,7 @@ def add_node_depth(tree: tree_utils.Node, max_depth: int) -> None:
 
 def create_html_tree(inname: str, outname: str, col_width: str = "40px", row_height: str = "10px",
                      name_width: str = "200px", prefix: str = "", label_branches: bool = False,
-                     rows_per_tip: int = 2, verbose: bool = True) -> list:
+                     rows_per_tip: int = 2, verbose: bool = True, inc_images: bool = False) -> list:
     with open(inname, "r") as infile:
         newick_str = infile.read()
     newick_str = newick_str[:newick_str.find(";")+1]
@@ -208,9 +228,10 @@ def create_html_tree(inname: str, outname: str, col_width: str = "40px", row_hei
     taxa, branches, vlines = calculate_tree(tree, nrows, ncols, rows_per_tip, label_branches)
     outlist = []
     start_html(outlist)
-    write_style_to_head(outlist, nrows, ncols, taxa, branches, vlines, col_width, row_height, name_width, prefix)
+    write_style_to_head(outlist, nrows, ncols, taxa, branches, vlines, col_width, row_height, name_width, prefix,
+                        inc_images)
     end_head_section(outlist)
-    write_tree_to_body(outlist, taxa, branches, vlines, prefix)
+    write_tree_to_body(outlist, taxa, branches, vlines, prefix, inc_images)
     end_html(outlist)
     if outname != "":  # if output file name is provided, write to file
         with open(outname, "w") as outfile:

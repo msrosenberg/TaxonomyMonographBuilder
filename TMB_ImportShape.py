@@ -7,8 +7,8 @@ both z and m elements if present.
 """
 
 import struct
-from typing import Tuple
-import matplotlib.pyplot as mplpy
+from typing import Tuple, Literal
+import matplotlib.pyplot as mplpy  # only for testing
 import TMB_Initialize
 from TMB_Classes import Point
 
@@ -25,7 +25,7 @@ def read_double_value(x: bytes, fpos: int) -> Tuple[float, int]:
     return dval, fpos
 
 
-def read_int_value(x: bytes, byteorder: str, fpos: int) -> Tuple[int, int]:
+def read_int_value(x: bytes, byteorder: Literal["little", "big"], fpos: int) -> Tuple[int, int]:
     """
     extract a 4-byte integer from bytestream and increase position counter by 4
     """
@@ -75,7 +75,7 @@ def import_arcinfo_shp(filename: str) -> list:
             rcnt = - 1
             while fpos < len(mapdata):
                 lval, fpos = read_int_value(mapdata, "big", fpos)  # record number
-                rec_len, fpos = read_int_value(mapdata, "big", fpos)  # reord length
+                rec_len, fpos = read_int_value(mapdata, "big", fpos)  # record length
                 st, fpos = read_int_value(mapdata, "little", fpos)  # shape type
                 if testout:
                     print()
@@ -241,9 +241,9 @@ def import_arcinfo_shp(filename: str) -> list:
                     fpos += (rec_len - 2) * 2
             # end of data read loop
         else:
-            print(filename + " contains an unknown or unsupported shape type.")
+            print(f"{filename} contains an unknown or unsupported shape type.")
     else:
-        print(filename + " does not appear to be a shapefile.")
+        print(f"{filename} does not appear to be a shapefile.")
     return imported_data
 
 
@@ -274,6 +274,7 @@ def test_draw(map_data: list) -> None:
 
 
 if __name__ == "__main__":
+    # for testing purposes
     TMB_Initialize.initialize()
     data = import_arcinfo_shp(TMB_Initialize.INIT_DATA.map_coastline)
     print("# of parts = {}".format(len(data)))

@@ -31,6 +31,7 @@ WEBOUT_PATH = "webout/"
 MEDIA_PATH = "media/"
 TMP_PATH = "temp/"
 TMP_MAP_PATH = TMP_PATH + "maps/"
+MAP_PATH = "maps/"
 
 FOSSIL_IMAGE = " <span class=\"fossil-img\">&#9760;</span>"
 STAR = "<sup>*</sup>"
@@ -45,13 +46,13 @@ AUTHOR_TAXON = 2        # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time-consuming
-DRAW_MAPS = True
-# this flag suppresses creation of output files, allowing data integrity checking without the output time cost
+DRAW_MAPS = False
+# this flag suppresses creation of output files, allowing some data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
 CHECK_LOCATIONS = False
 # this flag controls whether additional location data should be fetched from iNaturalist
-INCLUDE_INAT = True
+INCLUDE_INAT = False
 # Suppress some of the more time-consuming output; only meant for when testing others elements
 OUTPUT_REFS = True
 OUTPUT_LOCS = True
@@ -119,6 +120,7 @@ def common_header_part1(outfile: TextIO, title: str, indexpath: str = "") -> Non
     outfile.write("    <script defer src=\"" + indexpath + "js/solid.min.js\"></script>\n")
     outfile.write("    <script defer src=\"" + indexpath + "js/regular.min.js\"></script>\n")
     outfile.write("    <script defer src=\"" + indexpath + "js/brands.min.js\"></script>\n")
+    outfile.write("    <script defer src=\"" + indexpath + "js/duotone.min.js\"></script>\n")
     outfile.write("    <script defer src=\"" + indexpath + "js/fontawesome.min.js\"></script>\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath +
                   "images/flag-icon-css/css/flag-icons.min.css\" />\n")
@@ -146,47 +148,47 @@ def common_header_part2(outfile: TextIO, indexpath: str = "", include_map: bool 
     outfile.write("    </div>\n")
 
 
-def start_google_map_header(outfile: TextIO) -> None:
-    """
-    start of common header entries for webout html files which contain Google maps elements
-    """
-    outfile.write("    <script type=\"text/javascript\"\n")
-    outfile.write("      src=\"https://maps.googleapis.com/maps/api/js?"
-                  "key=AIzaSyAaITaFdh_own-ULkURNKtyeh2ZR_cpR74&sensor=false\">\n")
-    outfile.write("    </script>\n")
-    outfile.write("    <script type=\"text/javascript\">\n")
-    outfile.write("      function initialize() {\n")
-    outfile.write("        var mapOptions = {\n")
-    outfile.write("          center: new google.maps.LatLng(0,0),\n")
-    outfile.write("          zoom: 1,\n")
-    outfile.write("          disableDefaultUI: true,\n")
-    outfile.write("          panControl: false,\n")
-    outfile.write("          zoomControl: true,\n")
-    outfile.write("          mapTypeControl: true,\n")
-    outfile.write("          scaleControl: false,\n")
-    outfile.write("          streetViewControl: false,\n")
-    outfile.write("          overviewMapControl: false,\n")
-    outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
-    outfile.write("        };\n")
-
-
-def end_google_map_header(outfile: TextIO) -> None:
-    """
-    end of common header entries for webout html files which contain Google maps elements
-    """
-    outfile.write("      }\n")
-    outfile.write("    </script>\n")
-
-
-def write_google_map_range_header(outfile: TextIO, map_name: str) -> None:
-    """
-    common header entries for webout html files which contain Google maps elements - range map version
-    """
-    outfile.write("        var range_map = new google.maps.Map(document.getElementById(\"range_map_canvas\"),"
-                  "mapOptions);\n")
-    outfile.write("        var range_layer = new google.maps.KmlLayer(\"" + init_data().site_url() + "/maps/" +
-                  rangemap_name(map_name) + ".kmz\",{suppressInfoWindows: true});\n")
-    outfile.write("        range_layer.setMap(range_map);\n")
+# def start_google_map_header(outfile: TextIO) -> None:
+#     """
+#     start of common header entries for webout html files which contain Google maps elements
+#     """
+#     outfile.write("    <script type=\"text/javascript\"\n")
+#     outfile.write("      src=\"https://maps.googleapis.com/maps/api/js?"
+#                   "key=AIzaSyAaITaFdh_own-ULkURNKtyeh2ZR_cpR74&sensor=false\">\n")
+#     outfile.write("    </script>\n")
+#     outfile.write("    <script type=\"text/javascript\">\n")
+#     outfile.write("      function initialize() {\n")
+#     outfile.write("        var mapOptions = {\n")
+#     outfile.write("          center: new google.maps.LatLng(0,0),\n")
+#     outfile.write("          zoom: 1,\n")
+#     outfile.write("          disableDefaultUI: true,\n")
+#     outfile.write("          panControl: false,\n")
+#     outfile.write("          zoomControl: true,\n")
+#     outfile.write("          mapTypeControl: true,\n")
+#     outfile.write("          scaleControl: false,\n")
+#     outfile.write("          streetViewControl: false,\n")
+#     outfile.write("          overviewMapControl: false,\n")
+#     outfile.write("          mapTypeId: google.maps.MapTypeId.TERRAIN\n")
+#     outfile.write("        };\n")
+#
+#
+# def end_google_map_header(outfile: TextIO) -> None:
+#     """
+#     end of common header entries for webout html files which contain Google maps elements
+#     """
+#     outfile.write("      }\n")
+#     outfile.write("    </script>\n")
+#
+#
+# def write_google_map_range_header(outfile: TextIO, map_name: str) -> None:
+#     """
+#     common header entries for webout html files which contain Google maps elements - range map version
+#     """
+#     outfile.write("        var range_map = new google.maps.Map(document.getElementById(\"range_map_canvas\"),"
+#                   "mapOptions);\n")
+#     outfile.write("        var range_layer = new google.maps.KmlLayer(\"" + init_data().site_url() + "/maps/" +
+#                   rangemap_name(map_name) + ".kmz\",{suppressInfoWindows: true});\n")
+#     outfile.write("        range_layer.setMap(range_map);\n")
 
 
 # def write_google_map_point_header(outfile: TextIO, map_name: str,
@@ -216,16 +218,16 @@ def write_google_map_range_header(outfile: TextIO, map_name: str) -> None:
 #         outfile.write("        point_map.fitBounds(bounds);\n")
 
 
-def write_google_map_point_header(outfile: TextIO, map_name: str) -> None:
-    """
-    common header entries for webout html files which contain Google maps elements - point map version
-    """
-    outfile.write("        var point_map = new google.maps.Map(document.getElementById(\"point_map_canvas\"),"
-                  "mapOptions);\n")
-    outfile.write("        var point_layer = "
-                  "new google.maps.KmlLayer(\"" + init_data().site_url() + "/maps/" + pointmap_name(map_name) +
-                  ".kmz\",{suppressInfoWindows: false});\n")
-    outfile.write("        point_layer.setMap(point_map);\n")
+# def write_google_map_point_header(outfile: TextIO, map_name: str) -> None:
+#     """
+#     common header entries for webout html files which contain Google maps elements - point map version
+#     """
+#     outfile.write("        var point_map = new google.maps.Map(document.getElementById(\"point_map_canvas\"),"
+#                   "mapOptions);\n")
+#     outfile.write("        var point_layer = "
+#                   "new google.maps.KmlLayer(\"" + init_data().site_url() + "/maps/" + pointmap_name(map_name) +
+#                   ".kmz\",{suppressInfoWindows: false});\n")
+#     outfile.write("        point_layer.setMap(point_map);\n")
 
 
 def start_google_chart_header(outfile: TextIO) -> None:
@@ -241,7 +243,7 @@ def start_google_chart_header(outfile: TextIO) -> None:
 
 def end_google_chart_header(outfile: TextIO) -> None:
     """
-    end of common header entries for webout html files which contain Google maps elements - range map version
+    end of common header entries for webout html files which contain Google chart elements
     """
     outfile.write("      }\n")
     outfile.write("    </script>\n")
@@ -261,9 +263,9 @@ def common_html_footer(outfile: TextIO, indexpath: str = "") -> None:
     """
     outfile.write("\n")
     outfile.write("    <footer>\n")
-    outfile.write("       <figure id=\"footmap\"><script type=\"text/javascript\" "
-                  "src=\"//rf.revolvermaps.com/0/0/4.js?i=5f9t1sywiez&amp;m=0&amp;h=75&amp;c=ff0000&amp;r=30\" "
-                  "async=\"async\"></script><figcaption>Visitors</figcaption></figure>\n")
+    # outfile.write("       <figure id=\"footmap\"><script type=\"text/javascript\" "
+    #               "src=\"//rf.revolvermaps.com/0/0/4.js?i=5f9t1sywiez&amp;m=0&amp;h=75&amp;c=ff0000&amp;r=30\" "
+    #               "async=\"async\"></script><figcaption>Visitors</figcaption></figure>\n")
     outfile.write("       <p id=\"citation\"><a href=\"" + indexpath + init_data().cite_url +
                   "\">" + fetch_fa_glyph("site cite") + "How to cite this site</a></p>\n")
     outfile.write("       <p id=\"contact\">Questions or comments about the site? Contact "
@@ -281,7 +283,7 @@ def start_page_division(outfile: TextIO, page_class: str) -> None:
     """
     write start page information for print output
     """
-    outfile.write("  <div class=\"" + page_class + "\">\n")
+    outfile.write('  <div class="' + page_class + '">\n')
 
 
 def end_page_division(outfile: TextIO) -> None:
@@ -297,11 +299,11 @@ def create_blank_index(fname: str) -> None:
     """
     with open(fname, "w") as outfile:
         outfile.write("<!DOCTYPE HTML>\n")
-        outfile.write("<html lang=\"en\">\n")
+        outfile.write('<html lang="en">\n')
         outfile.write("  <head>\n")
-        outfile.write("    <meta charset=\"utf-8\" />\n")
+        outfile.write('    <meta charset="utf-8" />\n')
         outfile.write("    <title>n/a</title>\n")
-        outfile.write("    <meta name=\"description\" content=\"n/a\" />\n")
+        outfile.write('    <meta name="description" content="n/a" />\n')
         outfile.write("  </head>\n")
         outfile.write("  <body>\n")
         outfile.write("  </body>\n")
@@ -314,106 +316,65 @@ def fetch_fa_glyph(glyph: Optional[str]) -> str:
 
     centralized function to create fontawesome decoration based on specified glyph keyword/style
     """
-    if glyph is None:
-        return ""
+    glyph_dict = {
+        "home":             " fa-home\" aria-hidden",
+        "blog":             " fa-pencil-alt\" aria-hidden",
+        "mail":             " fa-envelope\" aria-hidden",
+        "site cite":        " fa-pencil-alt\" aria-hidden",
+        "index":            " fa-list\" aria-hidden",
+        "summary charts":   " fa-chart-line\" aria-hidden",
+        "location":         " fa-map-marker-alt\" aria-hidden",
+        "citation":         " fa-edit\" aria-hidden",
+        "specimen":         " fa-flask\" aria-hidden",
+        "sequence":         " fa-dna\" aria-hidden",
+        "original":         " fa-arrow-alt-left\" aria-hidden",
+        "computed":         " fa-cogs\" aria-hidden",
+        "geography":        "r fa-map\" aria-hidden",
+        "synonymy":         " fa-exchange\" aria-hidden",
+        "specific name":    " fa-window-minimize\" aria-hidden",
+        "info":             " fa-info-circle\" aria-hidden",
+        "accepted species": " fa-check-circle\" aria-hidden",
+        "download":         " fa-download\" aria-hidden",
+        "file download":    " fa-file-download\" aria-hidden",
+        "maps":             "r fa-map\" aria-hidden",
+        "photo":            " fa-camera-alt\" aria-hidden",
+        "video":            " fa-video\" aria-hidden",
+        "references":       " fa-book\" aria-hidden",
+        "art":              " fa-paint-brush\" aria-hidden",
+        "measure":          "r fa-ruler\" aria-hidden",
+        "handedness":       " fa-hands\" aria-hidden",
+        "guide":            "r fa-search\" aria-hidden",
+        "external link":    "d fa-external-link\" aria-hidden",
+        "list pdf":         "-li far fa-file-pdf\" aria-hidden",
+        "list github":      "-li fab fa-github\" aria-hidden",
+        "list systematics": "-li fa fa-signal fa-rotate-270\" aria-hidden",
+        "list phylogeny":   "-li fa fa-share-alt fa-rotate-270\" aria-hidden",
+        "list species":     "-li fa fa-list\" aria-hidden",
+        "list common":      "-li far fa-comments\" aria-hidden",
+        "list guide":       "-li far fa-search\" aria-hidden",
+        "list ranges":      "-li far fa-map\" aria-hidden",
+        "list morphology":  "-li far fa-heart\" aria-hidden",
+        "list references":  "-li fa fa-book\" aria-hidden",
+        "list lifecycle":   "-li fa fa-sync\" aria-hidden",
+        "list photo":       "-li fa fa-camera-alt\" aria-hidden",
+        "list video":       "-li fa fa-video\" aria-hidden",
+        "list art":         "-li fa fa-paint-brush\" aria-hidden",
+        "list site cite":   "-li fa fa-pencil-alt\" aria-hidden",
+        "list unusual dev": "-li fa fa-transgender-alt\" aria-hidden",
+        "bad location":     " fa-exclamation-triangle\" style=\"color: red\" title=\"Problematic Location: "
+                            "Outside range of all fiddler crabs or this particular species.\"",
+        "questionable id":  " fa-question-circle\" style=\"color: goldenrod\" title=\"Questionable ID: Species "
+                            "identity uncertain.\"",
+        "tax key":          " fa-key\" aria-hidden",
+        "location marker":  "r fa-map-marked-alt\" aria-hidden"
+    }
+
+    if glyph in glyph_dict:
+        return f"<span role=\"presentation\" class=\"fa{glyph_dict[glyph]}></span> "
     else:
-        x = "<span  role=\"presentation\" class=\"fa"
-        if glyph == "home":
-            x += " fa-home\" aria-hidden"
-        elif glyph == "blog":
-            x += " fa-pencil-alt\" aria-hidden"
-        elif glyph == "mail":
-            x += " fa-envelope\" aria-hidden"
-        elif glyph == "site cite":
-            x += " fa-pencil-alt\" aria-hidden"
-        elif glyph == "index":
-            x += " fa-list\" aria-hidden"
-        elif glyph == "summary charts":
-            x += " fa-chart-line\" aria-hidden"
-        elif glyph == "location":
-            x += " fa-map-marker-alt\" aria-hidden"
-        elif glyph == "citation":
-            x += " fa-edit\" aria-hidden"
-        elif glyph == "specimen":
-            x += " fa-flask\" aria-hidden"
-        elif glyph == "sequence":
-            x += " fa-dna\" aria-hidden"
-        elif glyph == "original":
-            x += " fa-arrow-alt-left\" aria-hidden"
-        elif glyph == "computed":
-            x += " fa-cogs\" aria-hidden"
-        elif glyph == "geography":
-            x += "r fa-map\" aria-hidden"
-        elif glyph == "synonymy":
-            x += " fa-exchange\" aria-hidden"
-        elif glyph == "specific name":
-            x += " fa-window-minimize\" aria-hidden"
-        elif glyph == "info":
-            x += " fa-info-circle\" aria-hidden"
-        elif glyph == "accepted species":
-            x += " fa-check-circle\" aria-hidden"
-        elif glyph == "download":
-            x += " fa-download\" aria-hidden"
-        elif glyph == "file download":
-            x += " fa-file-download\" aria-hidden"
-        elif glyph == "maps":
-            x += "r fa-map\" aria-hidden"
-        elif glyph == "photo":
-            x += " fa-camera-alt\" aria-hidden"
-        elif glyph == "video":
-            x += " fa-video\" aria-hidden"
-        elif glyph == "references":
-            x += " fa-book\" aria-hidden"
-        elif glyph == "art":
-            x += " fa-paint-brush\" aria-hidden"
-        elif glyph == "measure":
-            x += "r fa-ruler\" aria-hidden"
-        elif glyph == "handedness":
-            x += " fa-hands\" aria-hidden"
-        elif glyph == "list pdf":
-            x += "-li far fa-file-pdf\" aria-hidden"
-        elif glyph == "list github":
-            x += "-li fab fa-github\" aria-hidden"
-        elif glyph == "list systematics":
-            x += "-li fa fa-signal fa-rotate-270\" aria-hidden"
-        elif glyph == "list phylogeny":
-            x += "-li fa fa-share-alt fa-rotate-270\" aria-hidden"
-        elif glyph == "list species":
-            x += "-li fa fa-list\" aria-hidden"
-        elif glyph == "list common":
-            x += "-li far fa-comments\" aria-hidden"
-        elif glyph == "list ranges":
-            x += "-li far fa-map\" aria-hidden"
-        elif glyph == "list morphology":
-            x += "-li far fa-heart\" aria-hidden"
-        elif glyph == "list references":
-            x += "-li fa fa-book\" aria-hidden"
-        elif glyph == "list lifecycle":
-            x += "-li fa fa-sync\" aria-hidden"
-        elif glyph == "list photo":
-            x += "-li fa fa-camera-alt\" aria-hidden"
-        elif glyph == "list video":
-            x += "-li fa fa-video\" aria-hidden"
-        elif glyph == "list art":
-            x += "-li fa fa-paint-brush\" aria-hidden"
-        elif glyph == "list site cite":
-            x += "-li fa fa-pencil-alt\" aria-hidden"
-        elif glyph == "list unusual dev":
-            x += "-li fa fa-transgender-alt\" aria-hidden"
-        elif glyph == "bad location":
-            x += " fa-exclamation-triangle\" style=\"color: red\" title=\"Problematic Location: Outside range of " \
-                 "all fiddler crabs or this particular species.\""
-        elif glyph == "questionable id":
-            x += " fa-question-circle\" style=\"color: goldenrod\" title=\"Questionable ID: Species identity " \
-                 "uncertain.\""
-        elif glyph == "tax key":
-            x += " fa-key\" ara-hidden"
-        elif glyph == "location marker":
-            x += "r fa-map-marked-alt\" ara-hidden"
-        else:
+        if glyph is not None:
             report_error("missing glyph: " + glyph)
-            return ""
-        return x + "></span> "
+        return ""
 
 
 def rel_link_prefix(do_print: bool, prefix: str = "") -> str:
@@ -449,7 +410,7 @@ def format_reference_cite(ref: TMB_Classes.ReferenceClass, do_print: bool, autho
     elif author_style == AUTHOR_NOPAREN:  # Smith 1900
         outstr = ref.author() + " " + str(ref.year())
     elif author_style == AUTHOR_TAXON:  # Smith, 1900
-        if ref.taxon_author is not None:  # used to avoid et al. or for papers with slightly unusual authority
+        if ref.taxon_author is not None:  # used to avoid et al. for papers with slightly unusual authority
             outstr = ref.taxon_author
         else:
             outstr = ref.author() + ", " + str(ref.year())
@@ -459,8 +420,9 @@ def format_reference_cite(ref: TMB_Classes.ReferenceClass, do_print: bool, autho
         return outstr
     else:
         try:
-            return ("<a href=\"" + rel_link_prefix(do_print, path + "references/") + ref.cite_key +
-                    ".html\">" + outstr + "</a>")
+            return f'<a href="{rel_link_prefix(do_print, path + "references/")}{ref.cite_key}.html">{outstr}</a>'
+            # return ("<a href=\"" + rel_link_prefix(do_print, path + "references/") + ref.cite_key +
+            #         ".html\">" + outstr + "</a>")
         except LookupError:
             report_error("missing label: " + ref.cite_key)
             return ref.cite_key
@@ -481,12 +443,12 @@ def replace_species_in_string(instr: str, include_link: bool = False, do_print: 
         if include_link:
             name_str = create_species_link(s.genus, s.species, do_print, s.status, path=path)
         else:
-            name_str = "<em class=\"species\">" + s.binomial() + "</em>"
+            name_str = f"<em class=\"species\">{s.binomial()}</em>"
         if include_authority:
             a = " " + s.authority()
         else:
             a = ""
-        instr = re.sub(search_str, name_str + a, instr, 1)
+        instr = re.sub(search_str, name_str + a, instr, count=1)
     return instr
 
 
@@ -508,10 +470,12 @@ def replace_reference_in_string(instr: str, refdict: dict, do_print: bool, path:
         elif match.group("format") == ".in":
             link_str = format_reference_cite(ref, do_print, AUTHOR_NOPAREN, path=path)
         else:
-            link_str = "<a href=\"" + rel_link_prefix(do_print, path + "references/") + ref.cite_key + ".html\">" + \
-                       match.group("format") + "</a>"
+            link_str = (f'<a href="{rel_link_prefix(do_print, path + "references/")}{ref.cite_key}.html">'
+                        f'{match.group("format")}</a>')
+            # link_str = "<a href=\"" + rel_link_prefix(do_print, path + "references/") + ref.cite_key + ".html\">" + \
+            #            match.group("format") + "</a>"
         # replace the cross-reference with the correct text
-        instr = re.sub(search_str, link_str, instr, 1)
+        instr = re.sub(search_str, link_str, instr, count=1)
     return instr
 
 
@@ -558,32 +522,6 @@ def format_language(x: str) -> str:
     beautify language listings for references by adding flag icons for each language and replacing the word
     'and' with an ampersand
     """
-    # language_replace_list = [
-    #     [" and ", " &amp; "],
-    #     ["German", "<span class=\"flag-icon flag-icon-de\"></span> German"],
-    #     ["Spanish", "<span class=\"flag-icon flag-icon-es\"></span> Spanish"],
-    #     ["Russian", "<span class=\"flag-icon flag-icon-ru\"></span> Russian"],
-    #     ["French", "<span class=\"flag-icon flag-icon-fr\"></span> French"],
-    #     ["Portuguese", "<span class=\"flag-icon flag-icon-pt\"></span> Portuguese"],
-    #     ["Danish", "<span class=\"flag-icon flag-icon-dk\"></span> Danish"],
-    #     ["Dutch", "<span class=\"flag-icon flag-icon-nl\"></span> Dutch"],
-    #     ["Japanese", "<span class=\"flag-icon flag-icon-jp\"></span> Japanese"],
-    #     ["Chinese", "<span class=\"flag-icon flag-icon-cn\"></span> Chinese"],
-    #     ["English", "<span class=\"flag-icon flag-icon-us\"></span> English"],
-    #     ["Thai", "<span class=\"flag-icon flag-icon-th\"></span> Thai"],
-    #     ["Latin", "<span class=\"flag-icon flag-icon-va\"></span> Latin"],
-    #     ["Italian", "<span class=\"flag-icon flag-icon-it\"></span> Italian"],
-    #     ["Vietnamese", "<span class=\"flag-icon flag-icon-vn\"></span> Vietnamese"],
-    #     ["Korean", "<span class=\"flag-icon flag-icon-kr\"></span> Korean"],
-    #     ["Polish", "<span class=\"flag-icon flag-icon-pl\"></span> Polish"],
-    #     ["Arabic", "<span class=\"flag-icon flag-icon-sa\"></span> Arabic"],
-    #     ["Indonesian", "<span class=\"flag-icon flag-icon-id\"></span> Indonesian"],
-    #     ["Afrikaans", "<span class=\"flag-icon flag-icon-za\"></span> Afrikaans"],
-    #     ["Malay", "<span class=\"flag-icon flag-icon-my\"></span> Malay"],
-    #     ["Malagasy", "<span class=\"flag-icon flag-icon-mg\"></span> Malagasy"],
-    #     ["Persian", "<span class=\"flag-icon flag-icon-ir\"></span> Persian"],
-    #     ["Burmese", "<span class=\"flag-icon flag-icon-mm\"></span> Burmese"]
-    # ]
     language_replace_list = [
         [" and ", " &amp; "],
         ["German", "<span class=\"fi fi-de\"></span> German"],
@@ -625,13 +563,13 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         outfile.write("        var data1 = google.visualization.arrayToDataTable([\n")
         outfile.write("          ['Year', 'Cumulative Publications'],\n")
         for y in year_data:
-            outfile.write("          ['" + str(y[0]) + "', " + str(y[2]) + "],\n")
+            outfile.write(f"          ['{str(y[0])}', {str(y[2])}],\n")
         outfile.write("        ]);\n")
         outfile.write("\n")
         outfile.write("        var data2 = google.visualization.arrayToDataTable([\n")
         outfile.write("          ['Year', 'Publications'],\n")
         for y in year_data:
-            outfile.write("          ['" + str(y[0]) + "', " + str(y[1]) + "],\n")
+            outfile.write(f"          ['{str(y[0])}', {str(y[1])}],\n")
         outfile.write("        ]);\n")
         outfile.write("\n")
         """
@@ -645,13 +583,13 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         outfile.write("        var data4 = google.visualization.arrayToDataTable([\n")
         outfile.write("          ['Year', 'Publications'],\n")
         for y in year_data_1900:
-            outfile.write("          ['" + str(y[0]) + "', " + str(y[1]) + "],\n")
+            outfile.write(f"          ['{str(y[0])}', {str(y[1])}],\n")
         outfile.write("        ]);\n")
         outfile.write("\n")
         outfile.write("        var data5 = google.visualization.arrayToDataTable([\n")
         outfile.write("          ['Year', 'Citations in DB', 'Pending'],\n")
         for y in year_data_1900:
-            outfile.write("          ['" + str(y[0]) + "', " + str(y[2]) + ", " + str(y[1]-y[2]) + "],\n")
+            outfile.write(f"          ['{str(y[0])}', {str(y[2])}, {str(y[1]-y[2])}],\n")
         outfile.write("        ]);\n")
 
         outfile.write("        var data6 = google.visualization.arrayToDataTable([\n")
@@ -659,7 +597,7 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         langlist = list(languages.keys())
         langlist.sort()
         for lang in langlist:
-            outfile.write("          ['" + lang + "', " + str(languages[lang]) + "],\n")
+            outfile.write(f"          ['{lang}', {str(languages[lang])}],\n")
         outfile.write("        ]);\n")
 
         outfile.write("\n")
@@ -698,9 +636,7 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
 
         outfile.write("        var options6 = {\n")
         outfile.write("          title: \"Primary Language of References\", \n")
-        outfile.write("          titleTextStle: { fontSize: '16' },\n")
-        # outfile.write("          isStacked: true,\n")
-        # outfile.write("          bar: { groupWidth: '80%' }\n")
+        outfile.write("          titleTextStyle: { fontSize: '16' },\n")
         outfile.write("        };\n")
         outfile.write("\n")
 
@@ -856,9 +792,8 @@ def write_reference_bibliography(outfile: TextIO, do_print: bool, reflist: list)
     outfile.write("    <section class=\"spsection\">\n")
     outfile.write("      <div class=\"reference_list\">\n")
     outfile.write("        <ul>\n")
-    # for ref in tqdm(reflist):
     for ref in reflist:
-        outfile.write("          <li>" + format_reference_full(ref, do_print) + "</li>\n")
+        outfile.write(f"          <li>{format_reference_full(ref, do_print)}</li>\n")
     outfile.write("        </ul>\n")
     outfile.write("      </div>\n")
     outfile.write("    </section>\n")
@@ -1102,23 +1037,6 @@ def clean_specific_name(x: str) -> str:
                  "1",
                  "afruca",
                  "gelasimus")
-
-    # if (" " not in x) or ("(" in x):
-    #     return ""
-    # else:
-    #     if "{" in x:
-    #         x = x[:x.find("{")-1]
-    #     y = x.split(" ")
-    #     x = y[len(y)-1].lower()
-    #     if (x in skip_list) or ("gruppe" in x) or ("group" in x) or ("complex" in x):
-    #         return ""
-    #     else:
-    #         return x.lower()
-
-    # regex = r"\(.+?\)"
-    # x = re.sub(regex, "", x)
-    # regex = r"[.+?]"
-    # x = re.sub(regex, "", x)
 
     if x.endswith(")") or (" " not in x):
         return ""
@@ -1398,30 +1316,42 @@ def write_reference_page(outfile: TextIO, do_print: bool, ref: TMB_Classes.Refer
         outfile.write("    </p>\n")
 
     if ref.language != "":
-        outfile.write("<p><strong>Language:</strong> " + format_language(ref.language) + "</p>\n")
-    if ref.doi is not None:
+        outfile.write(f"<p><strong>Language:</strong> {format_language(ref.language)}</p>\n")
+    # if ref.doi is not None:
+    #     outfile.write("<p><strong>Online:</strong> ")
+    #     if ref.doi.startswith("10"):
+    #         outfile.write('<img src="../images/DOI_logo.svg" style="height: 1em; vertical-align: middle" alt="DOI"> ')
+    #         outfile.write(f'<a href="https://doi.org/{ref.doi}">https://doi.org/{ref.doi}</a></p>\n')
+    #     else:
+    #         outfile.write(f"{ref.doi}</p>\n")
+
+    if ref.doi is not None:  # if there is a DOI use it
         outfile.write("<p><strong>Online:</strong> ")
         if ref.doi.startswith("10"):
-            outfile.write("<img src=\"../images/DOI_logo.svg\" style=\"height: 1em; vertical-align: middle\" "
-                          "alt=\"DOI\"> ")
-            outfile.write("<a href=\"https://doi.org/{0}\">https://doi.org/{0}</a></p>\n".format(ref.doi))
+            outfile.write('<img src="../images/DOI_logo.svg" style="height: 1em; vertical-align: middle" alt="DOI"> ')
+            outfile.write(f'<a href="https://doi.org/{ref.doi}">https://doi.org/{ref.doi}</a></p>\n')
         else:
-            outfile.write("{0}</p>\n".format(ref.doi))
+            report_error(f"Invalid DOI: {ref.cite_key}: {ref.doi}")
+        # else:
+        #     outfile.write(f"{ref.doi}</p>\n")
+    elif ref.url is not None:  # if not, use a URL if present
+        outfile.write("<p><strong>Online:</strong> ")
+        outfile.write(f"{ref.url}</p>\n")
 
     # write name table
-    outfile.write("    <h3 class=\"nobookmark\">Names Appearing in this Publication</h3>\n")
+    outfile.write('    <h3 class="nobookmark">Names Appearing in this Publication</h3>\n')
     if len(names) > 0:
-        outfile.write("    <table class=\"citetable\">\n")
+        outfile.write('    <table class="citetable">\n')
         outfile.write("      <tr>\n")
-        outfile.write("        <th class=\"name_col\">Name Used</th>\n")
+        outfile.write('        <th class="name_col">Name Used</th>\n')
         if comcnt > 0:
-            outfile.write("        <th class=\"common_col\">Common Name(s)</th>\n")
-        outfile.write("        <th class=\"where_col\">Where</th>\n")
-        outfile.write("        <th class=\"applied_col\">Applied to...</th>\n")
-        outfile.write("        <th class=\"accepted_col\">Accepted Name</th>\n")
-        outfile.write("        <th class=\"source_col\">Source of Accepted</th>\n")
+            outfile.write('        <th class="common_col">Common Name(s)</th>\n')
+        outfile.write('        <th class="where_col">Where</th>\n')
+        outfile.write('        <th class="applied_col">Applied to...</th>\n')
+        outfile.write('        <th class="accepted_col">Accepted Name</th>\n')
+        outfile.write('        <th class="source_col">Source of Accepted</th>\n')
         if notecnt > 0:
-            outfile.write("        <th class=\"notes_col\">Note(s)</th>\n")
+            outfile.write('        <th class="notes_col">Note(s)</th>\n')
         outfile.write("      </tr>\n")
         names.sort()
         output_name_table(outfile, do_print, False, names, uniquenames, notecnt, comcnt, refdict, name_table,
@@ -1432,7 +1362,7 @@ def write_reference_page(outfile: TextIO, do_print: bool, ref: TMB_Classes.Refer
         outfile.write("    </p>\n")
 
     if len(cites_to) > 0:
-        outfile.write("    <h3 class=\"nobookmark\">This Publication is Cited By</h3>\n")
+        outfile.write('    <h3 class="nobookmark">This Publication is Cited By</h3>\n')
         outfile.write("    <p>\n")
         cs = set()
         for c in cites_to:
@@ -1537,10 +1467,13 @@ def write_binomial_name_page(outfile: TextIO, do_print: bool, name: str, namefil
                                                            init_data().graph_font)
     else:
         common_header_part1(outfile, name, indexpath="../")
-        if len(location_set) > 0:
-            start_google_map_header(outfile)
-            write_google_map_point_header(outfile, "name_" + name)
-            end_google_map_header(outfile)
+
+        # removed for now because of Google map issues
+
+        # if len(location_set) > 0:
+        #     start_google_map_header(outfile)
+        #     write_google_map_point_header(outfile, "name_" + name_to_filename(name))
+        #     end_google_map_header(outfile)
 
         if maxcnt > 0:
             start_google_chart_header(outfile)
@@ -1568,13 +1501,36 @@ def write_binomial_name_page(outfile: TextIO, do_print: bool, name: str, namefil
     if len(location_set) > 0:
         outfile.write("    <div class=\"map_section\">\n")
         outfile.write("    <h3 class=\"nobookmark\">Locations Where the Name has Been Applied</h3>\n")
-        if do_print:
-            outfile.write("      <figure>\n")
-            outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(name)) +
-                          ".png\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
-            outfile.write("      </figure>\n")
-        else:
-            outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
+
+        outfile.write("      <figure>\n")
+        outfile.write('        <img class="mapimg" src="../' + MAP_PATH +
+                      pointmap_name("name_" + name_to_filename(name)) +
+                      '.png" alt="Point Map" title="Point map of name application" />\n')
+        outfile.write("      </figure>\n")
+        # if do_print:
+        #     outfile.write("      <figure>\n")
+        #     outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("name_" + name_to_filename(name)) +
+        #                   ".png\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
+        #     outfile.write("      </figure>\n")
+        # else:
+        #     outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
+
+        outfile.write("    </div>\n")
+        outfile.write("    <div class=\"map_download\">\n")
+        outfile.write("      Purple points indicate locations where this name has been applied "
+                      "(whether correctly or incorrectly) in the scientific record; blue dotted circles "
+                      "indicate the same but for larger, general regions; a skull and crossbones "
+                      "indicates locations where this name has been applied to a fossil; and red Xs "
+                      "indicate false or mistaken records from the scientific record.\n")
+        # outfile.write("      Purple fiddler crabs <img class=\"map-icon\" src=\"../images/icon_fiddler_purple.png\" /> "
+        #               "indicate locations where this name has been applied "
+        #               "(whether correctly or incorrectly) in the scientific record; blue fiddler crabs surrounded by "
+        #               "a dashed circle <img class=\"map-icon\" src=\"../images/icon_region.png\" /> "
+        #               "indicate the same but for larger, general regions; a skull and crossbones "
+        #               "<img class=\"map-icon\" src=\"../images/icon_fossil.png\" /> "
+        #               "indicates locations where this name has been applied to a fossil; and red circles with an x "
+        #               "<img class=\"map-icon\" src=\"../images/icon_error.png\" /> "
+        #               "indicate false or mistaken records from the scientific record.\n")
         outfile.write("    </div>\n")
     if maxcnt > 0:
         write_chronology_chart_div(outfile, do_print, image_name, None, "Number of Uses of Name per Year", False, False)
@@ -1660,10 +1616,12 @@ def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB
     else:
         common_header_part1(outfile, specific_name.name, indexpath="../")
 
-        if len(location_set) > 0:
-            start_google_map_header(outfile)
-            write_google_map_point_header(outfile, "sn_" + specific_name.name)
-            end_google_map_header(outfile)
+        # removed for now because of Google Map issues
+
+        # if len(location_set) > 0:
+        #     start_google_map_header(outfile)
+        #     write_google_map_point_header(outfile, "sn_" + specific_name.name)
+        #     end_google_map_header(outfile)
 
         if maxcnt > 0:
             start_google_chart_header(outfile)
@@ -1725,13 +1683,35 @@ def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB
     if len(location_set) > 0:
         outfile.write("    <div class=\"map_section\">\n")
         outfile.write("    <h3 class=\"nobookmark\">Locations Where the Name has Been Applied</h3>\n")
-        if do_print:
-            outfile.write("      <figure>\n")
-            outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("sn_" + specific_name.name) +
-                          ".png\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
-            outfile.write("      </figure>\n")
-        else:
-            outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
+
+        outfile.write("      <figure>\n")
+        outfile.write('        <img class="mapimg" src="../' + MAP_PATH + pointmap_name("sn_" + specific_name.name) +
+                      '.png" alt="Point Map" title="Point map of name application" />\n')
+        outfile.write("      </figure>\n")
+        # if do_print:
+        #     outfile.write("      <figure>\n")
+        #     outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("sn_" + specific_name.name) +
+        #                   ".png\" alt=\"Point Map\" title=\"Point map of name application\" />\n")
+        #     outfile.write("      </figure>\n")
+        # else:
+        #     outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
+
+        outfile.write("    </div>\n")
+        outfile.write("    <div class=\"map_download\">\n")
+        outfile.write("      Purple circles indicate locations where this name has been applied "
+                      "(whether correctly or incorrectly) in the scientific record; blue dotted circles indicate the "
+                      "same but for larger, general regions; a skull and crossbones "
+                      "indicates locations where this name has been applied to a fossil; and red Xs "
+                      "indicate false or mistaken records from the scientific record.\n")
+        # outfile.write("      Purple fiddler crabs <img class=\"map-icon\" src=\"../images/icon_fiddler_purple.png\" /> "
+        #               "indicate locations where this name has been applied "
+        #               "(whether correctly or incorrectly) in the scientific record; blue fiddler crabs surrounded by "
+        #               "a dashed circle <img class=\"map-icon\" src=\"../images/icon_region.png\" /> indicate the same "
+        #               "but for larger, general regions; a skull and crossbones "
+        #               "<img class=\"map-icon\" src=\"../images/icon_fossil.png\" /> "
+        #               "indicates locations where this name has been applied to a fossil; and red circles with an x "
+        #               "<img class=\"map-icon\" src=\"../images/icon_error.png\" /> "
+        #               "indicate false or mistaken records from the scientific record.\n")
         outfile.write("    </div>\n")
 
     if maxcnt > 0:
@@ -2704,45 +2684,57 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
         start_page_division(outfile, "index_page")
     else:
         common_header_part1(outfile, "Fiddler Crab Geographic Ranges")
-        start_google_map_header(outfile)
-        # write_google_map_range_header(outfile, "fiddlers_all")
-        write_google_map_point_header(outfile, "fiddlers_all")
-        end_google_map_header(outfile)
+        # start_google_map_header(outfile)
+        # # write_google_map_range_header(outfile, "fiddlers_all")
+        # write_google_map_point_header(outfile, "fiddlers_all")
+        # end_google_map_header(outfile)
         common_header_part2(outfile, include_map=True)
 
-    outfile.write("    <header id=\"" + init_data().map_url + "\">\n")
-    outfile.write("      <h1 class=\"bookmark1\">Geographic Ranges</h1>\n")
+    outfile.write('    <header id="' + init_data().map_url + "\">\n")
+    outfile.write('      <h1 class="bookmark1">Geographic Ranges</h1>\n')
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"locations/index.html\">" + fetch_fa_glyph("index") + "Location "
+        outfile.write('          <li><a href="locations/index.html">' + fetch_fa_glyph("index") + "Location "
                       "Index</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
     outfile.write("\n")
-    outfile.write("    <section class=\"topspsection\">\n")
-    outfile.write("      <div class=\"map_section\">\n")
-    if do_print:
-        outfile.write("      <figure>\n")
-        outfile.write("        <img src=\"" + TMP_MAP_PATH + rangemap_name("fiddlers_all") + ".png\" alt=\"Map\" "
-                      "title=\"Map of fiddler crab distribution\" />\n")
-        outfile.write("      </figure>\n")
-        outfile.write("      <figure>\n")
-        outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("fiddlers_all") + ".png\" alt=\"Point Map\" "
-                      "title=\"Point map of fiddler crab distribution\" />\n")
-        outfile.write("      </figure>\n")
-    else:
-        # outfile.write("        <div id=\"range_map_canvas\"></div>\n")
-        outfile.write("        <div id=\"map_density\"><a href=\"maps/" + rangemap_name("fiddlers_all") +
-                      ".png\"><img src=\"maps/" + rangemap_name("fiddlers_all") + ".png\"></a></div>\n")
-        outfile.write("        <div id=\"point_map_canvas\"></div>\n")
-        outfile.write("        <div class=\"map_download\">\n")
-        # outfile.write("          <a href=\"maps/" + rangemap_name("fiddlers_all") + ".png\">" +
-        #               fetch_fa_glyph("download") + "Download PNG line map of ranges.</a> \n")
-        outfile.write("          <a href=\"maps/" + pointmap_name("fiddlers_all") + ".png\">" +
-                      fetch_fa_glyph("download") + "Download PNG line map of point locations.</a>\n")
-        outfile.write("        </div>\n")
+    outfile.write('    <section class="topspsection">\n')
+    outfile.write('      <div class="map_section">\n')
+
+    outfile.write("      <figure>\n")
+    outfile.write('        <a href="' + MAP_PATH + rangemap_name("fiddlers_all") + '.png"><img class="mapimg" src="' +
+                  MAP_PATH + rangemap_name("fiddlers_all") +
+                  '.png" alt="Map" title="Map of fiddler crab distribution" /></a>\n')
+    outfile.write("      </figure>\n")
+    outfile.write("      <figure>\n")
+    outfile.write('        <a href="' + MAP_PATH + pointmap_name("fiddlers_all") + '.png"><img class="mapimg" src="' +
+                  MAP_PATH + pointmap_name("fiddlers_all") +
+                  '.png" alt="Point Map" title="Point map of fiddler crab distribution" /></a>\n')
+    outfile.write("      </figure>\n")
+    # if do_print:
+    #     outfile.write("      <figure>\n")
+    #     outfile.write("        <img src=\"" + TMP_MAP_PATH + rangemap_name("fiddlers_all") + ".png\" alt=\"Map\" "
+    #                   "title=\"Map of fiddler crab distribution\" />\n")
+    #     outfile.write("      </figure>\n")
+    #     outfile.write("      <figure>\n")
+    #     outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("fiddlers_all") + ".png\" alt=\"Point Map\" "
+    #                   "title=\"Point map of fiddler crab distribution\" />\n")
+    #     outfile.write("      </figure>\n")
+    # else:
+    #     # outfile.write("        <div id=\"range_map_canvas\"></div>\n")
+    #     outfile.write("        <div id=\"map_density\"><a href=\"maps/" + rangemap_name("fiddlers_all") +
+    #                   ".png\"><img src=\"maps/" + rangemap_name("fiddlers_all") + ".png\"></a></div>\n")
+    #     outfile.write("        <div id=\"point_map_canvas\"></div>\n")
+    #     outfile.write("        <div class=\"map_download\">\n")
+    #     # outfile.write("          <a href=\"maps/" + rangemap_name("fiddlers_all") + ".png\">" +
+    #     #               fetch_fa_glyph("download") + "Download PNG line map of ranges.</a> \n")
+    #     outfile.write("          <a href=\"maps/" + pointmap_name("fiddlers_all") + ".png\">" +
+    #                   fetch_fa_glyph("download") + "Download PNG line map of point locations.</a>\n")
+    #     outfile.write("        </div>\n")
+
     outfile.write("      </div>\n")
     outfile.write("      <p>\n")
     outfile.write("        The first map shows the approximate density of species richness")
@@ -2752,10 +2744,25 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
     else:
         index_page = "locations/index.html"
         outfile.write(" (click on map for larger view). ")
-    outfile.write("The second map shows approximate point locations where fiddler crabs "
-                  "have been recorded in the scientific record. Red markers indicate points where fiddler crabs are "
-                  "found; purple indicates fossil-only locations; blue indicate false location records. See "
-                  "the <a href=\"" + index_page + "\">location index</a> for a full list of all point locations.")
+    # outfile.write("The second map shows approximate point locations where fiddler crabs "
+    #               "have been recorded in the scientific record. Red markers indicate points where fiddler crabs are "
+    #               "found; purple indicates fossil-only locations; blue indicate false location records. See "
+    #               "the <a href=\"" + index_page + "\">location index</a> for a full list of all point locations.")
+
+    outfile.write('The second map shows approximate point locations where fiddler crabs '
+                  'have been recorded in the scientific record. Purple circles indicate locations where '
+                  'fiddler crabs are found; blue dotted circles indicate the same but for '
+                  'larger, general regions; and red Xs indicate false or mistaken records. See '
+                  'the <a href="' + index_page + '">location index</a> for a full list of all point locations.')
+    # outfile.write('The second map shows approximate point locations where fiddler crabs '
+    #               'have been recorded in the scientific record. Purple fiddler crabs '
+    #               '<img class="map-icon" src="images/icon_fiddler_purple.png" /> indicate locations where '
+    #               'fiddler crabs are found; blue fiddler crabs surrounded by a dashed circle '
+    #               '<img class="map-icon" src="images/icon_region.png" /> indicate the same but for '
+    #               'larger, general regions; and red circles with an x '
+    #               '<img class="map-icon" src="images/icon_error.png" /> indicate false or mistaken records. See '
+    #               'the <a href="' + index_page + '">location index</a> for a full list of all point locations.')
+
     outfile.write("\n      </p>\n")
     outfile.write("      <p>\n")
     outfile.write("        Specific ranges for a species or name can be found on its associated pages. "
@@ -2765,9 +2772,9 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
     outfile.write("    </section>\n")
     for r in regions:
         outfile.write("\n")
-        outfile.write("    <section class=\"spsection\">\n")
-        outfile.write("      <h2 class=\"nobookmark\">" + r + "</h2>\n")
-        outfile.write("      <ul class=\"splist\">\n")
+        outfile.write('    <section class="spsection">\n')
+        outfile.write('      <h2 class="nobookmark">' + r + '</h2>\n')
+        outfile.write('      <ul class="splist">\n')
         for s in species:
             if s.realm == r:
                 if s.status != "fossil":
@@ -2830,7 +2837,7 @@ def fetch_child_data(loc: TMB_Classes.LocationClass, location_dict: dict) -> set
 def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.LocationClass, point_locations: dict,
                         location_species: dict, location_bi_names: dict, location_sp_names: dict,
                         location_direct_refs: dict, location_cited_refs: dict, references: list,
-                        locations_range_species: dict, location_keys: Optional[dict]) -> None:
+                        locations_range_species: dict, location_keys: Optional[dict], field_guide_data: dict) -> None:
     """
     write the output page for an individual location
     """
@@ -2854,10 +2861,10 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
         start_page_division(outfile, "base_page")
     else:
         common_header_part1(outfile, loc.trimmed_name, indexpath="../")
-        if not loc.unknown:
-            start_google_map_header(outfile)
-            write_google_map_point_header(outfile, "location_" + place_to_filename(loc.name))
-            end_google_map_header(outfile)
+        # if not loc.unknown:
+        #     start_google_map_header(outfile)
+        #     write_google_map_point_header(outfile, "location_" + place_to_filename(loc.name))
+        #     end_google_map_header(outfile)
         common_header_part2(outfile, indexpath="../", include_map=True)
 
     outfile.write("    <header id=\"" + place_to_filename(loc.name) + ".html\">\n")
@@ -2870,6 +2877,24 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
     outfile.write("    <dl>\n")
+
+    if loc.field_guide is not None:
+        fg_list = loc.field_guide.split(";")
+        tmp_list = []
+        # print(loc.trimmed_name, fg_list)
+        for fg in fg_list:
+            fg_dat = field_guide_data[fg]
+            fg_title = get_field_guide_title(fg_dat)
+            # dat = fg_dat[0].strip().split("\t")
+            # if dat[0] == "T":
+            #     fg_title = dat[1]
+            # else:
+            #     raise TypeError
+            tmp_list.append([fg_title, f"<a href=\"../field_guides/field_guide_{fg}.html\">{fg_title}</a>"])
+        tmp_list.sort()
+        link_list = [x[1] for x in tmp_list]
+        outfile.write("    <dt>Applicable Field Guides</dt>\n")
+        outfile.write("      <dd>" + "; ".join(link_list) + "</dd>\n")
 
     if loc.n_alternates() > 0:
         outfile.write("    <dt>Also Known As</dt>\n")
@@ -2890,6 +2915,8 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
                 p = point_locations[a]
                 dlist.append(create_location_link(p, p.trimmed_name, do_print))
             dstr = ", ".join(dlist)
+        elif dstr is None:
+            dstr = ""
         outfile.write("      <dd>" + dstr + "</dd>\n")
     if loc.unknown:
         outfile.write("    <dt>Location Could not be Identified</dt>\n")
@@ -2902,19 +2929,36 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
         outfile.write("    <dt>Approximate Coordinates</dt>\n")
         outfile.write("      <dd>" + format_latlon(loc.latitude, loc.longitude) + "</dd>\n")
         outfile.write("    <div class=\"map_section\">\n")
-        if do_print:
-            outfile.write("      <figure>\n")
-            outfile.write("        <img src=\"" + TMP_MAP_PATH +
-                          pointmap_name("location_" + place_to_filename(loc.name)) + ".png\" alt=\"" +
-                          loc.trimmed_name + "\" title=\"Map of " + loc.trimmed_name + "\" />\n")
-            outfile.write("      </figure>\n")
-        else:
-            outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
+
+        outfile.write("      <figure>\n")
+        outfile.write('        <img class="mapimg" src="../' + MAP_PATH +
+                      pointmap_name("location_" + place_to_filename(loc.name)) + '.png" alt="' + loc.trimmed_name +
+                      '" title="Map of ' + loc.trimmed_name + '" />\n')
+        outfile.write("      </figure>\n")
+        # if do_print:
+        #     outfile.write("      <figure>\n")
+        #     outfile.write("        <img src=\"" + TMP_MAP_PATH +
+        #                   pointmap_name("location_" + place_to_filename(loc.name)) + ".png\" alt=\"" +
+        #                   loc.trimmed_name + "\" title=\"Map of " + loc.trimmed_name + "\" />\n")
+        #     outfile.write("      </figure>\n")
+        # else:
+        #     outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
 
         outfile.write("        <div class=\"map_download\">\n")
-        outfile.write("         The red marker indicates the coordinates used to represent this location, "
-                      "yellow markers all other locations contained within this location. Purple markers indicate "
-                      "fossil-only locations or sub-locations.\n")
+        outfile.write("   A purple circles (local) or blue dotted circle (regional) indicates the coordinates used to "
+                      "represent this location; yellow circles indicate all "
+                      "sublocations contained within this location; a skull and crossbones indicates fossil-only "
+                      "locations or sub-locations; and red Xs indicate false or mistaken locations.\n")
+        # outfile.write("   A purple fiddler crab <img class=\"map-icon\" src=\"../images/icon_fiddler_purple.png\" /> "
+        #               "(local) or a blue fiddler crab surrounded by a dashed circle (regional) "
+        #               "<img class=\"map-icon\" src=\"../images/icon_region.png\" /> indicates the coordinates used to "
+        #               "represent this location; yellow fiddler crabs "
+        #               "<img class=\"map-icon\" src=\"../images/icon_fiddler_yellow.png\" /> indicate all "
+        #               "sublocations contained within this location; a skull and "
+        #               "crossbones <img class=\"map-icon\" src=\"../images/icon_fossil.png\" /> indicates fossil-only "
+        #               "locations or sub-locations; and red circles with an x "
+        #               "<img class=\"map-icon\" src=\"../images/icon_error.png\" /> indicate false or mistaken "
+        #               "locations.\n")
         outfile.write("        </div>\n")
 
         outfile.write("    </div>\n")
@@ -3028,7 +3072,7 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile)
+        common_html_footer(outfile, indexpath="../")
 
     # output place specific taxonomic key
     if (location_keys is not None) and (len(all_species) > 0):
@@ -3045,13 +3089,13 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
             if do_print:
                 write_location_page(outfile, do_print, c, point_locations, location_species, location_bi_names,
                                     location_sp_names, location_direct_refs, location_cited_refs, references,
-                                    locations_range_species, location_keys)
+                                    locations_range_species, location_keys, field_guide_data)
             else:
                 with open(WEBOUT_PATH + "locations/" + place_to_filename(c.name) + ".html", "w",
                           encoding="utf-8") as suboutfile:
                     write_location_page(suboutfile, do_print, c, point_locations, location_species, location_bi_names,
                                         location_sp_names, location_direct_refs, location_cited_refs, references,
-                                        locations_range_species, location_keys)
+                                        locations_range_species, location_keys, field_guide_data)
 
 
 def write_location_index_entry(outfile: TextIO, do_print: bool, loc: TMB_Classes.LocationClass,
@@ -3079,7 +3123,8 @@ def write_location_index_entry(outfile: TextIO, do_print: bool, loc: TMB_Classes
 def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict, location_dict: dict,
                          location_species: dict, location_sp_names: dict, location_bi_names: dict,
                          location_direct_refs: dict, location_cited_refs: dict, references: list,
-                         location_range_species: dict, location_keys: Optional[dict]) -> None:
+                         location_range_species: dict, location_keys: Optional[dict],
+                         field_guide_data: dict) -> None:
     """
     output observation location index to HTML
     """
@@ -3160,7 +3205,7 @@ def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict,
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile)
+        common_html_footer(outfile, indexpath="../")
 
     if location_keys is not None:
         if do_print:
@@ -3178,13 +3223,13 @@ def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict,
         if do_print:
             write_location_page(outfile, do_print, loc, point_locations, location_species, location_bi_names,
                                 location_sp_names, location_direct_refs, location_cited_refs, references,
-                                location_range_species, location_keys)
+                                location_range_species, location_keys, field_guide_data)
         else:
             with open(WEBOUT_PATH + "locations/" + place_to_filename(loc.name) + ".html", "w",
                       encoding="utf-8") as suboutfile:
                 write_location_page(suboutfile, do_print, loc, point_locations, location_species, location_bi_names,
                                     location_sp_names, location_direct_refs, location_cited_refs, references,
-                                    location_range_species, location_keys)
+                                    location_range_species, location_keys, field_guide_data)
 
 
 def check_location_page(loc: TMB_Classes.LocationClass, location_species: dict, location_bi_names: dict,
@@ -3341,6 +3386,262 @@ def compare_ranges_to_locations(species_range_blocks: dict, point_locations: dic
                     slist.append(species)
         point_range_species[dat] = slist
     return point_range_species
+
+
+def write_field_guide_page(outfile: TextIO, do_print: bool, guide: str, data: list, inc_map: bool = True) -> list:
+    """
+    output field guides to HTML
+    """
+    image_list = []
+    data = replace_species_references(data)
+    dat = data[0].strip().split("\t")
+    if dat[0] == "T":
+        title = dat[1]
+    else:
+        raise TypeError
+
+    if do_print:
+        start_page_division(outfile, "base_page")
+    else:
+        common_html_header(outfile, "Fiddler Crab Field Guide: " + title, indexpath="../")
+    outfile.write("    <header id=\"field_guide_" + guide + ".html\">\n")
+    outfile.write("      <h1 class=\"bookmark1\">Fiddler Crab Field Guide: {}</h1>\n".format(title))
+    if not do_print:
+        outfile.write("      <nav>\n")
+        outfile.write("        <ul>\n")
+        outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("index") +
+                      "Field Guide Index</a></li>\n")
+        outfile.write("        </ul>\n")
+        outfile.write("      </nav>\n")
+    outfile.write("    </header>\n")
+    outfile.write("\n")
+    outfile.write("          <p style=\"font-style: italic\">\n")
+    outfile.write("            This guide is designed for identification &ldquo;in the field&rdquo; where you might be "
+                  "looking at live crabs by eye or through binoculars or from photographs. I will generally try to "
+                  "avoid characters that will require you to physically catch the crab, although I may mention a few "
+                  "for secondary verification. It does not include the more strict taxonomist-style characters that "
+                  "may only be visible under a microscope or via dissection. It is also assumed that the individuals "
+                  "are living, as death (and even capture) can cause dramatic color change.\n")
+    outfile.write("          </p>\n")
+    if inc_map:
+        outfile.write("            <figure style=\"width: 800px; text-align: center\">\n")
+        outfile.write("              <img src=\"fg_map_{}.png\" />".format(guide))
+        outfile.write("            </figure>\n")
+
+    for line in data:
+        level, text = line.strip().split("\t")
+        if level == "P":  # paragraph
+            outfile.write("          <p style=\"clear: both\">\n")
+            outfile.write("            " + text + "\n")
+            outfile.write("          </p>\n")
+        # elif level == "M":  # map
+        #     pass
+        elif level == "SL":  # species list
+            sp_list = []
+            for s in text.split(";"):
+                sp_name = find_species_by_name(s)
+                sp_list.append(sp_name)
+            outfile.write("          <ul>\n")
+            for s in sp_list:
+                outfile.write("            <li>{} ({})</li>\n".format(create_species_link(s.genus, s.species,
+                                                                                          do_print, path="../"),
+                                                                      s.common))
+            outfile.write("          </ul>\n")
+        elif level == "SH":  # species_header
+            outfile.write("      <hr style=\"clear: both\"/>\n")
+            s = find_species_by_name(text)
+            outfile.write("      <h3 class=\"nobookmark\">{} ({})</h3>\n".format(create_species_link(s.genus,
+                                                                                                     s.species,
+                                                                                                     do_print,
+                                                                                                     path="../"),
+                                                                                 s.common))
+        elif level == "H2":  # level 2 header
+            outfile.write("      <hr style=\"clear: both\"/>\n")
+            outfile.write(f"          <h2 style=\"clear: both\">{text}</h2>\n")
+        elif level == "H3":  # level 3 header
+            outfile.write("      <hr style=\"clear: both\"/>\n")
+            outfile.write(f"          <h3 style=\"clear: both\">{text}</h3>\n")
+        elif level == "H4":  # level 4 header
+            outfile.write(f"          <h4 style=\"clear: both\">{text}</h4>\n")
+        elif level == "ST":  # start image table
+            outfile.write("          <div>\n")
+        elif level == "I":  # image within table
+            img, ititle, caption, source = text.split("|")
+            outfile.write("            <figure class=\"fgpic\">\n")
+            outfile.write("              <img src=\"{0}\" title=\"{1}\" alt=\"{1}\"/>".format(img, ititle))
+            outfile.write("              <figcaption style=\"font-size: 0.75em\">\n")
+            if source.startswith("https"):
+                outfile.write("                 {0} <a href=\"{1}\">{1}</a>\n".format(caption, source))
+            else:
+                outfile.write("                 {0} {1}\n".format(caption, source))
+            outfile.write("              </figcaption>\n")
+            outfile.write("            </figure>\n")
+            image_list.append(img)
+        elif level == "ET":  # end image table
+            outfile.write("          </div>\n")
+        elif level == "SUL":  # start general unordered list
+            outfile.write("          <ul>\n")
+        elif level == "EUL":  # end general unordered list
+            outfile.write("          </ul>\n")
+        elif level == "LI":  # general list item
+            outfile.write("          <li>{}</li>\n".format(text))
+        elif level == "SI":  # stand-alone image
+            img, ititle, caption, source = text.split("|")
+            outfile.write("          <blockquote>\n")
+            outfile.write("            <figure>\n")
+            outfile.write("              <img src=\"{0}\" title=\"{1}\" alt=\"{1}\"/>".format(img, ititle))
+            outfile.write("              <figcaption style=\"font-size: 0.75em\">\n")
+            if source.startswith("https"):
+                outfile.write("                 {0} <a href=\"{1}\">{1}</a>\n".format(caption, source))
+            else:
+                outfile.write("                 {0} {1}\n".format(caption, source))
+            outfile.write("              </figcaption>\n")
+            outfile.write("            </figure>\n")
+            outfile.write("          </blockquote>\n")
+            image_list.append(img)
+
+    if do_print:
+        end_page_division(outfile)
+    else:
+        common_html_footer(outfile, indexpath="../")
+    return image_list
+
+
+def get_field_guide_title(tmplist):
+    """
+    function to extract the title of a field guide from a list containing the data for that guide
+    """
+    dat = tmplist[0].strip().split("\t")
+    if dat[0] == "T":
+        return dat[1]
+    else:
+        raise TypeError
+
+
+def write_field_guides(field_guide_dict: dict, field_guide_data: dict, field_guide_map_data: dict,
+                       do_print: bool = False) -> list:
+    """
+    output field guides
+    """
+    realms = {"eastern_atlantic": "Eastern Atlantic Realm",
+              "western_atlantic": "Western Atlantic Realm",
+              "eastern_pacific": "Eastern Pacific Realm",
+              "iwp": "Indo-West Pacific Realm"}
+
+    with open(WEBOUT_PATH + "field_guides/index.html", "w", encoding="utf-8") as outfile:
+        if do_print:
+            start_page_division(outfile, "base_page")
+        else:
+            common_html_header(outfile, "Fiddler Crab Field Guides", indexpath="../")
+        outfile.write("    <header id=\"field_guides.html\">\n")
+        outfile.write("      <h1 class=\"bookmark1\">Fiddler Crab Field Guides</h1>\n")
+        outfile.write("    </header>\n")
+        outfile.write("\n")
+        outfile.write("          <p style=\"font-style: italic\">\n")
+        outfile.write("            These guides are designed for identification &ldquo;in the field&rdquo; where you "
+                      "might be looking at live crabs by eye or through binoculars or from photographs. I will "
+                      "generally try to avoid characters that will require you to physically catch the crab, although "
+                      "I do mention a few for secondary verification. They do not include the more strict "
+                      "taxonomist-style characters that may only be visible under a microscope or via dissection. It "
+                      "is also assumed that the individuals are living, as death (and even capture) can cause "
+                      "dramatic color change.\n")
+        outfile.write("          </p>\n")
+        outfile.write("          <p>\n")
+        outfile.write("            You can choose a guide from the list below or click on the following map to go to "
+                      "the guide for that region. The various <a href=\"../locations\">location information pages</a> "
+                      "also include links to relevant guides for each location.\n")
+        outfile.write("          </p>\n")
+
+        # create image map
+        outfile.write("          <img src=\"fg_map_all.png\" alt=\"world map\" usemap=\"#fgmap\" width=\"1200px\"/>\n")
+        outfile.write("          <map name=\"field guide map\" id=\"fgmap\">\n")
+        for guide in field_guide_map_data:
+            map_data = field_guide_map_data[guide]
+
+            data = field_guide_data[guide]
+            title = get_field_guide_title(data)
+
+            # dat = data[0].strip().split("\t")
+            # if dat[0] == "T":
+            #     title = dat[1]
+            # else:
+            #     raise TypeError
+
+            for block in map_data:
+                # map coords use the opposite corners of how I stored the blocks
+                upper_left_x = block.lower_left_lon
+                upper_left_y = block.upper_right_lat
+                lower_right_x = block.upper_right_lon
+                lower_right_y = block.lower_left_lat
+
+                # convert to pixel coords
+                # this assumes a 1200x600 image with a 27 pixel bevel
+                yscale = (600 - 27*2)/180  # pixels per degree
+                xscale = (1200 - 27 * 2) / 360  # pixels per degree
+                upper_left_x = round((upper_left_x + 180)*xscale + 27)
+                lower_right_x = round((lower_right_x + 180)*xscale + 27)
+                upper_left_y = round(-(upper_left_y - 90)*yscale + 27)
+                lower_right_y = round(-(lower_right_y - 90)*yscale + 27)
+                # outfile.write(f"            <area shape=\"rect\" "
+                #               f"coords=\"{upper_left_x},{upper_left_y},{lower_right_x},{lower_right_y}\" "
+                #               f"alt=\"{guide}\" href=\"field_guide_{guide}.html\">\n")
+                outfile.write(f'            <area shape="rect" coords="{upper_left_x},{upper_left_y},{lower_right_x},'
+                              f'{lower_right_y}" alt="{title}" title="{title}" href="field_guide_{guide}.html">\n')
+        outfile.write("          </map>\n")
+
+        outfile.write("          <h3>Field Guide List</h3>\n")
+        outfile.write("          <p>\n")
+        outfile.write("            The western Atlantic and eastern Pacific Realms are roughly organized from north "
+                      "to south, while the Indo-West Pacific Realm is roughly organized west to east (or perhaps "
+                      "clockwise) starting from South Africa.\n")
+        outfile.write("          </p>\n")
+
+        outfile.write("          <ul>\n")
+        # general guides that are not realm specific
+        for guide in field_guide_dict:
+            if field_guide_dict[guide] == "general":
+                data = field_guide_data[guide]
+                title = get_field_guide_title(data)
+                # dat = data[0].strip().split("\t")
+                # if dat[0] == "T":
+                #     title = dat[1]
+                # else:
+                #     raise TypeError
+                outfile.write(f"          <li><a href=\"field_guide_{guide}.html\">{title}</a></li>\n")
+
+        for realm in realms:
+            outfile.write(f"          <li>{realms[realm]}\n")
+            outfile.write("            <ul>\n")
+            for guide in field_guide_dict:
+                if field_guide_dict[guide] == realm:
+                    data = field_guide_data[guide]
+                    title = get_field_guide_title(data)
+                    # dat = data[0].strip().split("\t")
+                    # if dat[0] == "T":
+                    #     title = dat[1]
+                    # else:
+                    #     raise TypeError
+                    outfile.write(f"          <li><a href=\"field_guide_{guide}.html\">{title}</a></li>\n")
+            outfile.write("            </ul>\n")
+            outfile.write("          </li>\n")
+        outfile.write("          </ul>\n")
+        if do_print:
+            end_page_division(outfile)
+        else:
+            common_html_footer(outfile, indexpath="../")
+
+    image_list = []
+    for guide in field_guide_data:
+        if do_print:
+            pass
+        else:
+            if field_guide_dict[guide] == "general":
+                inc_map = False
+            else:
+                inc_map = True
+            with open(WEBOUT_PATH + "field_guides/field_guide_" + guide + ".html", "w", encoding="utf-8") as suboutfile:
+                image_list.extend(write_field_guide_page(suboutfile, do_print, guide, field_guide_data[guide], inc_map))
+    return image_list
 
 
 def write_common_names_pages(outfile: TextIO, do_print: bool, common_name_data: list) -> None:
@@ -3625,7 +3926,8 @@ def size_label(w: float) -> str:
 def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.SpeciesClass, references: list,
                        specific_names: list, all_names: list, photos: list, videos: list, artlist: list,
                        sprefs: dict, refdict: dict, binomial_name_counts: dict, specific_name_cnts: dict,
-                       higher_dict: dict, measurement_data: dict, handedness_data: list) -> None:
+                       higher_dict: dict, measurement_data: dict, handedness_data: list,
+                       field_guide_data: dict) -> None:
     """
     create the master page for a valid species
     """
@@ -3642,17 +3944,15 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
     else:
         if is_fossil:
             common_html_header(outfile, species.binomial() + " / Fossil")
-            # common_html_header(outfile, "Uca " + species.species + " / Fossil")
         else:
-            # common_header_part1(outfile, "Uca " + species.species + " / " + species.common)
             if species.common != ".":
                 common_header_part1(outfile, species.binomial() + " / " + species.common)
             else:
                 common_header_part1(outfile, species.binomial())
-            start_google_map_header(outfile)
-            write_google_map_range_header(outfile, "u_" + species.species)
-            write_google_map_point_header(outfile, "u_" + species.species)
-            end_google_map_header(outfile)
+            # start_google_map_header(outfile)
+            # write_google_map_range_header(outfile, "u_" + species.species)
+            # write_google_map_point_header(outfile, "u_" + species.species)
+            # end_google_map_header(outfile)
             common_header_part2(outfile, include_map=True)
 
     if species.species in measurement_data:
@@ -3709,16 +4009,11 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
     outfile.write("    </header>\n")
     outfile.write("\n")
     outfile.write("    <section class=\"topspsection\">\n")
-    if species.key_photo != ".":
-        outfile.write("        <figure class=\"species_key_fig\">\n")
-        outfile.write("          <img class=\"species_key_photo\" src=\"" + media_path + "photos/" + species.key_photo +
-                      "\" alt=\"" + species.binomial() + "\" title=\"" + species.binomial() + "\" />\n")
+    if species.key_photo:
+        outfile.write('        <figure class="species_key_fig">\n')
+        outfile.write(f'          <img class="species_key_photo" src="{media_path}photos/ex_{species.species}.jpg" '
+                      f'alt="{species.binomial()}" title="{species.binomial()}" />\n')
         outfile.write("        </figure>\n")
-        # copy photo to web output directory
-        try:
-            shutil.copy2(MEDIA_PATH + "photos/" + species.key_photo, WEBOUT_PATH + "photos/")
-        except FileNotFoundError:
-            report_error("Missing file: " + species.key_photo)
 
     if do_print:
         outfile.write("      <h2 class=\"nobookmark\">Type Description</h2>\n")
@@ -3754,8 +4049,10 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
 
     if not is_fossil and (species.commonext != "."):
         outfile.write("       <dt>Common Names</dt>\n")
-        # outfile.write("         <dd>" + species.commonext + "</dd>\n")
-        common_name_list = species.commonext.split(";")
+        if species.commonext == "#":
+            common_name_list = []
+        else:
+            common_name_list = species.commonext.split(";")
         name_languages = set()
         name_dict = {}
         for c in common_name_list:
@@ -3800,83 +4097,134 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
         outfile.write("       <dt>Size</dt>\n")
         slabel = size_label(mean + 1.96*std)
         outfile.write("         <dd>{} Carapace Breadth: {:0.1f} mm ± {:0.2f} (sd), 95% range: "
-                      "{:0.1f}&ndash;{:0.1f} mm, (<a href=\"sizes/{}_cb.html\">Data"
+                      "{:0.1f}&ndash;{:0.1f} mm (<a href=\"sizes/{}_cb.html\">Data"
                       "</a>)</dd>\n".format(slabel, mean, std, max(mean - 1.96*std, 0), mean + 1.96*std,
                                             species.species))
-        # outfile.write("         <dd>{}</dd>\n".format(slabel))
-        # outfile.write("         <dd>Carapace Breadth: {:0.1f} mm ± {:0.2f} (sd), 95% range: "
-        #               "{}&ndash;&{} mm</dd>\n".format(mean, std, mean - 1.96*std, mean + 1.96*std))
-        # outfile.write("         <dd>(<a href=\"sizes/{}_cb.html\">Size Data</a>)</dd>\n".format(species.species))
-        # outfile.write("         <dd>Carapace Breadth: {:0.1f} mm (95%: {:0.1f}&ndash;{:0.1f}) "
-        #               "(<a href=\"sizes/{}_cb.html\">data</a>)</dd>\n".format(mean, mean - 1.96*std,
-        #                                                                       mean + 1.96*std, species.species))
-
-        # temp
-        # print("{}\t{}\t{}\n".format(species.species, mean, std))
 
     # Geographic Range
     outfile.write("       <dt class=\"pagebreak\">Geographic Range</dt>\n")
     outfile.write("         <dd>" + species.realm + ": " + species.range + "</dd>\n")
     if not is_fossil:
-        outfile.write("         <dd>\n")
-        if do_print:
-            outfile.write("           <img src=\"" + TMP_MAP_PATH + rangemap_name("u_" + species.species) +
-                          ".png\" alt=\"Map\" />\n")
-            outfile.write("           <img src=\"" + TMP_MAP_PATH + pointmap_name("u_" + species.species) +
-                          ".png\" alt=\"Map\" />\n")
-        else:
-            outfile.write("           <div id=\"range_map_canvas\" class=\"sp_map\"></div>\n")
-            outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
-            outfile.write("           <div class=\"map_download\">\n")
-            outfile.write("             <a href=\"maps/" + rangemap_name("u_" + species.species) + ".png\">" +
-                          fetch_fa_glyph("download") + "Download PNG line map of ranges.</a> \n")
-            outfile.write("             <a href=\"maps/" + pointmap_name("u_" + species.species) + ".png\">" +
-                          fetch_fa_glyph("download") + "Download PNG line map of point locations.</a>\n")
-            outfile.write("           </div>\n")
+        outfile.write('         <dd>\n')
+
+        outfile.write('           <img class="mapimg" src="' + MAP_PATH + rangemap_name("u_" + species.species) +
+                      '.png" alt="Map" />\n')
+        outfile.write('           <img class="mapimg" src="' + MAP_PATH + pointmap_name("u_" + species.species) +
+                      '.png" alt="Map" />\n')
+
+        # if do_print:
+        #     outfile.write("           <img src=\"" + TMP_MAP_PATH + rangemap_name("u_" + species.species) +
+        #                   ".png\" alt=\"Map\" />\n")
+        #     outfile.write("           <img src=\"" + TMP_MAP_PATH + pointmap_name("u_" + species.species) +
+        #                   ".png\" alt=\"Map\" />\n")
+        # else:
+        #     outfile.write("           <div id=\"range_map_canvas\" class=\"sp_map\"></div>\n")
+        #     outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
+        #     outfile.write("           <div class=\"map_download\">\n")
+        #     outfile.write("             <a href=\"maps/" + rangemap_name("u_" + species.species) + ".png\">" +
+        #                   fetch_fa_glyph("download") + "Download PNG line map of ranges.</a> \n")
+        #     outfile.write("             <a href=\"maps/" + pointmap_name("u_" + species.species) + ".png\">" +
+        #                   fetch_fa_glyph("download") + "Download PNG line map of point locations.</a>\n")
+        #     outfile.write("           </div>\n")
         outfile.write("         </dd>\n")
 
-        outfile.write("         <dd class=\"map_data\">\n")
+        outfile.write('         <dd class="map_data">\n')
         if species.inatid != ".":
             x = "/taxa/" + species.inatid
         else:
             x = ""
-        outfile.write("           Red markers indicate locations where this species is found according to the "
-                      "scientific record; blue markers represent false or mistaken observations from the scientific "
-                      "record; green markers represent &ldquo;research grade&rdquo; observations imported from "
-                      "<a href=\"https://www.inaturalist.org" + x + "\">iNaturalist</a>.\n")
-        outfile.write("         </dd>\n")
 
-        outfile.write("         <dd class=\"map_data\">\n")
+        outfile.write('     Purple circles indicate locations where this species is found according to the '
+                      'scientific record; blue dotted circles indicate the same but for larger, general regions; '
+                      'green circles indicate &ldquo;research grade&rdquo; observations '
+                      'imported from <a href="https://www.inaturalist.org' + x + '">iNaturalist</a>; yellow '
+                      'question marks indicate questionable records of this species from the scientific record; and '
+                      'red Xs indicate false or mistaken records from the scientific record.\n')
+        # outfile.write('     Purple fiddler crabs <img class="map-icon" src="images/icon_fiddler_purple.png" /> '
+        #               'indicate locations where this species is found according to the '
+        #               'scientific record; blue fiddler crabs surrounded by a dashed circle '
+        #               '<img class="map-icon" src="images/icon_region.png" /> indicate the same but for '
+        #               'larger, general regions; green fiddler crabs '
+        #               '<img  class="map-icon" src="images/icon_fiddler_green.png" /> '
+        #               'indicate &ldquo;research grade&rdquo; observations '
+        #               'imported from <a href="https://www.inaturalist.org' + x + '">iNaturalist</a>; yellow circles '
+        #               'with a question mark <img class="map-icon" src="images/icon_question.png" /> indicate '
+        #               'questionable records of this species from the scientific record; and red circles with an x '
+        #               '<img class="map-icon" src="images/icon_error.png" /> indicate false or mistaken records '
+        #               'from the scientific record.\n')
+
+        # outfile.write("           Red markers indicate locations where this species is found according to the "
+        #               "scientific record; blue markers represent false or mistaken observations from the scientific "
+        #               "record; green markers represent &ldquo;research grade&rdquo; observations imported from "
+        #               "<a href=\"https://www.inaturalist.org" + x + "\">iNaturalist</a>.\n")
+        outfile.write('         </dd>\n')
+
+        outfile.write('         <dd class="map_data">\n')
         maprefkeylist = species.range_references.split(";")
         maprefkeylist.sort(key=lambda s: s.lower())
         mapcitelist = []
         for m in maprefkeylist:
             if m in refdict:
                 mref = refdict[m]
-                mapcitelist.append("<a href=\"" + rel_link_prefix(do_print, "references/") + mref.cite_key +
-                                   ".html\">" + mref.citation+"</a>")
+                mapcitelist.append('<a href="' + rel_link_prefix(do_print, "references/") + mref.cite_key +
+                                   '.html">' + mref.citation + '</a>')
             else:
                 mapcitelist.append(m)
-        outfile.write("           Range map data derived from: " + "; ".join(mapcitelist) + "\n")
-        outfile.write("         </dd>\n")
+        outfile.write('           Range map data derived from: ' + "; ".join(mapcitelist) + "\n")
+        outfile.write('         </dd>\n')
+
+    # Associated Field Guides
+    if not do_print and len(species.field_guides) > 0:
+        fg_list = []
+        for fg in species.field_guides:
+            fg_dat = field_guide_data[fg]
+            fg_title = get_field_guide_title(fg_dat)
+            # dat = fg_dat[0].strip().split("\t")
+            # if dat[0] == "T":
+            #     fg_title = dat[1]
+            # else:
+            #     raise TypeError
+            fg_list.append([fg_title, f"<a href=\"field_guides/field_guide_{fg}.html\">{fg_title}</a>"])
+        fg_list.sort()
+        link_list = [x[1] for x in fg_list]
+        outfile.write("       <dt>Associated Field Guides</dt>\n")
+        for link in link_list:
+            outfile.write(f"       <dd>{fetch_fa_glyph("guide")}{link}</dd>\n")
 
     # External links
     if not do_print:
         outfile.write("       <dt>External Links</dt>\n")
         if species.eolid != ".":
-            outfile.write("         <dd><a href=\"https://eol.org/pages/" + species.eolid +
-                          "/overview\">Encyclopedia of Life</a></dd>\n")
-        outfile.write("         <dd><a href=\"https://en.wikipedia.org/wiki/Uca_" + species.species +
-                      "\">Wikipedia</a></dd>\n")
+            outfile.write(f"         <dd>{fetch_fa_glyph("external link")}<a "
+                          f"href=\"https://eol.org/pages/{species.eolid}/overview\">Encyclopedia of Life</a></dd>\n")
+
+
+        outfile.write(f"         <dd>{fetch_fa_glyph("external link")}<a "
+                      f"href=\"https://en.wikipedia.org/wiki/Uca_{species.species}\">Wikipedia</a></dd>\n")
         if species.inatid != ".":
-            outfile.write("         <dd><a href=\"https://www.inaturalist.org/taxa/" + species.inatid +
-                          "\">iNaturalist</a></dd>\n")
+            outfile.write(f"         <dd>{fetch_fa_glyph("external link")}<a "
+                          f"href=\"https://www.inaturalist.org/taxa/{species.inatid}\">iNaturalist</a></dd>\n")
         if species.taxonid != ".":
-            outfile.write("         <dd><a href=\"https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=" +
-                          species.taxonid + "\">NCBI Taxonomy Browser/Genbank</a></dd>\n")
+            outfile.write(f"         <dd>{fetch_fa_glyph("external link")}<a "
+                          f"href=\"https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id={species.taxonid}\">NCBI"
+                          f" Taxonomy Browser/Genbank</a></dd>\n")
         if species.gbifid != ".":
-            outfile.write("         <dd><a href=\"https://www.gbif.org/species/" + species.gbifid +
-                          "\">GBIF</a></dd>\n")
+            outfile.write(f"         <dd>{fetch_fa_glyph("external link")}<a "
+                          f"href=\"https://www.gbif.org/species/{species.gbifid}\">GBIF</a></dd>\n")
+        # if species.eolid != ".":
+        #     outfile.write("         <dd><a href=\"https://eol.org/pages/" + species.eolid +
+        #                   "/overview\">Encyclopedia of Life</a></dd>\n")
+        # outfile.write("         <dd><a href=\"https://en.wikipedia.org/wiki/Uca_" + species.species +
+        #               "\">Wikipedia</a></dd>\n")
+        # if species.inatid != ".":
+        #     outfile.write("         <dd><a href=\"https://www.inaturalist.org/taxa/" + species.inatid +
+        #                   "\">iNaturalist</a></dd>\n")
+        # if species.taxonid != ".":
+        #     outfile.write("         <dd><a href=\"https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=" +
+        #                   species.taxonid + "\">NCBI Taxonomy Browser/Genbank</a></dd>\n")
+        # if species.gbifid != ".":
+        #     outfile.write("         <dd><a href=\"https://www.gbif.org/species/" + species.gbifid +
+        #                   "\">GBIF</a></dd>\n")
 
     outfile.write("      </dl>\n")
     outfile.write("    </section>\n")
@@ -4031,10 +4379,12 @@ def create_species_handedness_page(outfile: TextIO, species: TMB_Classes.Species
         for d in data:
             right_total += d.right_cnt
             left_total += d.left_cnt
-        outfile.write("<p>Observed handedness (based on raw totals across all data sets) is {:0.2%} right-handed, "
-                      "{:0.2%} left-handed</p>\n".format(right_total/(right_total + left_total),
-                                                         left_total/(right_total + left_total)))
-
+        outfile.write("<p>Observed handedness (based on raw totals across all data sets) is "
+                      f"{right_total/(right_total + left_total):0.2%} right-handed, "
+                      f"{left_total/(right_total + left_total):0.2%} left-handed</p>\n")
+        # outfile.write("<p>Observed handedness (based on raw totals across all data sets) is {:0.2%} right-handed, "
+        #               "{:0.2%} left-handed</p>\n".format(right_total/(right_total + left_total),
+        #                                                  left_total/(right_total + left_total)))
         filename = WEBOUT_PATH + "handedness/" + species.species + "_handedness.png"
         TMB_Create_Graphs.create_handedness_chart_file(filename, data)
 
@@ -4068,7 +4418,7 @@ def create_species_handedness_page(outfile: TextIO, species: TMB_Classes.Species
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile)
+        common_html_footer(outfile, indexpath="../")
 
 
 def create_species_cb_page(outfile: TextIO, do_print: bool, species: TMB_Classes.SpeciesClass,
@@ -4244,7 +4594,7 @@ def create_species_cb_page(outfile: TextIO, do_print: bool, species: TMB_Classes
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile)
+        common_html_footer(outfile, indexpath="../")
 
     return float(mean), float(std)
 
@@ -4696,7 +5046,7 @@ def write_species_info_pages(outfile: Optional[TextIO], do_print: bool, speciesl
                              specific_names: list, all_names: list, photos: list, videos: list, art: list,
                              species_refs: dict, refdict: dict, binomial_name_cnts: dict,
                              specific_name_cnts: dict, higher_dict: dict, measurement_data: dict,
-                             handedness_data: list) -> None:
+                             handedness_data: list, field_guide_data: dict) -> None:
     """
     create the species index and all individual species pages
     """
@@ -4711,12 +5061,12 @@ def write_species_info_pages(outfile: Optional[TextIO], do_print: bool, speciesl
         if do_print:
             write_species_page(outfile, True, species, references, specific_names, all_names, photos, videos, art,
                                sprefs, refdict, binomial_name_cnts, specific_name_cnts, higher_dict, measurement_data,
-                               handedness_data)
+                               handedness_data, field_guide_data)
         else:
             with open(WEBOUT_PATH + "u_" + species.species + ".html", "w", encoding="utf-8") as suboutfile:
                 write_species_page(suboutfile, False, species, references, specific_names, all_names, photos, videos,
                                    art, sprefs, refdict, binomial_name_cnts, specific_name_cnts, higher_dict,
-                                   measurement_data, handedness_data)
+                                   measurement_data, handedness_data, field_guide_data)
 
     if do_print:
         write_measurement_guide(outfile, True)
@@ -4817,7 +5167,7 @@ def write_handedness_guide(outfile: TextIO, refdict: dict, do_print: bool = Fals
     if do_print:
         end_page_division(outfile)
     else:
-        common_html_footer(outfile)
+        common_html_footer(outfile, indexpath="../")
 
 
 def write_measurement_guide(outfile: TextIO, do_print: bool):
@@ -5454,7 +5804,8 @@ def write_life_cycle_pages(outfile: TextIO, do_print: bool) -> None:
 
 def create_html_phylogenies():
     gen_tree = phy2html.create_html_tree("data/fiddler_genera_tree.nwk", "", prefix="genera_")
-    sp_tree = phy2html.create_html_tree("data/fiddler_species_tree.nwk", "", prefix="species_")
+    sp_tree = phy2html.create_html_tree("data/fiddler_species_tree.nwk", "", prefix="species_", row_height="26px",
+                                        inc_images=True)
     return gen_tree, sp_tree
 
 
@@ -5529,7 +5880,8 @@ def write_phylogeny_pages(outfile: TextIO, genera_tree: list, species_tree: list
     outfile.write("     The phylogeny of fiddler crabs is still largely unresolved. Two trees are shown below: one "
                   "of just the genera and one including all species. The tree of genera is fairly solid, "
                   "but the species tree is a rough estimate with many polytomies. Both are predominantly based on the "
-                  "work of " + format_reference_cite(refdict["Shih2016.2"], do_print, AUTHOR_PAREN) + ".\n")
+                  f"work of {format_reference_cite(refdict["Shih2016.2"], do_print, AUTHOR_PAREN)} and "
+                  f"{format_reference_cite(refdict["Thurman2025"], do_print, AUTHOR_PAREN)}.\n")
     outfile.write("    </p>\n")
     outfile.write("\n")
     outfile.write("    <section class=\"spsection\">\n")
@@ -5874,6 +6226,7 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list, higher_ta
         outfile.write("           <li><a href=\"names\">Name Index</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </li>\n")
+        outfile.write("      <li>" + fetch_fa_glyph("list guide") + "<a href=\"field_guides\">Field Guides</a></li>\n")
         outfile.write("      <li>" + fetch_fa_glyph("list common") + "<a href=\"" + init_data().common_url +
                       "\">Common Names</a></li>\n")
         outfile.write("      <li>" + fetch_fa_glyph("list ranges") + "<a href=\"" + init_data().map_url +
@@ -5949,10 +6302,11 @@ def create_web_output_paths() -> None:
     create_path_and_index("images/flag-icon-css/flags/")
     create_path_and_index("images/flag-icon-css/flags/4x3/")
     create_path_and_index("locations/")
-    create_path_and_index("locations/keys/")
+    # create_path_and_index("locations/keys/")
     create_path_and_index("js/")
     create_path_and_index("sizes/")
     create_path_and_index("handedness/")
+    create_path_and_index("field_guides/")
 
 
 def create_temp_output_paths() -> None:
@@ -5963,6 +6317,20 @@ def create_temp_output_paths() -> None:
         os.makedirs(TMP_PATH)
     if not os.path.exists(TMP_MAP_PATH):
         os.makedirs(TMP_MAP_PATH)
+
+
+def copy_special_species_images(species: list) -> None:
+    for s in species:
+        if s.phy_photo:
+            try:
+                shutil.copy2(f"media/photos/phy_{s.species}.jpg", WEBOUT_PATH + "photos/")
+            except FileNotFoundError:
+                report_error(f"Missing file: media/photos/phy_{s.species}.jpg")
+        if s.key_photo:
+            try:
+                shutil.copy2(f"media/photos/ex_{s.species}.jpg", WEBOUT_PATH + "photos/")
+            except FileNotFoundError:
+                report_error(f"Missing file: media/photos/ex_{s.species}.jpg")
 
 
 def copy_support_files() -> None:
@@ -6002,7 +6370,14 @@ def copy_support_files() -> None:
                 "size_mean.png",
                 "size_range.png",
                 "size_summary.png",
-                "double_clawed.jpg"}
+                "double_clawed.jpg",
+                "icon_fiddler_purple.png",
+                "icon_fiddler_green.png",
+                "icon_fiddler_yellow.png",
+                "icon_error.png",
+                "icon_question.png",
+                "icon_fossil.png",
+                "icon_region.png"}
     for filename in filelist:
         try:
             shutil.copy2("resources/images/" + filename, WEBOUT_PATH + "images/")
@@ -6019,6 +6394,7 @@ def copy_support_files() -> None:
     filelist = {"fontawesome.min.js",
                 "brands.min.js",
                 "regular.min.js",
+                "duotone.min.js",
                 "solid.min.js"}
     for filename in filelist:
         try:
@@ -6116,6 +6492,29 @@ def copy_map_files(species: list, all_names: list, specific_names: list, point_l
     for p in point_locations:
         if not point_locations[p].unknown:
             copy_file(TMP_MAP_PATH + pointmap_name("location_" + place_to_filename(p)) + ".kmz")
+            copy_file(TMP_MAP_PATH + pointmap_name("location_" + place_to_filename(p)) + ".png")
+
+
+def copy_field_guide_files(field_guides: dict, images_list: list) -> None:
+    """
+    copy all image files from temp directory to web output directory
+    """
+    def copy_file(filename: str) -> None:
+        try:
+            shutil.copy2(filename, WEBOUT_PATH + "field_guides/")
+        except FileNotFoundError:
+            report_error("Missing file: " + filename)
+
+    # field guide maps
+    for guide in field_guides:
+        if field_guides[guide] != "general":
+            copy_file(TMP_MAP_PATH + "fg_map_" + guide + ".png")
+    copy_file(TMP_MAP_PATH + "fg_map_all.png")
+
+    # field guide images
+    image_set = set(images_list)
+    for image in image_set:
+        copy_file("resources/field_guide_images/" + image)
 
 
 def print_cover(outfile: TextIO) -> None:
@@ -6276,6 +6675,7 @@ def start_print(outfile: TextIO) -> None:
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/font-awesome/css/fontawesome.min.css\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/font-awesome/css/solid.min.css\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/font-awesome/css/brands.min.css\" />\n")
+    outfile.write("    <link rel=\"stylesheet\" href=\"resources/font-awesome/css/duotone.min.css\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/font-awesome/css/regular.min.css\" />\n")
     outfile.write("    <link rel=\"stylesheet\" href=\"resources/flag-icon-css/css/flag-icons.min.css\" />\n")
     outfile.write("  </head>\n")
@@ -6332,8 +6732,9 @@ def build_site() -> None:
         higher_taxa, higher_dict = TMB_Import.read_higher_taxa_data(init_data().higher_taxa_file)
         if not CHECK_DATA:
             print("...Creating Wordclouds...")
-            TMB_Create_Graphs.create_word_cloud_image(binomial_usage_cnts, specific_usage_cnts,
-                                                      init_data().wc_font_path)
+            # TMB_Create_Graphs.create_word_cloud_image(binomial_usage_cnts, specific_usage_cnts,
+            #                                           init_data().wc_font_path)
+            TMB_Create_Graphs.create_word_cloud_image(binomial_usage_cnts, specific_usage_cnts)
 
         print("...Reading Photos and Videos...")
         photos = TMB_Import.read_photo_data(init_data().photo_file)
@@ -6360,16 +6761,20 @@ def build_site() -> None:
                                                                                     point_locations, citelist)
         location_range_species = compare_ranges_to_locations(species_range_blocks, point_locations)
 
-        print("...Creating Taxonomic Keys...")
-        (tk_trait_data, tk_generic_notes,
-         tk_taxa_data) = TMB_TaxKeyGen.read_data_files(init_data().tax_key_trait_file,
-                                                       init_data().tax_key_trait_var_file,
-                                                       init_data().tax_key_generic_file, init_data().tax_key_taxa_file)
-        TMB_TaxKeyGen.link_taxonomic_key_data(tk_trait_data, tk_generic_notes, tk_taxa_data)
-        # clean_key_taxa(tk_taxa_data, species)
+        # field guides
+        field_guide_list = TMB_Import.read_field_guide_list(init_data().field_guide_file, species)
+        field_guide_data = TMB_Import.read_field_guide_data(field_guide_list, init_data().field_guide_data_path)
+        field_guide_map_data = TMB_Import.read_species_blocks(init_data().field_guide_map_file)
 
-        location_keys = create_all_taxonomic_keys(point_locations, location_species, location_range_species,
-                                                  tk_trait_data, tk_taxa_data)
+        # print("...Creating Taxonomic Keys...")
+        # (tk_trait_data, tk_generic_notes,
+        #  tk_taxa_data) = TMB_TaxKeyGen.read_data_files(init_data().tax_key_trait_file,
+        #                                                init_data().tax_key_trait_var_file,
+        #                                                init_data().tax_key_generic_file, init_data().tax_key_taxa_file)
+        # TMB_TaxKeyGen.link_taxonomic_key_data(tk_trait_data, tk_generic_notes, tk_taxa_data)
+
+        # location_keys = create_all_taxonomic_keys(point_locations, location_species, location_range_species,
+        #                                           tk_trait_data, tk_taxa_data)
 
         genera_tree, species_tree = create_html_phylogenies()
 
@@ -6394,9 +6799,14 @@ def build_site() -> None:
                 TMB_Create_Maps.create_all_maps(init_data(), point_locations)  # only draw location maps
             print("......Writing Locations......")
             with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
+                # write_location_index(outfile, False, point_locations, location_dict, location_species,
+                #                      location_sp_names, location_bi_names, location_direct_refs,
+                #                      location_cited_refs, references, location_range_species, location_keys,
+                #                      field_guide_data)
                 write_location_index(outfile, False, point_locations, location_dict, location_species,
                                      location_sp_names, location_bi_names, location_direct_refs,
-                                     location_cited_refs, references, location_range_species, location_keys)
+                                     location_cited_refs, references, location_range_species, None,
+                                     field_guide_data)
         else:
             if DRAW_MAPS:
                 print("...Creating Maps...")
@@ -6415,6 +6825,7 @@ def build_site() -> None:
                 create_web_output_paths()
                 print("...Creating Web Version...")
                 copy_support_files()
+                copy_special_species_images(species)
 
                 if OUTPUT_REFS:
                     print("......Writing References......")
@@ -6433,16 +6844,21 @@ def build_site() -> None:
                 print("......Writing Species......")
                 write_species_info_pages(None, False, species, references, specific_names, all_names, photos, videos,
                                          art, species_refs, refdict, binomial_name_cnts, specific_name_cnts,
-                                         higher_dict, measurement_data, handedness_data)
+                                         higher_dict, measurement_data, handedness_data, field_guide_data)
                 if DRAW_MAPS:
                     print("......Copying Maps......")
                     copy_map_files(species, all_names, specific_names, point_locations)
                 if OUTPUT_LOCS:
                     print("......Writing Locations......")
                     with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
+                        # write_location_index(outfile, False, point_locations, location_dict, location_species,
+                        #                      location_sp_names, location_bi_names, location_direct_refs,
+                        #                      location_cited_refs, references, location_range_species, location_keys,
+                        #                      field_guide_data)
                         write_location_index(outfile, False, point_locations, location_dict, location_species,
-                                             location_sp_names, location_bi_names, location_direct_refs,
-                                             location_cited_refs, references, location_range_species, location_keys)
+                                         location_sp_names, location_bi_names, location_direct_refs,
+                                         location_cited_refs, references, location_range_species, None,
+                                         field_guide_data)
                     with open(WEBOUT_PATH + init_data().map_url, "w", encoding="utf-8") as outfile:
                         write_geography_page(outfile, False, species)
                 print("......Writing Media Pages......")
@@ -6451,6 +6867,12 @@ def build_site() -> None:
                 write_all_art_pages(None, False, art, refdict)
                 with open(WEBOUT_PATH + init_data().video_url, "w", encoding="utf-8") as outfile:
                     write_video_index(outfile, False, videos)
+
+                print("......Writing Field Guides and Maps......")
+                field_guide_images = write_field_guides(field_guide_list, field_guide_data, field_guide_map_data)
+                TMB_Create_Maps.draw_field_guide_maps(init_data(), field_guide_map_data)
+                copy_field_guide_files(field_guide_list, field_guide_images)
+
                 print("......Writing Misc......")
                 with open(WEBOUT_PATH + init_data().syst_url, "w", encoding="utf-8") as outfile:
                     write_systematics_overview(outfile, False, taxon_ranks, higher_taxa, species, refdict)
@@ -6460,7 +6882,6 @@ def build_site() -> None:
                     write_life_cycle_pages(outfile, False)
                 with open(WEBOUT_PATH + init_data().unsuual_dev_url, "w", encoding="utf-8") as outfile:
                     write_unusual_development_pages(outfile, unusual_development_data, refdict, False)
-
                 with open(WEBOUT_PATH + init_data().tree_url, "w", encoding="utf-8") as outfile:
                     write_phylogeny_pages(outfile, genera_tree, species_tree, False, refdict)
                 with open(WEBOUT_PATH + init_data().morph_url, "w", encoding="utf-8") as outfile:
@@ -6484,7 +6905,7 @@ def build_site() -> None:
                     print("......Writing Species Pages......")
                     write_species_info_pages(printfile, True, species, references, specific_names, all_names, photos,
                                              videos, art, species_refs, refdict, binomial_name_cnts, specific_name_cnts,
-                                             higher_dict, measurement_data, handedness_data)
+                                             higher_dict, measurement_data, handedness_data, field_guide_data)
                     print("......Writing Name Pages......")
                     write_all_name_pages(printfile, True, refdict, citelist, all_names, specific_names, name_table,
                                          species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
@@ -6494,7 +6915,8 @@ def build_site() -> None:
                         write_geography_page(printfile, True, species)
                         write_location_index(printfile, True, point_locations, location_dict, location_species,
                                              location_sp_names, location_bi_names, location_direct_refs,
-                                             location_cited_refs, references, location_range_species, None)
+                                             location_cited_refs, references, location_range_species, None,
+                                             field_guide_data)
                     print("......Writing Media Pages......")
                     write_main_morphology_pages(printfile, True, morphology)
                     write_photo_index(printfile, True, species, photos, refdict)
