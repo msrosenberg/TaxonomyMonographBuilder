@@ -71,7 +71,7 @@ class InitializationData:
         self.video_url = "uca_videos.html"
         self.map_url = "uca_ranges.html"
         self.lifecycle_url = "uca_lifecycle.html"
-        self.unsuual_dev_url = "uca_unusual_development.html"
+        self.unusual_dev_url = "uca_unusual_development.html"
         self.tree_url = "uca_phylogeny.html"
         self.art_sci_url = "uca_art_science.html"
         self.art_stamp_url = "uca_art_stamps.html"

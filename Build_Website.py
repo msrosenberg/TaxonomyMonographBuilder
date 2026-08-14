@@ -27,16 +27,16 @@ from TMB_SpeciesXRef import init_species_crossref, find_species_by_name
 import phy2html
 
 
-WEBOUT_PATH = "webout/"
-MEDIA_PATH = "media/"
-TMP_PATH = "temp/"
-TMP_MAP_PATH = TMP_PATH + "maps/"
-MAP_PATH = "maps/"
+WEBOUT_PATH = 'webout/'
+MEDIA_PATH = 'media/'
+TMP_PATH = 'temp/'
+TMP_MAP_PATH = TMP_PATH + 'maps/'
+MAP_PATH = 'maps/'
 
-FOSSIL_IMAGE = " <span class=\"fossil-img\">&#9760;</span>"
-STAR = "<sup>*</sup>"
-DAGGER = "<sup>†</sup>"
-DOUBLEDAGGER = "<sup>‡</sup>"
+FOSSIL_IMAGE = ' <span class="fossil-img">&#9760;</span>'
+STAR = '<sup>*</sup>'
+DAGGER = '<sup>†</sup>'
+DOUBLEDAGGER = '<sup>‡</sup>'
 
 CitationStyle = int
 AUTHOR_NOPAREN = 0      # Smith 1970
@@ -54,8 +54,8 @@ CHECK_LOCATIONS = False
 # this flag controls whether additional location data should be fetched from iNaturalist
 INCLUDE_INAT = False
 # Suppress some of the more time-consuming output; only meant for when testing others elements
-OUTPUT_REFS = True
-OUTPUT_LOCS = True
+OUTPUT_REFS = False
+OUTPUT_LOCS = False
 # these flags control creating print and web output, respectively
 OUTPUT_PRINT = False
 OUTPUT_WEB = True
@@ -79,73 +79,73 @@ def common_header_part1(outfile: TextIO, title: str, indexpath: str = "") -> Non
     """
     part 1 of the common header for all webout HTML files
     """
-    outfile.write("<!DOCTYPE HTML>\n")
-    outfile.write("<html lang=\"en\">\n")
-    outfile.write("  <head>\n")
-    outfile.write("  <!-- Google tag (gtag.js) -->\n")
-    outfile.write("  <script async src=\"https://www.googletagmanager.com/gtag/js?id=G-94FNMMTWTQ\"></script>\n")
-    outfile.write("  <script>\n")
-    outfile.write("    window.dataLayer = window.dataLayer || [];\n")
-    outfile.write("    function gtag(){dataLayer.push(arguments);}\n")
-    outfile.write("    gtag('js', new Date());\n")
-    outfile.write("    gtag('config', 'G-94FNMMTWTQ');\n")
-    outfile.write("  </script>\n")
-    outfile.write("    <meta charset=\"utf-8\" />\n")
-    outfile.write("    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n")
-    outfile.write("    <title>" + remove_html(title) + "</title>\n")
-    outfile.write("    <meta name=\"description\" content=\"Fiddler Crabs\" />\n")
-    outfile.write("    <link rel=\"icon\" sizes=\"128x128\" href=\"" + indexpath +
-                  "favicon128.png\" type=\"image/png\" />\n")
-    outfile.write("    <link rel=\"icon\" sizes=\"96x96\" href=\"" + indexpath +
-                  "favicon96.png\" type=\"image/png\" />\n")
-    outfile.write("    <link rel=\"icon\" sizes=\"72x72\" href=\"" + indexpath +
-                  "favicon72.png\" type=\"image/png\" />\n")
-    outfile.write("    <link rel=\"icon\" sizes=\"48x48\" href=\"" + indexpath +
-                  "favicon48.png\" type=\"image/png\" />\n")
-    outfile.write("    <link rel=\"icon\" sizes=\"32x32\" href=\"" + indexpath +
-                  "favicon32.png\" type=\"image/png\" />\n")
-    outfile.write("    <link rel=\"icon\" sizes=\"24x24\" href=\"" + indexpath +
-                  "favicon24.png\" type=\"image/png\" />\n")
-    outfile.write("    <link rel=\"icon\" sizes=\"16x16\" href=\"" + indexpath +
-                  "favicon16.png\" type=\"image/png\" />\n")
-    outfile.write("    <link rel=\"apple-touch-icon-precomposed\" href=\"" + indexpath +
-                  "apple-touch-icon-precomposed.png\">\n")
-    outfile.write("    <link rel=\"apple-touch-icon-precomposed\" sizes=\"72x72\" "
-                  "href=\"" + indexpath + "apple-touch-icon-72x72-precomposed.png\">\n")
-    outfile.write("    <link rel=\"apple-touch-icon-precomposed\" sizes=\"114x114\" "
-                  "href=\"" + indexpath + "apple-touch-icon-114x114-precomposed.png\">\n")
-    outfile.write("    <link rel=\"apple-touch-icon-precomposed\" sizes=\"144x144\" "
-                  "href=\"" + indexpath + "apple-touch-icon-144x144-precomposed.png\">\n")
-    outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath + "uca_style.css\" />\n")
-    outfile.write("    <script defer src=\"" + indexpath + "js/solid.min.js\"></script>\n")
-    outfile.write("    <script defer src=\"" + indexpath + "js/regular.min.js\"></script>\n")
-    outfile.write("    <script defer src=\"" + indexpath + "js/brands.min.js\"></script>\n")
-    outfile.write("    <script defer src=\"" + indexpath + "js/duotone.min.js\"></script>\n")
-    outfile.write("    <script defer src=\"" + indexpath + "js/fontawesome.min.js\"></script>\n")
-    outfile.write("    <link rel=\"stylesheet\" href=\"" + indexpath +
-                  "images/flag-icon-css/css/flag-icons.min.css\" />\n")
-    outfile.write("    <link rel=\"author\" href=\"" + init_data().site_author_email + "\" />\n")
+    outfile.write('<!DOCTYPE HTML>\n')
+    outfile.write('<html lang="en">\n')
+    outfile.write('  <head>\n')
+    outfile.write('  <!-- Google tag (gtag.js) -->\n')
+    outfile.write('  <script async src="https://www.googletagmanager.com/gtag/js?id=G-94FNMMTWTQ"></script>\n')
+    outfile.write('  <script>\n')
+    outfile.write('    window.dataLayer = window.dataLayer || [];\n')
+    outfile.write('    function gtag(){dataLayer.push(arguments);}\n')
+    outfile.write('    gtag(\'js\', new Date());\n')
+    outfile.write('    gtag(\'config\', \'G-94FNMMTWTQ\');\n')
+    outfile.write('  </script>\n')
+    outfile.write('    <meta charset="utf-8" />\n')
+    outfile.write('    <meta name="viewport" content="width=device-width, initial-scale=1.0" />\n')
+    outfile.write(f'    <title>{remove_html(title)}</title>\n')
+    outfile.write('    <meta name="description" content="Fiddler Crabs" />\n')
+
+    # outfile.write(f'    <link rel="icon" sizes="128x128" href="{indexpath}favicon128.png" type="image/png" />\n')
+    # outfile.write(f'    <link rel="icon" sizes="96x96" href="{indexpath}favicon96.png" type="image/png" />\n')
+    # outfile.write(f'    <link rel="icon" sizes="72x72" href="{indexpath}favicon72.png" type="image/png" />\n')
+    # outfile.write(f'    <link rel="icon" sizes="48x48" href="{indexpath}favicon48.png" type="image/png" />\n')
+    # outfile.write(f'    <link rel="icon" sizes="32x32" href="{indexpath}favicon32.png" type="image/png" />\n')
+    # outfile.write(f'    <link rel="icon" sizes="24x24" href="{indexpath}favicon24.png" type="image/png" />\n')
+    # outfile.write(f'    <link rel="icon" sizes="16x16" href="{indexpath}favicon16.png" type="image/png" />\n')
+    # outfile.write(f'    <link rel="apple-touch-icon-precomposed" '
+    #               f'href="{indexpath}apple-touch-icon-precomposed.png">\n')
+    # outfile.write('    <link rel="apple-touch-icon-precomposed" sizes="72x72" '
+    #               f'href="{indexpath}apple-touch-icon-72x72-precomposed.png">\n')
+    # outfile.write('    <link rel="apple-touch-icon-precomposed" sizes="114x114" '
+    #               f'href="{indexpath}apple-touch-icon-114x114-precomposed.png">\n')
+    # outfile.write('    <link rel="apple-touch-icon-precomposed" sizes="144x144" '
+    #               f'href="{indexpath}apple-touch-icon-144x144-precomposed.png">\n')
+    outfile.write(f'    <link rel="icon" sizes="any" href="{indexpath}favicon.ico" />\n')
+    outfile.write(f'    <link rel="apple-touch-icon" sizes="180x180" href="{indexpath}apple-touch-icon.png" />\n')
+    outfile.write(f'    <link rel="icon" type="image/png" sizes="32x32" href="{indexpath}favicon-32x32.png" />\n')
+    outfile.write(f'    <link rel="icon" type="image/png" sizes="16x16" href="{indexpath}favicon-16x16.png" />\n')
+    outfile.write(f'    <link rel="manifest" href="{indexpath}site.webmanifest">\n')
+
+    outfile.write(f'    <link rel="stylesheet" href="{indexpath}uca_style.css" />\n')
+    outfile.write(f'    <script defer src="{indexpath}js/solid.min.js"></script>\n')
+    outfile.write(f'    <script defer src="{indexpath}js/regular.min.js"></script>\n')
+    outfile.write(f'    <script defer src="{indexpath}js/brands.min.js"></script>\n')
+    outfile.write(f'    <script defer src="{indexpath}js/duotone.min.js"></script>\n')
+    outfile.write(f'    <script defer src="{indexpath}js/duotone-regular.min.js"></script>\n')
+    outfile.write(f'    <script defer src="{indexpath}js/light.min.js"></script>\n')
+    outfile.write(f'    <script defer src="{indexpath}js/fontawesome.min.js"></script>\n')
+    outfile.write(f'    <link rel="stylesheet" href="{indexpath}images/flag-icon-css/css/flag-icons.min.css" />\n')
+    outfile.write(f'    <link rel="author" href="{init_data().site_author_email}" />\n')
 
 
 def common_header_part2(outfile: TextIO, indexpath: str = "", include_map: bool = False) -> None:
     """
     part 2 of the common header for all webout HTML files
     """
-    outfile.write("  </head>\n")
-    outfile.write("\n")
+    outfile.write('  </head>\n')
+    outfile.write('\n')
     if include_map:
-        outfile.write("  <body onload=\"initialize()\">\n")
+        outfile.write('  <body onload="initialize()">\n')
     else:
-        outfile.write("  <body>\n")
-    outfile.write("    <div id=\"skip-links\" role=\"complementary\" aria-label=\"Skip links menu\">")
-    outfile.write("<a href=\"#Main\" tabindex=\"1\">Skip to content</a></div>\n")
-    outfile.write("    <div id=\"home\">\n")
-    outfile.write("      <a href=\"" + indexpath + "index.html\" class=\"home-title\">Fiddler Crabs</a>\n")
-    outfile.write("      <a href=\"" + indexpath +
-                  "index.html\" class=\"home-link\">" + fetch_fa_glyph("home") + "Home</a>\n")
+        outfile.write('  <body>\n')
+    outfile.write('    <div id="skip-links" role="complementary" aria-label="Skip links menu">')
+    outfile.write('<a href="#Main" tabindex="1">Skip to content</a></div>\n')
+    outfile.write('    <div id="home">\n')
+    outfile.write(f'      <a href="{indexpath}index.html" class="home-title">Fiddler Crabs</a>\n')
+    outfile.write(f'      <a href="{indexpath}index.html" class="home-link">' + fetch_fa_glyph("home") + 'Home</a>\n')
     # outfile.write("      <a href=\"" + indexpath +
     #               "blog\" class=\"home-link\">" + fetch_fa_glyph("blog") + "Blog</a>\n")
-    outfile.write("    </div>\n")
+    outfile.write('    </div>\n')
 
 
 # def start_google_map_header(outfile: TextIO) -> None:
@@ -234,19 +234,19 @@ def start_google_chart_header(outfile: TextIO) -> None:
     """
     start of common header entries for webout html files which contain Google chart elements
     """
-    outfile.write("    <script type=\"text/javascript\" src=\"https://www.google.com/jsapi\"></script>\n")
-    outfile.write("    <script type=\"text/javascript\">\n")
-    outfile.write("      google.load(\"visualization\", \"1\", {packages:[\"corechart\"]});\n")
-    outfile.write("      google.setOnLoadCallback(drawChart);\n")
-    outfile.write("      function drawChart() {\n")
+    outfile.write('    <script type="text/javascript" src="https://www.google.com/jsapi"></script>\n')
+    outfile.write('    <script type="text/javascript">\n')
+    outfile.write('      google.load("visualization", "1", {packages:["corechart"]});\n')
+    outfile.write('      google.setOnLoadCallback(drawChart);\n')
+    outfile.write('      function drawChart() {\n')
 
 
 def end_google_chart_header(outfile: TextIO) -> None:
     """
     end of common header entries for webout html files which contain Google chart elements
     """
-    outfile.write("      }\n")
-    outfile.write("    </script>\n")
+    outfile.write('      }\n')
+    outfile.write('    </script>\n')
 
 
 def common_html_header(outfile: TextIO, title: str, indexpath: str = "") -> None:
@@ -261,8 +261,8 @@ def common_html_footer(outfile: TextIO, indexpath: str = "") -> None:
     """
     common footer and closing elements for all webout HTML files
     """
-    outfile.write("\n")
-    outfile.write("    <footer>\n")
+    outfile.write('\n')
+    outfile.write('    <footer>\n')
     # outfile.write("       <figure id=\"footmap\"><script type=\"text/javascript\" "
     #               "src=\"//rf.revolvermaps.com/0/0/4.js?i=5f9t1sywiez&amp;m=0&amp;h=75&amp;c=ff0000&amp;r=30\" "
     #               "async=\"async\"></script><figcaption>Visitors</figcaption></figure>\n")
@@ -281,23 +281,23 @@ def common_html_footer(outfile: TextIO, indexpath: str = "") -> None:
     # outfile.write("       <p id=\"copyright\">Release: " + init_data().version +
     #               " &mdash; Copyright &copy; 2003&ndash;" + str(init_data().current_year) +
     #               " All Rights Reserved</p>\n")
-    outfile.write("    </footer>\n")
-    outfile.write("  </body>\n")
-    outfile.write("</html>\n")
+    outfile.write('    </footer>\n')
+    outfile.write('  </body>\n')
+    outfile.write('</html>\n')
 
 
 def start_page_division(outfile: TextIO, page_class: str) -> None:
     """
     write start page information for print output
     """
-    outfile.write('  <div class="' + page_class + '">\n')
+    outfile.write(f'  <div class="{page_class}">\n')
 
 
 def end_page_division(outfile: TextIO) -> None:
     """
     write end page information for print output
     """
-    outfile.write("  </div>\n")
+    outfile.write('  </div>\n')
 
 
 def create_blank_index(fname: str) -> None:
@@ -305,16 +305,16 @@ def create_blank_index(fname: str) -> None:
     create a blank index.html file for webout directories to prevent browsers from listing containing files
     """
     with open(fname, "w") as outfile:
-        outfile.write("<!DOCTYPE HTML>\n")
+        outfile.write('<!DOCTYPE HTML>\n')
         outfile.write('<html lang="en">\n')
-        outfile.write("  <head>\n")
+        outfile.write('  <head>\n')
         outfile.write('    <meta charset="utf-8" />\n')
-        outfile.write("    <title>n/a</title>\n")
+        outfile.write('    <title>n/a</title>\n')
         outfile.write('    <meta name="description" content="n/a" />\n')
-        outfile.write("  </head>\n")
-        outfile.write("  <body>\n")
-        outfile.write("  </body>\n")
-        outfile.write("</html>\n")
+        outfile.write('  </head>\n')
+        outfile.write('  <body>\n')
+        outfile.write('  </body>\n')
+        outfile.write('</html>\n')
 
 
 def fetch_fa_glyph(glyph: Optional[str]) -> str:
@@ -323,6 +323,8 @@ def fetch_fa_glyph(glyph: Optional[str]) -> str:
 
     centralized function to create fontawesome decoration based on specified glyph keyword/style
     """
+    """
+    # font awesome 5 glyphs
     glyph_dict = {
         "home":             " fa-home\" aria-hidden",
         "blog":             " fa-pencil-alt\" aria-hidden",
@@ -375,27 +377,92 @@ def fetch_fa_glyph(glyph: Optional[str]) -> str:
         "tax key":          " fa-key\" aria-hidden",
         "location marker":  "r fa-map-marked-alt\" aria-hidden"
     }
+    """
 
-    if glyph in glyph_dict:
-        return f"<span role=\"presentation\" class=\"fa{glyph_dict[glyph]}></span> "
-    else:
-        if glyph is not None:
-            report_error("missing glyph: " + glyph)
-        return ""
+    glyph_dict = {
+        # "home":             'duotone fa-solid fa-house-chimney" style="--fa-secondary-color: white; '
+        #                     '--fa-secondary-opacity: 1;" aria-hidden',
+        "home":             'solid fa-house-chimney" aria-hidden',
+        "mail":             'solid fa-envelope" aria-hidden',
+        "site cite":        'solid fa-pencil" aria-hidden',
+        "index":            'solid fa-list" aria-hidden',
+        "summary charts":   'solid fa-chart-line-up" aria-hidden',
+        "location":         'solid fa-location-dot" aria-hidden',
+        "citation":         'solid fa-pen-to-square" aria-hidden',
+        "specimen":         'regular fa-crab" aria-hidden',
+        "sequence":         'solid fa-dna" aria-hidden',
+        "original":         'solid fa-left" aria-hidden',
+        "computed":         'solid fa-gears" aria-hidden',
+        "geography":        'regular fa-map" aria-hidden',
+        "synonymy":         'solid fa-arrow-right-arrow-left" aria-hidden',
+        "specific name":    'solid fa-window-minimize" aria-hidden',
+        "info":             'solid fa-circle-info" aria-hidden',
+        "accepted species": 'solid fa-circle-check" aria-hidden',
+        "download":         'solid fa-download" aria-hidden',
+        "file download":    'solid fa-file-arrow-down" aria-hidden',
+        "maps":             'regular fa-map" aria-hidden',
+        "photo":            'solid fa-camera" aria-hidden',
+        "video":            'solid fa-video" aria-hidden',
+        "references":       'solid fa-book" aria-hidden',
+        "art":              'solid fa-paintbrush" aria-hidden',
+        "measure":          'regular fa-ruler" aria-hidden',
+        "handedness":       'light fa-hands-holding" aria-hidden',
+        "guide":            'regular fa-magnifying-glass" aria-hidden',
+        "external link":    'duotone fa-solid fa-arrow-up-right-from-square" '
+                            'style="--fa-secondary-color: gray; --fa-secondary-opacity: 1;" aria-hidden',
+        "list pdf":         'li fa-regular fa-file-pdf" aria-hidden',
+        "list github":      'li fa-brands fa-github" aria-hidden',
+        "list systematics": 'li fa-solid fa-signal fa-rotate-270" aria-hidden',
+        "list phylogeny":   'li fa-solid fa-share-nodes fa-rotate-270" aria-hidden',
+        "list species":     'li fa-solid fa-list" aria-hidden',
+        "list common":      'li fa-regular fa-comments" aria-hidden',
+        "list guide":       'li fa-regular fa-magnifying-glass" aria-hidden',
+        "list ranges":      'li fa-regular fa-map" aria-hidden',
+        # "list morphology":  'li fa-duotone fa-solid fa-crab" '
+        #                     'style="--fa-secondary-color: red; --fa-secondary-opacity: 1;" aria-hidden',
+        "list morphology":  'li fa-duotone fa-regular fa-crab" '
+                            'style="--fa-secondary-color: red; --fa-secondary-opacity: 1;" aria-hidden',
+        "list references":  'li fa-solid fa-book" aria-hidden',
+        "list lifecycle":   'li fa-solid fa-arrows-rotate" aria-hidden',
+        "list photo":       'li fa-solid fa-camera-alt" aria-hidden',
+        "list video":       'li fa-solid fa-video" aria-hidden',
+        "list art":         'li fa-solid fa-paintbrush" aria-hidden',
+        "list site cite":   'li fa-solid fa-pencil" aria-hidden',
+        "bad location":     'solid fa-triangle-exclamation" style="color: red" title="Problematic Location: '
+                            'Outside range of all fiddler crabs or this particular species."',
+        "questionable id":  'solid fa-circle-question" style="color: goldenrod" title="Questionable ID: '
+                            'Species identity uncertain."',
+        "location marker":  'regular fa-map-location" aria-hidden',
+        "intersex":         'solid fa-mercury" aria-hidden',
+        "list stamp":       'li fa-regular fa-postage-stamp" aria-hidden',
+        "list sciart":      'li fa-regular fa-image" aria-hidden',
+        "list crafts":      'li fa-solid fa-scissors" aria-hidden',
+        "list loc index":   'li fa-regular fa-globe-pointer" aria-hidden',
+        "list name index":  'li fa-light fa-list-tree" aria-hidden',
+        "list develop":     'li fa-solid fa-mercury" aria-hidden',
+        "list hand":        'li fa-light fa-hands-holding" aria-hidden'
+    }
+
+    if glyph is not None:
+        if glyph in glyph_dict:
+            return f'<span role="presentation" class="fa-{glyph_dict[glyph]}></span> '
+        else:
+            report_error('missing glyph: ' + glyph)
+    return ""
 
 
 def rel_link_prefix(do_print: bool, prefix: str = "") -> str:
     if do_print:
-        return "#"
+        return '#'
     else:
         return prefix
 
 
 def abs_link_prefix(do_absolute: bool) -> str:
     if do_absolute:
-        return init_data().site_url() + "/"
+        return init_data().site_url() + '/'
     else:
-        return ""
+        return ''
 
 
 def format_reference_full(ref: TMB_Classes.ReferenceClass, do_print: bool) -> str:
@@ -5516,7 +5583,7 @@ def write_unusual_development_pages(outfile: TextIO, abdevdata: list, refdict: d
     else:
         common_html_header(outfile, "Unusual Development in Fiddler Crabs")
         media_path = ""
-    outfile.write("    <header id=\"" + init_data().unsuual_dev_url + "\">\n")
+    outfile.write("    <header id=\"" + init_data().unusual_dev_url + "\">\n")
     outfile.write("      <h1 class=\"bookmark1\">Unusual Development</h1>\n")
     if not do_print:
         outfile.write("      <nav>\n")
@@ -5528,7 +5595,7 @@ def write_unusual_development_pages(outfile: TextIO, abdevdata: list, refdict: d
                 if data[0].startswith(":"):
                     navlist.append(data)
         for d in navlist:
-            outfile.write(f"          <li><a href=\"#{d[3]}\">{d[1]}</a></li>\n")
+            outfile.write(f"          <li><a href=\"#{d[3]}\">{fetch_fa_glyph(d[4])}{d[1]}</a></li>\n")
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
     outfile.write("    </header>\n")
@@ -5552,7 +5619,7 @@ def write_unusual_development_pages(outfile: TextIO, abdevdata: list, refdict: d
                 else:
                     not_first = True
                 outfile.write('    <section class="spsection">\n')
-                outfile.write(f'      <h2 id="{data[3]}" class="bookmark2">{data[1]}</h2>\n')
+                outfile.write(f'      <h2 id="{data[3]}" class="bookmark2">{fetch_fa_glyph(data[4])}{data[1]}</h2>\n')
                 outstr = replace_media_path(data[2], media_path)
                 outfile.write("      <p>\n")
                 outfile.write(replace_species_in_string(outstr, do_print=do_print) + "\n")
@@ -5597,7 +5664,7 @@ def write_life_cycle_pages(outfile: TextIO, do_print: bool) -> None:
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"#{}\">{}</a></li>\n".format(init_data().unsuual_dev_url,
+        outfile.write("          <li><a href=\"#{}\">{}</a></li>\n".format(init_data().unusual_dev_url,
                                                                            "Unusual Development"))
         outfile.write("        </ul>\n")
         outfile.write("      </nav>\n")
@@ -6033,7 +6100,7 @@ def write_citation_page(refdict: dict) -> None:
         outfile.write("        <li><a href=\"references/Rosenberg2014.html\">" + ref.formatted_html + "</a></li>\n")
         outfile.write("      </ul>\n")
         outfile.write("    </div>\n")
-        outfile.write("    <ul class=\"fa-ul\">\n")
+        outfile.write('    <ul class="fa-ul">\n')
         outfile.write("      <li>" + fetch_fa_glyph("list pdf") +
                       "<a href=\"https://dx.plos.org/10.1371/journal.pone.0101704\">Read paper online at "
                       "PLoS ONE</a></li>\n")
@@ -6050,9 +6117,9 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list, higher_ta
     """
     if do_print:
         start_page_division(outfile, "base_page")
-        outfile.write("    <header id=\"introduction\">\n")
-        outfile.write("      <h1 class=\"bookmark1\">Introduction</h1>\n")
-        outfile.write("    </header>\n")
+        outfile.write('    <header id="introduction">\n')
+        outfile.write('      <h1 class="bookmark1">Introduction</h1>\n')
+        outfile.write('    </header>\n')
     else:
         common_html_header(outfile, "Fiddler Crabs")
     outfile.write("    <p>\n")
@@ -6106,61 +6173,68 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list, higher_ta
     if do_print:
         end_page_division(outfile)
     else:
-        outfile.write("    <h2>Information</h2>\n")
-        outfile.write("    <ul class=\"fa-ul\">\n")
-        outfile.write("      <li>" + fetch_fa_glyph("list systematics") + "<a href=\"" + init_data().syst_url +
-                      "\">Systematics</a></li>\n")
-        outfile.write("      <li>" + fetch_fa_glyph("list phylogeny") + "<a href=\"" + init_data().tree_url +
-                      "\">Phylogeny</a></li>\n")
-        outfile.write("      <li>" + fetch_fa_glyph("list species") + "<a href=\"" + init_data().species_url +
-                      "\">Species</a>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("           <li><a href=\"names\">Name Index</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </li>\n")
+        outfile.write('    <h2>Information</h2>\n')
+        outfile.write('    <ul class="fa-ul">\n')
+        outfile.write('      <li>' + fetch_fa_glyph("list systematics") + '<a href="' + init_data().syst_url +
+                      '">Systematics</a></li>\n')
+        outfile.write('      <li>' + fetch_fa_glyph("list phylogeny") + '<a href="' + init_data().tree_url +
+                      '">Phylogeny</a></li>\n')
+        outfile.write('      <li>' + fetch_fa_glyph("list species") + '<a href="' + init_data().species_url +
+                      '">Species</a>\n')
+        outfile.write('        <ul class="fa-ul">\n')
+        outfile.write(f'           <li>{fetch_fa_glyph("list name index")}<a href="names">Name Index</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </li>\n')
         outfile.write("      <li>" + fetch_fa_glyph("list guide") + "<a href=\"field_guides\">Field Guides</a></li>\n")
         outfile.write("      <li>" + fetch_fa_glyph("list common") + "<a href=\"" + init_data().common_url +
                       "\">Common Names</a></li>\n")
         outfile.write("      <li>" + fetch_fa_glyph("list ranges") + "<a href=\"" + init_data().map_url +
                       "\">Geographic Ranges</a>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("           <li><a href=\"locations\">Location Index</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </li>\n")
+        outfile.write('        <ul class="fa-ul">\n')
+        outfile.write(f'           <li>{fetch_fa_glyph("list loc index")}<a href="locations">Location Index</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </li>\n')
         outfile.write("      <li>" + fetch_fa_glyph("list lifecycle") + "<a href=\"" + init_data().lifecycle_url +
                       "\">Life Cycle</a>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("           <li><a href=\"" + init_data().unsuual_dev_url + "\">Unusual Development</a></li>\n")
-        outfile.write("        </ul></li>\n")
+        outfile.write('        <ul class="fa-ul">\n')
+        outfile.write(f'           <li>{fetch_fa_glyph("list develop")}<a href="{init_data().unusual_dev_url}">'
+                      f'Unusual Development</a></li>\n')
+        outfile.write('        </ul></li>\n')
 
         outfile.write("      <li>" + fetch_fa_glyph("list morphology") + "<a href=\"" + init_data().morph_url +
                       "\">Morphology</a>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("           <li><a href=\"" + init_data().handedness_url + "\">Male Handedness</a></li>\n")
-        outfile.write("        </ul></li>\n")
+        outfile.write('        <ul class="fa-ul">\n')
+        outfile.write(f'           <li>{fetch_fa_glyph("list hand")}<a href="{init_data().handedness_url}">'
+                      f'Male Handedness</a></li>\n')
+        outfile.write('        </ul></li>\n')
         outfile.write("      <li>" + fetch_fa_glyph("list references") + "<a href=\"" + init_data().ref_url +
                       "\">Comprehensive Reference List</a></li>\n")
         outfile.write("    </ul>\n")
-        outfile.write("    <h2>Multimedia</h2>\n")
-        outfile.write("    <ul class=\"fa-ul\">\n")
-        outfile.write("      <li>" + fetch_fa_glyph("list photo") + "<a href=\"" + init_data().photo_url +
-                      "\">Photos</a></li>\n")
-        outfile.write("      <li>" + fetch_fa_glyph("list video") + "<a href=\"" + init_data().video_url +
-                      "\">Videos</a></li>\n")
+        outfile.write('    <h2>Multimedia</h2>\n')
+        outfile.write('    <ul class="fa-ul">\n')
+        outfile.write(f'      <li>{fetch_fa_glyph("list photo")}<a href="{init_data().photo_url}">Photos</a></li>\n')
+        outfile.write(f'      <li>{fetch_fa_glyph("list video")}<a href="{init_data().video_url}">Videos</a></li>\n')
         outfile.write("      <li>" + fetch_fa_glyph("list art") + "Art\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + init_data().art_sci_url + "\">Scientific Art</a></li>\n")
-        outfile.write("          <li><a href=\"" + init_data().art_stamp_url + "\">Postage Stamps</a></li>\n")
-        outfile.write("          <li><a href=\"" + init_data().art_craft_url + "\">Crafts</a></li>\n")
+        # outfile.write("        <ul>\n")
+        # outfile.write("          <li><a href=\"" + init_data().art_sci_url + "\">Scientific Art</a></li>\n")
+        # outfile.write("          <li><a href=\"" + init_data().art_stamp_url + "\">Postage Stamps</a></li>\n")
+        # outfile.write("          <li><a href=\"" + init_data().art_craft_url + "\">Crafts</a></li>\n")
+        outfile.write('        <ul class="fa-ul">\n')
+        outfile.write(f'          <li>{fetch_fa_glyph("list sciart")}<a href="{init_data().art_sci_url}">'
+                      f'Scientific Art</a></li>\n')
+        outfile.write(f'          <li>{fetch_fa_glyph("list stamp")}<a href="{init_data().art_stamp_url}">'
+                      f'Postage Stamps</a></li>\n')
+        outfile.write(f'          <li>{fetch_fa_glyph("list crafts")}<a href="{init_data().art_craft_url}">'
+                      f'Crafts</a></li>\n')
         outfile.write("        </ul>\n")
         outfile.write("      </li>\n")
         outfile.write("    </ul>\n")
         outfile.write("    <h2>Miscellania</h2>\n")
-        outfile.write("    <ul class=\"fa-ul\">\n")
-        outfile.write("      <li>" + fetch_fa_glyph("list site cite") + "<a href=\"" + init_data().cite_url +
-                      "\">Citation info for this website</a></li>\n")
-        outfile.write("      <li>" + fetch_fa_glyph("list github") +
-                      "<a href=\"https://github.com/msrosenberg/fiddlercrab.info\">Website data on GitHub</a></li>\n")
+        outfile.write('    <ul class="fa-ul">\n')
+        outfile.write(f'      <li>{fetch_fa_glyph("list site cite")}<a href="{init_data().cite_url}">'
+                      f'Citation info for this website</a></li>\n')
+        outfile.write(f'      <li>{fetch_fa_glyph("list github")}'
+                      f'<a href="https://github.com/msrosenberg/fiddlercrab.info">Website data on GitHub</a></li>\n')
         outfile.write("    </ul>\n")
         common_html_footer(outfile)
 
@@ -6229,22 +6303,30 @@ def copy_support_files() -> None:
     this includes icons, supporting images, and CSS files
     """
     # root folder files
-    filelist = {"favicon128.png",
-                "favicon96.png",
-                "favicon72.png",
-                "favicon48.png",
-                "favicon32.png",
-                "favicon24.png",
-                "favicon16.png",
-                "favicon.ico",
+    # filelist = {"favicon128.png",
+    #             "favicon96.png",
+    #             "favicon72.png",
+    #             "favicon48.png",
+    #             "favicon32.png",
+    #             "favicon24.png",
+    #             "favicon16.png",
+    #             "favicon.ico",
+    #             "apple-touch-icon.png",
+    #             "apple-touch-icon-precomposed.png",
+    #             "apple-touch-icon-72x72.png",
+    #             "apple-touch-icon-72x72-precomposed.png",
+    #             "apple-touch-icon-114x114.png",
+    #             "apple-touch-icon-114x114-precomposed.png",
+    #             "apple-touch-icon-144x144.png",
+    #             "apple-touch-icon-144x144-precomposed.png",
+    #             "uca_style.css"}
+    filelist = {"android-chrome-192x192.png",
+                "android-chrome-512x512.png",
                 "apple-touch-icon.png",
-                "apple-touch-icon-precomposed.png",
-                "apple-touch-icon-72x72.png",
-                "apple-touch-icon-72x72-precomposed.png",
-                "apple-touch-icon-114x114.png",
-                "apple-touch-icon-114x114-precomposed.png",
-                "apple-touch-icon-144x144.png",
-                "apple-touch-icon-144x144-precomposed.png",
+                "favicon-16x16.png",
+                "favicon-32x32.png",
+                "favicon.ico",
+                "site.webmanifest"
                 "uca_style.css"}
     for filename in filelist:
         try:
@@ -6281,11 +6363,18 @@ def copy_support_files() -> None:
         except FileNotFoundError:
             report_error("Missing file: " + TMP_PATH + filename)
     # font-awesome files
+    # filelist = {"fontawesome.min.js",
+    #             "brands.min.js",
+    #             "regular.min.js",
+    #             "duotone.min.js",
+    #             "solid.min.js"}
     filelist = {"fontawesome.min.js",
                 "brands.min.js",
                 "regular.min.js",
                 "duotone.min.js",
-                "solid.min.js"}
+                "duotone-regular.min.js",
+                "solid.min.js",
+                "light.min.js"}
     for filename in filelist:
         try:
             shutil.copy2("resources/font-awesome/js/" + filename, WEBOUT_PATH + "js/")
@@ -6497,7 +6586,7 @@ def print_table_of_contents(outfile: TextIO, species_list: list) -> None:
     outfile.write("       <li><a href=\"#" + init_data().tree_url + "\">Phylogeny</a></li>\n")
     outfile.write("       <li><a href=\"#" + init_data().lifecycle_url + "\">Life Cycle</a></li>\n")
     outfile.write("         <ul>\n")
-    outfile.write("           <li><a href=\"#" + init_data().unsuual_dev_url + "\">Unusual Development</a></li>\n")
+    outfile.write("           <li><a href=\"#" + init_data().unusual_dev_url + "\">Unusual Development</a></li>\n")
     outfile.write("         </ul>\n")
 
     outfile.write("       <li><a href=\"#" + init_data().species_url + "\">Species</a>\n")
@@ -6771,7 +6860,7 @@ def build_site() -> None:
                     write_common_names_pages(outfile, False, replace_references(common_name_data, refdict, False))
                 with open(WEBOUT_PATH + init_data().lifecycle_url, "w", encoding="utf-8") as outfile:
                     write_life_cycle_pages(outfile, False)
-                with open(WEBOUT_PATH + init_data().unsuual_dev_url, "w", encoding="utf-8") as outfile:
+                with open(WEBOUT_PATH + init_data().unusual_dev_url, "w", encoding="utf-8") as outfile:
                     write_unusual_development_pages(outfile, unusual_development_data, refdict, False)
                 with open(WEBOUT_PATH + init_data().tree_url, "w", encoding="utf-8") as outfile:
                     write_phylogeny_pages(outfile, genera_tree, species_tree, False, refdict)
