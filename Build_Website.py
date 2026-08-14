@@ -470,8 +470,9 @@ def format_reference_full(ref: TMB_Classes.ReferenceClass, do_print: bool) -> st
         return ref.formatted_html
     else:
         try:
-            return ("<a href=\"" + rel_link_prefix(do_print, "references/") + ref.cite_key + ".html\">" +
-                    ref.formatted_html + "</a>")
+            return f'<a href="{rel_link_prefix(do_print, "references/")}{ref.cite_key}.html">{ref.formatted_html}</a>'
+            # return ("<a href=\"" + rel_link_prefix(do_print, "references/") + ref.cite_key + ".html\">" +
+            #         ref.formatted_html + "</a>")
         except LookupError:
             report_error("missing label: " + ref.cite_key)
             return ref.cite_key
@@ -520,7 +521,7 @@ def replace_species_in_string(instr: str, include_link: bool = False, do_print: 
         if include_link:
             name_str = create_species_link(s.genus, s.species, do_print, s.status, path=path)
         else:
-            name_str = f"<em class=\"species\">{s.binomial()}</em>"
+            name_str = f'<em class="species">{s.binomial()}</em>'
         if include_authority:
             a = " " + s.authority()
         else:
@@ -598,30 +599,30 @@ def format_language(x: str) -> str:
     'and' with an ampersand
     """
     language_replace_list = [
-        [" and ", " &amp; "],
-        ["German", "<span class=\"fi fi-de\"></span> German"],
-        ["Spanish", "<span class=\"fi fi-es\"></span> Spanish"],
-        ["Russian", "<span class=\"fi fi-ru\"></span> Russian"],
-        ["French", "<span class=\"fi fi-fr\"></span> French"],
-        ["Portuguese", "<span class=\"fi fi-pt\"></span> Portuguese"],
-        ["Danish", "<span class=\"fi fi-dk\"></span> Danish"],
-        ["Dutch", "<span class=\"fi fi-nl\"></span> Dutch"],
-        ["Japanese", "<span class=\"fi fi-jp\"></span> Japanese"],
-        ["Chinese", "<span class=\"fi fi-cn\"></span> Chinese"],
-        ["English", "<span class=\"fi fi-us\"></span> English"],
-        ["Thai", "<span class=\"fi fi-th\"></span> Thai"],
-        ["Latin", "<span class=\"fi fi-va\"></span> Latin"],
-        ["Italian", "<span class=\"fi fi-it\"></span> Italian"],
-        ["Vietnamese", "<span class=\"fi fi-vn\"></span> Vietnamese"],
-        ["Korean", "<span class=\"fi fi-kr\"></span> Korean"],
-        ["Polish", "<span class=\"fi fi-pl\"></span> Polish"],
-        ["Arabic", "<span class=\"fi fi-sa\"></span> Arabic"],
-        ["Indonesian", "<span class=\"fi fi-id\"></span> Indonesian"],
-        ["Afrikaans", "<span class=\"fi fi-za\"></span> Afrikaans"],
-        ["Malay", "<span class=\"fi fi-my\"></span> Malay"],
-        ["Malagasy", "<span class=\"fi fi-mg\"></span> Malagasy"],
-        ["Persian", "<span class=\"fi fi-ir\"></span> Persian"],
-        ["Burmese", "<span class=\"fi fi-mm\"></span> Burmese"]
+        [" and ", ' &amp; '],
+        ["German", '<span class="fi fi-de"></span> German'],
+        ["Spanish", '<span class="fi fi-es"></span> Spanish'],
+        ["Russian", '<span class="fi fi-ru"></span> Russian'],
+        ["French", '<span class="fi fi-fr"></span> French'],
+        ["Portuguese", '<span class="fi fi-pt"></span> Portuguese'],
+        ["Danish", '<span class="fi fi-dk"></span> Danish'],
+        ["Dutch", '<span class="fi fi-nl"></span> Dutch'],
+        ["Japanese", '<span class="fi fi-jp"></span> Japanese'],
+        ["Chinese", '<span class="fi fi-cn"></span> Chinese'],
+        ["English", '<span class="fi fi-us"></span> English'],
+        ["Thai", '<span class="fi fi-th"></span> Thai'],
+        ["Latin", '<span class="fi fi-va"></span> Latin'],
+        ["Italian", '<span class="fi fi-it"></span> Italian'],
+        ["Vietnamese", '<span class="fi fi-vn"></span> Vietnamese'],
+        ["Korean", '<span class="fi fi-kr"></span> Korean'],
+        ["Polish", '<span class="fi fi-pl"></span> Polish'],
+        ["Arabic", '<span class="fi fi-sa"></span> Arabic'],
+        ["Indonesian", '<span class="fi fi-id"></span> Indonesian'],
+        ["Afrikaans", '<span class="fi fi-za"></span> Afrikaans'],
+        ["Malay", '<span class="fi fi-my"></span> Malay'],
+        ["Malagasy", '<span class="fi fi-mg"></span> Malagasy'],
+        ["Persian", '<span class="fi fi-ir"></span> Persian'],
+        ["Burmese", '<span class="fi fi-mm"></span> Burmese']
     ]
     for r in language_replace_list:
         x = x.replace(r[0], r[1])
@@ -736,41 +737,42 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         end_google_chart_header(outfile)
         common_header_part2(outfile)
 
-    outfile.write("    <header id=\"" + init_data().ref_sum_url + "\">\n")
-    outfile.write("      <h1 class=\"bookmark1\">Summary of References</h1>\n")
+    outfile.write(f'    <header id="{init_data().ref_sum_url}">\n')
+    outfile.write('      <h1 class="bookmark1">Summary of References</h1>\n')
     if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + init_data().ref_url +
-                      "\">" + fetch_fa_glyph("index") + "Full Reference List</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
+        outfile.write(f'          <li><a href="{rel_link_prefix(do_print)}{init_data().ref_url}">'
+                      f'{fetch_fa_glyph("index")}Full Reference List</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
     outfile.write("\n")
-    outfile.write("    <p>\n")
-    outfile.write("      A summary of the references  in the database (last updated {}).\n".
-                  format(datetime.date.isoformat(datetime.date.today())))
-    outfile.write("      " + str(cite_count) + " of " + str(nrefs) +
-                  " references  have had citation data recorded.\n")
-    outfile.write("      See also the <a href=\"" + rel_link_prefix(do_print, "names/") + init_data().name_sum_url +
-                  "\">name summary page</a> for information on reference patterns to specific species.\n")
-    outfile.write("    </p>\n")
+    outfile.write('    <p>\n')
+    outfile.write(f'      A summary of the references  in the database (last '
+                  f'updated {datetime.date.isoformat(datetime.date.today())}).\n')
+    # outfile.write("      A summary of the references  in the database (last updated {}).\n".
+    #               format(datetime.date.isoformat(datetime.date.today())))
+    outfile.write(f'      {cite_count} of {nrefs} references  have had citation data recorded.\n')
+    outfile.write(f'      See also the <a href="{rel_link_prefix(do_print, "names/")}{init_data().name_sum_url}">'
+                  f'name summary page</a> for information on reference patterns to specific species.\n')
+    outfile.write('    </p>\n')
     if do_print:
         # pie chart of languages
         filename = "language_pie.png"
         TMB_Create_Graphs.create_pie_chart_file(filename, languages, init_data().graph_font)
-        outfile.write("    <h3 class=\"nobookmark\">Primary Language of References</h3>\n")
-        outfile.write("    <figure class=\"graph\">\n")
-        outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"pie_chart\" />\n")
-        outfile.write("    </figure>\n")
+        outfile.write('    <h3 class="nobookmark">Primary Language of References</h3>\n')
+        outfile.write('    <figure class="graph">\n')
+        outfile.write(f'      <img src="{TMP_PATH}{filename}" class="pie_chart" />\n')
+        outfile.write('    </figure>\n')
 
         # bar chart of languages by year
         filename = "year_language_bar.png"
         TMB_Create_Graphs.create_language_bar_chart_file(filename, languages_by_year, init_data().graph_font)
-        outfile.write("    <h3 class=\"nobookmark\">Proportion of References in Primary Language each Year</h3>\n")
-        outfile.write("    <figure class=\"graph\">\n")
-        outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
-        outfile.write("    </figure>\n")
+        outfile.write('    <h3 class="nobookmark">Proportion of References in Primary Language each Year</h3>\n')
+        outfile.write('    <figure class="graph">\n')
+        outfile.write(f'      <img src="{TMP_PATH}{filename}" class="bar_chart" />\n')
+        outfile.write('    </figure>\n')
 
         # pubs per year bar chart
         miny = init_data().current_year
@@ -781,18 +783,18 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
 
         filename = "pubs_per_year_bar.png"
         TMB_Create_Graphs.create_bar_chart_file(filename, year_data, miny, maxy, 1, init_data().graph_font)
-        outfile.write("    <h3 class=\"nobookmark\">References by Year</h3>\n")
-        outfile.write("    <figure class=\"graph\">\n")
-        outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
-        outfile.write("    </figure>\n")
+        outfile.write('    <h3 class="nobookmark">References by Year</h3>\n')
+        outfile.write('    <figure class="graph">\n')
+        outfile.write(f'      <img src="{TMP_PATH}{filename}" class="bar_chart" />\n')
+        outfile.write('    </figure>\n')
 
         # pubs per year since 1900 bar chart
         filename = "pubs_per_year_1900_bar.png"
         TMB_Create_Graphs.create_bar_chart_file(filename, year_data_1900, 1900, maxy, 1, init_data().graph_font)
-        outfile.write("    <h3 class=\"nobookmark\">References by Year (since 1900)</h3>\n")
-        outfile.write("    <figure class=\"graph\">\n")
-        outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
-        outfile.write("    </figure>\n")
+        outfile.write('    <h3 class="nobookmark">References by Year (since 1900)</h3>\n')
+        outfile.write('    <figure class="graph">\n')
+        outfile.write(f'      <img src="{TMP_PATH}{filename}" class="bar_chart" />\n')
+        outfile.write('    </figure>\n')
 
         # citation data in database
         filename = "pubs_per_year_1900_complete_bar.png"
@@ -801,28 +803,28 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
             tmp_dat.append([y[2], y[1] - y[2]])
         dat_info = [["Citations in DB", 0], ["Pending", 1]]
         TMB_Create_Graphs.create_stacked_bar_chart_file(filename, tmp_dat, 1900, maxy, dat_info, init_data().graph_font)
-        outfile.write("    <h3 class=\"nobookmark\">References with Citation Data in Database (since 1900; all "
-                      "pre-1900 literature is complete)</h3>\n")
-        outfile.write("    <figure class=\"graph\">\n")
-        outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"bar_chart\" />\n")
-        outfile.write("    </figure>\n")
+        outfile.write('    <h3 class="nobookmark">References with Citation Data in Database (since 1900; all '
+                      'pre-1900 literature is complete)</h3>\n')
+        outfile.write('    <figure class="graph">\n')
+        outfile.write(f'      <img src="{TMP_PATH}{filename}" class="bar_chart" />\n')
+        outfile.write('    </figure>\n')
 
         # cumulative publications line chart
         filename = "cumulative_pubs_line.png"
         TMB_Create_Graphs.create_line_chart_file(filename, year_data, miny, maxy, 2, init_data().graph_font)
-        outfile.write("    <h3 class=\"nobookmark\">Cumulative References by Year</h3>\n")
-        outfile.write("    <figure class=\"graph\">\n")
-        outfile.write("      <img src=\"" + TMP_PATH + filename + "\" class=\"line_chart\" />\n")
-        outfile.write("    </figure>\n")
+        outfile.write('    <h3 class="nobookmark">Cumulative References by Year</h3>\n')
+        outfile.write('    <figure class="graph">\n')
+        outfile.write(f'      <img src="{TMP_PATH}{filename}" class="line_chart" />\n')
+        outfile.write('    </figure>\n')
 
         end_page_division(outfile)
     else:
-        outfile.write("    <div id=\"chart6_div\"></div>\n")
-        outfile.write("    <div id=\"chart2_div\"></div>\n")
-        outfile.write("    <div id=\"chart4_div\"></div>\n")
+        outfile.write('    <div id="chart6_div"></div>\n')
+        outfile.write('    <div id="chart2_div"></div>\n')
+        outfile.write('    <div id="chart4_div"></div>\n')
         # outfile.write("    <div id=\"chart3_div\"></div>\n")
-        outfile.write("    <div id=\"chart5_div\"></div>\n")
-        outfile.write("    <div id=\"chart_div\"></div>\n")
+        outfile.write('    <div id="chart5_div"></div>\n')
+        outfile.write('    <div id="chart_div"></div>\n')
         common_html_footer(outfile)
 
 
@@ -831,47 +833,47 @@ def write_reference_bibliography(outfile: TextIO, do_print: bool, reflist: list)
         start_page_division(outfile, "index_page")
     else:
         common_html_header(outfile, "Fiddler Crab Publications")
-    outfile.write("    <header id=\"" + init_data().ref_url + "\">\n")
-    outfile.write("      <h1 class=\"bookmark1\">Full Reference List</h1>\n")
+    outfile.write(f'    <header id="{init_data().ref_url}">\n')
+    outfile.write('      <h1 class="bookmark1">Full Reference List</h1>\n')
     if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + init_data().ref_sum_url +
-                      "\">" + fetch_fa_glyph("summary charts") + "Reference/Citation Summary</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
-    outfile.write("    <p>\n")
-    outfile.write("      Following is a fairly comprehensive list of papers, books, and theses that deal or refer "
-                  "to fiddler crabs. The list currently contains {:0,} references "
-                  "(last updated {}).\n".format(len(reflist), datetime.date.isoformat(datetime.date.today())))
-    outfile.write("    </p>\n")
-    outfile.write("    <p>\n")
-    outfile.write("      The references can also be downloaded as "
-                  "<a href=\"" + abs_link_prefix(do_print) + "references/Uca_references.enlx\">compressed Endnote</a>, "
-                  "<a href=\"" + abs_link_prefix(do_print) + "references/Uca_references_RIS.txt\">RIS (text)</a>, or "
-                  "<a href=\"" + abs_link_prefix(do_print) + "references/Uca_references_RIS.xml\">RIS (XML)</a>.\n")
-    outfile.write("    </p>\n")
-    outfile.write("    <p>\n")
-    outfile.write("      Linked references contain information on every name applied to fiddler crabs within "
-                  "the publication, including context and the correct name as we currently understand it. These "
-                  "data are in the process of being compiled (chronologically for all publications I have access "
-                  "to a copy of), with most references still incomplete.\n")
-    outfile.write("    </p>\n")
-    outfile.write("    <p>\n")
-    outfile.write("      In a list of this size, there are bound to be errors, omissions, and mistaken "
-                  "inclusions. Please feel free to send me corrections.\n")
-    outfile.write("    </p>\n")
-    outfile.write("\n")
-    outfile.write("    <section class=\"spsection\">\n")
-    outfile.write("      <div class=\"reference_list\">\n")
-    outfile.write("        <ul>\n")
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
+        outfile.write(f'          <li><a href="{rel_link_prefix(do_print)}{init_data().ref_sum_url}">'
+                      f'{fetch_fa_glyph("summary charts")}Reference/Citation Summary</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
+    outfile.write('    <p>\n')
+    outfile.write('      Following is a fairly comprehensive list of papers, books, and theses that deal or refer '
+                  f'to fiddler crabs. The list currently contains {len(reflist):0,} references '
+                  f'(last updated {datetime.date.isoformat(datetime.date.today())}).\n')
+    outfile.write('    </p>\n')
+    outfile.write('    <p>\n')
+    outfile.write('      The references can also be downloaded as '
+                  f'<a href="{abs_link_prefix(do_print)}references/Uca_references.enlx">compressed Endnote</a>, '
+                  f'<a href="{abs_link_prefix(do_print)}references/Uca_references_RIS.txt">RIS (text)</a>, or '
+                  f'<a href="{abs_link_prefix(do_print)}references/Uca_references_RIS.xml">RIS (XML)</a>.\n')
+    outfile.write('    </p>\n')
+    outfile.write('    <p>\n')
+    outfile.write('      Linked references contain information on every name applied to fiddler crabs within '
+                  'the publication, including context and the correct name as we currently understand it. These '
+                  'data are in the process of being compiled (chronologically for all publications I have access '
+                  'to a copy of), with most references still incomplete.\n')
+    outfile.write('    </p>\n')
+    outfile.write('    <p>\n')
+    outfile.write('      In a list of this size, there are bound to be errors, omissions, and mistaken '
+                  'inclusions. Please feel free to send me corrections.\n')
+    outfile.write('    </p>\n')
+    outfile.write('\n')
+    outfile.write('    <section class="spsection">\n')
+    outfile.write('      <div class="reference_list">\n')
+    outfile.write('        <ul>\n')
     for ref in reflist:
-        outfile.write(f"          <li>{format_reference_full(ref, do_print)}</li>\n")
-    outfile.write("        </ul>\n")
-    outfile.write("      </div>\n")
-    outfile.write("    </section>\n")
+        outfile.write(f'          <li>{format_reference_full(ref, do_print)}</li>\n')
+    outfile.write('        </ul>\n')
+    outfile.write('      </div>\n')
+    outfile.write('    </section>\n')
     if do_print:
         end_page_division(outfile)
     else:
@@ -982,8 +984,9 @@ def compute_species_from_citation_linking(citelist: list) -> None:
 
     for x in unrecorded_xrefs:
         if x[1] in recorded_refs:
-            report_error("Reference {} ({}) does not appear until after citation from {} ({})".format(x[1], x[3],
-                                                                                                      x[0], x[2]))
+            report_error(f'Reference {x[1]} ({x[3]}) does not appear until after citation from {x[0]} ({x[2]})')
+            # report_error("Reference {} ({}) does not appear until after citation from {} ({})".format(x[1], x[3],
+            #                                                                                           x[0], x[2]))
 
 
 def create_species_link(genus: str, species: str, do_print: bool, status: str = "", path: str = "") -> str:
@@ -991,13 +994,15 @@ def create_species_link(genus: str, species: str, do_print: bool, status: str = 
         sc = FOSSIL_IMAGE
     else:
         sc = ""
-    return ("<a href=\"" + rel_link_prefix(do_print, path) + "u_" + species + ".html\"><em class=\"species\">" + genus +
-            " " + species + "</em>" + sc + "</a>")
+    return (f'<a href="{rel_link_prefix(do_print, path)}u_{species}.html"><em class="species">'
+            f'{genus} {species}</em>{sc}</a>')
+    # return ("<a href=\"" + rel_link_prefix(do_print, path) + "u_" + species + ".html\"><em class=\"species\">"
+    #         + genus + " " + species + "</em>" + sc + "</a>")
 
 
 def rank_tags(x: str) -> Tuple[str, str]:
     if ("genus" in x) or ("species" in x):
-        return "<em class=\"species\">", "</em>"
+        return '<em class="species">', '</em>'
     else:
         return "", ""
 
@@ -1016,8 +1021,9 @@ def create_taxon_link(rank: str, name: str, do_print: bool, same_page: bool = Fa
         rc = rank.capitalize() + " "
     else:
         rc = ""
-    return "<a href=\"" + rel_link_prefix(do_print, x + "#") + \
-           "{0}_{1}\">{2}{3}{1}{4}</a>".format(rank, name, rc, start_tag, end_tag)
+    return f'<a href="{rel_link_prefix(do_print, x + "#")}{rank}_{name}">{rc}{start_tag}{name}{end_tag}</a>'
+    # return "<a href=\"" + rel_link_prefix(do_print, x + "#") + \
+    #        "{0}_{1}\">{2}{3}{1}{4}</a>".format(rank, name, rc, start_tag, end_tag)
 
 
 def create_location_link(location: TMB_Classes.LocationClass, display_name: str, do_print: bool, path: str = "",
@@ -1036,8 +1042,10 @@ def create_location_link(location: TMB_Classes.LocationClass, display_name: str,
         iconstr = fetch_fa_glyph("location marker")
     else:
         iconstr = ""
-    return ("<a href=\"" + rel_link_prefix(do_print, path) + place_to_filename(location.name) + ".html\">" +
-            iconstr + display_name + endstr)
+    return (f'<a href="{rel_link_prefix(do_print, path)}{place_to_filename(location.name)}.html">'
+            f'{iconstr}{display_name}{endstr}')
+    # return ("<a href=\"" + rel_link_prefix(do_print, path) + place_to_filename(location.name) + ".html\">" +
+    #         iconstr + display_name + endstr)
 
 
 def strip_location_subtext(x: str) -> str:
@@ -1057,26 +1065,43 @@ def format_name_string(x: str) -> str:
     """
     properly emphasize species names, but not non-name signifiers
     """
-    # get rid of [#] when present
+    def em_species_only(y: str, s: int, nlen: int) -> str:
+        """
+        emphasize genus and species but not non-name signifier in middle of name y
+        s is the start of the non-name signifier, while nlen is its length
+        """
+        return f'<em class="species">{y[:s]}</em> {y[s:s + nlen]} <em class="species">{y[s + nlen:]}</em>'
+
+    # main function call
     if "{" in x:
         x = x[:x.find("{")-1]
     if "var." in x.lower():
         p = x.lower().find("var.")
-        return "<em class=\"species\">" + x[:p] + "</em> " + x[p:p+4] + " <em class=\"species\">" + x[p+4:] + "</em>"
+        return em_species_only(x, p, 4)
+        # return f'<em class="species">{x[:p]}</em> {x[p:p+4]} <em class="species">{x[p+4:]}</em>'
+        # return "<em class=\"species\">" + x[:p] + "</em> " + x[p:p+4] + " <em class=\"species\">" + x[p+4:] + "</em>"
     elif " var " in x.lower():  # need the spaces around var, because some names have the letters var in them
         p = x.lower().find(" var ")
-        return "<em class=\"species\">" + x[:p] + "</em> " + x[p:p+4] + " <em class=\"species\">" + x[p+4:] + "</em>"
+        return em_species_only(x, p, 4)
+        # return f'<em class="species">{x[:p]}</em> {x[p:p+4]} <em class="species">{x[p+4:]}</em>'
+        # return "<em class=\"species\">" + x[:p] + "</em> " + x[p:p+4] + " <em class=\"species\">" + x[p+4:] + "</em>"
     elif "subsp." in x.lower():
         p = x.lower().find("subsp.")
-        return "<em class=\"species\">" + x[:p] + "</em> " + x[p:p+6] + " <em class=\"species\">" + x[p+6:] + "</em>"
+        return em_species_only(x, p, 6)
+        # return f'<em class="species">{x[:p]}</em> {x[p:p+6]} <em class="species">{x[p+6:]}</em>'
+        # return "<em class=\"species\">" + x[:p] + "</em> " + x[p:p+6] + " <em class=\"species\">" + x[p+6:] + "</em>"
     elif " forme " in x.lower():
         p = x.lower().find(" forme ")
-        return "<em class=\"species\">" + x[:p] + "</em> " + x[p:p+6] + " <em class=\"species\">" + x[p+6:] + "</em>"
+        return em_species_only(x, p, 6)
+        # return f'<em class="species">{x[:p]}</em> {x[p:p+6]} <em class="species">{x[p+6:]}</em>'
+        # return "<em class=\"species\">" + x[:p] + "</em> " + x[p:p+6] + " <em class=\"species\">" + x[p+6:] + "</em>"
     elif " f. " in x.lower():
         p = x.lower().find(" f. ")
-        return "<em class=\"species\">" + x[:p] + "</em> " + x[p:p+3] + " <em class=\"species\">" + x[p+3:] + "</em>"
+        return em_species_only(x, p, 3)
+        # return f'<em class="species">{x[:p]}</em> {x[p:p+3]} <em class="species">{x[p+3:]}</em>'
+        # return "<em class=\"species\">" + x[:p] + "</em> " + x[p:p+3] + " <em class=\"species\">" + x[p+3:] + "</em>"
     else:
-        return "<em class=\"species\">" + x + "</em>"
+        return f'<em class="species">{x}</em>'
 
 
 def clean_specific_name(x: str) -> str:
@@ -1165,33 +1190,33 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
             if first_name:
                 first_name = False
             else:
-                outfile.write("      <td class=\"rowspacer\" colspan=\"" + str(ncols) + "\">&nbsp;</td>\n")
-                outfile.write("    </tr>\n")
-                outfile.write("    <tr>\n")
+                outfile.write(f'      <td class="rowspacer" colspan="{ncols}">&nbsp;</td>\n')
+                outfile.write('    </tr>\n')
+                outfile.write('    <tr>\n')
 
             if nref == ".":
-                outfile.write("      <td>&nbsp;</td>\n")
+                outfile.write('      <td>&nbsp;</td>\n')
             elif is_name:  # output citation
                 crossref = refdict[nref]
-                outfile.write("      <td><a href=\"" + rel_link_prefix(do_print, "../references/") +
-                              crossref.cite_key + ".html\">" + crossref.citation + "</a></td>\n")
+                outfile.write(f'      <td><a href="{rel_link_prefix(do_print, "../references/")}'
+                              f'{crossref.cite_key}.html">{crossref.citation}</a></td>\n')
             else:  # output species name
-                outfile.write("      <td><a href=\"" + rel_link_prefix(do_print, "../names/") +
-                              name_to_filename(nref) + ".html\">" + format_name_string(nref) + "</a></td>\n")
+                outfile.write(f'      <td><a href="{rel_link_prefix(do_print, "../names/")}'
+                              f'{name_to_filename(nref)}.html">{format_name_string(nref)}</a></td>\n')
 
             # common names
             if comcnt > 0:
                 if n.common == ".":
-                    outfile.write("      <td>&nbsp;</td>\n")
+                    outfile.write('      <td>&nbsp;</td>\n')
                 else:
-                    outfile.write("      <td>" + n.common + "</td>\n")
-            outfile.write("      <td>" + n.where + "</td>\n")
+                    outfile.write(f'      <td>{n.common}</td>\n')
+            outfile.write(f'      <td>{n.where}</td>\n')
             unique_set -= {nref}
         else:
-            outfile.write("      <td>&nbsp;</td>\n")
+            outfile.write('      <td>&nbsp;</td>\n')
             if comcnt > 0:
-                outfile.write("      <td>&nbsp;</td>\n")
-            outfile.write("      <td>&nbsp;</td>\n")
+                outfile.write('      <td>&nbsp;</td>\n')
+            outfile.write('      <td>&nbsp;</td>\n')
 
         # applies to...
         if n.context == "location":
@@ -4214,61 +4239,42 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
         for fg in species.field_guides:
             fg_dat = field_guide_data[fg]
             fg_title = get_field_guide_title(fg_dat)
-            # dat = fg_dat[0].strip().split("\t")
-            # if dat[0] == "T":
-            #     fg_title = dat[1]
-            # else:
-            #     raise TypeError
-            fg_list.append([fg_title, f"<a href=\"field_guides/field_guide_{fg}.html\">{fg_title}</a>"])
+            fg_list.append([fg_title, f'<a href="field_guides/field_guide_{fg}.html">{fg_title}</a>'])
         fg_list.sort()
         link_list = [x[1] for x in fg_list]
-        outfile.write("       <dt>Associated Field Guides</dt>\n")
+        outfile.write('       <dt>Associated Field Guides</dt>\n')
         for link in link_list:
-            outfile.write(f"       <dd>{fetch_fa_glyph("guide")}{link}</dd>\n")
+            outfile.write(f'       <dd>{fetch_fa_glyph("guide")}{link}</dd>\n')
 
     # External links
     if not do_print:
         outfile.write("       <dt>External Links</dt>\n")
         if species.eolid != ".":
-            outfile.write(f"         <dd>{fetch_fa_glyph("external link")}<a "
-                          f"href=\"https://eol.org/pages/{species.eolid}/overview\">Encyclopedia of Life</a></dd>\n")
+            outfile.write(f'         <dd>{fetch_fa_glyph("external link")}<a '
+                          f'href="https://eol.org/pages/{species.eolid}/overview">Encyclopedia of Life</a></dd>\n')
 
 
-        outfile.write(f"         <dd>{fetch_fa_glyph("external link")}<a "
-                      f"href=\"https://en.wikipedia.org/wiki/Uca_{species.species}\">Wikipedia</a></dd>\n")
+        outfile.write(f'         <dd>{fetch_fa_glyph("external link")}<a '
+                      f'href="https://en.wikipedia.org/wiki/Uca_{species.species}">Wikipedia</a></dd>\n')
         if species.inatid != ".":
-            outfile.write(f"         <dd>{fetch_fa_glyph("external link")}<a "
-                          f"href=\"https://www.inaturalist.org/taxa/{species.inatid}\">iNaturalist</a></dd>\n")
+            outfile.write(f'         <dd>{fetch_fa_glyph("external link")}<a '
+                          f'href="https://www.inaturalist.org/taxa/{species.inatid}">iNaturalist</a></dd>\n')
         if species.taxonid != ".":
-            outfile.write(f"         <dd>{fetch_fa_glyph("external link")}<a "
-                          f"href=\"https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id={species.taxonid}\">NCBI"
-                          f" Taxonomy Browser/Genbank</a></dd>\n")
+            outfile.write(f'         <dd>{fetch_fa_glyph("external link")}<a '
+                          f'href="https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id={species.taxonid}">NCBI'
+                          f' Taxonomy Browser/Genbank</a></dd>\n')
         if species.gbifid != ".":
-            outfile.write(f"         <dd>{fetch_fa_glyph("external link")}<a "
-                          f"href=\"https://www.gbif.org/species/{species.gbifid}\">GBIF</a></dd>\n")
-        # if species.eolid != ".":
-        #     outfile.write("         <dd><a href=\"https://eol.org/pages/" + species.eolid +
-        #                   "/overview\">Encyclopedia of Life</a></dd>\n")
-        # outfile.write("         <dd><a href=\"https://en.wikipedia.org/wiki/Uca_" + species.species +
-        #               "\">Wikipedia</a></dd>\n")
-        # if species.inatid != ".":
-        #     outfile.write("         <dd><a href=\"https://www.inaturalist.org/taxa/" + species.inatid +
-        #                   "\">iNaturalist</a></dd>\n")
-        # if species.taxonid != ".":
-        #     outfile.write("         <dd><a href=\"https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=" +
-        #                   species.taxonid + "\">NCBI Taxonomy Browser/Genbank</a></dd>\n")
-        # if species.gbifid != ".":
-        #     outfile.write("         <dd><a href=\"https://www.gbif.org/species/" + species.gbifid +
-        #                   "\">GBIF</a></dd>\n")
+            outfile.write(f'         <dd>{fetch_fa_glyph("external link")}<a '
+                          f'href="https://www.gbif.org/species/{species.gbifid}">GBIF</a></dd>\n')
 
-    outfile.write("      </dl>\n")
-    outfile.write("    </section>\n")
-    outfile.write("\n")
-    outfile.write("    <section class=\"spsection\">\n")
+    outfile.write('      </dl>\n')
+    outfile.write('    </section>\n')
+    outfile.write('\n')
+    outfile.write('    <section class="spsection">\n')
     if do_print:
-        outfile.write("      <h2 class=\"nobookmark\">" + fetch_fa_glyph("photo") + "Photos</h2>\n")
+        outfile.write(f'      <h2 class="nobookmark">{fetch_fa_glyph("photo")}Photos</h2>\n')
     else:
-        outfile.write("      <h2 id=\"pics\" class=\"nobookmark\">" + fetch_fa_glyph("photo") + "Photos</h2>\n")
+        outfile.write(f'      <h2 id="pics" class="nobookmark">{fetch_fa_glyph("photo")}Photos</h2>\n')
     photo_n = 0
     for photo in photos:
         slist = photo.species.split(";")
@@ -4281,26 +4287,26 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
             else:
                 pfname = "photo_u_" + species.species + format(pn, "0>2") + ".html"
                 tname = species.species
-            outfile.write("      <figure class=\"sppic\">\n")
+            outfile.write('      <figure class="sppic">\n')
             outfile.write("        <a href=\"" + rel_link_prefix(do_print, "photos/") + pfname +
                           "\"><img class=\"thumbnail\" src=\"" + media_path + "photos/U_" + tname +
                           format(pn, "0>2") + "tn.jpg\" alt=\"" + species.binomial() + " thumbnail\" title=\"" +
                           species.binomial() + "\" /></a>\n")
-            outfile.write("      </figure>\n")
+            outfile.write('      </figure>\n')
             photo_n += 1
     if photo_n == 0:
-        outfile.write("      <p>\n")
-        outfile.write("        <em>No pictures available at this time.</em>\n")
-        outfile.write("      </p>\n")
-    outfile.write("    </section>\n")
+        outfile.write('      <p>\n')
+        outfile.write('        <em>No pictures available at this time.</em>\n')
+        outfile.write('      </p>\n')
+    outfile.write('    </section>\n')
 
     outfile.write("\n")
     if not is_fossil:
-        outfile.write("    <section class=\"spsection\">\n")
+        outfile.write('    <section class="spsection">\n')
         if do_print:
-            outfile.write("      <h2 class=\"nobookmark\">" + fetch_fa_glyph("video") + "Video</h2>\n")
+            outfile.write('      <h2 class="nobookmark">' + fetch_fa_glyph("video") + 'Video</h2>\n')
         else:
-            outfile.write("      <h2 id=\"video\" class=\"nobookmark\">" + fetch_fa_glyph("video") + "Video</h2>\n")
+            outfile.write('      <h2 id="video" class="nobookmark">' + fetch_fa_glyph("video") + 'Video</h2>\n')
         video_n = 0
         for video in videos:
             slist = video.species.split(";")
