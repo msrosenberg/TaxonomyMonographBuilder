@@ -70,25 +70,25 @@ def place_to_filename(x: str) -> str:
     return x
 
 
-def unicode_to_html_encoding(x: str) -> str:
-    """
-    Change Unicode characters to HTML encoding in order to display correctly in Google Maps
-    """
-    unicode_replace_list = [
-        ["ç", "&#x00E7;"],  # 231
-        ["ñ", "&#x00F1;"],  # 241
-        ["ã", "&#x00E3;"],  # 227
-        ["á", "&#x00E1;"],  # 225
-        ["é", "&#x00E9;"],  # 233
-        ["í", "&#x00ED;"],  # 237
-        ["ó", "&#x00F3;"],  # 243
-        ["ơ", "&#x01A1;"],  # 417
-        ["ú", "&#x00FA;"],  # 250
-        ["ū", "&#x016B;"]   # 363
-    ]
-    for r in unicode_replace_list:
-        x = x.replace(r[0], r[1])
-    return x
+# def unicode_to_html_encoding(x: str) -> str:
+#     """
+#     Change Unicode characters to HTML encoding in order to display correctly in Google Maps
+#     """
+#     unicode_replace_list = [
+#         ["ç", "&#x00E7;"],  # 231
+#         ["ñ", "&#x00F1;"],  # 241
+#         ["ã", "&#x00E3;"],  # 227
+#         ["á", "&#x00E1;"],  # 225
+#         ["é", "&#x00E9;"],  # 233
+#         ["í", "&#x00ED;"],  # 237
+#         ["ó", "&#x00F3;"],  # 243
+#         ["ơ", "&#x01A1;"],  # 417
+#         ["ú", "&#x00FA;"],  # 250
+#         ["ū", "&#x016B;"]   # 363
+#     ]
+#     for r in unicode_replace_list:
+#         x = x.replace(r[0], r[1])
+#     return x
 
 
 def str_to_number(number: str) -> Number:

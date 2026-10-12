@@ -3,6 +3,7 @@ Module holds a dictionary of species objects listed by name, allowing one to fin
 particular object representing that name
 """
 
+from typing import Optional
 import TMB_Classes
 from TMB_Error import report_error
 
@@ -16,9 +17,10 @@ def init_species_crossref(species: list) -> None:
         SPECIES_XREF[s.species] = s
 
 
-def find_species_by_name(x: str) -> TMB_Classes.SpeciesClass:
+def find_species_by_name(x: str) -> Optional[TMB_Classes.SpeciesClass]:
     if x in SPECIES_XREF:
         return SPECIES_XREF[x]
     else:
         report_error(f"Crossref Error: Cannot find species {x}")
-        return SPECIES_XREF["vocans"]  # default to prevent crashing
+        return None
+        # return SPECIES_XREF["vocans"]  # default to prevent crashing

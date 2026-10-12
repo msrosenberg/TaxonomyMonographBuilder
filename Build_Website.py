@@ -4,7 +4,7 @@ Taxonomy Monograph Builder
 
 # built-in dependencies
 import datetime
-import random
+# import random
 import os
 import shutil
 import re
@@ -21,7 +21,7 @@ from TMB_Common import *
 import TMB_Initialize
 import TMB_Classes
 import TMB_Create_Graphs
-import TMB_TaxKeyGen
+# import TMB_TaxKeyGen
 import TMB_Measurements
 from TMB_SpeciesXRef import init_species_crossref, find_species_by_name
 import phy2html
@@ -56,9 +56,13 @@ INCLUDE_INAT = False
 # Suppress some of the more time-consuming output; only meant for when testing others elements
 OUTPUT_REFS = False
 OUTPUT_LOCS = False
+OUTPUT_GUIDES = True
+OUTPUT_SPECIES = False
+OUTPUT_NAMES = False
+OUTPUT_MEDIA = False
 # these flags control creating print and web output, respectively
-OUTPUT_PRINT = False
-OUTPUT_WEB = True
+OUTPUT_PRINT = True
+OUTPUT_WEB = False
 
 # randSeed = random.randint(0, 10000)
 
@@ -116,6 +120,19 @@ def common_header_part1(outfile: TextIO, title: str, indexpath: str = "") -> Non
     outfile.write(f'    <link rel="icon" type="image/png" sizes="16x16" href="{indexpath}favicon-16x16.png" />\n')
     outfile.write(f'    <link rel="manifest" href="{indexpath}site.webmanifest">\n')
 
+    outfile.write('    <link rel="preconnect" href="https://fonts.googleapis.com">\n')
+    outfile.write('    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n')
+    outfile.write('    <link href="https://fonts.googleapis.com/css2?family=Merienda:wght@300..900'
+                  '&family=Noto+Serif+Bengali:wght@100..900'
+                  '&family=Noto+Serif+Devanagari:wght@100..900'
+                  '&family=Noto+Serif+Gujarati:wght@100..900'
+                  '&family=Noto+Serif+Kannada:wght@100..900'
+                  '&family=Noto+Serif+Malayalam:wght@100..900'
+                  '&family=Noto+Serif+Oriya:wght@400..700'
+                  '&family=Noto+Serif+Tamil:ital,wght@0,100..900;1,100..900'
+                  '&family=Noto+Serif+Telugu:wght@100..900'
+                  '&family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">\n')
+
     outfile.write(f'    <link rel="stylesheet" href="{indexpath}uca_style.css" />\n')
     outfile.write(f'    <script defer src="{indexpath}js/solid.min.js"></script>\n')
     outfile.write(f'    <script defer src="{indexpath}js/regular.min.js"></script>\n')
@@ -123,6 +140,7 @@ def common_header_part1(outfile: TextIO, title: str, indexpath: str = "") -> Non
     outfile.write(f'    <script defer src="{indexpath}js/duotone.min.js"></script>\n')
     outfile.write(f'    <script defer src="{indexpath}js/duotone-regular.min.js"></script>\n')
     outfile.write(f'    <script defer src="{indexpath}js/light.min.js"></script>\n')
+    outfile.write(f'    <script defer src="{indexpath}js/custom-icons.min.js"></script>\n')
     outfile.write(f'    <script defer src="{indexpath}js/fontawesome.min.js"></script>\n')
     outfile.write(f'    <link rel="stylesheet" href="{indexpath}images/flag-icon-css/css/flag-icons.min.css" />\n')
     outfile.write(f'    <link rel="author" href="{init_data().site_author_email}" />\n')
@@ -143,8 +161,6 @@ def common_header_part2(outfile: TextIO, indexpath: str = "", include_map: bool 
     outfile.write('    <div id="home">\n')
     outfile.write(f'      <a href="{indexpath}index.html" class="home-title">Fiddler Crabs</a>\n')
     outfile.write(f'      <a href="{indexpath}index.html" class="home-link">' + fetch_fa_glyph("home") + 'Home</a>\n')
-    # outfile.write("      <a href=\"" + indexpath +
-    #               "blog\" class=\"home-link\">" + fetch_fa_glyph("blog") + "Blog</a>\n")
     outfile.write('    </div>\n')
 
 
@@ -272,15 +288,7 @@ def common_html_footer(outfile: TextIO, indexpath: str = "") -> None:
                   f'<a href="mailto:{init_data().site_author_email}">{fetch_fa_glyph("mail")}'
                   f'Dr. Michael S. Rosenberg</a></p>\n')
     outfile.write(f'       <p id="copyright">Release: {init_data().version}'
-                  f' &mdash; Copyright &copy; 2003&ndash;{init_data().current_year} All Rights Reserved</p>\n')
-    # outfile.write("       <p id=\"citation\"><a href=\"" + indexpath + init_data().cite_url +
-    #               "\">" + fetch_fa_glyph("site cite") + "How to cite this site</a></p>\n")
-    # outfile.write("       <p id=\"contact\">Questions or comments about the site? Contact "
-    #               "<a href=\"mailto:" + init_data().site_author_email + "\">" + fetch_fa_glyph("mail") +
-    #               "Dr. Michael S. Rosenberg</a></p>\n")
-    # outfile.write("       <p id=\"copyright\">Release: " + init_data().version +
-    #               " &mdash; Copyright &copy; 2003&ndash;" + str(init_data().current_year) +
-    #               " All Rights Reserved</p>\n")
+                  f' &mdash; Copyright &copy; 1998&ndash;{init_data().current_year} All Rights Reserved</p>\n')
     outfile.write('    </footer>\n')
     outfile.write('  </body>\n')
     outfile.write('</html>\n')
@@ -428,6 +436,7 @@ def fetch_fa_glyph(glyph: Optional[str]) -> str:
         "list video":       'li fa-solid fa-video" aria-hidden',
         "list art":         'li fa-solid fa-paintbrush" aria-hidden',
         "list site cite":   'li fa-solid fa-pencil" aria-hidden',
+        "list about":        'li fa-regular fa-circle-info" aria-hidden',
         "bad location":     'solid fa-triangle-exclamation" style="color: red" title="Problematic Location: '
                             'Outside range of all fiddler crabs or this particular species."',
         "questionable id":  'solid fa-circle-question" style="color: goldenrod" title="Questionable ID: '
@@ -440,7 +449,8 @@ def fetch_fa_glyph(glyph: Optional[str]) -> str:
         "list loc index":   'li fa-regular fa-globe-pointer" aria-hidden',
         "list name index":  'li fa-light fa-list-tree" aria-hidden',
         "list develop":     'li fa-solid fa-mercury" aria-hidden',
-        "list hand":        'li fa-light fa-hands-holding" aria-hidden'
+        "list hand":        'li fa-light fa-hands-holding" aria-hidden',
+        "list group":       'li fa-kit fa-crab-crab-crab-crab" aria-hidden'
     }
 
     if glyph is not None:
@@ -471,8 +481,6 @@ def format_reference_full(ref: TMB_Classes.ReferenceClass, do_print: bool) -> st
     else:
         try:
             return f'<a href="{rel_link_prefix(do_print, "references/")}{ref.cite_key}.html">{ref.formatted_html}</a>'
-            # return ("<a href=\"" + rel_link_prefix(do_print, "references/") + ref.cite_key + ".html\">" +
-            #         ref.formatted_html + "</a>")
         except LookupError:
             report_error("missing label: " + ref.cite_key)
             return ref.cite_key
@@ -622,7 +630,8 @@ def format_language(x: str) -> str:
         ["Malay", '<span class="fi fi-my"></span> Malay'],
         ["Malagasy", '<span class="fi fi-mg"></span> Malagasy'],
         ["Persian", '<span class="fi fi-ir"></span> Persian'],
-        ["Burmese", '<span class="fi fi-mm"></span> Burmese']
+        ["Burmese", '<span class="fi fi-mm"></span> Burmese'],
+        ["Czech", '<span class="fi fi-cz"></span> Czech'],
     ]
     for r in language_replace_list:
         x = x.replace(r[0], r[1])
@@ -751,8 +760,6 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
     outfile.write('    <p>\n')
     outfile.write(f'      A summary of the references  in the database (last '
                   f'updated {datetime.date.isoformat(datetime.date.today())}).\n')
-    # outfile.write("      A summary of the references  in the database (last updated {}).\n".
-    #               format(datetime.date.isoformat(datetime.date.today())))
     outfile.write(f'      {cite_count} of {nrefs} references  have had citation data recorded.\n')
     outfile.write(f'      See also the <a href="{rel_link_prefix(do_print, "names/")}{init_data().name_sum_url}">'
                   f'name summary page</a> for information on reference patterns to specific species.\n')
@@ -766,13 +773,13 @@ def write_reference_summary(outfile: TextIO, do_print: bool, nrefs: int, year_da
         outfile.write(f'      <img src="{TMP_PATH}{filename}" class="pie_chart" />\n')
         outfile.write('    </figure>\n')
 
-        # bar chart of languages by year
-        filename = "year_language_bar.png"
-        TMB_Create_Graphs.create_language_bar_chart_file(filename, languages_by_year, init_data().graph_font)
-        outfile.write('    <h3 class="nobookmark">Proportion of References in Primary Language each Year</h3>\n')
-        outfile.write('    <figure class="graph">\n')
-        outfile.write(f'      <img src="{TMP_PATH}{filename}" class="bar_chart" />\n')
-        outfile.write('    </figure>\n')
+        # # bar chart of languages by year
+        # filename = "year_language_bar.png"
+        # TMB_Create_Graphs.create_language_bar_chart_file(filename, languages_by_year, init_data().graph_font)
+        # outfile.write('    <h3 class="nobookmark">Proportion of References in Primary Language each Year</h3>\n')
+        # outfile.write('    <figure class="graph">\n')
+        # outfile.write(f'      <img src="{TMP_PATH}{filename}" class="bar_chart" />\n')
+        # outfile.write('    </figure>\n')
 
         # pubs per year bar chart
         miny = init_data().current_year
@@ -985,8 +992,6 @@ def compute_species_from_citation_linking(citelist: list) -> None:
     for x in unrecorded_xrefs:
         if x[1] in recorded_refs:
             report_error(f'Reference {x[1]} ({x[3]}) does not appear until after citation from {x[0]} ({x[2]})')
-            # report_error("Reference {} ({}) does not appear until after citation from {} ({})".format(x[1], x[3],
-            #                                                                                           x[0], x[2]))
 
 
 def create_species_link(genus: str, species: str, do_print: bool, status: str = "", path: str = "") -> str:
@@ -996,8 +1001,6 @@ def create_species_link(genus: str, species: str, do_print: bool, status: str = 
         sc = ""
     return (f'<a href="{rel_link_prefix(do_print, path)}u_{species}.html"><em class="species">'
             f'{genus} {species}</em>{sc}</a>')
-    # return ("<a href=\"" + rel_link_prefix(do_print, path) + "u_" + species + ".html\"><em class=\"species\">"
-    #         + genus + " " + species + "</em>" + sc + "</a>")
 
 
 def rank_tags(x: str) -> Tuple[str, str]:
@@ -1013,17 +1016,17 @@ def create_taxon_link(rank: str, name: str, do_print: bool, same_page: bool = Fa
     create a link to a higher-order taxonomic entry
     """
     start_tag, end_tag = rank_tags(rank)
-    if same_page:
-        x = ""
-    else:
-        x = path + init_data().syst_url
+    # if same_page:
+    #     x = ""
+    # else:
+    #     # x = path + init_data().syst_url
+    x = f'{path}syst_{rank}.html'
+
     if include_rank:
         rc = rank.capitalize() + " "
     else:
         rc = ""
     return f'<a href="{rel_link_prefix(do_print, x + "#")}{rank}_{name}">{rc}{start_tag}{name}{end_tag}</a>'
-    # return "<a href=\"" + rel_link_prefix(do_print, x + "#") + \
-    #        "{0}_{1}\">{2}{3}{1}{4}</a>".format(rank, name, rc, start_tag, end_tag)
 
 
 def create_location_link(location: TMB_Classes.LocationClass, display_name: str, do_print: bool, path: str = "",
@@ -1044,8 +1047,6 @@ def create_location_link(location: TMB_Classes.LocationClass, display_name: str,
         iconstr = ""
     return (f'<a href="{rel_link_prefix(do_print, path)}{place_to_filename(location.name)}.html">'
             f'{iconstr}{display_name}{endstr}')
-    # return ("<a href=\"" + rel_link_prefix(do_print, path) + place_to_filename(location.name) + ".html\">" +
-    #         iconstr + display_name + endstr)
 
 
 def strip_location_subtext(x: str) -> str:
@@ -1078,28 +1079,18 @@ def format_name_string(x: str) -> str:
     if "var." in x.lower():
         p = x.lower().find("var.")
         return em_species_only(x, p, 4)
-        # return f'<em class="species">{x[:p]}</em> {x[p:p+4]} <em class="species">{x[p+4:]}</em>'
-        # return "<em class=\"species\">" + x[:p] + "</em> " + x[p:p+4] + " <em class=\"species\">" + x[p+4:] + "</em>"
     elif " var " in x.lower():  # need the spaces around var, because some names have the letters var in them
         p = x.lower().find(" var ")
         return em_species_only(x, p, 4)
-        # return f'<em class="species">{x[:p]}</em> {x[p:p+4]} <em class="species">{x[p+4:]}</em>'
-        # return "<em class=\"species\">" + x[:p] + "</em> " + x[p:p+4] + " <em class=\"species\">" + x[p+4:] + "</em>"
     elif "subsp." in x.lower():
         p = x.lower().find("subsp.")
         return em_species_only(x, p, 6)
-        # return f'<em class="species">{x[:p]}</em> {x[p:p+6]} <em class="species">{x[p+6:]}</em>'
-        # return "<em class=\"species\">" + x[:p] + "</em> " + x[p:p+6] + " <em class=\"species\">" + x[p+6:] + "</em>"
     elif " forme " in x.lower():
         p = x.lower().find(" forme ")
         return em_species_only(x, p, 6)
-        # return f'<em class="species">{x[:p]}</em> {x[p:p+6]} <em class="species">{x[p+6:]}</em>'
-        # return "<em class=\"species\">" + x[:p] + "</em> " + x[p:p+6] + " <em class=\"species\">" + x[p+6:] + "</em>"
     elif " f. " in x.lower():
         p = x.lower().find(" f. ")
         return em_species_only(x, p, 3)
-        # return f'<em class="species">{x[:p]}</em> {x[p:p+3]} <em class="species">{x[p+3:]}</em>'
-        # return "<em class=\"species\">" + x[:p] + "</em> " + x[p:p+3] + " <em class=\"species\">" + x[p+3:] + "</em>"
     else:
         return f'<em class="species">{x}</em>'
 
@@ -1228,18 +1219,17 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
                 if n.application in name_table:
                     nstr = n.cite_n
                     if nstr == "0":
-                        outfile.write("      <td>" + fetch_fa_glyph("citation") + "citation: "
-                                      "<a href=\"" + rel_link_prefix(do_print, "../references/") + crossref.cite_key +
-                                      ".html\">" + crossref.citation + "</a></td>\n")
+                        outfile.write(f'      <td>{fetch_fa_glyph("citation")}citation: '
+                                      f'<a href="{rel_link_prefix(do_print, "../references/")}{crossref.cite_key}.html">'
+                                      f'{crossref.citation}</a></td>\n')
                     else:
                         if "." in nstr:
                             try:
-                                extraref = " [" + name_table[n.application][nstr][1] + "]"
+                                extraref = f' [{name_table[n.application][nstr][1]}]'
                                 refname = name_table[n.application][nstr][0]
                             except LookupError:
                                 if is_name:  # only print errors on one pass
-                                    report_error("Error in citation: " + n.cite_key + " cites" + nstr +
-                                                 " in " + n.application)
+                                    report_error(f'Error in citation: {n.cite_key} cites {nstr} in {n.application}')
                                 extraref = ""
                                 refname = ""
                         else:
@@ -1247,20 +1237,17 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
                             try:
                                 refname = name_table[n.application][int(nstr)]
                             except ValueError:
-                                report_error("Citation " + n.cite_key + " tried to cite " + n.application +
-                                             " #" + nstr)
+                                report_error(f'Citation {n.cite_key} tried to cite {n.application} #' + nstr)
                                 refname = ""
-                        outfile.write("      <td>" + fetch_fa_glyph("citation") + "citation: "
-                                      "<a href=\"" + rel_link_prefix(do_print, "../references/") + crossref.cite_key +
-                                      ".html\">" + crossref.citation + "</a> → " + format_name_string(refname) +
-                                      extraref + "</td>\n")
+                        outfile.write(f'      <td>{fetch_fa_glyph("citation")}citation: '
+                                      f'<a href="{rel_link_prefix(do_print, "../references/")}{crossref.cite_key}.html"'
+                                      f'>{crossref.citation}</a> → {format_name_string(refname)}{extraref}</td>\n')
                 else:
                     outfile.write("      <td>" + fetch_fa_glyph("citation") + "citation: "
                                   "<a href=\"" + rel_link_prefix(do_print, "../references/") + crossref.cite_key +
                                   ".html\">" + crossref.citation + "</a></td>\n")
             else:
-                outfile.write("      <td>" + fetch_fa_glyph("citation") + "citation: " + n.application +
-                              "</td>\n")
+                outfile.write("      <td>" + fetch_fa_glyph("citation") + "citation: " + n.application + "</td>\n")
                 if is_name and not do_print:  # only print on one pass
                     report_error("Citation not in DB: " + n.cite_key + " cites " + n.application)
         elif n.context == "specimen":
@@ -1333,11 +1320,11 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
         # notes
         if notecnt > 0:
             if n.name_note == ".":
-                outfile.write("      <td>&nbsp;</td>\n")
+                outfile.write('      <td>&nbsp;</td>\n')
             else:
                 outfile.write("      <td>" + replace_species_in_string(n.name_note) + "</td>\n")
-        outfile.write("    </tr>\n")
-    outfile.write("    </table>\n")
+        outfile.write('    </tr>\n')
+    outfile.write('    </table>\n')
 
 
 def check_citation_cross_references(citelist: list, refdict: dict, name_table: dict) -> None:
@@ -1376,19 +1363,21 @@ def write_reference_page(outfile: TextIO, do_print: bool, ref: TMB_Classes.Refer
     """
     if do_print:
         start_page_division(outfile, "ref_page")
+        media_path = "resources/"
     else:
         common_html_header(outfile, ref.citation, indexpath="../")
-    outfile.write("    <header id=\"" + ref.cite_key + ".html\">\n")
-    outfile.write("      <h2 class=\"nobookmark\">" + ref.formatted_html + "</h2>\n")
+        media_path = "../"
+    outfile.write(f'    <header id="{ref.cite_key}.html">\n')
+    outfile.write(f'      <h2 class="nobookmark">{ref.formatted_html}</h2>\n')
     if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"../" + init_data().ref_url +
-                      "\">" + fetch_fa_glyph("index") + "Full Reference List</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
+        outfile.write(f'          <li><a href="../{init_data().ref_url}">{fetch_fa_glyph("index")}Full Reference '
+                      'List</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
     # find names for this citation
     names = []
     cites_to = []
@@ -1416,24 +1405,25 @@ def write_reference_page(outfile: TextIO, do_print: bool, ref: TMB_Classes.Refer
         outfile.write("    </p>\n")
 
     if ref.language != "":
-        outfile.write(f"<p><strong>Language:</strong> {format_language(ref.language)}</p>\n")
+        outfile.write(f'<p><strong>Language:</strong> {format_language(ref.language)}</p>\n')
 
     if ref.doi is not None:  # if there is a DOI use it
-        outfile.write("<p><strong>Online:</strong> ")
+        outfile.write('<p><strong>Online:</strong> ')
         if ref.doi.startswith("10"):
-            outfile.write('<img src="../images/DOI_logo.svg" style="height: 1em; vertical-align: middle" alt="DOI"> ')
+            outfile.write(f'<img src="{media_path}images/DOI_logo.svg" style="height: 1em; vertical-align: middle" '
+                          f'alt="DOI"> ')
             outfile.write(f'<a href="https://doi.org/{ref.doi}">https://doi.org/{ref.doi}</a></p>\n')
         else:
             report_error(f"Invalid DOI: {ref.cite_key}: {ref.doi}")
     elif ref.url is not None:  # if not, use a URL if present
-        outfile.write("<p><strong>Online:</strong> ")
-        outfile.write(f"{ref.url}</p>\n")
+        outfile.write('<p><strong>Online:</strong> ')
+        outfile.write(f'{ref.url}</p>\n')
 
     # write name table
     outfile.write('    <h3 class="nobookmark">Names Appearing in this Publication</h3>\n')
     if len(names) > 0:
         outfile.write('    <table class="citetable">\n')
-        outfile.write("      <tr>\n")
+        outfile.write('      <tr>\n')
         outfile.write('        <th class="name_col">Name Used</th>\n')
         if comcnt > 0:
             outfile.write('        <th class="common_col">Common Name(s)</th>\n')
@@ -1443,32 +1433,32 @@ def write_reference_page(outfile: TextIO, do_print: bool, ref: TMB_Classes.Refer
         outfile.write('        <th class="source_col">Source of Accepted</th>\n')
         if notecnt > 0:
             outfile.write('        <th class="notes_col">Note(s)</th>\n')
-        outfile.write("      </tr>\n")
+        outfile.write('      </tr>\n')
         names.sort()
         output_name_table(outfile, do_print, False, names, uniquenames, notecnt, comcnt, refdict, name_table,
                           point_locations)
     else:
-        outfile.write("    <p>\n")
-        outfile.write("      Data not yet available.\n")
-        outfile.write("    </p>\n")
+        outfile.write('    <p>\n')
+        outfile.write('      Data not yet available.\n')
+        outfile.write('    </p>\n')
 
     if len(cites_to) > 0:
         outfile.write('    <h3 class="nobookmark">This Publication is Cited By</h3>\n')
-        outfile.write("    <p>\n")
+        outfile.write('    <p>\n')
         cs = set()
         for c in cites_to:
             if c.cite_key in refdict:
                 crossref = refdict[c.cite_key]
-                cs |= {"<a href=\"" + rel_link_prefix(do_print) + crossref.cite_key +
-                       ".html\">" + crossref.citation + "</a>"}
+                cs |= {'<a href="' + rel_link_prefix(do_print) + crossref.cite_key +
+                       '.html">' + crossref.citation + '</a>'}
             else:
                 cs |= {c.cite_key}
         cl = []
         for x in cs:
             cl.append(x)
         cl.sort()
-        outfile.write("     " + ", ".join(cl) + "\n")
-        outfile.write("    </p>\n")
+        outfile.write('     ' + ', '.join(cl) + '\n')
+        outfile.write('    </p>\n')
 
     if do_print:
         end_page_division(outfile)
@@ -1573,29 +1563,33 @@ def write_binomial_name_page(outfile: TextIO, do_print: bool, name: str, namefil
             end_google_chart_header(outfile)
         common_header_part2(outfile, indexpath="../", include_map=True)
 
-    outfile.write("    <header id=\"" + namefile + ".html\" class=\"tabular_page\">\n")
-    outfile.write("      <h1 class=\"nobookmark\">" + format_name_string(name) + "</h1>\n")
-    outfile.write("      <nav>\n")
-    outfile.write("        <ul>\n")
+    fname = format_name_string(name)
+    outfile.write(f'    <header id="{namefile}.html" class="tabular_page">\n')
+    outfile.write(f'      <h1 class="nobookmark">{fname}</h1>\n')
+    outfile.write('      <nav>\n')
+    outfile.write('        <ul>\n')
     if species_name != "":
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + "sn_" + species_name +
-                      ".html\">" + fetch_fa_glyph("specific name") + format_name_string(species_name) +
-                      "</a></li>\n")
+        outfile.write(f'          <li><a href="{rel_link_prefix(do_print)}sn_{species_name}.html">'
+                      f'{fetch_fa_glyph("specific name")}{format_name_string(species_name)}</a></li>\n')
         if not do_print:
-            outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("index") + "Full Name "
-                          "Index</a></li>\n")
-    outfile.write("        </ul>\n")
-    outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
+            outfile.write(f'          <li><a href="index.html">{fetch_fa_glyph("index")}Full Name Index</a></li>\n')
+    outfile.write('        </ul>\n')
+    outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
 
     if len(location_set) > 0:
-        outfile.write("    <div class=\"map_section\">\n")
-        outfile.write("    <h3 class=\"nobookmark\">Locations Where the Name has Been Applied</h3>\n")
+        outfile.write('    <div class="map_section">\n')
+        # outfile.write('    <h3 class="nobookmark">Locations Where the Name has Been Applied</h3>\n')
+        outfile.write(f'    <h3 class="nobookmark">Locations Where {fname} has Been Applied</h3>\n')
 
-        outfile.write("      <figure>\n")
-        outfile.write('        <img class="mapimg" src="../' + MAP_PATH +
-                      pointmap_name("name_" + name_to_filename(name)) +
+        outfile.write('      <figure>\n')
+        if do_print:
+            map_path = TMP_MAP_PATH
+        else:
+            map_path = f'../{MAP_PATH}'
+
+        outfile.write(f'        <img class="mapimg" src="{map_path}{pointmap_name("name_" + name_to_filename(name))}'
                       '.png" alt="Point Map" title="Point map of name application" />\n')
         outfile.write("      </figure>\n")
         # if do_print:
@@ -1606,13 +1600,13 @@ def write_binomial_name_page(outfile: TextIO, do_print: bool, name: str, namefil
         # else:
         #     outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
 
-        outfile.write("    </div>\n")
-        outfile.write("    <div class=\"map_download\">\n")
-        outfile.write("      Purple points indicate locations where this name has been applied "
-                      "(whether correctly or incorrectly) in the scientific record; blue dotted circles "
-                      "indicate the same but for larger, general regions; a skull and crossbones "
-                      "indicates locations where this name has been applied to a fossil; and red Xs "
-                      "indicate false or mistaken records from the scientific record.\n")
+        outfile.write('    </div>\n')
+        outfile.write('    <div class="map_download">\n')
+        outfile.write('      Purple points indicate locations where this name has been applied '
+                      '(whether correctly or incorrectly) in the scientific record; blue dotted circles '
+                      'indicate the same but for larger, general regions; a skull and crossbones '
+                      'indicates locations where this name has been applied to a fossil; and red Xs '
+                      'indicate false or mistaken records from the scientific record.\n')
         # outfile.write("    Purple fiddler crabs <img class=\"map-icon\" src=\"../images/icon_fiddler_purple.png\" /> "
         #               "indicate locations where this name has been applied "
         #               "(whether correctly or incorrectly) in the scientific record; blue fiddler crabs surrounded by "
@@ -1622,29 +1616,32 @@ def write_binomial_name_page(outfile: TextIO, do_print: bool, name: str, namefil
         #               "indicates locations where this name has been applied to a fossil; and red circles with an x "
         #               "<img class=\"map-icon\" src=\"../images/icon_error.png\" /> "
         #               "indicate false or mistaken records from the scientific record.\n")
-        outfile.write("    </div>\n")
+        outfile.write('    </div>\n')
     if maxcnt > 0:
-        write_chronology_chart_div(outfile, do_print, image_name, None, "Number of Uses of Name per Year", False, False)
-        outfile.write("\n")
+        write_chronology_chart_div(outfile, do_print, image_name, None, f"Number of Uses of {fname} per Year", False,
+                                   False)
+        # write_chronology_chart_div(outfile, do_print, image_name, None, "Number of Uses of Name per Year", False, False)
+        outfile.write('\n')
 
     # write name table
-    outfile.write("    <h3 class=\"nobookmark\">Publications Using this Name</h3>\n")
-    outfile.write("    <table class=\"citetable\">\n")
-    outfile.write("      <tr>\n")
-    outfile.write("        <th class=\"citation_col\">Citation</th>\n")
+    outfile.write(f'    <h3 class="nobookmark">Publications Using {fname}</h3>\n')
+    # outfile.write('    <h3 class="nobookmark">Publications Using this Name</h3>\n')
+    outfile.write('    <table class="citetable">\n')
+    outfile.write('      <tr>\n')
+    outfile.write('        <th class="citation_col">Citation</th>\n')
     if comcnt > 0:
-        outfile.write("        <th class=\"common_col\">Common Name(s)</th>\n")
-    outfile.write("        <th class=\"where_col\">Where</th>\n")
-    outfile.write("        <th class=\"applied_col\">Applied to...</th>\n")
-    outfile.write("        <th class=\"accepted_col\">Accepted Name</th>\n")
-    outfile.write("        <th class=\"source_col\">Source of Accepted</th>\n")
+        outfile.write('        <th class="common_col">Common Name(s)</th>\n')
+    outfile.write('        <th class="where_col">Where</th>\n')
+    outfile.write('        <th class="applied_col">Applied to...</th>\n')
+    outfile.write('        <th class="accepted_col">Accepted Name</th>\n')
+    outfile.write('        <th class="source_col">Source of Accepted</th>\n')
     if notecnt > 0:
-        outfile.write("        <th class=\"notes_col\">Note(s)</th>\n")
-    outfile.write("      </tr>\n")
+        outfile.write('        <th class="notes_col">Note(s)</th>\n')
+    outfile.write('      </tr>\n')
     output_name_table(outfile, do_print, True, cites, uniquecites, notecnt, comcnt, refdict, name_table,
                       point_locations)
-    outfile.write("    <p>\n")
-    outfile.write("    </p>\n")
+    outfile.write('    <p>\n')
+    outfile.write('    </p>\n')
     if do_print:
         end_page_division(outfile)
     else:
@@ -1721,64 +1718,67 @@ def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB
             end_google_chart_header(outfile)
         common_header_part2(outfile, indexpath="../", include_map=True)
 
-    outfile.write("    <header id=\"sn_" + specific_name.name + ".html\" class=\"tabular_page\">\n")
-    outfile.write("      <h1 class=\"nobookmark\">" + format_name_string(specific_name.name) + "</h1>\n")
+    fname = format_name_string(specific_name.name)
+    outfile.write(f'    <header id="sn_{specific_name.name}.html" class="tabular_page">\n')
+    outfile.write(f'      <h1 class="nobookmark">{fname}</h1>\n')
     if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("index") + "Full Name Index</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
-    outfile.write("    <section class=\"topspsection\">\n")
-    outfile.write("      <h3 class=\"nobookmark\">History</h3>\n")
-    outfile.write("      <dl>\n")
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
+        outfile.write(f'          <li><a href="index.html">{fetch_fa_glyph("index")}Full Name Index</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
+    outfile.write('    <section class="topspsection">\n')
+    outfile.write('      <h3 class="nobookmark">History</h3>\n')
+    outfile.write('      <dl>\n')
     if specific_name.synonym != ".":
         if specific_name.synonym in specific_name.variations:
-            outfile.write("        <dt>Species</dt>\n")
+            outfile.write('        <dt>Species</dt>\n')
         else:
-            outfile.write("        <dt>Primary Senior Synonym</dt>\n")
+            outfile.write('        <dt>Primary Senior Synonym</dt>\n')
         if specific_name.synonym == "?":
-            outfile.write("          <dd>Unknown</dd>\n")
+            outfile.write('          <dd>Unknown</dd>\n')
         elif specific_name.synonym.startswith(">"):
-            outfile.write("          <dd><em class=\"species\">" +
-                          specific_name.synonym[1:] + "</em></dd>\n")
+            outfile.write(f'          <dd><em class="species">{specific_name.synonym[1:]}</em></dd>\n')
         else:
             s = find_species_by_name(specific_name.synonym)
-            outfile.write("          <dd>" + create_species_link(s.genus, s.species, do_print, path="../") +
-                          "</dd>\n")
-    outfile.write("        <dt>Original Usage</dt>\n")
-    outfile.write("          <dd>" + format_name_string(specific_name.original_binomial) + "</dd>\n")
-    outfile.write("        <dt>Original Source with Priority</dt>\n")
+            outfile.write(f'          <dd>{create_species_link(s.genus, s.species, do_print, path="../")}</dd>\n')
+    outfile.write('        <dt>Original Usage</dt>\n')
+    outfile.write('          <dd>' + format_name_string(specific_name.original_binomial) + "</dd>\n")
+    outfile.write('        <dt>Original Source with Priority</dt>\n')
     refname = ""
     if specific_name.priority_source != ".":
         try:
             ref = refdict[specific_name.priority_source]
             refname = ref.formatted_html
         except LookupError:
-            # print(name.priority_source)
             report_error(specific_name.priority_source)
     else:
         refname = "unknown"
-    outfile.write("          <dd>" + refname + "</dd>\n")
-    outfile.write("        <dt>Derivation</dt>\n")
+    outfile.write(f'          <dd>{refname}</dd>\n')
+    outfile.write('        <dt>Derivation</dt>\n')
     if specific_name.meaning == ".":
-        outfile.write("          <dd>unknown</dd>\n")
+        outfile.write('          <dd>unknown</dd>\n')
     else:
-        outfile.write("          <dd>" + specific_name.meaning + "</dd>\n")
-    outfile.write("      </dl>\n")
-    outfile.write("    </section>\n")
+        outfile.write(f'          <dd>{specific_name.meaning}</dd>\n')
+    outfile.write('      </dl>\n')
+    outfile.write('    </section>\n')
     outfile.write("\n")
 
     if len(location_set) > 0:
-        outfile.write("    <div class=\"map_section\">\n")
-        outfile.write("    <h3 class=\"nobookmark\">Locations Where the Name has Been Applied</h3>\n")
+        outfile.write('    <div class="map_section">\n')
+        outfile.write(f'    <h3 class="nobookmark">Locations Where {fname} has Been Applied</h3>\n')
+        # outfile.write('    <h3 class="nobookmark">Locations Where the Name has Been Applied</h3>\n')
 
-        outfile.write("      <figure>\n")
-        outfile.write('        <img class="mapimg" src="../' + MAP_PATH + pointmap_name("sn_" + specific_name.name) +
-                      '.png" alt="Point Map" title="Point map of name application" />\n')
-        outfile.write("      </figure>\n")
+        if do_print:
+            map_path = TMP_MAP_PATH
+        else:
+            map_path = f'../{MAP_PATH}'
+        outfile.write('      <figure>\n')
+        outfile.write(f'        <img class="mapimg" src="{map_path}{pointmap_name("sn_" + specific_name.name)}.png" '
+                      f'alt="Point Map" title="Point map of name application" />\n')
+        outfile.write('      </figure>\n')
         # if do_print:
         #     outfile.write("      <figure>\n")
         #     outfile.write("        <img src=\"" + TMP_MAP_PATH + pointmap_name("sn_" + specific_name.name) +
@@ -1787,13 +1787,13 @@ def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB
         # else:
         #     outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
 
-        outfile.write("    </div>\n")
-        outfile.write("    <div class=\"map_download\">\n")
-        outfile.write("      Purple circles indicate locations where this name has been applied "
-                      "(whether correctly or incorrectly) in the scientific record; blue dotted circles indicate the "
-                      "same but for larger, general regions; a skull and crossbones "
-                      "indicates locations where this name has been applied to a fossil; and red Xs "
-                      "indicate false or mistaken records from the scientific record.\n")
+        outfile.write('    </div>\n')
+        outfile.write('    <div class="map_download">\n')
+        outfile.write('      Purple circles indicate locations where this name has been applied '
+                      '(whether correctly or incorrectly) in the scientific record; blue dotted circles indicate the '
+                      'same but for larger, general regions; a skull and crossbones '
+                      'indicates locations where this name has been applied to a fossil; and red Xs '
+                      'indicate false or mistaken records from the scientific record.\n')
         # outfile.write("    Purple fiddler crabs <img class=\"map-icon\" src=\"../images/icon_fiddler_purple.png\" /> "
         #               "indicate locations where this name has been applied "
         #               "(whether correctly or incorrectly) in the scientific record; blue fiddler crabs surrounded by "
@@ -1803,31 +1803,34 @@ def write_specific_name_page(outfile: TextIO, do_print: bool, specific_name: TMB
         #               "indicates locations where this name has been applied to a fossil; and red circles with an x "
         #               "<img class=\"map-icon\" src=\"../images/icon_error.png\" /> "
         #               "indicate false or mistaken records from the scientific record.\n")
-        outfile.write("    </div>\n")
+        outfile.write('    </div>\n')
 
     if maxcnt > 0:
-        write_chronology_chart_div(outfile, do_print, image_name, None, "Number of Uses of Name per Year", False, False)
+        write_chronology_chart_div(outfile, do_print, image_name, None, f"Number of Uses of {fname} per Year", False,
+                                   False)
+        # write_chronology_chart_div(outfile, do_print, image_name, None, "Number of Uses of Name per Year", False, False)
         outfile.write("\n")
 
     if specific_name.notes != ".":
-        outfile.write("    <section class=\"spsection\" style=\"clear: both\">\n")
-        outfile.write("      <h3 class=\"nobookmark\">Notes/Comments</h3>\n")
-        outfile.write("      <p>\n")
-        outfile.write("        " + replace_species_in_string(specific_name.notes) + "\n")
-        outfile.write("      </p>\n")
-        outfile.write("    </section>\n")
-    outfile.write("    <section class=\"spsection\" style=\"clear: both\">\n")
-    outfile.write("      <h3 class=\"nobookmark\">Binomials Using this Specific Name</h3>\n")
-    outfile.write("      <ul>\n")
+        outfile.write('    <section class="spsection" style="clear: both">\n')
+        outfile.write('      <h3 class="nobookmark">Notes/Comments</h3>\n')
+        outfile.write('      <p>\n')
+        outfile.write(f'        {replace_species_in_string(specific_name.notes)}\n')
+        outfile.write('      </p>\n')
+        outfile.write('    </section>\n')
+    outfile.write('    <section class="spsection" style="clear: both">\n')
+    outfile.write(f'      <h3 class="nobookmark">Binomials Using {fname}</h3>\n')
+    # outfile.write('      <h3 class="nobookmark">Binomials Using this Specific Name</h3>\n')
+    outfile.write('      <ul>\n')
     for n in binomial_names:
         x = clean_specific_name(n)
         tmpnamelist = specific_name.variations.split(";")
         if (x != "") and (x in tmpnamelist):
             namefile = name_to_filename(n)
-            outfile.write("      <li><a href=\"" + rel_link_prefix(do_print) + namefile + ".html\">" +
-                          format_name_string(n) + "</a></li>\n")
-    outfile.write("      </ul>\n")
-    outfile.write("    </section>\n")
+            outfile.write(f'      <li><a href="{rel_link_prefix(do_print)}{namefile}.html">'
+                          f'{format_name_string(n)}</a></li>\n')
+    outfile.write('      </ul>\n')
+    outfile.write('    </section>\n')
 
     if do_print:
         end_page_division(outfile)
@@ -1902,6 +1905,7 @@ def write_chronology_chart_div(outfile: TextIO, do_print: bool, n: Union[str, in
         position = "left"
     else:
         position = "top"
+    # outfile.write(f'      <div class="chronchart_title_{position}">{title_str}</div>\n')
     outfile.write(f'      <div class="chronchart_title_{position}">{title_str}</div>\n')
     if do_print:
         outfile.write(f'      <div class="chronchart_{position}"><img src="{TMP_PATH}{n}'
@@ -1987,7 +1991,7 @@ def create_synonym_chronology(outfile: TextIO, do_print: bool, species_name: str
         end_google_chart_header(outfile)
         common_header_part2(outfile)
 
-    outfile.write("    <header>\n")
+    outfile.write(f'    <header id="synonyms_{species_name}.html">\n')
     # outfile.write("      <h1 class=\"nobookmark\">Synonym Chronology of " + format_name_string("Uca " + species) +
     outfile.write("      <h1 class=\"nobookmark\">Synonym Chronology of " + format_name_string(species.binomial()) +
                   "</h1>\n")
@@ -2315,7 +2319,7 @@ def create_genus_chronology(outfile: TextIO, do_print: bool, genus_cnts: dict) -
             TMB_Create_Graphs.create_chronology_chart_file(filename, miny, maxy, maxcnt, genus_cnts[name],
                                                            init_data().graph_font)
     else:
-        common_header_part1(outfile, "Uca", indexpath="../")
+        common_header_part1(outfile, "Fiddler Crab Genera Usage Patterns", indexpath="../")
         start_google_chart_header(outfile)
         setup_chronology_chart(outfile, 0, miny, maxy, maxcnt, total_cnts)
         adjust = 1
@@ -2324,29 +2328,29 @@ def create_genus_chronology(outfile: TextIO, do_print: bool, genus_cnts: dict) -
         end_google_chart_header(outfile)
         common_header_part2(outfile)
 
-    outfile.write("    <header>\n")
-    outfile.write("      <h1 class=\"bookmark2\">Chronology of Fiddler Crab Genera</h1>\n")
+    outfile.write('    <header id="genera_chronology">\n')
+    outfile.write('      <h1 class="bookmark2">Chronology of Fiddler Crab Genera</h1>\n')
     if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) +
-                      "index.html\">" + fetch_fa_glyph("index") + "Full Name Index</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
+        outfile.write(f'          <li><a href="{rel_link_prefix(do_print)}index.html">{fetch_fa_glyph("index")}'
+                      f'Full Name Index</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
     if do_print:
         filename = "Genus_total_chronology.png"
     else:
         filename = 0
-    outfile.write("    <p>Chronological charts of different generic names for fiddler crabs. The charts include "
-                  "instances when fiddler crabs were placed in other, valid, genera (<em>e.g.,</em> "
-                  "<em class=\"species\">Cancer</em>) as well as cases in the 19<sup>th</sup> century when the "
-                  "genus <em class=\"species\">Uca</em> was used for non-fiddler crabs.</p>\n")
+    outfile.write('    <p>Chronological charts of different generic names for fiddler crabs. The charts include '
+                  'instances when fiddler crabs were placed in other, valid, genera (<em>e.g.,</em> '
+                  '<em class="species">Cancer</em>) as well as cases in the 19<sup>th</sup> century when the '
+                  'genus <em class="species">Uca</em> was used for non-fiddler crabs.</p>\n')
     write_chronology_chart_div(outfile, do_print, filename, None, "All Genera", False, True)
     adjust = 1
-    outfile.write("    <p style=\"clear: both\">Genera are listed in decreasing order of use.</p>\n")
-    outfile.write("    <h2 class=\"nobookmark\">Fiddler Crab Genera</h2>\n")
+    outfile.write('    <p style="clear: both">Genera are listed in decreasing order of use.</p>\n')
+    outfile.write('    <h2 class="nobookmark">Fiddler Crab Genera</h2>\n')
     for i, name in enumerate(order):
         if do_print:
             filename = "Genus_" + name + "_chronology.png"
@@ -2380,7 +2384,7 @@ def clean_genus(genus: str) -> str:
     """
     fix and match alternate genus spellings when performing summaries
     """
-    if genus in {"Galasimus", "Gelasimes", "Gelasius", "Gelasmus", "Gelsimus", "Gelassimus", "Gelasima"}:
+    if genus in {"Galasimus", "Gelasimes", "Gelasius", "Gelasmus", "Gelsimus", "Gelassimus", "Gelasima", "Gelarimus"}:
         return "Gelasimus"
     elif genus in {"Uka", "Uça"}:
         return "Uca"
@@ -2388,7 +2392,10 @@ def clean_genus(genus: str) -> str:
         return "Gonoplax"
     elif genus in {"Ocypoda"}:
         return "Ocypode"
-    elif genus in {"Ciecie"}:
+    elif genus in {"lactea-complex", "vocator-complex", "lactea", "triangularis", "vocans"}:
+        # species-grouping that are potentially equivalent to subgenera but not used as formal names
+        return ""
+    elif genus in {"Ciecie"}:  # pre-Linnean name
         return ""
     else:
         return genus
@@ -2476,60 +2483,60 @@ def write_all_name_pages(outfile: TextIO, do_print: bool, refdict: dict, citelis
         start_page_division(outfile, "index_page")
     else:
         common_html_header(outfile, "Name Index", indexpath="../")
-    outfile.write("    <header id=\"name_index\">\n")
-    outfile.write("      <h1 class=\"bookmark1\">Name Index</h1>\n")
+    outfile.write('    <header id="name_index">\n')
+    outfile.write('      <h1 class="bookmark1">Scientific Names</h1>\n')
     if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + init_data().name_sum_url +
-                      "\">" + fetch_fa_glyph("summary charts") + "Name Summary</a></li>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + init_data().species_url +
-                      "\">" + fetch_fa_glyph("accepted species") + "Accepted Species</a></li>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print) + init_data().synonyms_genera +
-                      "\">Genera Usage Patterns</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("    <p>\n")
-    outfile.write("      This is an index of every scientific name (including all alternate spellings) which have "
-                  "been applied to fiddler crabs or placed in the fiddler crab genus.\n")
-    outfile.write("    </p>\n")
-    outfile.write("    <p>\n")
-    outfile.write("      For the binomials, every publication which used that name is provided, as well as the "
-                  "best estimate as to which species, as we understand them today, the author was actually "
-                  "referring.\n")
-    outfile.write("    </p>\n")
-    outfile.write("    <p>\n")
-    outfile.write("      For the specific names, only the primary spelling is listed below, but all alternate "
-                  "spellings and inclusive binomials are included on the linked page, as well as general "
-                  "information on the status of each specific name.\n")
-    outfile.write("    </p>\n")
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
+        outfile.write('          <li><a href="' + rel_link_prefix(do_print) + init_data().name_sum_url +
+                      '">' + fetch_fa_glyph("summary charts") + 'Name Summary</a></li>\n')
+        outfile.write('          <li><a href="' + rel_link_prefix(do_print, "../") + init_data().species_url +
+                      '">' + fetch_fa_glyph("accepted species") + 'Accepted Species</a></li>\n')
+        outfile.write('          <li><a href="' + rel_link_prefix(do_print) + init_data().synonyms_genera +
+                      '">Genera Usage Patterns</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('    <p>\n')
+    outfile.write('      This is an index of every scientific name (including all alternate spellings) which have '
+                  'been applied to fiddler crabs or placed in the fiddler crab genus.\n')
+    outfile.write('    </p>\n')
+    outfile.write('    <p>\n')
+    outfile.write('      For the binomials, every publication which used that name is provided, as well as the '
+                  'best estimate as to which species, as we understand them today, the author was actually '
+                  'referring.\n')
+    outfile.write('    </p>\n')
+    outfile.write('    <p>\n')
+    outfile.write('      For the specific names, only the primary spelling is listed below, but all alternate '
+                  'spellings and inclusive binomials are included on the linked page, as well as general '
+                  'information on the status of each specific name.\n')
+    outfile.write('    </p>\n')
 
-    outfile.write("    <div class=\"namecol\">\n")
-    outfile.write("      <h3 id=\"binomials\" class=\"bookmark2\">Binomials (and other Compound Names)</h3>\n")
-    outfile.write("      <ul class=\"namelist\">\n")
+    outfile.write('    <div class="namecol">\n')
+    outfile.write('      <h3 id="binomials" class="bookmark2">Binomials (and other Compound Names) Index</h3>\n')
+    outfile.write('      <ul class="namelist">\n')
     for name in unique_names:
         namefile = name_to_filename(name)
-        outfile.write("        <li><a href=\"" + rel_link_prefix(do_print) + namefile + ".html\">" +
-                      format_name_string(name) + "</a></li>\n")
+        outfile.write(f'        <li><a href="{rel_link_prefix(do_print)}{namefile}.html">'
+                      f'{format_name_string(name)}</a></li>\n')
 
-    outfile.write("      </ul>\n")
-    outfile.write("    </div>\n")
-    outfile.write("    <div class=\"namecol pagebreak\">\n")
-    outfile.write("      <h3 id=\"specificnames\" class=\"bookmark2\">Specific Names</h3>\n")
-    outfile.write("      <ul class=\"spnamelist\">\n")
+    outfile.write('      </ul>\n')
+    outfile.write('    </div>\n')
+    outfile.write('    <div class="namecol pagebreak">\n')
+    outfile.write('      <h3 id="specificnames" class="bookmark2">Specific Names Index</h3>\n')
+    outfile.write('      <ul class="spnamelist">\n')
 
     specific_year_cnts = collections.Counter()
     for name in specific_names:
-        outfile.write("        <li><a href=\"" + rel_link_prefix(do_print) + "sn_" + name.name + ".html\">" +
-                      format_name_string(name.name) + "</a></li>\n")
+        outfile.write(f'        <li><a href="{rel_link_prefix(do_print)}sn_{name.name}.html">'
+                      f'{format_name_string(name.name)}</a></li>\n')
         tmpkey = name.priority_source
         if tmpkey != ".":
             y = refdict[tmpkey].year()
             if y is not None:
                 specific_year_cnts.update([y])
-    outfile.write("      </ul>\n")
-    outfile.write("    </div>\n")
+    outfile.write('      </ul>\n')
+    outfile.write('    </div>\n')
     if do_print:
         end_page_division(outfile)
     else:
@@ -2591,96 +2598,96 @@ def check_specific_names(citelist: list, specific_names: list) -> None:
             report_error("Missing specific name: " + n)
 
 
-def create_all_taxonomic_keys(point_locations: dict, location_species: dict, location_range_species: dict,
-                              trait_data: dict, all_taxa_data: dict) -> dict:
-    """
-    create taxonomic keys for every unique set of species identified across all locations
-    """
+# def create_all_taxonomic_keys(point_locations: dict, location_species: dict, location_range_species: dict,
+#                               trait_data: dict, all_taxa_data: dict) -> dict:
+#     """
+#     create taxonomic keys for every unique set of species identified across all locations
+#     """
+#
+#     all_keys = {}
+#
+#     # find all unique sets of species
+#     species_sets = set()
+#     for p in point_locations:
+#         loc = point_locations[p]
+#         all_species = set()
+#         all_species |= location_species[loc.name]
+#         if loc.n_direct_children() > 0:
+#             for c in loc.direct_children():
+#                 all_species |= fetch_child_data(c, location_species)
+#
+#         range_species = set(find_species_by_name(s) for s in location_range_species[loc])
+#         all_species |= range_species
+#         if len(all_species) > 0:
+#             species_sets.add(frozenset(all_species))
+#
+#     # create keys for each unique set of species
+#     warnings = set()
+#     for sp_set in species_sets:
+#         taxa_data = {}
+#         for s in sp_set:
+#             try:
+#                 taxa_data["Male " + s.binomial()] = all_taxa_data["♂ Male {{" + s.species + "}}"]
+#                 taxa_data["Female " + s.binomial()] = all_taxa_data["♀ Female {{" + s.species + "}}"]
+#             except KeyError:
+#                 report_error("Missing taxonomic key data: " + s.species)
+#
+#         all_keys[sp_set], new_warning = TMB_TaxKeyGen.generate_taxonomic_key(trait_data, taxa_data, verbose=False)
+#         warnings |= new_warning
+#
+#     # global key for all species
+#     all_keys["all"], new_warning = TMB_TaxKeyGen.generate_taxonomic_key(trait_data, all_taxa_data, verbose=False)
+#     warnings |= new_warning
+#
+#     for w in sorted(warnings):
+#         report_error(w)
+#
+#     return all_keys
 
-    all_keys = {}
 
-    # find all unique sets of species
-    species_sets = set()
-    for p in point_locations:
-        loc = point_locations[p]
-        all_species = set()
-        all_species |= location_species[loc.name]
-        if loc.n_direct_children() > 0:
-            for c in loc.direct_children():
-                all_species |= fetch_child_data(c, location_species)
-
-        range_species = set(find_species_by_name(s) for s in location_range_species[loc])
-        all_species |= range_species
-        if len(all_species) > 0:
-            species_sets.add(frozenset(all_species))
-
-    # create keys for each unique set of species
-    warnings = set()
-    for sp_set in species_sets:
-        taxa_data = {}
-        for s in sp_set:
-            try:
-                taxa_data["Male " + s.binomial()] = all_taxa_data["♂ Male {{" + s.species + "}}"]
-                taxa_data["Female " + s.binomial()] = all_taxa_data["♀ Female {{" + s.species + "}}"]
-            except KeyError:
-                report_error("Missing taxonomic key data: " + s.species)
-
-        all_keys[sp_set], new_warning = TMB_TaxKeyGen.generate_taxonomic_key(trait_data, taxa_data, verbose=False)
-        warnings |= new_warning
-
-    # global key for all species
-    all_keys["all"], new_warning = TMB_TaxKeyGen.generate_taxonomic_key(trait_data, all_taxa_data, verbose=False)
-    warnings |= new_warning
-
-    for w in sorted(warnings):
-        report_error(w)
-
-    return all_keys
-
-
-def write_taxonomic_key(outfile: TextIO, do_print: bool, taxkey: TMB_TaxKeyGen.KeyText,
-                        location: Optional[TMB_Classes.LocationClass]) -> None:
-    """
-    write pre-generated taxonomic key to HTML
-    """
-    if do_print:
-        start_page_division(outfile, "base_page")
-    else:
-        if location is None:
-            common_header_part1(outfile, "Fiddler Crab Taxonomic Key", indexpath="../../")
-        else:
-            common_header_part1(outfile, location.trimmed_name + ": Taxonomic Key", indexpath="../../")
-        outfile.writelines(taxkey.header)
-        common_header_part2(outfile, indexpath="../../")
-
-    if location is None:
-        outfile.write("    <header id=\"all_taxkey.html\">\n")
-        outfile.write("      <h1 class=\"nobookmark\">Taxonomic Key to All Fiddler Crabs</h1>\n")
-    else:
-        outfile.write("    <header id=\"" + place_to_filename(location.name) + "_taxkey.html\">\n")
-        outfile.write("      <h1 class=\"nobookmark\">" + location.trimmed_name + ": Taxonomic Key</h1>\n")
-    if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        if location is not None:
-            outfile.write("          <li>" + create_location_link(location, location.trimmed_name, do_print, path="../",
-                                                                  inc_icon=True) + "</li>\n")
-            outfile.write("          <li><a href=\"../index.html\">" + fetch_fa_glyph("index") +
-                          "Location Index</a></li>\n")
-        outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("tax key") +
-                      "Taxonomic Key Guide</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("    <p>&nbsp;</p>\n")
-
-    for line in taxkey.body:
-        outfile.write(replace_species_in_string(line, True, do_print, "../../"))
-
-    if do_print:
-        end_page_division(outfile)
-    else:
-        common_html_footer(outfile)
+# def write_taxonomic_key(outfile: TextIO, do_print: bool, taxkey: TMB_TaxKeyGen.KeyText,
+#                         location: Optional[TMB_Classes.LocationClass]) -> None:
+#     """
+#     write pre-generated taxonomic key to HTML
+#     """
+#     if do_print:
+#         start_page_division(outfile, "base_page")
+#     else:
+#         if location is None:
+#             common_header_part1(outfile, "Fiddler Crab Taxonomic Key", indexpath="../../")
+#         else:
+#             common_header_part1(outfile, location.trimmed_name + ": Taxonomic Key", indexpath="../../")
+#         outfile.writelines(taxkey.header)
+#         common_header_part2(outfile, indexpath="../../")
+#
+#     if location is None:
+#         outfile.write("    <header id=\"all_taxkey.html\">\n")
+#         outfile.write("      <h1 class=\"nobookmark\">Taxonomic Key to All Fiddler Crabs</h1>\n")
+#     else:
+#         outfile.write("    <header id=\"" + place_to_filename(location.name) + "_taxkey.html\">\n")
+#         outfile.write("      <h1 class=\"nobookmark\">" + location.trimmed_name + ": Taxonomic Key</h1>\n")
+#     if not do_print:
+#         outfile.write("      <nav>\n")
+#         outfile.write("        <ul>\n")
+#         if location is not None:
+#             outfile.write("          <li>" + create_location_link(location, location.trimmed_name, do_print, path="../",
+#                                                                   inc_icon=True) + "</li>\n")
+#             outfile.write("          <li><a href=\"../index.html\">" + fetch_fa_glyph("index") +
+#                           "Location Index</a></li>\n")
+#         outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("tax key") +
+#                       "Taxonomic Key Guide</a></li>\n")
+#         outfile.write("        </ul>\n")
+#         outfile.write("      </nav>\n")
+#     outfile.write("    </header>\n")
+#     outfile.write("    <p>&nbsp;</p>\n")
+#
+#     for line in taxkey.body:
+#         outfile.write(replace_species_in_string(line, True, do_print, "../../"))
+#
+#     if do_print:
+#         end_page_division(outfile)
+#     else:
+#         common_html_footer(outfile)
 
 
 # def write_taxonomic_key_guide(outfile: TextIO, do_print: bool) -> None:
@@ -2753,8 +2760,10 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
                "Indo-West Pacific Realm")
     if do_print:
         start_page_division(outfile, "index_page")
+        map_path = TMP_MAP_PATH
     else:
         common_header_part1(outfile, "Fiddler Crab Geographic Ranges")
+        map_path = MAP_PATH
         # start_google_map_header(outfile)
         # # write_google_map_range_header(outfile, "fiddlers_all")
         # write_google_map_point_header(outfile, "fiddlers_all")
@@ -2766,25 +2775,25 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
     if not do_print:
         outfile.write("      <nav>\n")
         outfile.write("        <ul>\n")
-        outfile.write('          <li><a href="locations/index.html">' + fetch_fa_glyph("index") + "Location "
-                      "Index</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
+        outfile.write(f'          <li><a href="locations/index.html">{fetch_fa_glyph("index")}Location '
+                      f'Index</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
     outfile.write('    <section class="topspsection">\n')
     outfile.write('      <div class="map_section">\n')
 
-    outfile.write("      <figure>\n")
-    outfile.write('        <a href="' + MAP_PATH + rangemap_name("fiddlers_all") + '.png"><img class="mapimg" src="' +
-                  MAP_PATH + rangemap_name("fiddlers_all") +
-                  '.png" alt="Map" title="Map of fiddler crab distribution" /></a>\n')
-    outfile.write("      </figure>\n")
-    outfile.write("      <figure>\n")
-    outfile.write('        <a href="' + MAP_PATH + pointmap_name("fiddlers_all") + '.png"><img class="mapimg" src="' +
-                  MAP_PATH + pointmap_name("fiddlers_all") +
-                  '.png" alt="Point Map" title="Point map of fiddler crab distribution" /></a>\n')
-    outfile.write("      </figure>\n")
+    outfile.write('      <figure>\n')
+    outfile.write(f'        <a href="{map_path}{rangemap_name("fiddlers_all")}.png"><img class="mapimg" '
+                  f'src="{map_path}{rangemap_name("fiddlers_all")}.png" alt="Map" '
+                  'title="Map of fiddler crab distribution" /></a>\n')
+    outfile.write('      </figure>\n')
+    outfile.write('      <figure>\n')
+    outfile.write(f'        <a href="{map_path}{pointmap_name("fiddlers_all")}.png"><img class="mapimg" '
+                  f'src="{map_path}{pointmap_name("fiddlers_all")}.png" alt="Point Map" '
+                  f'title="Point map of fiddler crab distribution" /></a>\n')
+    outfile.write('      </figure>\n')
     # if do_print:
     #     outfile.write("      <figure>\n")
     #     outfile.write("        <img src=\"" + TMP_MAP_PATH + rangemap_name("fiddlers_all") + ".png\" alt=\"Map\" "
@@ -2806,40 +2815,40 @@ def write_geography_page(outfile: TextIO, do_print: bool, species: list) -> None
     #                   fetch_fa_glyph("download") + "Download PNG line map of point locations.</a>\n")
     #     outfile.write("        </div>\n")
 
-    outfile.write("      </div>\n")
-    outfile.write("      <p>\n")
-    outfile.write("        The first map shows the approximate density of species richness")
+    outfile.write('      </div>\n')
+    outfile.write('      <p>\n')
+    outfile.write('        The first map shows the approximate density of species richness')
     if do_print:
-        index_page = "#location_index.html"
-        outfile.write(". ")
+        index_page = '#location_index.html'
+        outfile.write('. ')
     else:
-        index_page = "locations/index.html"
-        outfile.write(" (click on map for larger view). ")
+        index_page = 'locations/index.html'
+        outfile.write(' (click on map for larger view). ')
 
     outfile.write('The second map shows approximate point locations where fiddler crabs '
                   'have been recorded in the scientific record. Purple circles indicate locations where '
                   'fiddler crabs are found; blue dotted circles indicate the same but for '
                   'larger, general regions; and red Xs indicate false or mistaken records. See '
-                  'the <a href="' + index_page + '">location index</a> for a full list of all point locations.')
+                  f'the <a href="{index_page}">location index</a> for a full list of all point locations.')
 
-    outfile.write("\n      </p>\n")
-    outfile.write("      <p>\n")
-    outfile.write("        Specific ranges for a species or name can be found on its associated pages. "
-                  "The list below sorts the species by major zoogeographic realm.\n")
-    outfile.write("      </p>\n")
+    outfile.write('\n      </p>\n')
+    outfile.write('      <p>\n')
+    outfile.write('        Specific ranges for a species or name can be found on its associated pages. '
+                  'The list below sorts the species by major zoogeographic realm.\n')
+    outfile.write('      </p>\n')
 
-    outfile.write("    </section>\n")
+    outfile.write('    </section>\n')
     for r in regions:
-        outfile.write("\n")
+        outfile.write('\n')
         outfile.write('    <section class="spsection">\n')
-        outfile.write('      <h2 class="nobookmark">' + r + '</h2>\n')
+        outfile.write(f'      <h2 class="nobookmark">{r}</h2>\n')
         outfile.write('      <ul class="splist">\n')
         for s in species:
             if s.realm == r:
                 if s.status != "fossil":
-                    outfile.write("        <li>" + create_species_link(s.genus, s.species, do_print) + "</li>\n")
-        outfile.write("      </ul>\n")
-        outfile.write("    </section>\n")
+                    outfile.write(f'        <li>{create_species_link(s.genus, s.species, do_print)}</li>\n')
+        outfile.write('      </ul>\n')
+        outfile.write('    </section>\n')
     if do_print:
         end_page_division(outfile)
     else:
@@ -2913,11 +2922,13 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
             londir = "W"
         else:
             londir = "E"
-        return "{:1.6f}&deg;{}, {:1.6f}&deg;{}".format(abs(lat), latdir, abs(lon), londir)
+        return f'{abs(lat):1.6f}&deg;{latdir}, {abs(lon):1.6f}&deg;{londir}'
+        # return "{:1.6f}&deg;{}, {:1.6f}&deg;{}".format(abs(lat), latdir, abs(lon), londir)
 
     # main function code
     if do_print:
         start_page_division(outfile, "base_page")
+        map_path = TMP_MAP_PATH
     else:
         common_header_part1(outfile, loc.trimmed_name, indexpath="../")
         # if not loc.unknown:
@@ -2925,17 +2936,18 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
         #     write_google_map_point_header(outfile, "location_" + place_to_filename(loc.name))
         #     end_google_map_header(outfile)
         common_header_part2(outfile, indexpath="../", include_map=True)
+        map_path = "../" + MAP_PATH
 
-    outfile.write("    <header id=\"" + place_to_filename(loc.name) + ".html\">\n")
-    outfile.write("      <h1 class=\"nobookmark\">" + loc.trimmed_name + "</h1>\n")
+    outfile.write(f'    <header id="{place_to_filename(loc.name)}.html">\n')
+    outfile.write(f'      <h1 class="nobookmark">{loc.trimmed_name}</h1>\n')
     if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("index") + "Location Index</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("    <dl>\n")
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
+        outfile.write(f'          <li><a href="index.html">{fetch_fa_glyph("index")}Location Index</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('    <dl>\n')
 
     if loc.field_guide is not None:
         fg_list = loc.field_guide.split(";")
@@ -2952,7 +2964,7 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
             tmp_list.append([fg_title, f"<a href=\"../field_guides/field_guide_{fg}.html\">{fg_title}</a>"])
         tmp_list.sort()
         link_list = [x[1] for x in tmp_list]
-        outfile.write("    <dt>Applicable Field Guides</dt>\n")
+        outfile.write('    <dt>Applicable Field Guides</dt>\n')
         outfile.write("      <dd>" + "; ".join(link_list) + "</dd>\n")
 
     if loc.n_alternates() > 0:
@@ -2976,23 +2988,23 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
             dstr = ", ".join(dlist)
         elif dstr is None:
             dstr = ""
-        outfile.write("      <dd>" + dstr + "</dd>\n")
+        outfile.write(f'      <dd>{dstr}</dd>\n')
     if loc.unknown:
-        outfile.write("    <dt>Location Could not be Identified</dt>\n")
+        outfile.write('    <dt>Location Could not be Identified</dt>\n')
         if loc.notes is not None:
-            outfile.write("      <dd>" + loc.notes + "</dd>\n")
+            outfile.write(f'      <dd>{loc.notes}</dd>\n')
     else:
         if loc.notes is not None:
-            outfile.write("    <dt>Note</dt>\n")
-            outfile.write("      <dd>" + loc.notes + "</dd>\n")
-        outfile.write("    <dt>Approximate Coordinates</dt>\n")
-        outfile.write("      <dd>" + format_latlon(loc.latitude, loc.longitude) + "</dd>\n")
-        outfile.write("    <div class=\"map_section\">\n")
+            outfile.write('    <dt>Note</dt>\n')
+            outfile.write(f'      <dd>{loc.notes}</dd>\n')
+        outfile.write('    <dt>Approximate Coordinates</dt>\n')
+        outfile.write(f'      <dd>{format_latlon(loc.latitude, loc.longitude)}</dd>\n')
+        outfile.write('    <div class="map_section">\n')
 
-        outfile.write("      <figure>\n")
-        outfile.write('        <img class="mapimg" src="../' + MAP_PATH +
-                      pointmap_name("location_" + place_to_filename(loc.name)) + '.png" alt="' + loc.trimmed_name +
-                      '" title="Map of ' + loc.trimmed_name + '" />\n')
+        outfile.write('      <figure>\n')
+        outfile.write(f'        <img class="mapimg" '
+                      f'src="{map_path}{pointmap_name("location_" + place_to_filename(loc.name))}.png" '
+                      f'alt="{loc.trimmed_name}" title="Map of {loc.trimmed_name}" />\n')
         outfile.write("      </figure>\n")
         # if do_print:
         #     outfile.write("      <figure>\n")
@@ -3003,11 +3015,11 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
         # else:
         #     outfile.write("           <div id=\"point_map_canvas\" class=\"sp_map\"></div>\n")
 
-        outfile.write("        <div class=\"map_download\">\n")
-        outfile.write("   A purple circle (local) or blue dotted circle (regional) indicates the coordinates used to "
-                      "represent this location; yellow circles indicate all "
-                      "sublocations contained within this location; a skull and crossbones indicates fossil-only "
-                      "locations or sub-locations; and red Xs indicate false or mistaken locations.\n")
+        outfile.write('        <div class="map_download">\n')
+        outfile.write('   A purple circle (local) or blue dotted circle (regional) indicates the coordinates used to '
+                      'represent this location; yellow circles indicate all '
+                      'sublocations contained within this location; a skull and crossbones indicates fossil-only '
+                      'locations or sub-locations; and red Xs indicate false or mistaken locations.\n')
         # outfile.write("   A purple fiddler crab <img class=\"map-icon\" src=\"../images/icon_fiddler_purple.png\" /> "
         #               "(local) or a blue fiddler crab surrounded by a dashed circle (regional) "
         #              "<img class=\"map-icon\" src=\"../images/icon_region.png\" /> indicates the coordinates used to "
@@ -3018,10 +3030,10 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
         #               "locations or sub-locations; and red circles with an x "
         #               "<img class=\"map-icon\" src=\"../images/icon_error.png\" /> indicate false or mistaken "
         #               "locations.\n")
-        outfile.write("        </div>\n")
+        outfile.write('        </div>\n')
 
-        outfile.write("    </div>\n")
-    outfile.write("    </dl>\n")
+        outfile.write('    </div>\n')
+    outfile.write('    </dl>\n')
     all_species = set()
     all_species |= location_species[loc.name]
     all_bi_names = set()
@@ -3032,18 +3044,18 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
     all_refs |= location_direct_refs[loc.name]
     all_refs |= location_cited_refs[loc.name]
     if loc.n_direct_children() > 0:
-        outfile.write("  <section class=\"spsection\">\n")
-        outfile.write("    <h3 class=\"nobookmark\">Includes Subareas</h3>\n")
-        outfile.write("    <ul class=\"locpagelist\">\n")
+        outfile.write('  <section class="spsection">\n')
+        outfile.write('    <h3 class="nobookmark">Includes Subareas</h3>\n')
+        outfile.write('    <ul class="locpagelist">\n')
         for c in loc.direct_children():
-            outfile.write("    <li>" + create_location_link(c, c.trimmed_name, do_print) + "</li>\n")
+            outfile.write(f'    <li>{create_location_link(c, c.trimmed_name, do_print)}</li>\n')
             all_species |= fetch_child_data(c, location_species)
             all_bi_names |= fetch_child_data(c, location_bi_names)
             all_sp_names |= fetch_child_data(c, location_sp_names)
             all_refs |= fetch_child_ref_data(c, location_direct_refs)
             all_refs |= fetch_child_ref_data(c, location_cited_refs)
-        outfile.write("    </ul>\n")
-        outfile.write("  </section>\n")
+        outfile.write('    </ul>\n')
+        outfile.write('  </section>\n')
 
     # add species
     range_species = set(find_species_by_name(s) for s in locations_range_species[loc])
@@ -3053,11 +3065,11 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
     is_error = True
     print_star = False
     print_double = False
-    outfile.write("  <section class=\"spsection\">\n")
-    outfile.write("    <h3 class=\"nobookmark\">Currently Recognized Species</h3>\n")
+    outfile.write('  <section class="spsection">\n')
+    outfile.write('    <h3 class="nobookmark">Currently Recognized Species</h3>\n')
     if len(all_species) > 0:
         is_error = False
-        outfile.write("    <ul class=\"locpagelist\">\n")
+        outfile.write('    <ul class="locpagelist">\n')
         for s in sorted(list(all_species)):
             if s in location_species[loc.name]:
                 suffix = ""
@@ -3070,42 +3082,42 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
             outfile.write("      <li>" +
                           create_species_link(s.genus, s.species, do_print, status=s.status, path="../") +
                           suffix + "</li>\n")
-        outfile.write("    </ul>\n")
+        outfile.write('    </ul>\n')
     else:
-        outfile.write("  <p>None</p>\n")
-    outfile.write("  </section>\n")
+        outfile.write('  <p>None</p>\n')
+    outfile.write('  </section>\n')
 
     if len(all_bi_names) > 0:
         is_error = False
-        outfile.write("  <section class=\"spsection\">\n")
-        outfile.write("    <h3 class=\"nobookmark\">Names Which Have Been Used for This Area</h3>\n")
-        outfile.write("    <ul class=\"locpagelist\">\n")
+        outfile.write('  <section class="spsection">\n')
+        outfile.write('    <h3 class="nobookmark">Names Which Have Been Used for This Area</h3>\n')
+        outfile.write('    <ul class="locpagelist">\n')
         for s in sorted(list(all_bi_names)):
             if s in location_bi_names[loc.name]:
                 suffix = ""
             else:
                 suffix = STAR
                 print_star = True
-            outfile.write("      <li><a href=\"" + rel_link_prefix(do_print, "../names/") + name_to_filename(s) +
-                          ".html\">" + format_name_string(s) + "</a>" + suffix + "</li>\n")
-        outfile.write("    </ul>\n")
-        outfile.write("  </section>\n")
+            outfile.write('      <li><a href="' + rel_link_prefix(do_print, "../names/") + name_to_filename(s) +
+                          '.html">' + format_name_string(s) + '</a>' + suffix + '</li>\n')
+        outfile.write('    </ul>\n')
+        outfile.write('  </section>\n')
 
     if len(all_sp_names) > 0:
         is_error = False
-        outfile.write("  <section class=\"spsection\">\n")
-        outfile.write("    <h3 class=\"nobookmark\">Specific Names Which Have Been Used for This Area</h3>\n")
-        outfile.write("    <ul class=\"locpagelist\">\n")
+        outfile.write('  <section class="spsection">\n')
+        outfile.write('    <h3 class="nobookmark">Specific Names Which Have Been Used for This Area</h3>\n')
+        outfile.write('    <ul class="locpagelist">\n')
         for s in sorted(list(all_sp_names)):
             if s in location_sp_names[loc.name]:
                 suffix = ""
             else:
                 suffix = STAR
                 print_star = True
-            outfile.write("      <li><a href=\"" + rel_link_prefix(do_print, "../names/") + "sn_" + s.name +
-                          ".html\">" + format_name_string(s.name) + "</a>" + suffix + "</li>\n")
-        outfile.write("    </ul>\n")
-        outfile.write("  </section>\n")
+            outfile.write(f'      <li><a href="{rel_link_prefix(do_print, "../names/")}sn_{s.name}.html">'
+                          f'{format_name_string(s.name)}</a>{suffix}</li>\n')
+        outfile.write('    </ul>\n')
+        outfile.write('  </section>\n')
 
     # the following is to identify locations which may no longer used in the DB and can be removed
     if is_error:
@@ -3115,16 +3127,15 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
                                    location_cited_refs[loc.name], "../")
 
     if len(location_direct_refs[loc.name]) != len(location_cited_refs[loc.name]):
-        key_str = "Entries marked with " + DAGGER + " represent indirect references to location through citation. "
+        key_str = f'Entries marked with {DAGGER} represent indirect references to location through citation. '
     else:
-        key_str = ""
+        key_str = ''
     if print_star:
-        key_str += "Entries marked with " + STAR + " are inferred from subareas. "
+        key_str += f'Entries marked with {STAR} are inferred from subareas. '
     if print_double:
-        key_str += "Entries marked with " + DOUBLEDAGGER + " represent potential inhabitants inferred from " \
-                                                           "species ranges."
+        key_str += f'Entries marked with {DOUBLEDAGGER} represent potential inhabitants inferred from species ranges.'
     if key_str != "":
-        outfile.write("    <p>" + key_str.strip() + "</p>\n")
+        outfile.write(f'    <p>{key_str.strip()}</p>\n')
 
     if do_print:
         end_page_division(outfile)
@@ -3132,13 +3143,13 @@ def write_location_page(outfile: TextIO, do_print: bool, loc: TMB_Classes.Locati
         common_html_footer(outfile, indexpath="../")
 
     # output place specific taxonomic key
-    if (location_keys is not None) and (len(all_species) > 0):
-        if do_print:
-            write_taxonomic_key(outfile, do_print, location_keys[frozenset(all_species)], loc)
-        else:
-            with open(WEBOUT_PATH + "locations/keys/" + place_to_filename(loc.name) + "_taxkey.html", "w",
-                      encoding="utf-8") as suboutfile:
-                write_taxonomic_key(suboutfile, do_print, location_keys[frozenset(all_species)], loc)
+    # if (location_keys is not None) and (len(all_species) > 0):
+    #     if do_print:
+    #         write_taxonomic_key(outfile, do_print, location_keys[frozenset(all_species)], loc)
+    #     else:
+    #         with open(WEBOUT_PATH + "locations/keys/" + place_to_filename(loc.name) + "_taxkey.html", "w",
+    #                   encoding="utf-8") as suboutfile:
+    #             write_taxonomic_key(suboutfile, do_print, location_keys[frozenset(all_species)], loc)
 
     # write out children pages (primary children only)
     if loc.n_children() > 0:
@@ -3161,7 +3172,7 @@ def write_location_index_entry(outfile: TextIO, do_print: bool, loc: TMB_Classes
     print a location and all of its child locations
     """
     mark2 = not is_primary
-    outfile.write("<li>" + create_location_link(loc, loc.trimmed_name, do_print, mark_unknown=True,
+    outfile.write('<li>' + create_location_link(loc, loc.trimmed_name, do_print, mark_unknown=True,
                                                 mark_secondary=mark2))
     if is_primary and (loc.n_direct_children() > 0):
         child_list = []
@@ -3170,11 +3181,11 @@ def write_location_index_entry(outfile: TextIO, do_print: bool, loc: TMB_Classes
         for child in loc.secondary_children:
             child_list.append([child.name, False])
         child_list.sort()
-        outfile.write("\n <ul>\n")
+        outfile.write('\n <ul>\n')
         for child in child_list:
             write_location_index_entry(outfile, do_print, point_locations[child[0]], point_locations, child[1])
-        outfile.write(" </ul>\n")
-    outfile.write("</li>\n")
+        outfile.write(' </ul>\n')
+    outfile.write('</li>\n')
 
 
 def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict, location_dict: dict,
@@ -3189,76 +3200,74 @@ def write_location_index(outfile: TextIO, do_print: bool, point_locations: dict,
         start_page_division(outfile, "index_page")
     else:
         common_html_header(outfile, "Fiddler Crab Observation Locations", indexpath="../")
-    outfile.write("    <header id=\"location_index\">\n")
-    outfile.write("      <h1 class=\"bookmark1\">Location Index</h1>\n")
+    outfile.write('    <header id="location_index">\n')
+    outfile.write('      <h1 class="bookmark1">Location Index</h1>\n')
     if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"../" + init_data().map_url +
-                      "\">" + fetch_fa_glyph("maps") + "Range Maps</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
-    outfile.write("    <p>\n")
-    outfile.write("      The following indices include all locations extracted from the literature in the database "
-                  "where fiddler crabs have been reported. The first list includes all modern names in a rough, "
-                  "hierarchical framework, mostly by country and subregions within country. Bodies of water which "
-                  "cannot be associated with a single country are listed independently. The hierarchy is imperfect "
-                  "because some observations were general enough to cross political or other structural boundaries. "
-                  "To deal with this, sublocations may contain duplicate listings within the hierarchy. Such "
-                  "duplicates are marked by a " + STAR + " and do not display further sublocations under these "
-                  "duplicate entries within the index (although all sublocations are included on all location-specific "
-                  "pages).\n")
-    outfile.write("    </p>\n")
-    outfile.write("    <p>\n")
-    outfile.write("      The second list is strictly alphabetical and includes archaic and older place names, as "
-                  "well as common alternative names in local languages.\n")
-    outfile.write("    </p>\n")
-    outfile.write("    <p>\n")
-    outfile.write("    Each location is expressed as a single pair of coordinates, so all plotted points "
-                  "should only be viewed as an approximate location. Generally, a point on the shore was chosen to "
-                  "represent each locality, but occasionally an interior land point may have been chosen when no "
-                  "single shore point made sense, for example, in the case of a record on an island.\n")
-    outfile.write("    </p>\n")
-    outfile.write("    <p>\n")
-    outfile.write("    Species lists for each area are automatically generated from the database and take "
-                  "advantage of the hierarchical structure to fill in species for larger containing areas. These "
-                  "lists may be incomplete due to the imperfect nature of the hierachy; similarly, a listed species "
-                  "for a large area may only be found in a small part of the total region.\n")
-    outfile.write("    </p>\n")
-    outfile.write("    <p>\n")
-    outfile.write("    Locations marked by " + DAGGER + " represent place names from the literature which could not be "
-                  "identified or associated with a modern name or place.\n")
-    outfile.write("    </p>\n")
-    outfile.write("\n")
-    outfile.write("  <div class=\"namecol\">\n")
-    outfile.write("    <h3 id=\"location_index_hier\" class=\"bookmark2\">Hierarchical List of Modern Location "
-                  "Names</h3>\n")
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
+        outfile.write(f'          <li><a href="../{init_data().map_url}">{fetch_fa_glyph("maps")}Range Maps</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
+    outfile.write('    <p>\n')
+    outfile.write('      The following indices include all locations extracted from the literature in the database '
+                  'where fiddler crabs have been reported. The first list includes all modern names in a rough, '
+                  'hierarchical framework, mostly by country and subregions within country. Bodies of water which '
+                  'cannot be associated with a single country are listed independently. The hierarchy is imperfect '
+                  'because some observations were general enough to cross political or other structural boundaries. '
+                  'To deal with this, sublocations may contain duplicate listings within the hierarchy. Such '
+                  f'duplicates are marked by a {STAR} and do not display further sublocations under these '
+                  'duplicate entries within the index (although all sublocations are included on all location-specific '
+                  'pages).\n')
+    outfile.write('    </p>\n')
+    outfile.write('    <p>\n')
+    outfile.write('      The second list is strictly alphabetical and includes archaic and older place names, as '
+                  'well as common alternative names in local languages.\n')
+    outfile.write('    </p>\n')
+    outfile.write('    <p>\n')
+    outfile.write('    Each location is expressed as a single pair of coordinates, so all plotted points '
+                  'should only be viewed as an approximate location. Generally, a point on the shore was chosen to '
+                  'represent each locality, but occasionally an interior land point may have been chosen when no '
+                  'single shore point made sense, for example, in the case of a record on an island.\n')
+    outfile.write('    </p>\n')
+    outfile.write('    <p>\n')
+    outfile.write('    Species lists for each area are automatically generated from the database and take '
+                  'advantage of the hierarchical structure to fill in species for larger containing areas. These '
+                  'lists may be incomplete due to the imperfect nature of the hierachy; similarly, a listed species '
+                  'for a large area may only be found in a small part of the total region.\n')
+    outfile.write('    </p>\n')
+    outfile.write('    <p>\n')
+    outfile.write(f'    Locations marked by {DAGGER} represent place names from the literature which could not be '
+                  'identified or associated with a modern name or place.\n')
+    outfile.write('    </p>\n')
+    outfile.write('\n')
+    outfile.write('  <div class="namecol">\n')
+    outfile.write('    <h3 id="location_index_hier" class="bookmark2">Hierarchical List of Modern Location '
+                  'Names</h3>\n')
     top_list = []
     for p in point_locations:
         loc = point_locations[p]
         if loc.parent is None:
             top_list.append(loc.name)
     top_list.sort()
-    outfile.write("    <ul class=\"hlocationlist\">\n")
+    outfile.write('    <ul class="hlocationlist">\n')
     for p in top_list:
         loc = point_locations[p]
         write_location_index_entry(outfile, do_print, loc, point_locations, True)
-    outfile.write("    </ul>\n")
-    outfile.write("  </div>\n")
+    outfile.write('    </ul>\n')
+    outfile.write('  </div>\n')
 
-    outfile.write("  <div class=\"namecol pagebreak\">\n")
-    outfile.write("    <h3 id=\"location_index_alpha\" class=\"bookmark2\">Alphabetical List of All Location "
-                  "Names</h3>\n")
+    outfile.write('  <div class="namecol pagebreak">\n')
+    outfile.write('    <h3 id="location_index_alpha" class="bookmark2">Alphabetical List of All Location Names</h3>\n')
     full_list = list(location_dict.keys())
     full_list.sort()
-    outfile.write("    <ul class=\"locationlist\">\n")
+    outfile.write('    <ul class="locationlist">\n')
     for p in full_list:
         loc = location_dict[p]
-        outfile.write("   <li>" + create_location_link(loc, p, do_print, mark_unknown=False) + "</li>\n")
-    outfile.write("    </ul>\n")
-    outfile.write("  </div>\n")
+        outfile.write(f'   <li>{create_location_link(loc, p, do_print, mark_unknown=False)}</li>\n')
+    outfile.write('    </ul>\n')
+    outfile.write('  </div>\n')
 
     if do_print:
         end_page_division(outfile)
@@ -3461,38 +3470,43 @@ def write_field_guide_page(outfile: TextIO, do_print: bool, guide: str, data: li
 
     if do_print:
         start_page_division(outfile, "base_page")
+        map_path = TMP_MAP_PATH
+        media_path = "resources/field_guide_images/"
     else:
         common_html_header(outfile, "Fiddler Crab Field Guide: " + title, indexpath="../")
-    outfile.write("    <header id=\"field_guide_" + guide + ".html\">\n")
-    outfile.write("      <h1 class=\"bookmark1\">Fiddler Crab Field Guide: {}</h1>\n".format(title))
+        map_path = ""
+        media_path = ""
+
+    outfile.write(f'    <header id="field_guide_{guide}.html">\n')
+    outfile.write(f'      <h1 class="bookmark1">Fiddler Crab Field Guide: {title}</h1>\n')
     if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("index") +
-                      "Field Guide Index</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
-    outfile.write("          <p style=\"font-style: italic\">\n")
-    outfile.write("            This guide is designed for identification &ldquo;in the field&rdquo; where you might be "
-                  "looking at live crabs by eye or through binoculars or from photographs. I will generally try to "
-                  "avoid characters that will require you to physically catch the crab, although I may mention a few "
-                  "for secondary verification. It does not include the more strict taxonomist-style characters that "
-                  "may only be visible under a microscope or via dissection. It is also assumed that the individuals "
-                  "are living, as death (and even capture) can cause dramatic color change.\n")
-    outfile.write("          </p>\n")
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
+        outfile.write('          <li><a href="index.html">' + fetch_fa_glyph("index") +
+                      'Field Guide Index</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
+    outfile.write('          <p style="font-style: italic">\n')
+    outfile.write('            This guide is designed for identification &ldquo;in the field&rdquo; where you might be '
+                  'looking at live crabs by eye or through binoculars or from photographs. I will generally try to '
+                  'avoid characters that will require you to physically catch the crab, although I may mention a few '
+                  'for secondary verification. It does not include the more strict taxonomist-style characters that '
+                  'may only be visible under a microscope or via dissection. It is also assumed that the individuals '
+                  'are living, as death (and even capture) can cause dramatic color change.\n')
+    outfile.write('          </p>\n')
     if inc_map:
-        outfile.write("            <figure style=\"width: 800px; text-align: center\">\n")
-        outfile.write("              <img src=\"fg_map_{}.png\" />".format(guide))
-        outfile.write("            </figure>\n")
+        outfile.write('            <figure style="width: 800px; text-align: center">\n')
+        outfile.write(f'              <img src="{map_path}fg_map_{guide}.png" />')
+        outfile.write('            </figure>\n')
 
     for line in data:
         level, text = line.strip().split("\t")
         if level == "P":  # paragraph
-            outfile.write("          <p style=\"clear: both\">\n")
-            outfile.write("            " + text + "\n")
-            outfile.write("          </p>\n")
+            outfile.write('          <p style="clear: both">\n')
+            outfile.write(f'            {text}\n')
+            outfile.write('          </p>\n')
         # elif level == "M":  # map
         #     pass
         elif level == "SL":  # species list
@@ -3502,61 +3516,58 @@ def write_field_guide_page(outfile: TextIO, do_print: bool, guide: str, data: li
                 sp_list.append(sp_name)
             outfile.write("          <ul>\n")
             for s in sp_list:
-                outfile.write("            <li>{} ({})</li>\n".format(create_species_link(s.genus, s.species,
-                                                                                          do_print, path="../"),
-                                                                      s.common))
-            outfile.write("          </ul>\n")
+                outfile.write(f'            <li>{create_species_link(s.genus, s.species, do_print, path="../")} '
+                              f'({s.common})</li>\n')
+            outfile.write('          </ul>\n')
         elif level == "SH":  # species_header
-            outfile.write("      <hr style=\"clear: both\"/>\n")
+            outfile.write('      <hr style="clear: both"/>\n')
             s = find_species_by_name(text)
-            outfile.write("      <h3 class=\"nobookmark\">{} ({})</h3>\n".format(create_species_link(s.genus,
-                                                                                                     s.species,
-                                                                                                     do_print,
-                                                                                                     path="../"),
-                                                                                 s.common))
+            outfile.write(f'      <h3 class="nobookmark" style="clear: both">{create_species_link(s.genus, s.species, 
+                                                                                                  do_print, 
+                                                                              path="../")} ({s.common})</h3>\n')
         elif level == "H2":  # level 2 header
-            outfile.write("      <hr style=\"clear: both\"/>\n")
-            outfile.write(f"          <h2 style=\"clear: both\">{text}</h2>\n")
+            outfile.write('      <hr style="clear: both"/>\n')
+            outfile.write(f'          <h2 style="clear: both">{text}</h2>\n')
         elif level == "H3":  # level 3 header
-            outfile.write("      <hr style=\"clear: both\"/>\n")
-            outfile.write(f"          <h3 style=\"clear: both\">{text}</h3>\n")
+            outfile.write('      <hr style="clear: both"/>\n')
+            outfile.write(f'          <h3 style="clear: both">{text}</h3>\n')
         elif level == "H4":  # level 4 header
-            outfile.write(f"          <h4 style=\"clear: both\">{text}</h4>\n")
+            outfile.write(f'          <h4 style="clear: both">{text}</h4>\n')
         elif level == "ST":  # start image table
-            outfile.write("          <div>\n")
+            outfile.write('          <div style="clear: both; overflow: hidden">\n')
         elif level == "I":  # image within table
             img, ititle, caption, source = text.split("|")
-            outfile.write("            <figure class=\"fgpic\">\n")
-            outfile.write("              <img src=\"{0}\" title=\"{1}\" alt=\"{1}\"/>".format(img, ititle))
-            outfile.write("              <figcaption style=\"font-size: 0.75em\">\n")
+            outfile.write('            <figure class="fgpic">\n')
+            outfile.write(f'              <img src="{media_path}{img}" title="{ititle}" alt="{ititle}"/>')
+            outfile.write('              <figcaption style="font-size: 0.75em">\n')
             if source.startswith("https"):
-                outfile.write("                 {0} <a href=\"{1}\">{1}</a>\n".format(caption, source))
+                outfile.write(f'                 {caption} <a href="{source}">{source}</a>\n')
             else:
-                outfile.write("                 {0} {1}\n".format(caption, source))
-            outfile.write("              </figcaption>\n")
-            outfile.write("            </figure>\n")
+                outfile.write(f'                 {caption} {source}\n')
+            outfile.write('              </figcaption>\n')
+            outfile.write('            </figure>\n')
             image_list.append(img)
         elif level == "ET":  # end image table
-            outfile.write("          </div>\n")
+            outfile.write('          </div>\n')
         elif level == "SUL":  # start general unordered list
-            outfile.write("          <ul>\n")
+            outfile.write('          <ul>\n')
         elif level == "EUL":  # end general unordered list
-            outfile.write("          </ul>\n")
+            outfile.write('          </ul>\n')
         elif level == "LI":  # general list item
-            outfile.write("          <li>{}</li>\n".format(text))
+            outfile.write(f'          <li>{text}</li>\n')
         elif level == "SI":  # stand-alone image
             img, ititle, caption, source = text.split("|")
-            outfile.write("          <blockquote>\n")
-            outfile.write("            <figure>\n")
-            outfile.write("              <img src=\"{0}\" title=\"{1}\" alt=\"{1}\"/>".format(img, ititle))
-            outfile.write("              <figcaption style=\"font-size: 0.75em\">\n")
+            outfile.write('          <blockquote>\n')
+            outfile.write('            <figure>\n')
+            outfile.write(f'              <img src="{media_path}{img}" title="{ititle}" alt="{ititle}"/>')
+            outfile.write('              <figcaption style="font-size: 0.75em">\n')
             if source.startswith("https"):
-                outfile.write("                 {0} <a href=\"{1}\">{1}</a>\n".format(caption, source))
+                outfile.write(f'                 {caption} <a href="{source}">{source}</a>\n')
             else:
-                outfile.write("                 {0} {1}\n".format(caption, source))
-            outfile.write("              </figcaption>\n")
-            outfile.write("            </figure>\n")
-            outfile.write("          </blockquote>\n")
+                outfile.write(f'                 {caption} {source}\n')
+            outfile.write('              </figcaption>\n')
+            outfile.write('            </figure>\n')
+            outfile.write('          </blockquote>\n')
             image_list.append(img)
 
     if do_print:
@@ -3577,8 +3588,8 @@ def get_field_guide_title(tmplist):
         raise TypeError
 
 
-def write_field_guides(field_guide_dict: dict, field_guide_data: dict, field_guide_map_data: dict,
-                       do_print: bool = False) -> list:
+def write_field_guides(outfile: TextIO, do_print: bool, field_guide_dict: dict, field_guide_data: dict,
+                       field_guide_map_data: dict) -> list:
     """
     output field guides
     """
@@ -3587,44 +3598,48 @@ def write_field_guides(field_guide_dict: dict, field_guide_data: dict, field_gui
               "eastern_pacific": "Eastern Pacific Realm",
               "iwp": "Indo-West Pacific Realm"}
 
-    with open(WEBOUT_PATH + "field_guides/index.html", "w", encoding="utf-8") as outfile:
-        if do_print:
-            start_page_division(outfile, "base_page")
-        else:
-            common_html_header(outfile, "Fiddler Crab Field Guides", indexpath="../")
-        outfile.write("    <header id=\"field_guides.html\">\n")
-        outfile.write("      <h1 class=\"bookmark1\">Fiddler Crab Field Guides</h1>\n")
-        outfile.write("    </header>\n")
-        outfile.write("\n")
-        outfile.write("          <p style=\"font-style: italic\">\n")
-        outfile.write("            These guides are designed for identification &ldquo;in the field&rdquo; where you "
-                      "might be looking at live crabs by eye or through binoculars or from photographs. I will "
-                      "generally try to avoid characters that will require you to physically catch the crab, although "
-                      "I do mention a few for secondary verification. They do not include the more strict "
-                      "taxonomist-style characters that may only be visible under a microscope or via dissection. It "
-                      "is also assumed that the individuals are living, as death (and even capture) can cause "
-                      "dramatic color change.\n")
-        outfile.write("          </p>\n")
-        outfile.write("          <p>\n")
-        outfile.write("            You can choose a guide from the list below or click on the following map to go to "
-                      "the guide for that region. The various <a href=\"../locations\">location information pages</a> "
-                      "also include links to relevant guides for each location.\n")
-        outfile.write("          </p>\n")
+    # with open(WEBOUT_PATH + "field_guides/index.html", "w", encoding="utf-8") as outfile:
+    if do_print:
+        start_page_division(outfile, "base_page")
+        loc_link = "#location_index"
+        map_path = TMP_MAP_PATH
+    else:
+        common_html_header(outfile, "Fiddler Crab Field Guides", indexpath="../")
+        loc_link = "../locations"
+        map_path = ""
+    outfile.write('    <header id="field_guides.html">\n')
+    outfile.write('      <h1 class="bookmark1">Fiddler Crab Field Guides</h1>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
+    outfile.write('          <p style="font-style: italic">\n')
+    outfile.write('            These guides are designed for identification &ldquo;in the field&rdquo; where you '
+                  'might be looking at live crabs by eye or through binoculars or from photographs. I will '
+                  'generally try to avoid characters that will require you to physically catch the crab, although '
+                  'I do mention a few for secondary verification. They do not include the more strict '
+                  'taxonomist-style characters that may only be visible under a microscope or via dissection. It '
+                  'is also assumed that the individuals are living, as death (and even capture) can cause '
+                  'dramatic color change.\n')
+    outfile.write('          </p>\n')
+    outfile.write('          <p>\n')
+    if do_print:
+        outfile.write('            You can choose a guide from the list below. The various '
+                      f'<a href="{loc_link}">location information pages</a> also include links to relevant guides '
+                      'for each location.\n')
+        outfile.write('          </p>\n')
+    else:
+        outfile.write('            You can choose a guide from the list below or click on the following map to go to '
+                      f'the guide for that region. The various <a href="{loc_link}">location information pages</a> '
+                      'also include links to relevant guides for each location.\n')
+        outfile.write('          </p>\n')
 
         # create image map
-        outfile.write("          <img src=\"fg_map_all.png\" alt=\"world map\" usemap=\"#fgmap\" width=\"1200px\"/>\n")
-        outfile.write("          <map name=\"field guide map\" id=\"fgmap\">\n")
+        outfile.write(f'        <img src="{map_path}fg_map_all.png" alt="world map" usemap="#fgmap" width="1200px"/>\n')
+        outfile.write('          <map name="field guide map" id="fgmap">\n')
         for guide in field_guide_map_data:
             map_data = field_guide_map_data[guide]
 
             data = field_guide_data[guide]
             title = get_field_guide_title(data)
-
-            # dat = data[0].strip().split("\t")
-            # if dat[0] == "T":
-            #     title = dat[1]
-            # else:
-            #     raise TypeError
 
             for block in map_data:
                 # map coords use the opposite corners of how I stored the blocks
@@ -3641,65 +3656,52 @@ def write_field_guides(field_guide_dict: dict, field_guide_data: dict, field_gui
                 lower_right_x = round((lower_right_x + 180)*xscale + 27)
                 upper_left_y = round(-(upper_left_y - 90)*yscale + 27)
                 lower_right_y = round(-(lower_right_y - 90)*yscale + 27)
-                # outfile.write(f"            <area shape=\"rect\" "
-                #               f"coords=\"{upper_left_x},{upper_left_y},{lower_right_x},{lower_right_y}\" "
-                #               f"alt=\"{guide}\" href=\"field_guide_{guide}.html\">\n")
                 outfile.write(f'            <area shape="rect" coords="{upper_left_x},{upper_left_y},{lower_right_x},'
                               f'{lower_right_y}" alt="{title}" title="{title}" href="field_guide_{guide}.html">\n')
-        outfile.write("          </map>\n")
+        outfile.write('          </map>\n')
 
-        outfile.write("          <h3>Field Guide List</h3>\n")
-        outfile.write("          <p>\n")
-        outfile.write("            The western Atlantic and eastern Pacific Realms are roughly organized from north "
-                      "to south, while the Indo-West Pacific Realm is roughly organized west to east (or perhaps "
-                      "clockwise) starting from South Africa.\n")
-        outfile.write("          </p>\n")
+    outfile.write('          <h3>Field Guide List</h3>\n')
+    outfile.write('          <p>\n')
+    outfile.write('            The western Atlantic and eastern Pacific Realms are roughly organized from north '
+                  'to south, while the Indo-West Pacific Realm is roughly organized west to east (or perhaps '
+                  'clockwise) starting from South Africa.\n')
+    outfile.write('          </p>\n')
 
-        outfile.write("          <ul>\n")
-        # general guides that are not realm specific
+    outfile.write('          <ul>\n')
+    # general guides that are not realm specific
+    for guide in field_guide_dict:
+        if field_guide_dict[guide] == "general":
+            data = field_guide_data[guide]
+            title = get_field_guide_title(data)
+            outfile.write(f'     <li><a href="{rel_link_prefix(do_print)}field_guide_{guide}.html">{title}</a></li>\n')
+
+    for realm in realms:
+        outfile.write(f'          <li>{realms[realm]}\n')
+        outfile.write('            <ul>\n')
         for guide in field_guide_dict:
-            if field_guide_dict[guide] == "general":
+            if field_guide_dict[guide] == realm:
                 data = field_guide_data[guide]
                 title = get_field_guide_title(data)
-                # dat = data[0].strip().split("\t")
-                # if dat[0] == "T":
-                #     title = dat[1]
-                # else:
-                #     raise TypeError
-                outfile.write(f"          <li><a href=\"field_guide_{guide}.html\">{title}</a></li>\n")
-
-        for realm in realms:
-            outfile.write(f"          <li>{realms[realm]}\n")
-            outfile.write("            <ul>\n")
-            for guide in field_guide_dict:
-                if field_guide_dict[guide] == realm:
-                    data = field_guide_data[guide]
-                    title = get_field_guide_title(data)
-                    # dat = data[0].strip().split("\t")
-                    # if dat[0] == "T":
-                    #     title = dat[1]
-                    # else:
-                    #     raise TypeError
-                    outfile.write(f"          <li><a href=\"field_guide_{guide}.html\">{title}</a></li>\n")
-            outfile.write("            </ul>\n")
-            outfile.write("          </li>\n")
-        outfile.write("          </ul>\n")
-        if do_print:
-            end_page_division(outfile)
-        else:
-            common_html_footer(outfile, indexpath="../")
+                outfile.write(f'  <li><a href="{rel_link_prefix(do_print)}field_guide_{guide}.html">{title}</a></li>\n')
+        outfile.write('            </ul>\n')
+        outfile.write('          </li>\n')
+    outfile.write('          </ul>\n')
+    if do_print:
+        end_page_division(outfile)
+    else:
+        common_html_footer(outfile, indexpath="../")
 
     image_list = []
     for guide in field_guide_data:
-        if do_print:
-            pass
+        if field_guide_dict[guide] == "general":
+            inc_map = False
         else:
-            if field_guide_dict[guide] == "general":
-                inc_map = False
-            else:
-                inc_map = True
+            inc_map = True
+        if do_print:
+            image_list.extend(write_field_guide_page(outfile, True, guide, field_guide_data[guide], inc_map))
+        else:
             with open(WEBOUT_PATH + "field_guides/field_guide_" + guide + ".html", "w", encoding="utf-8") as suboutfile:
-                image_list.extend(write_field_guide_page(suboutfile, do_print, guide, field_guide_data[guide], inc_map))
+                image_list.extend(write_field_guide_page(suboutfile, False, guide, field_guide_data[guide], inc_map))
     return image_list
 
 
@@ -3711,16 +3713,16 @@ def write_common_names_pages(outfile: TextIO, do_print: bool, common_name_data: 
         start_page_division(outfile, "base_page")
     else:
         common_html_header(outfile, "Common Names of Fiddler Crabs")
-    outfile.write("    <header id=\"" + init_data().common_url + "\">\n")
-    outfile.write("      <h1 class=\"bookmark1\">Common Names of Fiddler Crabs</h1>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
-    outfile.write("    <p>\n")
-    outfile.write("      Following is a summary of common names for fiddler crabs. See <a href=\"" +
-                  rel_link_prefix(do_print) + init_data().species_url +
-                  "\">individual species</a> for more information on the common names of a particular species.\n")
-    outfile.write("    </p>\n")
-    outfile.write("    <dl class=\"common\">\n")
+    outfile.write(f'    <header id="{init_data().common_url}">\n')
+    outfile.write('      <h1 class="bookmark1">Common Names of Fiddler Crabs</h1>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
+    outfile.write('    <p>\n')
+    outfile.write('      Following is a summary of common names for fiddler crabs. See <a href="'
+                  f'{rel_link_prefix(do_print)}{init_data().species_url}">individual species</a> for more '
+                  f'information on the common names of a particular species.\n')
+    outfile.write('    </p>\n')
+    outfile.write('    <dl class="common">\n')
     first_level = True
     for line in common_name_data[1:]:
         line = line.strip()
@@ -3728,21 +3730,77 @@ def write_common_names_pages(outfile: TextIO, do_print: bool, common_name_data: 
             text_level, text = line.split("\t")
             if text_level == "T":
                 if not first_level:
-                    outfile.write("        </dd>\n")
+                    outfile.write('        </dd>\n')
                 else:
                     first_level = False
-                outfile.write("      <dt>" + text + "</dt>\n")
-                outfile.write("        <dd>\n")
+                outfile.write(f'      <dt>{text}</dt>\n')
+                outfile.write('        <dd>\n')
             elif text_level == "P":
-                outfile.write("          <p>\n")
-                outfile.write("            " + text + "\n")
-                outfile.write("          </p>\n")
+                outfile.write('          <p>\n')
+                outfile.write(f'            {text}\n')
+                outfile.write('          </p>\n')
             elif text_level == "B":
-                outfile.write("          <blockquote>\n")
-                outfile.write("            " + text + "\n")
-                outfile.write("          </blockquote>\n")
-    outfile.write("        </dd>\n")
-    outfile.write("    </dl>\n")
+                outfile.write('          <blockquote>\n')
+                outfile.write(f'            {text}\n')
+                outfile.write('          </blockquote>\n')
+    outfile.write('        </dd>\n')
+    outfile.write('    </dl>\n')
+    if do_print:
+        end_page_division(outfile)
+    else:
+        common_html_footer(outfile)
+
+
+def write_group_names_pages(outfile: TextIO, refdict: dict, do_print: bool = False):
+    """
+    output a discussion of fiddler crab group names
+    """
+    if do_print:
+        start_page_division(outfile, "base_page")
+    else:
+        common_html_header(outfile, "Fiddler Crab Group Names")
+    outfile.write('    <header id="uca_group_names.html">\n')
+    outfile.write('      <h1 class="nobookmark">Fiddler Crab Group Names</h1>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
+    outfile.write('    <section class="topsection">\n')
+    outfile.write('      <p>\n')
+    outfile.write('          Many animals have a collective noun (<em>a.k.a.</em>, "term of venery" or '
+                  '"noun of assembly") that refers to a group of that '
+                  'animal, <em>e.g.,</em> a flock of birds, a parliament of owls, a pride of lions, and a murder of '
+                  'crows. Is there such a term for fiddler crabs?\n')
+    outfile.write('      </p>\n')
+
+    outfile.write('      <p>\n')
+    ref1 = format_reference_cite(refdict["McLain2005"], do_print, AUTHOR_NOPAREN, path="../")
+    outfile.write('          Historically, no. There are a number of terms that have been used for a group of crabs '
+                  '(in general), including <em>cast</em> and <em>consortium</em> among others. For fiddler crabs '
+                  'specifically, some species have a behavior known as "droving" where large groups of crabs will '
+                  'temporarily gather together in huge numbers along the shoreline as they feed; this is thought to '
+                  f'most likely be a type of anti-predator herding behavior ({ref1}). Such a group is generally '
+                  'referred to as a <em>drove</em>, but drove would not necessarily serve as a general term for all '
+                  'groups of fiddler crabs since it refers to a particular behavior restricted to a subset of '
+                  'species.\n')
+    outfile.write('      </p>\n')
+    outfile.write('      <p>\n')
+    outfile.write('          Based on a (presumably tongue-in-cheek) question on social media, I am suggesting '
+                  'that from henceforth, a group of fiddler crabs be known as an <strong>orchestra</strong>. It is '
+                  'uniquely appropriate with an obvious etymology. We will all be better off for it.\n')
+    outfile.write('      </p>\n')
+    if do_print:
+        media_path = "resources/"
+        link = ""
+    else:
+        media_path = ""
+        link = ('<br /><a href="https://bsky.app/profile/conflummoxed.bsky.social/post/3mpqmjmgisc2x">Link to '
+                'original post</a>')
+    outfile.write('      <figure class="fullpic">\n')
+    outfile.write(f'        <img src="{media_path}images/orchestra_bluesky.png" alt="What do you call a couple '
+                  f'dozen fiddler crabs? An orchestra" title="Bluesky Post" />\n')
+    outfile.write('        <figcaption>Original Bluesky Post: What do you call a couple dozen fiddler crabs? '
+                  f'An orchestra?{link}</figcaption>\n')
+    outfile.write('      </figure>\n')
+    outfile.write('    </section>\n')
     if do_print:
         end_page_division(outfile)
     else:
@@ -4016,23 +4074,25 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
 
     if species.species in measurement_data:
         mdata = measurement_data[species.species]
-        if do_print:
-            mean, std = create_species_cb_page(outfile, do_print, species, mdata, refdict)
-        else:
-            with open(WEBOUT_PATH + "sizes/" + species.species + "_cb.html", "w", encoding="utf-8") as suboutfile:
-                mean, std = create_species_cb_page(suboutfile, do_print, species, mdata, refdict)
+        mean, std = analyze_species_cb(species, mdata)
+        #
+        # if do_print:
+        #     mean, std = create_species_cb_page(outfile, do_print, species, mdata, refdict)
+        # else:
+        #     with open(WEBOUT_PATH + "sizes/" + species.species + "_cb.html", "w", encoding="utf-8") as suboutfile:
+        #         mean, std = create_species_cb_page(suboutfile, do_print, species, mdata, refdict)
     else:
         mdata = None
         mean = 0
         std = 0
 
-    if not is_fossil:
-        if do_print:
-            create_species_handedness_page(outfile, species, handedness_data, refdict, do_print)
-        else:
-            with open(WEBOUT_PATH + "handedness/" + species.species + "_handedness.html", "w",
-                      encoding="utf-8") as suboutfile:
-                create_species_handedness_page(suboutfile, species, handedness_data, refdict, do_print)
+    # if not is_fossil:
+    #     if do_print:
+    #         create_species_handedness_page(outfile, species, handedness_data, refdict, do_print)
+    #     else:
+    #         with open(WEBOUT_PATH + "handedness/" + species.species + "_handedness.html", "w",
+    #                   encoding="utf-8") as suboutfile:
+    #             create_species_handedness_page(suboutfile, species, handedness_data, refdict, do_print)
 
     outfile.write("    <header id=\"u_" + species.species + ".html\">\n")
     if is_fossil:
@@ -4146,11 +4206,11 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
             llist.append("<a href=\"" + rel_link_prefix(do_print, "names/") + namefile + ".html\">" +
                          format_name_string(n) + "</a>")
 
-        tmpstr = "Synonyms, Alternate Spellings, &amp; Name Forms"
-        tmpstr += " (<a href=\"" + rel_link_prefix(do_print, "names/") + "synonyms_" + species.species + \
-                  ".html\">Chronology</a>)"
-        outfile.write("       <dt>" + tmpstr + "</dt>\n")
-        outfile.write("         <dd><em class=\"species\">" + ", ".join(llist) + "</em></dd>\n")
+        tmpstr = 'Synonyms, Alternate Spellings, &amp; Name Forms'
+        tmpstr += ' (<a href="' + rel_link_prefix(do_print, "names/") + 'synonyms_' + species.species + \
+                  '.html">Chronology</a>)'
+        outfile.write(f'       <dt>{tmpstr}</dt>\n')
+        outfile.write('         <dd><em class="species">' + ", ".join(llist) + "</em></dd>\n")
 
     # Size Data
     if mdata is not None:
@@ -4162,15 +4222,26 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
                                             species.species))
 
     # Geographic Range
-    outfile.write("       <dt class=\"pagebreak\">Geographic Range</dt>\n")
-    outfile.write("         <dd>" + species.realm + ": " + species.range + "</dd>\n")
+    if is_fossil:
+        tmpclass = ""
+    else:
+        tmpclass = ' class="pagebreak"'
+
+    outfile.write(f'       <dt{tmpclass}>Geographic Range</dt>\n')
+    outfile.write(f'         <dd>{species.realm}: {species.range}</dd>\n')
     if not is_fossil:
+        if do_print:
+            map_path = TMP_MAP_PATH
+            tmpwidth = 'width="90%"'
+        else:
+            map_path = MAP_PATH
+            tmpwidth = ""
         outfile.write('         <dd>\n')
 
-        outfile.write('           <img class="mapimg" src="' + MAP_PATH + rangemap_name("u_" + species.species) +
-                      '.png" alt="Map" />\n')
-        outfile.write('           <img class="mapimg" src="' + MAP_PATH + pointmap_name("u_" + species.species) +
-                      '.png" alt="Map" />\n')
+        outfile.write(f'           <img class="mapimg" src="{map_path}{rangemap_name("u_" + species.species)}.png" '
+                      f'alt="Map" {tmpwidth} />\n')
+        outfile.write(f'           <img class="mapimg" src="{map_path}{pointmap_name("u_" + species.species)}.png" '
+                      f'alt="Map" {tmpwidth} />\n')
 
         # if do_print:
         #     outfile.write("           <img src=\"" + TMP_MAP_PATH + rangemap_name("u_" + species.species) +
@@ -4377,6 +4448,23 @@ def write_species_page(outfile: TextIO, do_print: bool, species: TMB_Classes.Spe
                 create_synonym_chronology(suboutfile, do_print, species.species, binomial_synlist, binomial_name_counts,
                                           specific_synlist, specific_name_cnts)
 
+    if not is_fossil:
+        if do_print:
+            create_species_handedness_page(outfile, species, handedness_data, refdict, do_print)
+        else:
+            with open(WEBOUT_PATH + "handedness/" + species.species + "_handedness.html", "w",
+                      encoding="utf-8") as suboutfile:
+                create_species_handedness_page(suboutfile, species, handedness_data, refdict, do_print)
+
+    if species.species in measurement_data:
+        mdata = measurement_data[species.species]
+        if do_print:
+            create_species_cb_page(outfile, do_print, species, mdata, refdict, mean, std)
+        else:
+            with open(WEBOUT_PATH + "sizes/" + species.species + "_cb.html", "w", encoding="utf-8") as suboutfile:
+                create_species_cb_page(suboutfile, do_print, species, mdata, refdict, mean, std)
+
+
 
 def create_species_handedness_page(outfile: TextIO, species: TMB_Classes.SpeciesClass, handedness_data: list,
                                    refdict: dict, do_print: bool = False):
@@ -4385,30 +4473,29 @@ def create_species_handedness_page(outfile: TextIO, species: TMB_Classes.Species
     """
     if do_print:
         start_page_division(outfile, "base_page")
+        media_path = WEBOUT_PATH + "handedness/"
     else:
         common_html_header(outfile, species.binomial() + " Handedness", indexpath="../")
-    outfile.write("    <header id=\"" + species.species + "_handedness.html\">\n")
-    outfile.write("      <h1 class=\"nobookmark\"><em class=\"species\">" + species.binomial() +
-                  "</em> Handedness</h1>\n")
+        media_path = ""
+    outfile.write('    <header id="' + species.species + "_handedness.html\">\n")
+    outfile.write(f'      <h1 class="nobookmark"><em class="species">{species.binomial()}</em> Handedness</h1>\n')
 
     if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + species.species +
-                      ".html\">" + fetch_fa_glyph("info") + "Species page</a></li>\n")
-        outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("handedness") +
-                      "About Handedness</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
+        outfile.write(f'          <li><a href="{rel_link_prefix(do_print, "../")}u_{species.species}.html">'
+                      f'{fetch_fa_glyph("info")}Species page</a></li>\n')
+        outfile.write(f'          <li><a href="index.html">{fetch_fa_glyph("handedness")}About Handedness</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
 
-    outfile.write("       <h2>Summary</h2>\n")
+    outfile.write('       <h2>Summary</h2>\n')
     if species.genus == "Gelasimus":
-        expected = "95% or more right-handed"
+        expected = '95% or more right-handed'
     else:
-        expected = "50% right-handed and 50% left-handed"
-    outfile.write("<p>Expected handedness for <em class=\"species\">{}</em> is {}</p>\n".format(species.binomial(),
-                                                                                                expected))
+        expected = '50% right-handed and 50% left-handed'
+    outfile.write(f'<p>Expected handedness for <em class="species">{species.binomial()}</em> is {expected}</p>\n')
 
     data = []
     for d in handedness_data:
@@ -4420,38 +4507,44 @@ def create_species_handedness_page(outfile: TextIO, species: TMB_Classes.Species
         for d in data:
             right_total += d.right_cnt
             left_total += d.left_cnt
-        outfile.write("<p>Observed handedness (based on raw totals across all data sets) is "
-                      f"{right_total/(right_total + left_total):0.2%} right-handed, "
-                      f"{left_total/(right_total + left_total):0.2%} left-handed</p>\n")
+        outfile.write('<p>Observed handedness (based on raw totals across all data sets) is '
+                      f'{right_total/(right_total + left_total):0.2%} right-handed, '
+                      f'{left_total/(right_total + left_total):0.2%} left-handed</p>\n')
         filename = WEBOUT_PATH + "handedness/" + species.species + "_handedness.png"
         TMB_Create_Graphs.create_handedness_chart_file(filename, data)
 
-        outfile.write("    <p>The following figure displays the left and right counts for each individual data "
-                      "set.</p>\n")
-        outfile.write("    <figure class=\"sizeimg\">\n")
-        outfile.write("      <img src=\"{0}_handedness.png\" alt=\"handedness data for {1}\" "
-                      "title=\"handedness data for {1}\"/>\n".format(species.species, species.binomial()))
-        outfile.write("    </figure>\n")
+        outfile.write('    <p>The following figure displays the left and right counts for each individual data '
+                      'set.</p>\n')
+        outfile.write('    <figure class="sizeimg">\n')
+        outfile.write(f'      <img src="{media_path}{species.species}_handedness.png" alt="handedness data '
+                      f'for {species.binomial()}" title="handedness data for {species.binomial()}"/>\n')
+        outfile.write('    </figure>\n')
 
         with open(WEBOUT_PATH + "handedness/" + species.species + "_handedness.txt", "w") as datfile:
-            outfile.write("    <h2>Data</h2>\n")
-            outfile.write("    <p><a href=\"" + species.species + "_handedness.txt\">" +
-                          fetch_fa_glyph("file download") + " Download Data</a></p>")
-            outfile.write("<table class=\"size_data_table\">\n")
-            outfile.write("<tr><th>Reference</th><th>Right Count</th><th>Left Count</th>"
-                          "<th>Right %</th><th>Left %</th><th>Notes</th></tr>\n")
-            datfile.write("Reference\tRight Count\tLeft Count\tRight %\tLeft %\tNotes\n")
+            outfile.write('    <h2>Data</h2>\n')
+            if not do_print:
+                outfile.write(f'    <p><a href="{species.species}_handedness.txt">{fetch_fa_glyph("file download")} '
+                              f'Download Data</a></p>')
+            outfile.write('<table class="size_data_table">\n')
+            outfile.write('<tr><th>Reference</th><th>Right Count</th><th>Left Count</th>'
+                          '<th>Right %</th><th>Left %</th><th>Notes</th></tr>\n')
+            datfile.write('Reference\tRight Count\tLeft Count\tRight %\tLeft %\tNotes\n')
             for d in data:
                 note_str = replace_species_in_string(d.notes)
                 rstr = format_reference_cite(refdict[d.ref], do_print, AUTHOR_PAREN, "../")
-                outfile.write("<tr><td>{}</td><td>{}</td><td>{}</td><td>{:0.3f}</td><td>{:0.3f}</td>"
-                              "<td>{}</td></tr>\n".format(rstr, d.right_cnt, d.left_cnt, d.right_p, d.left_p, note_str))
-                datfile.write("{}\t{}\t{}\t{:0.3f}\t{:0.3f}\t{}\n".format(d.ref, d.right_cnt, d.left_cnt, d.right_p,
-                                                                          d.left_p, note_str))
-            outfile.write("</table>\n")
-            datfile.write("\n")
+
+                outfile.write(f'<tr><td>{rstr}</td><td>{d.right_cnt}</td><td>{d.left_cnt}</td><td>{d.right_p:0.3f}</td>'
+                              f'<td>{d.left_p:0.3f}</td><td>{note_str}</td></tr>\n')
+                datfile.write(f'{d.ref}\t{d.right_cnt}\t{d.left_cnt}\t{d.right_p:0.3f}\t{d.left_p:0.3f}\t{note_str}\n')
+
+                # outfile.write("<tr><td>{}</td><td>{}</td><td>{}</td><td>{:0.3f}</td><td>{:0.3f}</td>"
+                #               "<td>{}</td></tr>\n".format(rstr, d.right_cnt, d.left_cnt, d.right_p, d.left_p, note_str))
+                # datfile.write("{}\t{}\t{}\t{:0.3f}\t{:0.3f}\t{}\n".format(d.ref, d.right_cnt, d.left_cnt, d.right_p,
+                #                                                           d.left_p, note_str))
+            outfile.write('</table>\n')
+            datfile.write('\n')
     else:
-        outfile.write("<p><em>No data available at this time.</em></p>\n")
+        outfile.write('<p><em>No data available at this time.</em></p>\n')
 
     if do_print:
         end_page_division(outfile)
@@ -4459,30 +4552,11 @@ def create_species_handedness_page(outfile: TextIO, species: TMB_Classes.Species
         common_html_footer(outfile, indexpath="../")
 
 
-def create_species_cb_page(outfile: TextIO, do_print: bool, species: TMB_Classes.SpeciesClass,
-                           measurement_data: TMB_Classes.SpeciesMeasurements, refdict: dict) -> Tuple[float, float]:
+def analyze_species_cb(species: TMB_Classes.SpeciesClass,
+                       measurement_data: TMB_Classes.SpeciesMeasurements) -> Tuple[float, float]:
     """
-    write species carapace width page
+    create the summary figure and calculate mean and st dev of carapace breadth
     """
-    if do_print:
-        start_page_division(outfile, "base_page")
-    else:
-        common_html_header(outfile, species.binomial() + " Carapace Breadth", indexpath="../")
-    outfile.write("    <header id=\"" + species.species + "_cb.html\">\n")
-    outfile.write("      <h1 class=\"nobookmark\"><em class=\"species\">" + species.binomial() +
-                  "</em> Carapace Breadth</h1>\n")
-
-    if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + species.species +
-                      ".html\">" + fetch_fa_glyph("info") + "Species page</a></li>\n")
-        outfile.write("          <li><a href=\"index.html\">" + fetch_fa_glyph("measure") +
-                      "Measurement Guide</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-
     cdat = TMB_Measurements.combine_measurement_data(measurement_data.all)
     mdat = TMB_Measurements.combine_measurement_data(measurement_data.male)
     fdat = TMB_Measurements.combine_measurement_data(measurement_data.female)
@@ -4493,20 +4567,64 @@ def create_species_cb_page(outfile: TextIO, do_print: bool, species: TMB_Classes
     mean = numpy.mean(cdat)
     std = numpy.std(cdat)
 
-    outfile.write("       <h2>Summary</h2>\n")
-    slabel = size_label(mean + 1.96*std)
-    outfile.write("         <p>{} Carapace Breadth: {:0.1f} mm ± {:0.2f} (sd), 95% range: "
-                  "{:0.1f}&ndash;{:0.1f} mm</p>\n".format(slabel, mean, std, max(mean - 1.96*std, 0), mean + 1.96*std))
+    return float(mean), float(std)
 
-    outfile.write("    <figure class=\"sizeimg\">\n")
-    outfile.write("      <img src=\"{0}_cb.png\" alt=\"size data for {1}\" "
-                  "title=\"size data for {1}\"/>\n".format(species.species, species.binomial()))
-    outfile.write("    </figure>\n")
+
+def create_species_cb_page(outfile: TextIO, do_print: bool, species: TMB_Classes.SpeciesClass,
+                           measurement_data: TMB_Classes.SpeciesMeasurements, refdict: dict,
+                           mean: float, std: float) -> None:
+    """
+    write species carapace breadth page
+    """
+    if do_print:
+        start_page_division(outfile, "base_page")
+        media_path = WEBOUT_PATH + "sizes/"
+    else:
+        common_html_header(outfile, species.binomial() + " Carapace Breadth", indexpath="../")
+        media_path = ""
+
+    outfile.write(f'    <header id="{species.species}_cb.html">\n')
+    outfile.write(f'      <h1 class="nobookmark"><em class="species">{species.binomial()}</em> '
+                  f'Carapace Breadth</h1>\n')
+
+    if not do_print:
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
+        outfile.write(f'          <li><a href="{rel_link_prefix(do_print, "../")}u_{species.species}.html">'
+                      f'{fetch_fa_glyph("info")}Species page</a></li>\n')
+        outfile.write(f'          <li><a href="index.html">{fetch_fa_glyph("measure")}Measurement Guide</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+
+    # cdat = TMB_Measurements.combine_measurement_data(measurement_data.all)
+    # mdat = TMB_Measurements.combine_measurement_data(measurement_data.male)
+    # fdat = TMB_Measurements.combine_measurement_data(measurement_data.female)
+    #
+    # filename = WEBOUT_PATH + "sizes/" + species.species + "_cb.png"
+    # TMB_Measurements.plot_measurement_data(measurement_data, cdat, mdat, fdat, filename)
+    #
+    # mean = numpy.mean(cdat)
+    # std = numpy.std(cdat)
+
+    outfile.write('       <h2>Summary</h2>\n')
+    slabel = size_label(mean + 1.96*std)
+    outfile.write('         <p>{} Carapace Breadth: {:0.1f} mm ± {:0.2f} (sd), 95% range: '
+                  '{:0.1f}&ndash;{:0.1f} mm</p>\n'.format(slabel, mean, std, max(mean - 1.96*std, 0), mean + 1.96*std))
+
+    outfile.write('    <figure class="sizeimg">\n')
+    outfile.write(f'      <img src="{media_path}{species.species}_cb.png" alt="size data for {species.binomial()}" '
+                  f'title="size data for {species.binomial()}"/>\n')
+    outfile.write('    </figure>\n')
 
     with open(WEBOUT_PATH + "sizes/" + species.species + "_cb.txt", "w") as datfile:
-        outfile.write("    <h2>Data</h2>\n")
-        outfile.write("    <p>All measurements are in millimeters (mm). <a href=\"" + species.species + "_cb.txt\">" +
-                      fetch_fa_glyph("file download") + " Download Data</a></p>")
+        outfile.write('    <h2 class="pagebreak">Data</h2>\n')
+        # outfile.write('    <p>All measurements are in millimeters (mm). <a href="' + species.species + '_cb.txt">' +
+        #               fetch_fa_glyph("file download") + ' Download Data</a></p>')
+        outfile.write('    <p>All measurements are in millimeters (mm).')
+        if not do_print:
+            outfile.write(f' <a href="{species.species}_cb.txt">{fetch_fa_glyph("file download")} Download Data</a>')
+        outfile.write('</p>\n')
         if "individual" in measurement_data.all:
             outfile.write("    <h3>Individuals</h3>\n")
             outfile.write("<table class=\"size_data_table\">\n")
@@ -4634,7 +4752,7 @@ def create_species_cb_page(outfile: TextIO, do_print: bool, species: TMB_Classes
     else:
         common_html_footer(outfile, indexpath="../")
 
-    return float(mean), float(std)
+    # return float(mean), float(std)
 
 
 def write_photo_index(outfile: TextIO, do_print: bool, specieslist: list, photos: list, refdict: dict) -> None:
@@ -5089,11 +5207,19 @@ def write_species_info_pages(outfile: Optional[TextIO], do_print: bool, speciesl
     create the species index and all individual species pages
     """
     if do_print and (outfile is not None):
+        write_measurement_guide(outfile, True)
+        write_handedness_guide(outfile, refdict, True)
+    else:
+        with open(WEBOUT_PATH + "sizes/index.html", "w") as suboutfile:
+            write_measurement_guide(suboutfile, False)
+        with open(WEBOUT_PATH + "handedness/index.html", "w") as suboutfile:
+            write_handedness_guide(suboutfile, refdict, False)
+
+    if do_print and (outfile is not None):
         write_species_list(outfile, True, specieslist)
     else:
         with open(WEBOUT_PATH + init_data().species_url, "w", encoding="utf-8") as suboutfile:
             write_species_list(suboutfile, False, specieslist)
-    # for species in tqdm(specieslist):
     for species in specieslist:
         sprefs = species_refs[species.species]
         if do_print and (outfile is not None):
@@ -5106,15 +5232,6 @@ def write_species_info_pages(outfile: Optional[TextIO], do_print: bool, speciesl
                                    art, sprefs, refdict, binomial_name_cnts, specific_name_cnts, higher_dict,
                                    measurement_data, handedness_data, field_guide_data)
 
-    if do_print and (outfile is not None):
-        write_measurement_guide(outfile, True)
-        write_handedness_guide(outfile, refdict, True)
-    else:
-        with open(WEBOUT_PATH + "sizes/index.html", "w") as suboutfile:
-            write_measurement_guide(suboutfile, False)
-        with open(WEBOUT_PATH + "handedness/index.html", "w") as suboutfile:
-            write_handedness_guide(suboutfile, refdict, False)
-
 
 def write_handedness_guide(outfile: TextIO, refdict: dict, do_print: bool = False):
     """
@@ -5124,34 +5241,34 @@ def write_handedness_guide(outfile: TextIO, refdict: dict, do_print: bool = Fals
         start_page_division(outfile, "base_page")
     else:
         common_html_header(outfile, "Male Fiddler Crab Handedness", indexpath="../")
-    outfile.write("    <header id=\"handedness_index.html\">\n")
-    outfile.write("      <h1 class=\"nobookmark\">Male Handedness</h1>\n")
+    outfile.write('    <header id="handedness_index.html">\n')
+    outfile.write('      <h1 class="nobookmark">Male Handedness</h1>\n')
     if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"../" + init_data().species_url + "\">" + fetch_fa_glyph("index") +
-                      "Species List</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
-    outfile.write("    <section class=\"topspsection\">\n")
-    outfile.write("      <p>\n")
-    outfile.write("          One of the most striking features of fiddler crabs is the extreme claw asymmetry found "
-                  "in males and one of the most common questions I get asked is whether males tend to be right- or "
-                  "left-handed. Most people seem to assume they are mostly one or the other, but in fact, most "
-                  "fiddler crab species appear to be evenly split 50:50 between right- and left-handed males. "
-                  "The exceptions are the species in the genus <em>Gelasimus</em>, where males are almost entirely "
-                  "right-handed (generally >95%).\n")
-    outfile.write("      </p>\n")
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
+        outfile.write(f'          <li><a href="../{init_data().species_url}">{fetch_fa_glyph("index")}Species '
+                      f'List</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
+    outfile.write('    <section class="topspsection">\n')
+    outfile.write('      <p>\n')
+    outfile.write('          One of the most striking features of fiddler crabs is the extreme claw asymmetry found '
+                  'in males and one of the most common questions I get asked is whether males tend to be right- or '
+                  'left-handed. Most people seem to assume they are mostly one or the other, but in fact, most '
+                  'fiddler crab species appear to be evenly split 50:50 between right- and left-handed males. '
+                  'The exceptions are the species in the genus <em>Gelasimus</em>, where males are almost entirely '
+                  'right-handed (generally >95%).\n')
+    outfile.write('      </p>\n')
     weis_ref = format_reference_cite(refdict["Weis2019"], do_print, AUTHOR_NOPAREN, path="../")
-    outfile.write("      <p>\n")
-    outfile.write("          An extremely common misconception is that when a male fiddler crab loses its large "
-                  "claw that the handedness switches and the small claws grows into a new large one. This is simply "
-                  "wrong! The crab will regenerate a large claw on the same side; the small claw remains small. "
-                  "This urban legend is so persistent that it's appeared (and been removed) from Wikipedia multiple "
-                  "times. Judith Weis recently wrote a paper about the origins and persistence of this "
-                  "myth ({}).\n".format(weis_ref))
+    outfile.write('      <p>\n')
+    outfile.write('          An extremely common misconception is that when a male fiddler crab loses its large '
+                  'claw that the handedness switches and the small claws grows into a new large one. This is simply '
+                  'wrong! The crab will regenerate a large claw on the same side; the small claw remains small. '
+                  'This urban legend is so persistent that it\'s appeared (and been removed) from Wikipedia multiple '
+                  'times. Judith Weis recently wrote a paper about the origins and persistence of this '
+                  f'myth ({weis_ref}).\n')
     outfile.write("      </p>\n")
 
     morgan23_ref = format_reference_cite(refdict["Morgan1923.1"], do_print, AUTHOR_PAREN, path="../")
@@ -5164,44 +5281,43 @@ def write_handedness_guide(outfile: TextIO, refdict: dict, do_print: bool = Fals
     krishnan92_ref = format_reference_cite(refdict["Krishnan1992.3"], do_print, AUTHOR_PAREN, path="../")
     yamaguchi01_ref = format_reference_cite(refdict["Yamaguchi2001.8"], do_print, AUTHOR_PAREN, path="../")
 
-    outfile.write("      <p>\n")
-    outfile.write("          How handedness is determined has been studied by researchers numerous times, but the "
-                  "answer is still not entirely clear, as different studies have not always come to the same "
-                  "conclusion and there are a number of possible explanations for the variation in results. "
-                  "For the mostly right-handed species, right-handedness is likely genetically hardwired with the "
-                  "occasional left-handed individuals probably due to environmental damage at a critical "
-                  "developmental stage leading to the development of left-handedness. For the rest of the species, "
-                  "it is probably randomly determined by the environment, although there could be a genetic factor or "
-                  "a combination of both. "
-                  "Breeding experiments to examine heritability in fiddlers are not particularly easy or feasible. "
-                  "Some of the studies on this question include "
-                  "{}, {}, {}, {}, {}, {}, {}, {}, and {}.\n".format(morgan23_ref, morgan24_ref, vernberg66_ref,
-                                                                     yamaguchi77_ref, yamaguchi78_ref, ahmed781_ref,
-                                                                     ahmed782_ref, krishnan92_ref, yamaguchi01_ref))
-    outfile.write("      </p>\n")
+    outfile.write('      <p>\n')
+    outfile.write('          How handedness is determined has been studied by researchers numerous times, but the '
+                  'answer is still not entirely clear, as different studies have not always come to the same '
+                  'conclusion and there are a number of possible explanations for the variation in results. '
+                  'For the mostly right-handed species, right-handedness is likely genetically hardwired with the '
+                  'occasional left-handed individuals probably due to environmental damage at a critical '
+                  'developmental stage leading to the development of left-handedness. For the rest of the species, '
+                  'it is probably randomly determined by the environment, although there could be a genetic factor or '
+                  'a combination of both. '
+                  'Breeding experiments to examine heritability in fiddlers are not particularly easy or feasible. '
+                  'Some of the studies on this question include '
+                  f'{morgan23_ref}, {morgan24_ref}, {vernberg66_ref}, {yamaguchi77_ref}, {yamaguchi78_ref}, '
+                  f'{ahmed781_ref}, {ahmed782_ref}, {krishnan92_ref}, and {yamaguchi01_ref}.\n')
+    outfile.write('      </p>\n')
     alt_ref = format_reference_cite(refdict["Altevogt1979"], do_print, AUTHOR_PAREN, path="../")
-    outfile.write("      <p>\n")
-    outfile.write("          Species information pages on this site include a link to information about the "
-                  "handedness for that species, including the predicted handedness based on taxonomy and the "
-                  "observed data that has been recorded (if any), including an overall estimate of the handedness "
-                  "based on the (usually limited) available data. Data has been updated to reflect our current "
-                  "taxonomy rather than the name used in the publication; some samples may include mixed species "
-                  "if certain species boundaries were not recognized at the time of original publication. "
-                  "Not all papers that "
-                  "record handedness have been entered yet, but many species have not been formally examined for "
-                  "handedness ratios, particularly with large sample sizes. Sometimes when they are commented upon, "
-                  "key data and specifics are not provided. For example, {} report that 23 non-specified "
-                  "species have 50:50 ratios, and that "
-                  "more recent re-examination of three of these species still have 50:50 rations, while a fourth "
-                  "has a 50:50 from over 400 specimens examined. No actual counts are specified. They then state that "
-                  "in another species, only one left-handed male was found out of more than 1,000 examined. "
-                  "While useful general statements, these numbers lack the specificity one would want for "
-                  "computational analysis (For what it's worth, they also claim that the right-handed skewed species "
-                  "used to be 50:50 and shifted to the skew, but it is more likely that they never paid close "
-                  "attention in previous years.)\n".format(alt_ref))
-    outfile.write("      </p>\n")
+    outfile.write('      <p>\n')
+    outfile.write('          Species information pages on this site include a link to information about the '
+                  'handedness for that species, including the predicted handedness based on taxonomy and the '
+                  'observed data that has been recorded (if any), including an overall estimate of the handedness '
+                  'based on the (usually limited) available data. Data has been updated to reflect our current '
+                  'taxonomy rather than the name used in the publication; some samples may include mixed species '
+                  'if certain species boundaries were not recognized at the time of original publication. '
+                  'Not all papers that '
+                  'record handedness have been entered yet, but many species have not been formally examined for '
+                  'handedness ratios, particularly with large sample sizes. Sometimes when they are commented upon, '
+                  f'key data and specifics are not provided. For example, {alt_ref} report that 23 non-specified '
+                  'species have 50:50 ratios, and that '
+                  'more recent re-examination of three of these species still have 50:50 rations, while a fourth '
+                  'has a 50:50 from over 400 specimens examined. No actual counts are specified. They then state that '
+                  'in another species, only one left-handed male was found out of more than 1,000 examined. '
+                  'While useful general statements, these numbers lack the specificity one would want for '
+                  'computational analysis (For what it\'s worth, they also claim that the right-handed skewed species '
+                  'used to be 50:50 and shifted to the skew, but it is more likely that they never paid close '
+                  'attention in previous years.)\n')
+    outfile.write('      </p>\n')
 
-    outfile.write("    </section>\n")
+    outfile.write('    </section>\n')
     if do_print:
         end_page_division(outfile)
     else:
@@ -5214,145 +5330,151 @@ def write_measurement_guide(outfile: TextIO, do_print: bool):
     """
     if do_print:
         start_page_division(outfile, "base_page")
+        media_path = "media"
     else:
         common_html_header(outfile, "Fiddler Crab Carapace Breadth Measurements", indexpath="../")
-    outfile.write("    <header id=\"size_index.html\">\n")
-    outfile.write("      <h1 class=\"nobookmark\">Carapace Breadth Guide</h1>\n")
+        media_path = ".."
+    outfile.write('    <header id="size_index.html">\n')
+    outfile.write('      <h1 class="nobookmark">Carapace Breadth Guide</h1>\n')
     if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"../" + init_data().species_url + "\">" + fetch_fa_glyph("index") +
-                      "Species List</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
-    outfile.write("    <section class=\"topspsection\">\n")
-    outfile.write("      <p>\n")
-    outfile.write("          This is a general guide to the data and figures on fiddler crab size on the site. At "
-                  "this time size is presented as carapace width (or breadth). This is either measured as the "
-                  "maximum breadth of the carapace or the distance between the tips of the antero-lateral angles; "
-                  "usually (although not always) these are the same thing, although the difference is always "
-                  "minor when there is one. All measurements are presented in millimeters (mm).\n")
-    outfile.write("      </p>\n")
-    outfile.write("<figure class=\"morphimg\">\n")
-    outfile.write("  <img src=\"../morphology/carapace2.png\" "
-                  "alt=\"Illustration of carpace width and length. Figure modified from Crane (1975).\" "
-                  "title=\"Illustration of carpace width and length. Figure modified from Crane (1975).\" />\n")
-    outfile.write("  <figcaption>Illustration of carpace width and length. "
-                  "Figure modified from Crane (1975).</figcaption>\n")
-    outfile.write("</figure>\n")
-    outfile.write("      <p>\n")
-    outfile.write("          For each species, the bottom part of its size page lists all of the data values, "
-                  "including source. In some cases data was extracted from figues (should be indicated in the notes). "
-                  "The data for each species can also be downloaded as a tab-separated text document. The top "
-                  "of each page begins with a graphical illustration of all of the data, including a summary "
-                  "figure which integrates all of the data into a single estimated distribution. Different types of "
-                  "data are displayed in a different manner in the figures, and are described below.\n")
-    outfile.write("      </p>\n")
-    outfile.write("      <p>\n")
-    outfile.write("         As a general rule, data are added to the figure from the bottom up. Blue data points and "
-                  "images refer to male data, red refers to female data, and black refers to mixed/combined/"
-                  "sex-unspecified data. Male data and female data are always plotted separately, except when "
-                  "combined into the summary distribution (black) at the top of each figure.\n")
-    outfile.write("      </p>\n")
-    outfile.write("      <h2>Individuals</h2>\n")
-    outfile.write("      <p>\n")
-    outfile.write("         The most sraight-forward data are direct measurements of individuals. These are "
-                  "graphically displayed as round points at the bottom of each figure. The vertical shifting of the "
-                  "points is meaningless, arbitrary noise used to help better display the density of similar "
-                  "measurements.\n")
-    outfile.write("      </p>\n")
-    outfile.write("<figure class=\"morphimg\">\n")
-    outfile.write("  <img src=\"../images/size_ind.png\" alt=\"Example of individual size plot.\" "
-                  "title=\"Example of individual size plot.\" />\n")
-    outfile.write("</figure>\n")
-    outfile.write("      <h2>Ranges</h2>\n")
-    outfile.write("      <p>\n")
-    outfile.write("         Range data represents the largest and smallest values for a group of individuals, "
-                  "including sample size when available. When unavailable, the sample size was assumed to be 2 as "
-                  "this is the miniumm number necessary to create a range. Ranges are drawn as horizontal lines with "
-                  "vertical endcaps representing the minimum and maximum widths. Each range is drawn separately; "
-                  "sample size is not indicated on the graph (but is in the data table).\n")
-    outfile.write("      </p>\n")
-    outfile.write("<figure class=\"morphimg\">\n")
-    outfile.write("  <img src=\"../images/size_range.png\" alt=\"Example of range plots.\" "
-                  "title=\"Example of range plots.\" />\n")
-    outfile.write("</figure>\n")
-    outfile.write("      <h2>Means</h2>\n")
-    outfile.write("      <p>\n")
-    outfile.write("         Means represent average sizes of a sample. Reported means may include sample size, "
-                  "standard deviation, standard error, and even minimum and maximum values. Sometimes they include "
-                  "none of these (in which case the sample size is assumed to be 1, <em>i.e.,</em> equivalent to an "
-                  "individual. Each combination of data reporting is listed in a separate data table. Visually, "
-                  "means are drawn on the figure as diamonds, each on it's own line. A 95% confidence interval is "
-                  "included when an SD or SE is available. If both SD and min/max are available, the figure "
-                  "includes both a thicker line indicating the 95% CI and a thinner line with vertical endcaps "
-                  "indicating the maximum and minimum values.\n")
-    outfile.write("      </p>\n")
-    outfile.write("<figure class=\"morphimg\">\n")
-    outfile.write("  <img src=\"../images/size_mean.png\" alt=\"Example of means plots.\" "
-                  "title=\"Example of means plots.\" />\n")
-    outfile.write("</figure>\n")
-    outfile.write("      <h2>Histograms</h2>\n")
-    outfile.write("      <p>\n")
-    outfile.write("       Occasionally a size distribution is available as a histogram. In this case, the data is "
-                  "presented as the min and max of each histogram bar and the sample size (height) of the bar. "
-                  "Bars for the same histogram are labeled in the data by a unique set name. Histograms are drawn "
-                  "on the figure as standard histograms, except that each unique histogram is scaled to the "
-                  "identical maximum height, thus the drawn histograms can be used for general distribution comparison "
-                  "but do not indicate the case where one may be based on a much larger sample than another (all "
-                  "sample sizes are part of the data table).\n")
-    outfile.write("      </p>\n")
-    outfile.write("<figure class=\"morphimg\">\n")
-    outfile.write("  <img src=\"../images/size_hist.png\" alt=\"Example of histogram plots.\" "
-                  "title=\"Example of histogram plots.\" />\n")
-    outfile.write("</figure>\n")
-    outfile.write("      <h2>Summary Distributions</h2>\n")
-    outfile.write("      <p>\n")
-    outfile.write("       The summary distributions are calculated for males and females independently, as well as "
-                  "combined (the top figure in black). These distributions are created through a simulated integration "
-                  "across all of the data for that species. The simulation creates a large &ldquo;data set&rdquo; of "
-                  "individual measurements from all of the distinct data sets and types. The data set with the "
-                  "largest sample size is scaled to provide 1,000 values to our simulated data set. All other data "
-                  "sets provide values proportionally (<em>e.g.</em>, if the largest data set has <em>n</em>=50, that "
-                  "data set will provide 1,000 values, while one with an <em>n</em>=10 would provide 200). (In the "
-                  "unlikely event that the largest observed data set has n > 1,000, the algorithm automatically "
-                  "rescales the largest sample by orders of magnitude until it exceeds the largest n). Data values are "
-                  "&ldquo;simulated&rdquo; based on each data set depending on the type of data. Individual measures, "
-                  "which definitionally have <em>n</em>=1, are added directly to the simulated set in numbers "
-                  "proportional to the largest sample. Frequency histograms are also directly added to the simulated "
-                  "set with the midpoint of each bin representing the value added and the total count of the bin "
-                  "representing the <em>n</em> to scale to the largest sample. For measures represented by means with "
-                  "an estimate of variance; values are simulated from a normal distribution (with expected mean and "
-                  "variance). If a mean is reported without a variance, it is treated as if the variance were "
-                  "zero; this has the obvious potential to give too much weight to that estimate, but generally "
-                  "these have very small sample sizes so the effect appears to be minor.\n")
-    outfile.write("      <p>\n")
-    outfile.write("       Range data is the most complicated part of the simulation. First, the end points of the "
-                  "range are added as if they were individual measures. If the sample size of the range is greater "
-                  "than two, then the remaining samples (after those representing the endpoints are accounted for) "
-                  "are drawn from a restricted normal distribution whose mean is represented by the midpoint of the "
-                  "range and whose standard deviation is estimated as the width of the range divided by four "
-                  "(the &ldquo;range rule of thumb&rdquo;). The restriction is that only simulated values that fall "
-                  "within the reported range are accepted.\n")
-    outfile.write("      </p>\n")
-    outfile.write("      <p>\n")
-    outfile.write("All of these simulated data points from all of these data types are combined together into one "
-                  "overall set. From this set, 1,000 values are then randomly subsampled to estimate the overall "
-                  "distribution, mean, median, etc.\n")
-    outfile.write("      </p>\n")
-    outfile.write("      <p>\n")
-    outfile.write("       The simulated summary results are shown by the violin graphs at the tops of each figure. "
-                  "These reveal a lot of information. Each of these graphs show the full range of the distribution, "
-                  "a density estimate of sizes (based on the colored, curvy background), the mean (diamond), "
-                  "median (circle), and quartile (thick center line).\n")
-    outfile.write("      </p>\n")
-    outfile.write("<figure class=\"morphimg\">\n")
-    outfile.write("  <img src=\"../images/size_summary.png\" alt=\"Example of size summary plot.\" "
-                  "title=\"Example of size summary plot.\" />\n")
-    outfile.write("</figure>\n")
-    outfile.write("    </section>\n")
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
+        outfile.write(f'          <li><a href="../{init_data().species_url}">{fetch_fa_glyph("index")}Species '
+                      f'List</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
+    outfile.write('    <section class="topspsection">\n')
+    outfile.write('      <p>\n')
+    outfile.write('          This is a general guide to the data and figures on fiddler crab size on the site. At '
+                  'this time size is presented as carapace width (or breadth). This is either measured as the '
+                  'maximum breadth of the carapace or the distance between the tips of the antero-lateral angles; '
+                  'usually (although not always) these are the same thing, although the difference is always '
+                  'minor when there is one. All measurements are presented in millimeters (mm).\n')
+    outfile.write('      </p>\n')
+    outfile.write('<figure class="morphimg">\n')
+    outfile.write(f'  <img src="{media_path}/morphology/carapace2.png" '
+                  'alt="Illustration of carpace width and length. Figure modified from Crane (1975)." '
+                  'title="Illustration of carpace width and length. Figure modified from Crane (1975)." />\n')
+    outfile.write('  <figcaption>Illustration of carpace width and length. '
+                  'Figure modified from Crane (1975).</figcaption>\n')
+    outfile.write('</figure>\n')
+
+    if do_print:
+        media_path = "resources"
+
+    outfile.write('      <p>\n')
+    outfile.write('          For each species, the bottom part of its size page lists all of the data values, '
+                  'including source. In some cases data was extracted from figues (should be indicated in the notes). '
+                  'The data for each species can also be downloaded as a tab-separated text document. The top '
+                  'of each page begins with a graphical illustration of all of the data, including a summary '
+                  'figure which integrates all of the data into a single estimated distribution. Different types of '
+                  'data are displayed in a different manner in the figures, and are described below.\n')
+    outfile.write('      </p>\n')
+    outfile.write('      <p>\n')
+    outfile.write('         As a general rule, data are added to the figure from the bottom up. Blue data points and '
+                  'images refer to male data, red refers to female data, and black refers to mixed/combined/'
+                  'sex-unspecified data. Male data and female data are always plotted separately, except when '
+                  'combined into the summary distribution (black) at the top of each figure.\n')
+    outfile.write('      </p>\n')
+    outfile.write('      <h2>Individuals</h2>\n')
+    outfile.write('      <p>\n')
+    outfile.write('         The most straight-forward data are direct measurements of individuals. These are '
+                  'graphically displayed as round points at the bottom of each figure. The vertical shifting of the '
+                  'points is meaningless, arbitrary noise used to help better display the density of similar '
+                  'measurements.\n')
+    outfile.write('      </p>\n')
+    outfile.write('<figure class="morphimg">\n')
+    outfile.write(f'  <img src="{media_path}/images/size_ind.png" alt="Example of individual size plot." '
+                  'title="Example of individual size plot." />\n')
+    outfile.write('</figure>\n')
+    outfile.write('      <h2>Ranges</h2>\n')
+    outfile.write('      <p>\n')
+    outfile.write('         Range data represents the largest and smallest values for a group of individuals, '
+                  'including sample size when available. When unavailable, the sample size was assumed to be 2 as '
+                  'this is the miniumm number necessary to create a range. Ranges are drawn as horizontal lines with '
+                  'vertical endcaps representing the minimum and maximum widths. Each range is drawn separately; '
+                  'sample size is not indicated on the graph (but is in the data table).\n')
+    outfile.write('      </p>\n')
+    outfile.write('<figure class="morphimg">\n')
+    outfile.write(f'  <img src="{media_path}/images/size_range.png" alt="Example of range plots." '
+                  'title="Example of range plots." />\n')
+    outfile.write('</figure>\n')
+    outfile.write('      <h2>Means</h2>\n')
+    outfile.write('      <p>\n')
+    outfile.write('         Means represent average sizes of a sample. Reported means may include sample size, '
+                  'standard deviation, standard error, and even minimum and maximum values. Sometimes they include '
+                  'none of these (in which case the sample size is assumed to be 1, <em>i.e.,</em> equivalent to an '
+                  'individual. Each combination of data reporting is listed in a separate data table. Visually, '
+                  'means are drawn on the figure as diamonds, each on it\'s own line. A 95% confidence interval is '
+                  'included when an SD or SE is available. If both SD and min/max are available, the figure '
+                  'includes both a thicker line indicating the 95% CI and a thinner line with vertical endcaps '
+                  'indicating the maximum and minimum values.\n')
+    outfile.write('      </p>\n')
+    outfile.write('<figure class="morphimg">\n')
+    outfile.write(f'  <img src="{media_path}/images/size_mean.png" alt="Example of means plots." '
+                  'title="Example of means plots." />\n')
+    outfile.write('</figure>\n')
+    outfile.write('      <h2>Histograms</h2>\n')
+    outfile.write('      <p>\n')
+    outfile.write('       Occasionally a size distribution is available as a histogram. In this case, the data is '
+                  'presented as the min and max of each histogram bar and the sample size (height) of the bar. '
+                  'Bars for the same histogram are labeled in the data by a unique set name. Histograms are drawn '
+                  'on the figure as standard histograms, except that each unique histogram is scaled to the '
+                  'identical maximum height, thus the drawn histograms can be used for general distribution comparison '
+                  'but do not indicate the case where one may be based on a much larger sample than another (all '
+                  'sample sizes are part of the data table).\n')
+    outfile.write('      </p>\n')
+    outfile.write('<figure class="morphimg">\n')
+    outfile.write(f'  <img src="{media_path}/images/size_hist.png" alt="Example of histogram plots." '
+                  'title="Example of histogram plots." />\n')
+    outfile.write('</figure>\n')
+    outfile.write('      <h2>Summary Distributions</h2>\n')
+    outfile.write('      <p>\n')
+    outfile.write('       The summary distributions are calculated for males and females independently, as well as '
+                  'combined (the top figure in black). These distributions are created through a simulated integration '
+                  'across all of the data for that species. The simulation creates a large &ldquo;data set&rdquo; of '
+                  'individual measurements from all of the distinct data sets and types. The data set with the '
+                  'largest sample size is scaled to provide 1,000 values to our simulated data set. All other data '
+                  'sets provide values proportionally (<em>e.g.</em>, if the largest data set has <em>n</em>=50, that '
+                  'data set will provide 1,000 values, while one with an <em>n</em>=10 would provide 200). (In the '
+                  'unlikely event that the largest observed data set has n > 1,000, the algorithm automatically '
+                  'rescales the largest sample by orders of magnitude until it exceeds the largest n). Data values are '
+                  '&ldquo;simulated&rdquo; based on each data set depending on the type of data. Individual measures, '
+                  'which definitionally have <em>n</em>=1, are added directly to the simulated set in numbers '
+                  'proportional to the largest sample. Frequency histograms are also directly added to the simulated '
+                  'set with the midpoint of each bin representing the value added and the total count of the bin '
+                  'representing the <em>n</em> to scale to the largest sample. For measures represented by means with '
+                  'an estimate of variance; values are simulated from a normal distribution (with expected mean and '
+                  'variance). If a mean is reported without a variance, it is treated as if the variance were '
+                  'zero; this has the obvious potential to give too much weight to that estimate, but generally '
+                  'these have very small sample sizes so the effect appears to be minor.\n')
+    outfile.write('      <p>\n')
+    outfile.write('       Range data is the most complicated part of the simulation. First, the end points of the '
+                  'range are added as if they were individual measures. If the sample size of the range is greater '
+                  'than two, then the remaining samples (after those representing the endpoints are accounted for) '
+                  'are drawn from a restricted normal distribution whose mean is represented by the midpoint of the '
+                  'range and whose standard deviation is estimated as the width of the range divided by four '
+                  '(the &ldquo;range rule of thumb&rdquo;). The restriction is that only simulated values that fall '
+                  'within the reported range are accepted.\n')
+    outfile.write('      </p>\n')
+    outfile.write('      <p>\n')
+    outfile.write('All of these simulated data points from all of these data types are combined together into one '
+                  'overall set. From this set, 1,000 values are then randomly subsampled to estimate the overall '
+                  'distribution, mean, median, etc.\n')
+    outfile.write('      </p>\n')
+    outfile.write('      <p>\n')
+    outfile.write('       The simulated summary results are shown by the violin graphs at the tops of each figure. '
+                  'These reveal a lot of information. Each of these graphs show the full range of the distribution, '
+                  'a density estimate of sizes (based on the colored, curvy background), the mean (diamond), '
+                  'median (circle), and quartile (thick center line).\n')
+    outfile.write('      </p>\n')
+    outfile.write('<figure class="morphimg">\n')
+    outfile.write(f'  <img src="{media_path}/images/size_summary.png" alt="Example of size summary plot." '
+                  'title="Example of size summary plot." />\n')
+    outfile.write('</figure>\n')
+    outfile.write('    </section>\n')
     if do_print:
         end_page_division(outfile)
     else:
@@ -5363,13 +5485,169 @@ def replace_media_path(x: str, p: str) -> str:
     return x.replace("%%MEDIA_PATH%%", p)
 
 
+# def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: list, higher_taxa_list: list,
+#                                specieslist: list, refdict: dict) -> None:
+#     """
+#     create the systematics page
+#     """
+#     def taxon_link(tax: TMB_Classes.RankedTaxonClass) -> str:
+#         return tax.taxon_rank + "_" + tax.name
+#
+#     def write_taxon_item(tax: TMB_Classes.RankedTaxonClass, ind: str) -> None:
+#         """
+#         subfunction to write a hierarchical list of taxonomic names to HTML
+#         """
+#         outfile.write(ind + "<li>" + create_taxon_link(tax.taxon_rank, tax.name, do_print, same_page=True) + "\n")
+#         outfile.write(ind + "  <ul>\n")
+#         if tax.n_children() > 0:
+#             for cc in sorted(tax.children):
+#                 # the following has a phantom typing error
+#                 write_taxon_item(cc, ind + 4 * " ")
+#         else:
+#             ssplist = []
+#             for ss in specieslist:
+#                 if tax.taxon_rank == "genus":
+#                     if ss.genus == tax.name:
+#                         ssplist.append(create_species_link(ss.genus, ss.species, do_print, status=ss.status))
+#                 elif tax.taxon_rank == "subgenus":
+#                     if ss.subgenus == tax.name:
+#                         ssplist.append(create_species_link(ss.genus, ss.species, do_print, status=ss.status))
+#             outfile.write(ind + "    <li>" + ", ".join(ssplist) + "</li>\n")
+#         outfile.write(ind + "  </ul>\n")
+#         outfile.write(ind + "</li>\n")
+#
+#     # main function code
+#
+#     # create list of present taxa ranks for navigation
+#     rank_cnts = {t.rank: 0 for t in taxon_ranks}
+#     for t in higher_taxa_list:
+#         rank_cnts[t.taxon_rank] += 1
+#     nav_list = []
+#     for t in taxon_ranks:
+#         if rank_cnts[t.rank] == 1:
+#             nav_list.append(t.rank)
+#         elif rank_cnts[t.rank] > 1:
+#             nav_list.append(t.plural)
+#
+#     if do_print:
+#         start_page_division(outfile, "base_page")
+#         media_path = MEDIA_PATH
+#     else:
+#         common_html_header(outfile, "Fiddler Crab Systematics")
+#         media_path = ""
+#     outfile.write(f'    <header id="{init_data().syst_url}">\n')
+#     outfile.write('      <h1 class="bookmark1">Systematics</h1>\n')
+#     if not do_print:
+#         outfile.write('      <nav>\n')
+#         outfile.write('        <ul>\n')
+#         for n in nav_list:
+#             outfile.write(f'          <li><a href="#{n}">{n.capitalize()}</a></li>\n')
+#         outfile.write('        </ul>\n')
+#         outfile.write('      </nav>\n')
+#     outfile.write('    </header>\n')
+#     outfile.write('\n')
+#
+#     outfile.write('    <div class="topsection">\n')
+#     outfile.write('      <h2>Systematic Hierarchy</h2>\n')
+#     outfile.write('      <ul>\n')
+#     for t in sorted(higher_taxa_list):
+#         if t.parent is None:
+#             write_taxon_item(t, 8*" ")
+#     outfile.write('      </ul>\n')
+#     outfile.write('\n')
+#
+#     for t_rank in taxon_ranks:
+#         rank = t_rank.rank
+#         if rank_cnts[rank] > 0:
+#             if rank_cnts[rank] == 1:
+#                 rank_title = rank
+#             else:
+#                 rank_title = t_rank.plural
+#             outfile.write('    <section class="spsection">\n')
+#             outfile.write(f'      <h2 id="{rank_title}" class="bookmark2">{rank_title.capitalize()}</h2>\n')
+#             if t_rank.notes != ".":
+#                 outfile.write('      <p>\n')
+#                 outstr = replace_media_path(t_rank.notes, media_path)
+#                 outfile.write(f'        {replace_reference_in_string(outstr, refdict, do_print)}\n')
+#                 outfile.write('      </p>\n')
+#             # extract and alphabetically sort taxa at current rank
+#             rank_list = []
+#             for taxon in higher_taxa_list:
+#                 if taxon.taxon_rank == rank:
+#                     rank_list.append(taxon)
+#             rank_list.sort()
+#             for taxon in rank_list:
+#                 outfile.write('      <hr />\n')
+#                 start_tag, end_tag = rank_tags(rank)
+#                 if taxon.author == ".":
+#                     authorstr = ""
+#                 else:
+#                     authorstr = format_reference_cite(refdict[taxon.author], do_print, AUTHOR_TAXON)
+#                 outfile.write(f'      <h3 id="{taxon_link(taxon)}">{taxon.taxon_rank.capitalize()} '
+#                               f'{start_tag}{taxon.name}{end_tag} {authorstr}</h2>\n')
+#                 # outfile.write('      <h3 id="' + taxon_link(taxon) + '">' + taxon.taxon_rank.capitalize() + ' ' +
+#                 #               start_tag + taxon.name + end_tag + ' ' + authorstr + '</h2>\n')
+#                 if taxon.type_species.startswith(">>"):
+#                     typestr = f"Genus <em>{taxon.type_species[2:]}</em>"
+#                 elif taxon.type_species.startswith(">"):
+#                     typestr = f'<a href="#genus_{taxon.type_species[1:]}">Genus <em>{taxon.type_species[1:]}</em></a>'
+#                 else:
+#                     s = find_species_by_name(taxon.type_species)
+#                     typestr = create_species_link(s.genus, s.species, do_print, status=s.status)
+#                 outfile.write('      <dl>\n')
+#                 outfile.write('        <dt>Type</dt>\n')
+#                 outfile.write(f'        <dd>{typestr}</dd>\n')
+#                 if taxon.parent is not None:
+#                     outfile.write(f'        <dt>Part of {taxon.parent.taxon_rank}</dt>\n')
+#                     outfile.write('        <dd>' + create_taxon_link(taxon.parent.taxon_rank, taxon.parent.name,
+#                                                                      do_print, same_page=True) + '</dd>\n')
+#                 c_label = "Contains "
+#                 if taxon.n_children() > 0:
+#                     if taxon.n_children() == 1:
+#                         c_label += taxon.children[0].taxon_rank
+#                     else:
+#                         i = 0
+#                         while taxon_ranks[i].rank != taxon.children[0].taxon_rank:
+#                             i += 1
+#                         c_label += taxon_ranks[i].plural
+#                     children = []
+#                     for c in taxon.children:
+#                         children.append(create_taxon_link(c.taxon_rank, c.name, do_print, same_page=True))
+#                     children.sort()
+#                     outfile.write(f'        <dt>{c_label}</dt>\n')
+#                     outfile.write('        <dd>' + ", ".join(children) + '</dd>\n')
+#                 else:
+#                     outfile.write('        <dt>Contains species</dt>\n')
+#                     splist = []
+#                     for s in specieslist:
+#                         if taxon.taxon_rank == "genus":
+#                             if s.genus == taxon.name:
+#                                 splist.append(create_species_link(s.genus, s.species, do_print, status=s.status))
+#                         elif taxon.taxon_rank == "subgenus":
+#                             if s.subgenus == taxon.name:
+#                                 splist.append(create_species_link(s.genus, s.species, do_print, status=s.status))
+#                     outfile.write('        <dd>' + ", ".join(splist) + '</dd>\n')
+#                 outfile.write('      </dl>\n')
+#                 if taxon.notes != ".":
+#                     outstr = replace_media_path(taxon.notes, media_path)
+#                     outfile.write('      <p>' +
+#                                   replace_species_in_string(replace_reference_in_string(outstr, refdict, do_print)) +
+#                                   '</p>\n')
+#             outfile.write('    </section>\n')
+#             outfile.write("\n")
+#     if do_print:
+#         end_page_division(outfile)
+#     else:
+#         common_html_footer(outfile)
+
+
 def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: list, higher_taxa_list: list,
                                specieslist: list, refdict: dict) -> None:
     """
-    create the systematics page
+    create the systematics pages
     """
-    def taxon_link(tax: TMB_Classes.RankedTaxonClass) -> str:
-        return tax.taxon_rank + "_" + tax.name
+    # def taxon_link(tax: TMB_Classes.RankedTaxonClass) -> str:
+    #     return tax.taxon_rank + "_" + tax.name
 
     def write_taxon_item(tax: TMB_Classes.RankedTaxonClass, ind: str) -> None:
         """
@@ -5409,110 +5687,158 @@ def write_systematics_overview(outfile: TextIO, do_print: bool, taxon_ranks: lis
 
     if do_print:
         start_page_division(outfile, "base_page")
-        media_path = MEDIA_PATH
+        # media_path = MEDIA_PATH
     else:
         common_html_header(outfile, "Fiddler Crab Systematics")
-        media_path = ""
-    outfile.write("    <header id=\"" + init_data().syst_url + "\">\n")
-    outfile.write("      <h1 class=\"bookmark1\">Systematics</h1>\n")
+        # media_path = ""
+    outfile.write(f'    <header id="{init_data().syst_url}">\n')
+    outfile.write('      <h1 class="bookmark1">Systematics</h1>\n')
     if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
         for n in nav_list:
-            outfile.write("          <li><a href=\"#{}\">{}</a></li>\n".format(n, n.capitalize()))
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
+            outfile.write(f'          <li><a href="#{n}">{n.capitalize()}</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
 
-    outfile.write("    <div class=\"topsection\">\n")
-    outfile.write("      <h2>Systematic Hierarchy</h2>\n")
-    outfile.write("      <ul>\n")
+    outfile.write('    <div class="topsection">\n')
+    outfile.write('      <h2>Systematic Hierarchy</h2>\n')
+    outfile.write('      <ul>\n')
     for t in sorted(higher_taxa_list):
         if t.parent is None:
             write_taxon_item(t, 8*" ")
-    outfile.write("      </ul>\n")
+    outfile.write('      </ul>\n')
+    outfile.write('\n')
+    if do_print:
+        end_page_division(outfile)
+    else:
+        common_html_footer(outfile)
+
+    # create individual pages for each taxonomic rank
+    for t_rank in taxon_ranks:
+        if rank_cnts[t_rank.rank] > 0:
+            if do_print and (outfile is not None):
+                write_systematics_page(outfile, do_print, t_rank, taxon_ranks, higher_taxa_list, specieslist, refdict,
+                                       rank_cnts)
+            else:
+                with open(WEBOUT_PATH + f"syst_{t_rank.rank}.html", "w", encoding="utf-8") as suboutfile:
+                    write_systematics_page(suboutfile, False, t_rank, taxon_ranks, higher_taxa_list, specieslist,
+                                           refdict, rank_cnts)
+
+
+def write_systematics_page(outfile: TextIO, do_print: bool, taxon_level, taxon_ranks: list, higher_taxa_list: list,
+                               specieslist: list, refdict: dict, rank_cnts: dict) -> None:
+    def taxon_link(tax: TMB_Classes.RankedTaxonClass) -> str:
+        return tax.taxon_rank + "_" + tax.name
+
+    rank = taxon_level.rank
+    if rank_cnts[rank] == 1:
+        rank_title = rank.capitalize()
+    else:
+        rank_title = taxon_level.plural.capitalize()
+
+    if do_print:
+        start_page_division(outfile, "base_page")
+        media_path = MEDIA_PATH
+    else:
+        common_html_header(outfile, f"Fiddler Crab Systematics: {rank_title}")
+        media_path = ""
+
+    outfile.write(f'    <header id="syst_{taxon_level.rank}.html">\n')
+    outfile.write(f'      <h1 class="nobookmark">{rank_title}</h1>\n')
+    if not do_print:
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
+        outfile.write(f'          <li><a href="{rel_link_prefix(do_print)}{init_data().syst_url}">'
+                      f'Systematics Overview</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
+
+    outfile.write('    <section class="topsection">\n')
+    # outfile.write(f'      <h2 id="{rank_title}" class="bookmark2">{rank_title.capitalize()}</h2>\n')
+    if taxon_level.notes != ".":
+        outfile.write('      <p>\n')
+        outstr = replace_media_path(taxon_level.notes, media_path)
+        outfile.write(f'        {replace_reference_in_string(outstr, refdict, do_print)}\n')
+        outfile.write('      </p>\n')
+    # extract and alphabetically sort taxa at current rank
+    rank_list = []
+    for taxon in higher_taxa_list:
+        if taxon.taxon_rank == rank:
+            rank_list.append(taxon)
+    rank_list.sort()
+    for taxon in rank_list:
+        outfile.write('      <hr />\n')
+        start_tag, end_tag = rank_tags(rank)
+        if taxon.author == ".":
+            authorstr = ""
+        else:
+            authorstr = format_reference_cite(refdict[taxon.author], do_print, AUTHOR_TAXON)
+        outfile.write(f'      <h2 id="{taxon_link(taxon)}">{taxon.taxon_rank.capitalize()} '
+                      f'{start_tag}{taxon.name}{end_tag} {authorstr}</h2>\n')
+        if taxon.type_species.startswith(">>"):
+            typestr = f"Genus <em>{taxon.type_species[2:]}</em>"
+        elif taxon.type_species.startswith(">"):
+            typestr = create_taxon_link("genus", taxon.type_species[1:], do_print, same_page=False)
+            # typestr = f'<a href="#genus_{taxon.type_species[1:]}">Genus <em>{taxon.type_species[1:]}</em></a>'
+        else:
+            s = find_species_by_name(taxon.type_species)
+            typestr = create_species_link(s.genus, s.species, do_print, status=s.status)
+        outfile.write('      <dl>\n')
+        outfile.write('        <dt>Type</dt>\n')
+        outfile.write(f'        <dd>{typestr}</dd>\n')
+        if taxon.parent is not None:
+            outfile.write(f'        <dt>Part of {taxon.parent.taxon_rank}</dt>\n')
+            outfile.write('        <dd>' + create_taxon_link(taxon.parent.taxon_rank, taxon.parent.name,
+                                                             do_print, same_page=True) + '</dd>\n')
+        if taxon.alt_spellings is not None:
+            if "genus" in rank:
+                se = "<em>"
+                ee = "</em>"
+            else:
+                se = ""
+                ee = ""
+            outfile.write(f'        <dt>Alternate Spelling/Misspelling</dt>\n')
+            outfile.write(f'        <dd>{se}{", ".join(sorted(taxon.alt_spellings))}{ee}</dd>\n')
+        c_label = "Contains "
+        if taxon.n_children() > 0:
+            if taxon.n_children() == 1:
+                c_label += taxon.children[0].taxon_rank
+            else:
+                i = 0
+                while taxon_ranks[i].rank != taxon.children[0].taxon_rank:
+                    i += 1
+                c_label += taxon_ranks[i].plural
+            children = []
+            for c in taxon.children:
+                children.append(create_taxon_link(c.taxon_rank, c.name, do_print, same_page=True))
+            children.sort()
+            outfile.write(f'        <dt>{c_label}</dt>\n')
+            outfile.write('        <dd>' + ", ".join(children) + '</dd>\n')
+        else:
+            outfile.write('        <dt>Contains species</dt>\n')
+            splist = []
+            for s in specieslist:
+                if taxon.taxon_rank == "genus":
+                    if s.genus == taxon.name:
+                        splist.append(create_species_link(s.genus, s.species, do_print, status=s.status))
+                elif taxon.taxon_rank == "subgenus":
+                    if s.subgenus == taxon.name:
+                        splist.append(create_species_link(s.genus, s.species, do_print, status=s.status))
+            outfile.write('        <dd>' + ", ".join(splist) + '</dd>\n')
+        outfile.write('      </dl>\n')
+        if taxon.notes != ".":
+            outstr = replace_media_path(taxon.notes, media_path)
+            outfile.write('      <p>' +
+                          replace_species_in_string(replace_reference_in_string(outstr, refdict, do_print)) +
+                          '</p>\n')
+    outfile.write('    </section>\n')
     outfile.write("\n")
 
-    for t_rank in taxon_ranks:
-        rank = t_rank.rank
-        if rank_cnts[rank] > 0:
-            if rank_cnts[rank] == 1:
-                rank_title = rank
-            else:
-                rank_title = t_rank.plural
-            outfile.write("    <section class=\"spsection\">\n")
-            outfile.write("      <h2 id=\"{}\" class=\"bookmark2\">{}</h2>\n".format(rank_title,
-                                                                                     rank_title.capitalize()))
-            if t_rank.notes != ".":
-                outfile.write("      <p>\n")
-                outstr = replace_media_path(t_rank.notes, media_path)
-                outfile.write("        " + replace_reference_in_string(outstr, refdict, do_print) + "\n")
-                outfile.write("      </p>\n")
-            # extract and alphabetically sort taxa at current rank
-            rank_list = []
-            for taxon in higher_taxa_list:
-                if taxon.taxon_rank == rank:
-                    rank_list.append(taxon)
-            rank_list.sort()
-            for taxon in rank_list:
-                outfile.write("      <hr />\n")
-                start_tag, end_tag = rank_tags(rank)
-                if taxon.author == ".":
-                    authorstr = ""
-                else:
-                    authorstr = format_reference_cite(refdict[taxon.author], do_print, AUTHOR_TAXON)
-                outfile.write("      <h3 id=\"" + taxon_link(taxon) + "\">" + taxon.taxon_rank.capitalize() + " " +
-                              start_tag + taxon.name + end_tag + " " + authorstr + "</h2>\n")
-                if taxon.type_species.startswith(">>"):
-                    typestr = "Genus <em>" + taxon.type_species[2:] + "</em>"
-                elif taxon.type_species.startswith(">"):
-                    typestr = "<a href=\"#genus_" + taxon.type_species[1:] + "\">Genus <em>" + \
-                              taxon.type_species[1:] + "</em></a>"
-                else:
-                    s = find_species_by_name(taxon.type_species)
-                    typestr = create_species_link(s.genus, s.species, do_print, status=s.status)
-                outfile.write("      <dl>\n")
-                outfile.write("        <dt>Type</dt>\n")
-                outfile.write("        <dd>" + typestr + "</dd>\n")
-                if taxon.parent is not None:
-                    outfile.write("        <dt>Part of " + taxon.parent.taxon_rank + "</dt>\n")
-                    outfile.write("        <dd>" + create_taxon_link(taxon.parent.taxon_rank, taxon.parent.name,
-                                                                     do_print, same_page=True) + "</dd>\n")
-                c_label = "Contains "
-                if taxon.n_children() > 0:
-                    if taxon.n_children() == 1:
-                        c_label += taxon.children[0].taxon_rank
-                    else:
-                        i = 0
-                        while taxon_ranks[i].rank != taxon.children[0].taxon_rank:
-                            i += 1
-                        c_label += taxon_ranks[i].plural
-                    children = []
-                    for c in taxon.children:
-                        children.append(create_taxon_link(c.taxon_rank, c.name, do_print, same_page=True))
-                    children.sort()
-                    outfile.write("        <dt>" + c_label + "</dt>\n")
-                    outfile.write("        <dd>" + ", ".join(children) + "</dd>\n")
-                else:
-                    outfile.write("        <dt>Contains species</dt>\n")
-                    splist = []
-                    for s in specieslist:
-                        if taxon.taxon_rank == "genus":
-                            if s.genus == taxon.name:
-                                splist.append(create_species_link(s.genus, s.species, do_print, status=s.status))
-                        elif taxon.taxon_rank == "subgenus":
-                            if s.subgenus == taxon.name:
-                                splist.append(create_species_link(s.genus, s.species, do_print, status=s.status))
-                    outfile.write("        <dd>" + ", ".join(splist) + "</dd>\n")
-                outfile.write("      </dl>\n")
-                if taxon.notes != ".":
-                    outstr = replace_media_path(taxon.notes, media_path)
-                    outfile.write("      <p>" +
-                                  replace_species_in_string(replace_reference_in_string(outstr, refdict, do_print)) +
-                                  "</p>\n")
-            outfile.write("    </section>\n")
-            outfile.write("\n")
     if do_print:
         end_page_division(outfile)
     else:
@@ -5585,15 +5911,15 @@ def write_unusual_development_pages(outfile: TextIO, abdevdata: list, refdict: d
     """
     if do_print:
         start_page_division(outfile, "base_page")
-        media_path = MEDIA_PATH
+        media_path = "resources/"
     else:
         common_html_header(outfile, "Unusual Development in Fiddler Crabs")
         media_path = ""
-    outfile.write("    <header id=\"" + init_data().unusual_dev_url + "\">\n")
-    outfile.write("      <h1 class=\"bookmark1\">Unusual Development</h1>\n")
+    outfile.write(f'    <header id="{init_data().unusual_dev_url}">\n')
+    outfile.write('      <h1 class="bookmark1">Unusual Development</h1>\n')
     if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
         navlist = []
         for line in abdevdata:
             if line.strip() != "":
@@ -5601,53 +5927,55 @@ def write_unusual_development_pages(outfile: TextIO, abdevdata: list, refdict: d
                 if data[0].startswith(":"):
                     navlist.append(data)
         for d in navlist:
-            outfile.write(f"          <li><a href=\"#{d[3]}\">{fetch_fa_glyph(d[4])}{d[1]}</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
+            outfile.write(f'          <li><a href="#{d[3]}\">{fetch_fa_glyph(d[4])}{d[1]}</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
 
-    outfile.write("\n")
-    outfile.write("    <p>\n")
-    outfile.write("      The following is a collection of references to unusual development of secondary "
-                  "sexual characters in fiddler crabs, divided by basic type. It is not meant bo be a thorough "
-                  "overview of developmental studies. This also does not include anomalies in claw size due to "
-                  "regeneration status.\n")
-    outfile.write("    </p>\n")
-    outfile.write("\n")
+    outfile.write('\n')
+    outfile.write('    <p>\n')
+    outfile.write('      The following is a collection of references to unusual development of secondary '
+                  'sexual characters in fiddler crabs, divided by basic type. It is not meant bo be a thorough '
+                  'overview of developmental studies. This also does not include anomalies in claw size due to '
+                  'regeneration status.\n')
+    outfile.write('    </p>\n')
+    outfile.write('\n')
     not_first = False
     for line in abdevdata:
         if line.strip() != "":
             data = line.strip().split("\t")
             if data[0].startswith(":"):
                 if not_first:
-                    outfile.write("      </table>\n")
-                    outfile.write("    </section>\n")
+                    outfile.write('      </table>\n')
+                    outfile.write('    </section>\n')
                 else:
                     not_first = True
                 outfile.write('    <section class="spsection">\n')
                 outfile.write(f'      <h2 id="{data[3]}" class="bookmark2">{fetch_fa_glyph(data[4])}{data[1]}</h2>\n')
                 outstr = replace_media_path(data[2], media_path)
-                outfile.write("      <p>\n")
+                outfile.write('      <p>\n')
                 outfile.write(replace_species_in_string(outstr, do_print=do_print) + "\n")
-                outfile.write("      </p>\n")
-                outfile.write("      <table>\n")
+                outfile.write('      </p>\n')
+                outfile.write('      <table>\n')
             else:
                 species = find_species_by_name(data[1])
-                outfile.write("        <tr>\n")
+                outfile.write('        <tr>\n')
                 if data[0].startswith("http"):
                     url, caption = data[0].split("|")
-                    outfile.write("          <td><a href=\"" + url + "\">" + caption + "</a></td>\n")
+                    outfile.write(f'          <td><a href="{url}">{caption}</a></td>\n')
                 else:
                     ref = refdict[data[0]]
-                    outfile.write("          <td>" + format_reference_cite(ref, do_print, AUTHOR_PAREN) + "</td>\n")
-                outfile.write("          <td>" + create_species_link(species.genus, species.species, do_print) +
-                              "</td>\n")
+                    outfile.write(f'          <td>{format_reference_cite(ref, do_print, AUTHOR_PAREN)}</td>\n')
+                if species is None:
+                    outfile.write(f'          <td>?</td>\n')
+                else:
+                   outfile.write(f'          <td>{create_species_link(species.genus, species.species, do_print)}</td>\n')
                 if data[2] != ".":
-                    outfile.write("          <td>" + data[2] + "</td>\n")
-                outfile.write("        </tr>\n")
+                    outfile.write(f'          <td>{data[2]}</td>\n')
+                outfile.write('        </tr>\n')
 
-    outfile.write("      </table>\n")
-    outfile.write("    </section>\n")
+    outfile.write('      </table>\n')
+    outfile.write('    </section>\n')
     if do_print:
         end_page_division(outfile)
     else:
@@ -5776,10 +6104,20 @@ def write_life_cycle_pages(outfile: TextIO, do_print: bool) -> None:
         common_html_footer(outfile)
 
 
-def create_html_phylogenies():
+def create_html_phylogenies(do_print: bool = False) -> Tuple[list, list]:
     gen_tree = phy2html.create_html_tree("data/fiddler_genera_tree.nwk", "", prefix="genera_")
-    sp_tree = phy2html.create_html_tree("data/fiddler_species_tree.nwk", "", prefix="species_", row_height="26px",
-                                        inc_images=True)
+
+    if do_print:
+        inc_images = False
+        row_height = "5px"
+        col_width = "30px"
+    else:
+        inc_images = True
+        row_height = "26px"
+        col_width = "40px"
+    sp_tree = phy2html.create_html_tree("data/fiddler_species_tree.nwk", "", prefix="species_", row_height=row_height,
+                                        col_width=col_width, inc_images=inc_images)
+
     return gen_tree, sp_tree
 
 
@@ -5833,42 +6171,42 @@ def write_phylogeny_pages(outfile: TextIO, genera_tree: list, species_tree: list
         start_page_division(outfile, "base_page")
     else:
         common_header_part1(outfile, "Fiddler Crab Phylogeny")
-    outfile.write("    <style>\n")
+    outfile.write('    <style>\n')
     for line in gen_style:
         outfile.write(line)
-    outfile.write("\n")
+    outfile.write('\n')
     for line in sp_style:
         outfile.write(line)
-    outfile.write("\n")
-    outfile.write("    .phylogeny_grid { padding: 30px;  }\n")  # add a little extra padding
-    outfile.write("    </style>\n")
+    outfile.write('\n')
+    outfile.write('    .phylogeny_grid { padding: 30px;  }\n')  # add a little extra padding
+    outfile.write('    </style>\n')
 
     if not do_print:
         common_header_part2(outfile)
 
-    outfile.write("    <header id=\"" + init_data().tree_url + "\">\n")
-    outfile.write("      <h1 class=\"bookmark1\">Phylogeny</h1>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
-    outfile.write("    <p>\n")
-    outfile.write("     The phylogeny of fiddler crabs is still largely unresolved. Two trees are shown below: one "
-                  "of just the genera and one including all species. The tree of genera is fairly solid, "
-                  "but the species tree is a rough estimate with many polytomies. Both are predominantly based on the "
-                  f"work of {format_reference_cite(refdict["Shih2016.2"], do_print, AUTHOR_PAREN)} and "
-                  f"{format_reference_cite(refdict["Thurman2025"], do_print, AUTHOR_PAREN)}.\n")
-    outfile.write("    </p>\n")
-    outfile.write("\n")
-    outfile.write("    <section class=\"spsection\">\n")
-    outfile.write("      <h2 class=\"bookmark2\">Genera Phylogeny</h2>\n")
+    outfile.write(f'    <header id="{init_data().tree_url}">\n')
+    outfile.write('      <h1 class="bookmark1">Phylogeny</h1>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
+    outfile.write('    <p>\n')
+    outfile.write('     The phylogeny of fiddler crabs is still largely unresolved. Two trees are shown below: one '
+                  'of just the genera and one including all species. The tree of genera is fairly solid, '
+                  'but the species tree is a rough estimate with many polytomies. Both are predominantly based on the '
+                  f'work of {format_reference_cite(refdict["Shih2016.2"], do_print, AUTHOR_PAREN)} and '
+                  f'{format_reference_cite(refdict["Thurman2025"], do_print, AUTHOR_PAREN)}.\n')
+    outfile.write('    </p>\n')
+    outfile.write('\n')
+    outfile.write('    <section class="spsection">\n')
+    outfile.write('      <h2 class="bookmark2">Genera Phylogeny</h2>\n')
     for line in gen_body:
         outfile.write(add_link_to_genus(line))
-    outfile.write("    </section>\n")
-    outfile.write("    <section class=\"spsection\">\n")
-    outfile.write("      <h2 class=\"bookmark2\">Species Phylogeny</h2>\n")
+    outfile.write('    </section>\n')
+    outfile.write('    <section class="spsection pagebreak">\n')
+    outfile.write('      <h2 class="bookmark2">Species Phylogeny</h2>\n')
     for line in sp_body:
         outfile.write(replace_species_in_string(line, True, do_print))
-    outfile.write("    </section>\n")
-    outfile.write("\n")
+    outfile.write('    </section>\n')
+    outfile.write('\n')
     if do_print:
         end_page_division(outfile)
     else:
@@ -5978,18 +6316,18 @@ def write_morphology_index(outfile: TextIO, do_print: bool, morphlist: list) -> 
         start_page_division(outfile, "index_page")
     else:
         common_html_header(outfile, "Morphology Index", indexpath="../")
-    outfile.write("    <header id=\"morphology_index.html\">\n")
-    outfile.write("      <h1 class=\"bookmark2\">Morphology Index</h1>\n")
+    outfile.write('    <header id="morphology_index.html">\n')
+    outfile.write('      <h1 class="bookmark2">Morphology Index</h1>\n')
     if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + init_data().morph_url +
-                      "\">General Morphology</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
-    outfile.write("     <ul class=\"morphlist\">\n")
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
+        outfile.write(f'          <li><a href="{rel_link_prefix(do_print, "../")}{init_data().morph_url}">'
+                      f'General Morphology</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
+    outfile.write('     <ul class="morphlist">\n')
     uniquelist = collections.Counter(m.character for m in morphlist)
 
     sortlist = []
@@ -6002,12 +6340,12 @@ def write_morphology_index(outfile: TextIO, do_print: bool, morphlist: list) -> 
     for s in sortlist:
         m = s[1]
         if uniquelist[m.character] > 1:
-            p = " ("+m.parent+")"
+            p = f' ({m.parent})'
         else:
             p = ""
-        outfile.write("      <li><a href=\"" + rel_link_prefix(do_print) + morphology_link(m.parent, m.character) +
-                      ".html\">" + m.character + p + "</a></li>\n")
-    outfile.write("     </ul>\n")
+        outfile.write(f'      <li><a href="{rel_link_prefix(do_print)}{morphology_link(m.parent, m.character)}.html">'
+                      f'{m.character}{p}</a></li>\n')
+    outfile.write('     </ul>\n')
     if do_print:
         end_page_division(outfile)
     else:
@@ -6024,53 +6362,53 @@ def write_main_morphology_pages(outfile: TextIO, do_print: bool, morphology: lis
     else:
         common_html_header(outfile, "Fiddler Crab Morphology")
         media_path = ""
-    outfile.write("    <header id=\"" + init_data().morph_url + "\">\n")
-    outfile.write("      <h1 class=\"bookmark1\">Morphology</h1>\n")
+    outfile.write(f'    <header id="{init_data().morph_url}">\n')
+    outfile.write('      <h1 class="bookmark1">Morphology</h1>\n')
     if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
         if do_print:
             index_page = "#morphology_index.html"
         else:
             index_page = "morphology/index.html"
-        outfile.write("          <li><a href=\"" + index_page + "\">" + fetch_fa_glyph("index") + "Index</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
-    outfile.write("    <div class=\"morphdesc\">\n")
-    outfile.write("     <p>\n")
-    outfile.write("      Fiddler crabs are decapod &ldquo;true crabs&rdquo; with much of the standard morphology "
-                  "found within this group. The following sections briefly describe major morphological features "
-                  "as well as characteristics that are often used to distinguish among species.\n")
-    outfile.write("     </p>\n")
-    outfile.write("      The morphology is organized hierarchically by major body component with further details "
-                  "within each section.\n")
-    outfile.write("     <p>\n")
-    outfile.write("     </p>\n")
-    outfile.write("     <h2 class=\"nobookmark\">More Detail</h2>\n")
-    outfile.write("     <ul>\n")
+        outfile.write(f'          <li><a href="{index_page}">{fetch_fa_glyph("index")}Index</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
+    outfile.write('    <div class="morphdesc">\n')
+    outfile.write('     <p>\n')
+    outfile.write('      Fiddler crabs are decapod &ldquo;true crabs&rdquo; with much of the standard morphology '
+                  'found within this group. The following sections briefly describe major morphological features '
+                  'as well as characteristics that are often used to distinguish among species.\n')
+    outfile.write('     </p>\n')
+    outfile.write('      The morphology is organized hierarchically by major body component with further details '
+                  'within each section.\n')
+    outfile.write('     <p>\n')
+    outfile.write('     </p>\n')
+    outfile.write('     <h2 class="nobookmark">More Detail</h2>\n')
+    outfile.write('     <ul>\n')
     for m in morphology:
         if m.parent == ".":
-            outfile.write("      <li><a href=\"" + rel_link_prefix(do_print, "morphology/") +
-                          morphology_link(m.parent, m.character) + ".html\">" + m.character + "</a></li>\n")
-    outfile.write("     </ul>\n")
-    outfile.write("    </div>\n")
-    outfile.write("    <figure class=\"morphimg\">\n")
-    outfile.write("      <img src=\"" + media_path + "morphology/dorsal_view.png\" "
-                  "alt=\"dorsal view of crab image\" title=\"dorsal view of crab\" />\n")
-    outfile.write("      <figcaption>Figure modified from Crane (1975).</figcaption>\n")
-    outfile.write("    </figure>\n")
-    outfile.write("    <figure class=\"morphimg\">\n")
-    outfile.write("      <img src=\"" + media_path + "morphology/ventral_view.png\" "
-                  "alt=\"ventral view of crab image\" title=\"ventral view of crab\" />\n")
-    outfile.write("      <figcaption>Figure modified from Crane (1975).</figcaption>\n")
-    outfile.write("    </figure>\n")
-    outfile.write("    <figure class=\"morphimg\">\n")
-    outfile.write("      <img src=\"" + media_path + "morphology/anterior_view.png\" "
-                  "alt=\"anterior view of crab image\" title=\"anterior view of crab\" />\n")
-    outfile.write("      <figcaption>Figure modified from Crane (1975).</figcaption>\n")
-    outfile.write("    </figure>\n")
+            outfile.write(f'      <li><a href="{rel_link_prefix(do_print, "morphology/")}'
+                          f'{morphology_link(m.parent, m.character)}.html">{m.character}</a></li>\n')
+    outfile.write('     </ul>\n')
+    outfile.write('    </div>\n')
+    outfile.write('    <figure class="morphimg">\n')
+    outfile.write(f'      <img src="{media_path}morphology/dorsal_view.png" '
+                  'alt="dorsal view of crab image" title="dorsal view of crab" />\n')
+    outfile.write('      <figcaption>Figure modified from Crane (1975).</figcaption>\n')
+    outfile.write('    </figure>\n')
+    outfile.write('    <figure class="morphimg">\n')
+    outfile.write(f'      <img src="{media_path}morphology/ventral_view.png" '
+                  'alt="ventral view of crab image" title="ventral view of crab" />\n')
+    outfile.write('      <figcaption>Figure modified from Crane (1975).</figcaption>\n')
+    outfile.write('    </figure>\n')
+    outfile.write('    <figure class="morphimg">\n')
+    outfile.write(f'      <img src="{media_path}morphology/anterior_view.png" '
+                  'alt="anterior view of crab image" title="anterior view of crab" />\n')
+    outfile.write('      <figcaption>Figure modified from Crane (1975).</figcaption>\n')
+    outfile.write('    </figure>\n')
     if do_print:
         end_page_division(outfile)
         write_morphology_index(outfile, do_print, morphology)
@@ -6092,28 +6430,67 @@ def write_citation_page(refdict: dict) -> None:
     """
     with open(WEBOUT_PATH + init_data().cite_url, "w", encoding="utf-8") as outfile:
         common_html_header(outfile, "Fiddler Crab Website Citation")
-        outfile.write("    <header id=\"" + init_data().cite_url + "\">\n")
-        outfile.write("      <h1>Citation Info</h1>\n")
-        outfile.write("    </header>\n")
-        outfile.write("\n")
-        outfile.write("    <p>\n")
-        outfile.write("      Generally it is best to cite the primary literature, whenever possible. However, the "
-                      "following paper describes much of the data that is unique to this website:\n")
-        outfile.write("    </p>\n")
-        outfile.write("    <div class=\"reference_list\">\n")
-        outfile.write("      <ul>\n")
+        outfile.write(f'    <header id="{init_data().cite_url}">\n')
+        outfile.write('      <h1>Citation Info</h1>\n')
+        outfile.write('    </header>\n')
+        outfile.write('\n')
+        outfile.write('    <p>\n')
+        outfile.write('      Generally it is best to cite the primary literature, whenever possible. However, the '
+                      'following paper describes much of the data that is unique to this website:\n')
+        outfile.write('    </p>\n')
+        outfile.write('    <div class="reference_list">\n')
+        outfile.write('      <ul>\n')
         ref = refdict["Rosenberg2014"]  # citation describing the database
-        outfile.write("        <li><a href=\"references/Rosenberg2014.html\">" + ref.formatted_html + "</a></li>\n")
-        outfile.write("      </ul>\n")
-        outfile.write("    </div>\n")
+        outfile.write(f'        <li><a href="references/Rosenberg2014.html">{ref.formatted_html}</a></li>\n')
+        outfile.write('      </ul>\n')
+        outfile.write('    </div>\n')
         outfile.write('    <ul class="fa-ul">\n')
-        outfile.write("      <li>" + fetch_fa_glyph("list pdf") +
-                      "<a href=\"https://dx.plos.org/10.1371/journal.pone.0101704\">Read paper online at "
-                      "PLoS ONE</a></li>\n")
-        outfile.write("      <li>" + fetch_fa_glyph("list github") +
-                      "<a href=\"https://github.com/msrosenberg/fiddlercrab.info\">Website data repository on "
-                      "GitHub</a></li>\n")
-        outfile.write("    </ul>\n")
+        outfile.write(f'      <li>{fetch_fa_glyph("list pdf")}'
+                      '<a href="https://dx.plos.org/10.1371/journal.pone.0101704">Read paper online at '
+                      'PLoS ONE</a></li>\n')
+        outfile.write(f'      <li>{fetch_fa_glyph("list github")}'
+                      '<a href="https://github.com/msrosenberg/fiddlercrab.info">Website data repository on '
+                      'GitHub</a></li>\n')
+        outfile.write('    </ul>\n')
+        common_html_footer(outfile)
+
+
+def write_about_page(outfile: TextIO, do_print: bool, about_data: list) -> None:
+    if do_print:
+        start_page_division(outfile, "base_page")
+        media_path = "resources/"
+    else:
+        common_html_header(outfile, "About fiddlercrab.info")
+        media_path = ""
+
+    outfile.write(f'    <header id="{init_data().about_url}">\n')
+    outfile.write('      <h1>A Not-so Brief History of This Website, a.k.a., Why Does fiddlercrab.info Even '
+                  'Exist?</h1>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
+    for line in about_data:
+        line = line.strip()
+        if line != "":
+            code, text = line.split("\t")
+            text = replace_media_path(text, media_path)
+            if code == "p":
+                outfile.write(f'    <p>{text}</p>\n')
+            elif code == "pclear":
+                outfile.write(f'    <p style="clear: both">{text}</p>\n')
+            elif code == "pcenter":
+                outfile.write(f'    <p style="text-align: center">{text}</p>\n')
+            elif code == "h2":
+                outfile.write(f'    <h2>{text}</h2>\n')
+            elif code == "ol":
+                outfile.write(f'    <ol>\n')
+            elif code == "eol":
+                outfile.write(f'    </ol>\n')
+            elif code == "li":
+                outfile.write(f'       <li>{text}</li>\n')
+
+    if do_print:
+        end_page_division(outfile)
+    else:
         common_html_footer(outfile)
 
 
@@ -6128,55 +6505,59 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list, higher_ta
         outfile.write('    </header>\n')
     else:
         common_html_header(outfile, "Fiddler Crabs")
-    outfile.write("    <p>\n")
+    outfile.write('    <p>\n')
     scnt = 0
     for s in species:
         if s.status != "fossil":
             scnt += 1
-    outfile.write("      Fiddler crabs are small, semi-terrestrial crabs are characterized by extreme cheliped "
-                  "asymmetry in males. They are most closely related to the <em class=\"species\">Ocypode</em> "
-                  "(ghost crabs). <a href=\"" + rel_link_prefix(do_print) + init_data().species_url +
-                  "\">There are currently {} recognized extant species</a>.\n".format(scnt))
-    outfile.write("    </p>\n")
+    outfile.write('      Fiddler crabs are small, semi-terrestrial crabs are characterized by extreme cheliped '
+                  'asymmetry in males. They are most closely related to the <em class="species">Ocypode</em> '
+                  f'(ghost crabs). <a href="{rel_link_prefix(do_print)}{init_data().species_url}">'
+                  f'There are currently {scnt} recognized extant species</a>.\n')
+    outfile.write('    </p>\n')
     if do_print:
         media_path = MEDIA_PATH
     else:
         media_path = ""
-    outfile.write("    <div class=\"indeximages\">\n")
-    outfile.write("      <img class=\"thumbnail\" src=\"" + media_path +
-                  "photos/U_mjoebergi04tn.jpg\" alt=\"Austruca mjoebergi photo\" />\n")
-    outfile.write("      <img class=\"thumbnail\" src=\"" + media_path +
-                  "photos/U_minax07tn.jpg\" alt=\"Minuca minax photo\" />\n")
-    outfile.write("      <img class=\"thumbnail\" src=\"" + media_path +
-                  "photos/U_crassipes19tn.jpg\" alt=\"Paraleptuca crassipes photo\" />\n")
-    outfile.write("    </div>\n")
-    outfile.write("\n")
-    outfile.write("    <h2 class=\"nobookmark\">Classification</h2>\n")
-    outfile.write("    <table>\n")
-    outfile.write("      <tr><td class=\"classcol1\">Kingdom</td><td>Animalia</td></tr>\n")
-    outfile.write("      <tr><td class=\"classcol1\">Phylum</td><td>Arthropoda</td></tr>\n")
-    outfile.write("      <tr><td class=\"classcol1\">Class</td><td>Crustacea</td></tr>\n")
-    outfile.write("      <tr><td class=\"classcol1\">Sub-class</td><td>Malocostraca</td></tr>\n")
-    outfile.write("      <tr><td class=\"classcol1\">Order</td><td>Decapoda</td></tr>\n")
-    outfile.write("      <tr><td class=\"classcol1\">Infraorder</td><td>Brachyura</td></tr>\n")
-    outfile.write("      <tr><td class=\"classcol1\">Superfamily</td><td>Ocypodoidea</td></tr>\n")
-    outfile.write("      <tr><td class=\"classcol1\">Family</td><td>Ocypodidae</td></tr>\n")
+    outfile.write('    <div class="indeximages">\n')
+    outfile.write(f'      <img class="thumbnail" src="{media_path}photos/U_mjoebergi04tn.jpg" '
+                  f'alt="Austruca mjoebergi photo" />\n')
+    outfile.write(f'      <img class="thumbnail" src="{media_path}photos/U_minax07tn.jpg" '
+                  f'alt="Minuca minax photo" />\n')
+    outfile.write(f'      <img class="thumbnail" src="{media_path}photos/U_crassipes19tn.jpg" '
+                  f'alt="Paraleptuca crassipes photo" />\n')
+    outfile.write('    </div>\n')
+    outfile.write('\n')
+    outfile.write('    <h2 class="nobookmark">Classification</h2>\n')
+    outfile.write('    <table>\n')
+    outfile.write('      <tr><td class="classcol1">Kingdom</td><td>Animalia</td></tr>\n')
+    outfile.write('      <tr><td class="classcol1">Phylum</td><td>Arthropoda</td></tr>\n')
+    outfile.write('      <tr><td class="classcol1">Class</td><td>Crustacea</td></tr>\n')
+    outfile.write('      <tr><td class="classcol1">Sub-class</td><td>Malocostraca</td></tr>\n')
+    outfile.write('      <tr><td class="classcol1">Order</td><td>Decapoda</td></tr>\n')
+    outfile.write('      <tr><td class="classcol1">Infraorder</td><td>Brachyura</td></tr>\n')
+    outfile.write('      <tr><td class="classcol1">Superfamily</td><td>Ocypodoidea</td></tr>\n')
+    outfile.write('      <tr><td class="classcol1">Family</td><td>Ocypodidae</td></tr>\n')
     genera = []
     for t in higher_taxa:
         if t.taxon_rank == "genus":
             genera.append(t.name)
     genera.sort()
-    outfile.write("      <tr><td class=\"classcol1\">Genera</td><td><em class=\"species\">" +
-                  ", ".join(genera) + "</em></td>\n")
+    outfile.write('      <tr><td class="classcol1">Genera</td><td><em class="species">' +
+                  ", ".join(genera) + '</em></td>\n')
 
-    outfile.write("    </table>\n")
-    outfile.write("\n")
-    outfile.write("    <p>\n")
-    outfile.write("      The common English name &ldquo;Fiddler Crab&rdquo; comes from the feeding of the "
-                  "males, where the movement of the small claw from the ground to its mouth "
-                  "resembles the motion of a someone moving a bow across a fiddle (the large claw).\n")
-    outfile.write("    </p>\n")
+    outfile.write('    </table>\n')
+    outfile.write('\n')
+    outfile.write('    <p>\n')
+    outfile.write('      The common English name &ldquo;Fiddler Crab&rdquo; comes from the feeding of the '
+                  'males, where the movement of the small claw from the ground to its mouth '
+                  'resembles the motion of a someone moving a bow across a fiddle (the large claw).\n')
+    outfile.write('    </p>\n')
     if do_print:
+        """
+        print version has an independent table of contents so does no tneed the index/TOC that is part 
+        of the web version intro page
+        """
         end_page_division(outfile)
     else:
         outfile.write('    <h2>Information</h2>\n')
@@ -6192,8 +6573,16 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list, higher_ta
         outfile.write('        </ul>\n')
         outfile.write('      </li>\n')
         outfile.write("      <li>" + fetch_fa_glyph("list guide") + "<a href=\"field_guides\">Field Guides</a></li>\n")
-        outfile.write("      <li>" + fetch_fa_glyph("list common") + "<a href=\"" + init_data().common_url +
-                      "\">Common Names</a></li>\n")
+        # outfile.write("      <li>" + fetch_fa_glyph("list common") + "<a href=\"" + init_data().common_url +
+        #               "\">Common Names</a></li>\n")
+        outfile.write('      <li>' + fetch_fa_glyph("list common") + '<a href="' + init_data().common_url +
+                      '">Common Names</a>\n')
+        outfile.write('        <ul class="fa-ul">\n')
+        outfile.write(f'            <li>{fetch_fa_glyph("list group")}<a href="{init_data().group_url}">'
+                      f'Group Names</a>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </li>\n')
+
         outfile.write("      <li>" + fetch_fa_glyph("list ranges") + "<a href=\"" + init_data().map_url +
                       "\">Geographic Ranges</a>\n")
         outfile.write('        <ul class="fa-ul">\n')
@@ -6232,16 +6621,18 @@ def write_introduction(outfile: TextIO, do_print: bool, species: list, higher_ta
                       f'Postage Stamps</a></li>\n')
         outfile.write(f'          <li>{fetch_fa_glyph("list crafts")}<a href="{init_data().art_craft_url}">'
                       f'Crafts</a></li>\n')
-        outfile.write("        </ul>\n")
-        outfile.write("      </li>\n")
-        outfile.write("    </ul>\n")
-        outfile.write("    <h2>Miscellania</h2>\n")
+        outfile.write('        </ul>\n')
+        outfile.write('      </li>\n')
+        outfile.write('    </ul>\n')
+        outfile.write('    <h2>Miscellania</h2>\n')
         outfile.write('    <ul class="fa-ul">\n')
+        outfile.write(f'      <li>{fetch_fa_glyph("list about")}<a href="{init_data().about_url}">'
+                      f'About fiddlercrab.info</a></li>\n')
         outfile.write(f'      <li>{fetch_fa_glyph("list site cite")}<a href="{init_data().cite_url}">'
                       f'Citation info for this website</a></li>\n')
-        outfile.write(f'      <li>{fetch_fa_glyph("list github")}'
-                      f'<a href="https://github.com/msrosenberg/fiddlercrab.info">Website data on GitHub</a></li>\n')
-        outfile.write("    </ul>\n")
+        # outfile.write(f'      <li>{fetch_fa_glyph("list github")}'
+        #               f'<a href="https://github.com/msrosenberg/fiddlercrab.info">Website data on GitHub</a></li>\n')
+        outfile.write('    </ul>\n')
         common_html_footer(outfile)
 
 
@@ -6332,7 +6723,7 @@ def copy_support_files() -> None:
                 "favicon-16x16.png",
                 "favicon-32x32.png",
                 "favicon.ico",
-                "site.webmanifest"
+                "site.webmanifest",
                 "uca_style.css"}
     for filename in filelist:
         try:
@@ -6349,6 +6740,18 @@ def copy_support_files() -> None:
                 "size_range.png",
                 "size_summary.png",
                 "double_clawed.jpg",
+                "orchestra_bluesky.png",
+                "map1975.png",
+                "map2000.png",
+                "map2026.png",
+                "Crane_forcipata.png",
+                "Crane_inversa.png",
+                "Crane_latimanus.png",
+                "Crane_ornata.png",
+                "Crane_pygmaea.png",
+                "Crane_saltitanta.png",
+                "Crane_thayeri.png",
+                "Crane_vocans.png",
                 "icon_fiddler_purple.png",
                 "icon_fiddler_green.png",
                 "icon_fiddler_yellow.png",
@@ -6361,6 +6764,7 @@ def copy_support_files() -> None:
             shutil.copy2("resources/images/" + filename, WEBOUT_PATH + "images/")
         except FileNotFoundError:
             report_error("Missing file: resources/images/" + filename)
+    # word cloud images
     filelist = {"specific_word_cloud.png",
                 "binomial_word_cloud.png"}
     for filename in filelist:
@@ -6380,6 +6784,7 @@ def copy_support_files() -> None:
                 "duotone.min.js",
                 "duotone-regular.min.js",
                 "solid.min.js",
+                "custom-icons.min.js",
                 "light.min.js"}
     for filename in filelist:
         try:
@@ -6416,6 +6821,7 @@ def copy_support_files() -> None:
                 "my.svg",  # Malaysia (for Malay)
                 "mg.svg",  # Madagascar (for Malagasy)
                 "ir.svg",  # Iran (for Persian)
+                "cz.svg",  # Czech
                 "vn.svg"}  # Vietnam
     for filename in filelist:
         try:
@@ -6502,11 +6908,13 @@ def copy_field_guide_files(field_guides: dict, images_list: list) -> None:
         copy_file("resources/field_guide_images/" + image)
 
 
+# ---------- Start of print specific code ----------
+
 def print_cover(outfile: TextIO) -> None:
     """
     create cover for monographic print output
     """
-    outfile.write("    <div id=\"cover_page\">\n")
+    outfile.write('    <div id="cover_page">\n')
     for i in range(1, 29):
         outfile.write(f'      <img id="cover_img{i}" class="cover_img" src="media/cover images/cover{i}.jpg" />\n')
     outfile.write(f'      <p class="cover_title">{init_data().site_title}</p>\n')
@@ -6534,145 +6942,176 @@ def print_copyright_page(outfile: TextIO, refdict: dict) -> None:
     """
     create copyright page for monographic print output
     """
-    outfile.write("    <div id=\"copyright_page\">\n")
-    outfile.write("     <p>Copyright &copy; 2003&ndash;" + str(init_data().current_year) +
-                  " by " + init_data().site_author + ". All Rights Reserved</p>\n")
-    outfile.write("     <p>Release: " + init_data().version + "</p>\n")
-    outfile.write("     <p><a href=\"" + init_data().site_url() + "\">" + init_data().site_address + "</a></p>\n")
-    outfile.write("     <p>\n")
-    outfile.write("       The data and code used to produce this document can be found on GitHub at")
-    outfile.write("     </p>\n")
-    outfile.write("     <p>\n")
-    outfile.write("       <a href=\"https://github.com/msrosenberg/fiddlercrab.info\">"
-                  "https://github.com/msrosenberg/fiddlercrab.info</a>\n")
-    outfile.write("     </p>\n")
-    outfile.write("     <p>and</p>\n")
-    outfile.write("     <p>\n")
-    outfile.write("       <a href=\"https://github.com/msrosenberg/TaxonomyMonographBuilder\">"
-                  "https://github.com/msrosenberg/TaxonomyMonographBuilder</a>.\n")
-    outfile.write("     </p>\n")
-    outfile.write("     <p class=\"copy_cite\">\n")
-    outfile.write("       Please cite this document as:\n")
-    outfile.write("     </p>\n")
-    outfile.write("     <p>\n")
-    outfile.write("       Rosenberg, M.S. (" + str(init_data().current_year) + ") www.fiddlercrab.info, v." +
-                  init_data().version + ".\n")
+    outfile.write('    <div id="copyright_page">\n')
+    outfile.write(f'     <p>Copyright &copy; 1998&ndash;{init_data().current_year} by {init_data().site_author}. '
+                  f'All Rights Reserved</p>\n')
+    outfile.write(f'     <p>Release: {init_data().version}</p>\n')
+    outfile.write(f'     <p><a href="{init_data().site_url()}">{init_data().site_address}</a></p>\n')
+    outfile.write('     <p>\n')
+    outfile.write('       The data and code used to produce this document can be found on GitHub at')
+    outfile.write('     </p>\n')
+    outfile.write('     <p>\n')
+    outfile.write('       <a href="https://github.com/msrosenberg/fiddlercrab.info">'
+                  'https://github.com/msrosenberg/fiddlercrab.info</a>\n')
+    outfile.write('     </p>\n')
+    outfile.write('     <p>and</p>\n')
+    outfile.write('     <p>\n')
+    outfile.write('       <a href="https://github.com/msrosenberg/TaxonomyMonographBuilder">'
+                  'https://github.com/msrosenberg/TaxonomyMonographBuilder</a>.\n')
+    outfile.write('     </p>\n')
+    outfile.write('     <p class="copy_cite">\n')
+    outfile.write('       Please cite this document as:\n')
+    outfile.write('     </p>\n')
+    outfile.write('     <p>\n')
+    outfile.write(f'       Rosenberg, M.S. ({init_data().current_year}) www.fiddlercrab.info, '
+                  f'v.{init_data().version}.\n')
     outfile.write("     </p>\n")
 
-    outfile.write("     <p>\n")
-    outfile.write("       Certain key elements of this work are described in:\n")
+    outfile.write('     <p>\n')
+    outfile.write('       Certain key elements of this work are described in:\n')
     key_ref = "Rosenberg2014"  # citation describing the database
     ref = refdict[key_ref]
-    outfile.write("      <div class=\"reference_list\">\n")
-    outfile.write("        <ul>\n")
-    outfile.write("          <li><a href=\"" + rel_link_prefix(True, "references/") + key_ref + ".html\">" +
-                  ref.formatted_html + "</a></li>\n")
-    outfile.write("        </ul>\n")
-    outfile.write("      </div>\n")
-    outfile.write("    </div>\n")
-    outfile.write("\n")
+    outfile.write('      <div class="reference_list">\n')
+    outfile.write('        <ul>\n')
+    outfile.write(f'          <li><a href="{rel_link_prefix(True, "references/")}{key_ref}.html">'
+                  f'{ref.formatted_html}</a></li>\n')
+    outfile.write('        </ul>\n')
+    outfile.write('      </div>\n')
+    outfile.write('    </div>\n')
+    outfile.write('\n')
 
 
-def print_table_of_contents(outfile: TextIO, species_list: list) -> None:
+def print_table_of_contents(outfile: TextIO, species_list: list, taxon_ranks: list,
+                            higher_taxa: list) -> None:
     """
     create Table of Contents for monographic print output
     """
-    outfile.write("    <div id=\"table_of_contents\">\n")
-    outfile.write("     <h1 class=\"bookmark1\">Table of Contents</h1>\n")
-    outfile.write("     <ul>\n")
-    outfile.write("       <li><a href=\"#introduction\">Introduction</a></li>\n")
-    outfile.write("       <li><a href=\"#" + init_data().common_url + "\">Common Names</a></li>\n")
-    outfile.write("       <li><a href=\"#" + init_data().syst_url + "\">Systematics Overview</a>\n")
-    outfile.write("         <ul>\n")
-    outfile.write("           <li><a href=\"#genus\">Genus</a></li>\n")
-    outfile.write("           <li><a href=\"#subgenera\">Subgenera</a></li>\n")
-    outfile.write("           <li><a href=\"#species\">Species</a></li>\n")
-    outfile.write("         </ul>\n")
-    outfile.write("       </li>\n")
-    outfile.write("       <li><a href=\"#" + init_data().tree_url + "\">Phylogeny</a></li>\n")
-    outfile.write("       <li><a href=\"#" + init_data().lifecycle_url + "\">Life Cycle</a></li>\n")
-    outfile.write("         <ul>\n")
-    outfile.write("           <li><a href=\"#" + init_data().unusual_dev_url + "\">Unusual Development</a></li>\n")
-    outfile.write("         </ul>\n")
-
-    outfile.write("       <li><a href=\"#" + init_data().species_url + "\">Species</a>\n")
-    outfile.write("         <ul>\n")
+    outfile.write('    <div id="table_of_contents">\n')
+    outfile.write('     <h1 class="bookmark1">Table of Contents</h1>\n')
+    outfile.write('     <ul>\n')
+    outfile.write(f'       <li><a href="#{init_data().about_url}">About this Work</a></li>\n')
+    outfile.write('       <li><a href="#introduction">Introduction</a></li>\n')
+    outfile.write(f'       <li><a href="#{init_data().common_url}">Common Names</a></li>\n')
+    outfile.write(f'       <li><a href="#{init_data().group_url}">Collective Noun</a></li>\n')
+    outfile.write(f'       <li><a href="#{init_data().syst_url}">Systematics Overview</a>\n')
+    outfile.write('         <ul>\n')
+    # create list of present higher taxa ranks for TOC
+    rank_cnts = {t.rank: 0 for t in taxon_ranks}
+    for t in higher_taxa:
+        rank_cnts[t.taxon_rank] += 1
+    nav_list = []
+    for t in taxon_ranks:
+        if rank_cnts[t.rank] == 1:
+            nav_list.append((t.rank, t.rank))
+        elif rank_cnts[t.rank] > 1:
+            nav_list.append((t.rank, t.plural))
+    for n in nav_list:
+        outfile.write(f'          <li><a href="#syst_{n[0]}.html">{n[1].capitalize()}</a></li>\n')
+    outfile.write('         </ul>\n')
+    outfile.write('       </li>\n')
+    outfile.write(f'       <li><a href="#{init_data().tree_url}">Phylogeny</a></li>\n')
+    outfile.write(f'       <li><a href="#size_index.html">Carapace Breadth Guide</a></li>\n')
+    outfile.write(f'       <li><a href="#handedness_index.html">Male Handedness</a></li>\n')
+    outfile.write(f'       <li><a href="#{init_data().species_url}">Species</a>\n')
+    outfile.write('         <ul>\n')
     for species in species_list:
-        outfile.write("           <li>" + create_species_link(species.genus, species.species, True) + "</li>\n")
-    outfile.write("         </ul>\n")
-    outfile.write("       </li>\n")
+        outfile.write(f'           <li>{create_species_link(species.genus, species.species, True)}</li>\n')
+    outfile.write('         </ul>\n')
+    outfile.write('       </li>\n')
+    outfile.write('       <li><a href="#field_guides.html">Field Guides</a>\n')
+    outfile.write('       <li><a href="#name_index">Scientific Names</a>\n')
+    outfile.write('         <ul>\n')
+    outfile.write('           <li><a href="#binomials">Binomials and Other Compound Names Index</a>\n')
+    outfile.write('           <li><a href="#specificnames">Specific Names Index</a>\n')
+    outfile.write(f'           <li><a href="#{init_data().name_sum_url}">Summary of Scientific Names</a>\n')
+    outfile.write(f'           <li><a href="#genera_chronology">Chronology of Genera Usage</a>\n')
+    outfile.write('         </ul>\n')
+    outfile.write('       </li>\n')
+    outfile.write(f'      <li><a href="#{init_data().lifecycle_url}">Life Cycle</a></li>\n')
+    outfile.write(f'      <li><a href="#{init_data().morph_url}">Morphology</a></li>\n')
+    outfile.write(f'      <li><a href="#{init_data().unusual_dev_url}">Unusual Development</a></li>\n')
+    outfile.write(f'       <li><a href="#{init_data().map_url}">Geography</a>\n')
+    outfile.write('         <ul>\n')
+    outfile.write('           <li><a href="#location_index">Location Index</a></li>\n')
+    outfile.write('         </ul>\n')
+    outfile.write('       </li>\n')
+    outfile.write(f'       <li><a href="#{init_data().photo_url}">Photo Index</a></li>\n')
+    outfile.write(f'       <li><a href="#{init_data().video_url}">Video Index</a></li>\n')
+    outfile.write('       <li>Art\n')
+    outfile.write('         <ul>\n')
+    outfile.write(f'           <li><a href="#{init_data().art_sci_url}">Scientific Drawings</a></li>\n')
+    outfile.write(f'           <li><a href="#{init_data().art_stamp_url}">Postage Stamps</a></li>\n')
+    outfile.write(f'           <li><a href="#{init_data().art_craft_url}">Arts &amp; Crafts</a></li>\n')
+    outfile.write('         </ul>\n')
+    outfile.write('       </li>\n')
+    outfile.write('       <li>References\n')
+    outfile.write('         <ul>\n')
+    outfile.write(f'           <li><a href="#{init_data().ref_sum_url}">Summary of References</a></li>\n')
+    outfile.write(f'           <li><a href="#{init_data().ref_url}">Full Reference List</a></li>\n')
+    outfile.write('         </ul>\n')
+    outfile.write('       </li>\n')
+    outfile.write('     </ul>\n')
+    outfile.write('    </div>\n')
+    outfile.write('\n')
 
-    outfile.write("       <li><a href=\"#name_index\">Name Index</a>\n")
-    outfile.write("         <ul>\n")
-    outfile.write("           <li><a href=\"#binomials\">Binomials and Other Compound Names</a>\n")
-    outfile.write("           <li><a href=\"#specificnames\">Specific Names</a>\n")
-    outfile.write("           <li><a href=\"#" + init_data().name_sum_url + "\">Summary of Names</a>\n")
-    outfile.write("         </ul>\n")
-    outfile.write("       </li>\n")
-    outfile.write("       <li><a href=\"#" + init_data().map_url + "\">Geography</a>\n")
-    outfile.write("         <ul>\n")
-    outfile.write("           <li><a href=\"#location_index\">Location Index</a></li>\n")
-    outfile.write("         </ul>\n")
-    outfile.write("       </li>\n")
-    outfile.write("       <li><a href=\"#" + init_data().morph_url + "\">Morphology</a></li>\n")
-    outfile.write("       <li><a href=\"#" + init_data().photo_url + "\">Photo Index</a></li>\n")
-    outfile.write("       <li><a href=\"#" + init_data().video_url + "\">Video Index</a></li>\n")
-    outfile.write("       <li>Art\n")
-    outfile.write("         <ul>\n")
-    outfile.write("           <li><a href=\"#" + init_data().art_sci_url + "\">Scientific Drawings</a></li>\n")
-    outfile.write("           <li><a href=\"#" + init_data().art_stamp_url + "\">Postage Stamps</a></li>\n")
-    outfile.write("           <li><a href=\"#" + init_data().art_craft_url + "\">Arts &amp; Crafts</a></li>\n")
-    outfile.write("         </ul>\n")
-    outfile.write("       </li>\n")
-    outfile.write("       <li>References\n")
-    outfile.write("         <ul>\n")
-    outfile.write("           <li><a href=\"#" + init_data().ref_sum_url + "\">Summary of References</a></li>\n")
-    outfile.write("           <li><a href=\"#" + init_data().ref_url + "\">Full Reference List</a></li>\n")
-    outfile.write("         </ul>\n")
-    outfile.write("       </li>\n")
-    outfile.write("     </ul>\n")
-    outfile.write("    </div>\n")
-    outfile.write("\n")
 
-
-def write_print_only_pages(outfile: TextIO, species: list, refdict: dict) -> None:
+def write_print_only_pages(outfile: TextIO, species: list, refdict: dict, taxon_ranks: list,
+                           higher_taxa: list) -> None:
     """
     create starting pages that are unique to print output
     """
     print_cover(outfile)
     print_title_page(outfile)
     print_copyright_page(outfile, refdict)
-    print_table_of_contents(outfile, species)
+    print_table_of_contents(outfile, species, taxon_ranks, higher_taxa)
 
 
 def start_print(outfile: TextIO) -> None:
     """
-    start html file for print monographic output
+    start HTML file for print monographic output
     """
-    outfile.write("<!DOCTYPE HTML>\n")
-    outfile.write("<html lang=\"en\">\n")
-    outfile.write("  <head>\n")
-    outfile.write("    <meta charset=\"utf-8\" />\n")
-    outfile.write("    <title>Fiddler Crabs</title>\n")
-    outfile.write("    <link rel=\"stylesheet\" href=\"resources/uca_style.css\" />\n")
-    outfile.write("    <link rel=\"stylesheet\" href=\"resources/print.css\" />\n")
-    outfile.write("    <link rel=\"stylesheet\" href=\"resources/font-awesome/css/fontawesome.min.css\" />\n")
-    outfile.write("    <link rel=\"stylesheet\" href=\"resources/font-awesome/css/solid.min.css\" />\n")
-    outfile.write("    <link rel=\"stylesheet\" href=\"resources/font-awesome/css/brands.min.css\" />\n")
-    outfile.write("    <link rel=\"stylesheet\" href=\"resources/font-awesome/css/duotone.min.css\" />\n")
-    outfile.write("    <link rel=\"stylesheet\" href=\"resources/font-awesome/css/regular.min.css\" />\n")
-    outfile.write("    <link rel=\"stylesheet\" href=\"resources/flag-icon-css/css/flag-icons.min.css\" />\n")
-    outfile.write("  </head>\n")
-    outfile.write("\n")
-    outfile.write("  <body>\n")
+    outfile.write('<!DOCTYPE HTML>\n')
+    outfile.write('<html lang="en">\n')
+    outfile.write('  <head>\n')
+    outfile.write('    <meta charset="utf-8" />\n')
+    outfile.write('    <title>Fiddler Crabs</title>\n')
+    outfile.write('    <link rel="preconnect" href="https://fonts.googleapis.com">\n')
+    outfile.write('    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n')
+    outfile.write('    <link href="https://fonts.googleapis.com/css2?family=Merienda:wght@300..900'
+                  '&family=Noto+Serif+Bengali:wght@100..900'
+                  '&family=Noto+Serif+Devanagari:wght@100..900'
+                  '&family=Noto+Serif+Gujarati:wght@100..900'
+                  '&family=Noto+Serif+Kannada:wght@100..900'
+                  '&family=Noto+Serif+Malayalam:wght@100..900'
+                  '&family=Noto+Serif+Oriya:wght@400..700'
+                  '&family=Noto+Serif+Tamil:ital,wght@0,100..900;1,100..900'
+                  '&family=Noto+Serif+Telugu:wght@100..900'
+                  '&family=Noto+Serif:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">\n')
+    outfile.write('    <link rel="stylesheet" href="resources/uca_style.css" />\n')
+    outfile.write('    <link rel="stylesheet" href="resources/print.css" />\n')
+    outfile.write('    <link rel="stylesheet" href="resources/font-awesome/css/fontawesome.min.css" />\n')
+    outfile.write('    <link rel="stylesheet" href="resources/font-awesome/css/solid.min.css" />\n')
+    outfile.write('    <link rel="stylesheet" href="resources/font-awesome/css/brands.min.css" />\n')
+    outfile.write('    <link rel="stylesheet" href="resources/font-awesome/css/regular.min.css" />\n')
+    outfile.write('    <link rel="stylesheet" href="resources/font-awesome/css/duotone.min.css" />\n')
+    outfile.write('    <link rel="stylesheet" href="resources/font-awesome/css/duotone-regular.min.css" />\n')
+    outfile.write('    <link rel="stylesheet" href="resources/font-awesome/css/light.min.css" />\n')
+    outfile.write('    <link rel="stylesheet" href="resources/font-awesome/css/custom-icons.min.css" />\n')
+    outfile.write('    <link rel="stylesheet" href="resources/flag-icon-css/css/flag-icons.min.css" />\n')
+    outfile.write('  </head>\n')
+    outfile.write('\n')
+    outfile.write('  <body>\n')
 
 
 def end_print(outfile: TextIO) -> None:
     """
-    end html file for print monographic output
+    end HTML file for print monographic output
     """
-    outfile.write("  </body>\n")
-    outfile.write("</html>\n")
+    outfile.write('  </body>\n')
+    outfile.write('</html>\n')
+
+# --- End of print specific code ---
+
 
 
 # def build_site(init_data):
@@ -6709,7 +7148,7 @@ def build_site() -> None:
         (all_names, binomial_name_cnts, specific_name_cnts, genus_cnts, total_binomial_year_cnts,
          name_table, specific_point_locations, binomial_point_locations, binomial_usage_cnts,
          specific_usage_cnts) = calculate_name_index_data(refdict, citelist, specific_names)
-        common_name_data = TMB_Import.read_common_name_data(init_data().common_names_file)
+        common_name_data = TMB_Import.read_general_text_data(init_data().common_names_file)
         common_name_data = replace_species_references(common_name_data)
 
         taxon_ranks = TMB_Import.read_taxon_rank_data(init_data().taxon_ranks_file)
@@ -6762,12 +7201,15 @@ def build_site() -> None:
         # location_keys = create_all_taxonomic_keys(point_locations, location_species, location_range_species,
         #                                           tk_trait_data, tk_taxa_data)
 
-        genera_tree, species_tree = create_html_phylogenies()
+        # genera_tree, species_tree = create_html_phylogenies()
 
         measurement_data = TMB_Import.read_measurement_data(init_data().measurement_file)
         measurement_data = TMB_Measurements.sort_measurement_data(measurement_data)
 
         handedness_data = TMB_Import.read_handedness_data(init_data().handedness_file)
+
+        about_data = TMB_Import.read_general_text_data(init_data().about_file)
+        about_data = replace_species_references(about_data)
 
         if INCLUDE_INAT and (not CHECK_DATA) and DRAW_MAPS:
             species_inat = TMB_Import.fetch_inat_data(species)
@@ -6785,10 +7227,6 @@ def build_site() -> None:
                 TMB_Create_Maps.create_all_maps(init_data(), point_locations)  # only draw location maps
             print("......Writing Locations......")
             with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
-                # write_location_index(outfile, False, point_locations, location_dict, location_species,
-                #                      location_sp_names, location_bi_names, location_direct_refs,
-                #                      location_cited_refs, references, location_range_species, location_keys,
-                #                      field_guide_data)
                 write_location_index(outfile, False, point_locations, location_dict, location_species,
                                      location_sp_names, location_bi_names, location_direct_refs,
                                      location_cited_refs, references, location_range_species, None,
@@ -6806,6 +7244,10 @@ def build_site() -> None:
                 print("......Map End Time:", map_end_time)
                 print("...Total Map Creation Time:", map_end_time - map_start_time)
 
+            if OUTPUT_GUIDES:
+                print("......Creating Field Guide Maps......")
+                TMB_Create_Maps.draw_field_guide_maps(init_data(), field_guide_map_data)
+
             # output website version
             if OUTPUT_WEB:
                 create_web_output_paths()
@@ -6821,81 +7263,103 @@ def build_site() -> None:
                         write_reference_summary(outfile, False, len(references), yeardat, yeardat1900, citecount,
                                                 languages, languages_by_year)
                     write_reference_pages(None, False, references, refdict, citelist, name_table, point_locations)
-                print("......Writing Names Info......")
-                with open(WEBOUT_PATH + "names/index.html", "w", encoding="utf-8") as outfile:
-                    write_all_name_pages(outfile, False, refdict, citelist, all_names, specific_names, name_table,
-                                         species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
-                                         binomial_point_locations, specific_point_locations, point_locations)
 
-                print("......Writing Species......")
-                write_species_info_pages(None, False, species, references, specific_names, all_names, photos, videos,
-                                         art, species_refs, refdict, binomial_name_cnts, specific_name_cnts,
-                                         higher_dict, measurement_data, handedness_data, field_guide_data)
+                if OUTPUT_NAMES:
+                    print("......Writing Names Info......")
+                    with open(WEBOUT_PATH + "names/index.html", "w", encoding="utf-8") as outfile:
+                        write_all_name_pages(outfile, False, refdict, citelist, all_names, specific_names, name_table,
+                                             species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
+                                             binomial_point_locations, specific_point_locations, point_locations)
+
+                if OUTPUT_SPECIES:
+                    print("......Writing Species......")
+                    write_species_info_pages(None, False, species, references, specific_names, all_names, photos,
+                                             videos, art, species_refs, refdict, binomial_name_cnts, specific_name_cnts,
+                                             higher_dict, measurement_data, handedness_data, field_guide_data)
+
                 if DRAW_MAPS:
                     print("......Copying Maps......")
                     copy_map_files(species, all_names, specific_names, point_locations)
+
                 if OUTPUT_LOCS:
                     print("......Writing Locations......")
                     with open(WEBOUT_PATH + "locations/index.html", "w", encoding="utf-8") as outfile:
-                        # write_location_index(outfile, False, point_locations, location_dict, location_species,
-                        #                      location_sp_names, location_bi_names, location_direct_refs,
-                        #                      location_cited_refs, references, location_range_species, location_keys,
-                        #                      field_guide_data)
                         write_location_index(outfile, False, point_locations, location_dict, location_species,
                                          location_sp_names, location_bi_names, location_direct_refs,
                                          location_cited_refs, references, location_range_species, None,
                                          field_guide_data)
                     with open(WEBOUT_PATH + init_data().map_url, "w", encoding="utf-8") as outfile:
                         write_geography_page(outfile, False, species)
-                print("......Writing Media Pages......")
-                with open(WEBOUT_PATH + init_data().photo_url, "w", encoding="utf-8") as outfile:
-                    write_photo_index(outfile, False, species, photos, refdict)
-                write_all_art_pages(None, False, art, refdict)
-                with open(WEBOUT_PATH + init_data().video_url, "w", encoding="utf-8") as outfile:
-                    write_video_index(outfile, False, videos)
 
-                print("......Writing Field Guides and Maps......")
-                field_guide_images = write_field_guides(field_guide_list, field_guide_data, field_guide_map_data)
-                TMB_Create_Maps.draw_field_guide_maps(init_data(), field_guide_map_data)
-                copy_field_guide_files(field_guide_list, field_guide_images)
+                if OUTPUT_MEDIA:
+                    print("......Writing Media Pages......")
+                    with open(WEBOUT_PATH + init_data().photo_url, "w", encoding="utf-8") as outfile:
+                        write_photo_index(outfile, False, species, photos, refdict)
+                    write_all_art_pages(None, False, art, refdict)
+                    with open(WEBOUT_PATH + init_data().video_url, "w", encoding="utf-8") as outfile:
+                        write_video_index(outfile, False, videos)
+
+                if OUTPUT_GUIDES:
+                    print("......Writing Field Guides......")
+                    with open(WEBOUT_PATH + "field_guides/index.html", "w", encoding="utf-8") as outfile:
+                        field_guide_images = write_field_guides(outfile, False, field_guide_list, field_guide_data,
+                                                                field_guide_map_data)
+                    copy_field_guide_files(field_guide_list, field_guide_images)
 
                 print("......Writing Misc......")
                 with open(WEBOUT_PATH + init_data().syst_url, "w", encoding="utf-8") as outfile:
                     write_systematics_overview(outfile, False, taxon_ranks, higher_taxa, species, refdict)
                 with open(WEBOUT_PATH + init_data().common_url, "w", encoding="utf-8") as outfile:
                     write_common_names_pages(outfile, False, replace_references(common_name_data, refdict, False))
+                with open(WEBOUT_PATH + init_data().group_url, "w", encoding="utf-8") as outfile:
+                    write_group_names_pages(outfile, refdict)
                 with open(WEBOUT_PATH + init_data().lifecycle_url, "w", encoding="utf-8") as outfile:
                     write_life_cycle_pages(outfile, False)
                 with open(WEBOUT_PATH + init_data().unusual_dev_url, "w", encoding="utf-8") as outfile:
                     write_unusual_development_pages(outfile, unusual_development_data, refdict, False)
+                genera_tree, species_tree = create_html_phylogenies()
                 with open(WEBOUT_PATH + init_data().tree_url, "w", encoding="utf-8") as outfile:
                     write_phylogeny_pages(outfile, genera_tree, species_tree, False, refdict)
                 with open(WEBOUT_PATH + init_data().morph_url, "w", encoding="utf-8") as outfile:
                     write_main_morphology_pages(outfile, False, morphology)
                 with open(WEBOUT_PATH + "index.html", "w", encoding="utf-8") as outfile:
                     write_introduction(outfile, False, species, higher_taxa)
+                with open(WEBOUT_PATH + init_data().about_url, "w", encoding="utf-8") as outfile:
+                    write_about_page(outfile, False, replace_references(about_data, refdict, False))
                 write_citation_page(refdict)
 
             # output print version
             if OUTPUT_PRINT:
+                print()
                 print("...Creating Print Version...")
                 with open("print.html", "w", encoding="utf-8") as printfile:
                     start_print(printfile)
-                    write_print_only_pages(printfile, species, refdict)
+                    write_print_only_pages(printfile, species, refdict, taxon_ranks, higher_taxa)
+                    write_about_page(printfile, True, replace_references(about_data, refdict, True))
                     write_introduction(printfile, True, species, higher_taxa)
                     write_common_names_pages(printfile, True, replace_references(common_name_data, refdict, True))
+                    write_group_names_pages(printfile, refdict, do_print=True)
                     write_systematics_overview(printfile, True, taxon_ranks, higher_taxa, species, refdict)
+                    genera_tree, species_tree = create_html_phylogenies(do_print=True)
                     write_phylogeny_pages(printfile, genera_tree, species_tree, True, refdict)
+                    if OUTPUT_SPECIES:
+                        print("......Writing Species Pages......")
+                        write_species_info_pages(printfile, True, species, references, specific_names, all_names,
+                                                 photos, videos, art, species_refs, refdict, binomial_name_cnts,
+                                                 specific_name_cnts, higher_dict, measurement_data, handedness_data,
+                                                 field_guide_data)
+                    if OUTPUT_GUIDES:
+                        print("......Writing Field Guides......")
+                        write_field_guides(printfile, True, field_guide_list, field_guide_data, field_guide_map_data)
+
+                    if OUTPUT_NAMES:
+                        print("......Writing Name Pages......")
+                        write_all_name_pages(printfile, True, refdict, citelist, all_names, specific_names, name_table,
+                                             species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
+                                             binomial_point_locations, specific_point_locations, point_locations)
                     write_life_cycle_pages(printfile, True)
+                    write_main_morphology_pages(printfile, True, morphology)
                     write_unusual_development_pages(printfile, unusual_development_data, refdict, True)
-                    print("......Writing Species Pages......")
-                    write_species_info_pages(printfile, True, species, references, specific_names, all_names, photos,
-                                             videos, art, species_refs, refdict, binomial_name_cnts, specific_name_cnts,
-                                             higher_dict, measurement_data, handedness_data, field_guide_data)
-                    print("......Writing Name Pages......")
-                    write_all_name_pages(printfile, True, refdict, citelist, all_names, specific_names, name_table,
-                                         species_refs, genus_cnts, binomial_name_cnts, total_binomial_year_cnts,
-                                         binomial_point_locations, specific_point_locations, point_locations)
                     if OUTPUT_LOCS:
                         print("......Writing Location Pages......")
                         write_geography_page(printfile, True, species)
@@ -6903,11 +7367,11 @@ def build_site() -> None:
                                              location_sp_names, location_bi_names, location_direct_refs,
                                              location_cited_refs, references, location_range_species, None,
                                              field_guide_data)
-                    print("......Writing Media Pages......")
-                    write_main_morphology_pages(printfile, True, morphology)
-                    write_photo_index(printfile, True, species, photos, refdict)
-                    write_video_index(printfile, True, videos)
-                    write_all_art_pages(printfile, True, art, refdict)
+                    if OUTPUT_MEDIA:
+                        print("......Writing Media Pages......")
+                        write_photo_index(printfile, True, species, photos, refdict)
+                        write_video_index(printfile, True, videos)
+                        write_all_art_pages(printfile, True, art, refdict)
                     if OUTPUT_REFS:
                         print("......Writing Reference Pages......")
                         write_reference_summary(printfile, True, len(references), yeardat, yeardat1900, citecount,
@@ -6925,7 +7389,7 @@ def build_site() -> None:
 def main():
     # will eventually need to put options here for choosing different paths, etc.
     TMB_Initialize.initialize()
-    random.seed()
+    # random.seed()
     # will need to read options from file
     build_site()
 

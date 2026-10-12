@@ -235,9 +235,11 @@ def read_higher_taxa_data(filename: str) -> Tuple[list, dict]:
                 report_error(f"Import Error: Taxon Parent Not Found: {g[2]}")
         new_taxon.author = g[3]
         new_taxon.type_species = g[4]
-        new_taxon.notes = g[5]
-        new_taxon.taxonid = g[6]
-        new_taxon.eolid = g[7]
+        if g[5] != ".":
+            new_taxon.alt_spellings = g[5].split(";")
+        new_taxon.notes = g[6]
+        new_taxon.taxonid = g[7]
+        new_taxon.eolid = g[8]
         taxon_list.append(new_taxon)
         tmpdict[new_taxon.taxon_rank + new_taxon.name] = new_taxon
     return taxon_list, tmpdict
@@ -315,9 +317,9 @@ def read_morphology_data(filename: str) -> list:
     return morph_list
 
 
-def read_common_name_data(filename: str) -> list:
+def read_general_text_data(filename: str) -> list:
     """
-    read common name text info
+    read general text data in a non-tabular format
     """
     with open(filename, "r", encoding="utf-8") as infile:
         return infile.readlines()

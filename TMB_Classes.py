@@ -24,7 +24,7 @@ class ReferenceClass:
             y = self.citation
             y = y[y.find("(") + 1:y.find(")")]
             if (y != "?") and (y.lower() != "in press"):
-                if y[0] == "~":
+                if y.startswith("~"):
                     y = y[1:]
                 if len(y) > 4:
                     y = y[:4]
@@ -67,6 +67,7 @@ class RankedTaxonClass:
         self.notes = ""
         self.taxonid = ""
         self.eolid = ""
+        self.alt_spellings = None
         self.parent = None
         self.taxon_rank = ""
         self.children = []
@@ -166,15 +167,16 @@ class SpeciesClass:
         if self.subgenus == "":
             return self.binomial()
         else:
-            return f"{self.genus} ({self.subgenus}) {self.species}"
+            return f'{self.genus} ({self.subgenus}) {self.species}'
 
     def authority(self) -> str:
         ogenus = self.type_species[:self.type_species.find(" ")].strip()
-        author = self.type_reference.author() + ", " + str(self.type_reference.year())
+        # author = self.type_reference.author() + ", " + str(self.type_reference.year())
+        author = f'{self.type_reference.author()}, {self.type_reference.year()}'
         if ogenus == self.genus:
             return author
         else:
-            return f"({author})"
+            return f'({author})'
 
 
 class CitationClass:

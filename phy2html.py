@@ -207,6 +207,7 @@ def add_node_depth(tree: tree_utils.Node, max_depth: int) -> None:
 def create_html_tree(inname: str, outname: str, col_width: str = "40px", row_height: str = "10px",
                      name_width: str = "200px", prefix: str = "", label_branches: bool = False,
                      rows_per_tip: int = 2, verbose: bool = True, inc_images: bool = False) -> list:
+
     with open(inname, "r") as infile:
         newick_str = infile.read()
     newick_str = newick_str[:newick_str.find(";")+1]

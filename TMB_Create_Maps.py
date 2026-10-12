@@ -1078,6 +1078,7 @@ def create_all_maps(init_data: TMB_Initialize.InitializationData, point_location
         if species_blocks is not None:
             for s in tqdm(species_blocks):
                 # test_draw_blocks(s, species_blocks[s], coastline_map)
+                # print(f".............{s}.............")
                 species_ranges[s] = get_range_map_overlap(species_blocks[s], coastline_map)
 
         print(".........Drawing Species Maps.........")

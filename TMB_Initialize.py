@@ -20,6 +20,7 @@ class InitializationData:
         self.species_data_file = "data/species_info.txt"
         self.specific_names_file = "data/specific_names.txt"
         self.common_names_file = "data/common_names.txt"
+        self.about_file = "data/about.txt"
         self.higher_taxa_file = "data/higher_taxa.txt"
         self.taxon_ranks_file = "data/taxon_ranks.txt"
         self.photo_file = "data/photos.txt"
@@ -67,6 +68,7 @@ class InitializationData:
         self.ref_sum_url = "uca_refsummary.html"
         self.syst_url = "uca_systematics.html"
         self.common_url = "uca_common_names.html"
+        self.group_url = "uca_group_names.html"
         self.photo_url = "uca_photos.html"
         self.video_url = "uca_videos.html"
         self.map_url = "uca_ranges.html"
@@ -81,6 +83,7 @@ class InitializationData:
         self.name_sum_url = "name_graphs.html"
         self.synonyms_genera = "synonymys_uca.html"
         self.handedness_url = r"handedness\index.html"
+        self.about_url = "about.html"
 
         # customization of fonts on graphs and charts
 
