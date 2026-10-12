@@ -99,7 +99,7 @@ def read_reference_data(ref_filename: str, formatref_filename: str,
                 print(line)
 
 
-    # html formatted full references
+    # HTML formatted full references
     with open(formatref_filename, "r", encoding="utf-8") as reffile:
         c = -1
         for line in reffile:

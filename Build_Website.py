@@ -248,7 +248,7 @@ def common_header_part2(outfile: TextIO, indexpath: str = "", include_map: bool 
 
 def start_google_chart_header(outfile: TextIO) -> None:
     """
-    start of common header entries for webout html files which contain Google chart elements
+    start of common header entries for webout HTML files which contain Google chart elements
     """
     outfile.write('    <script type="text/javascript" src="https://www.google.com/jsapi"></script>\n')
     outfile.write('    <script type="text/javascript">\n')
@@ -259,7 +259,7 @@ def start_google_chart_header(outfile: TextIO) -> None:
 
 def end_google_chart_header(outfile: TextIO) -> None:
     """
-    end of common header entries for webout html files which contain Google chart elements
+    end of common header entries for webout HTML files which contain Google chart elements
     """
     outfile.write('      }\n')
     outfile.write('    </script>\n')
@@ -1220,8 +1220,8 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
                     nstr = n.cite_n
                     if nstr == "0":
                         outfile.write(f'      <td>{fetch_fa_glyph("citation")}citation: '
-                                      f'<a href="{rel_link_prefix(do_print, "../references/")}{crossref.cite_key}.html">'
-                                      f'{crossref.citation}</a></td>\n')
+                                      f'<a href="{rel_link_prefix(do_print, "../references/")}'
+                                      f'{crossref.cite_key}.html">{crossref.citation}</a></td>\n')
                     else:
                         if "." in nstr:
                             try:
@@ -1243,60 +1243,59 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
                                       f'<a href="{rel_link_prefix(do_print, "../references/")}{crossref.cite_key}.html"'
                                       f'>{crossref.citation}</a> → {format_name_string(refname)}{extraref}</td>\n')
                 else:
-                    outfile.write("      <td>" + fetch_fa_glyph("citation") + "citation: "
-                                  "<a href=\"" + rel_link_prefix(do_print, "../references/") + crossref.cite_key +
-                                  ".html\">" + crossref.citation + "</a></td>\n")
+                    outfile.write(f'      <td>{fetch_fa_glyph("citation")}citation: '
+                                  f'<a href="{rel_link_prefix(do_print, "../references/")}{crossref.cite_key}.html">'
+                                  f'{crossref.citation}</a></td>\n')
             else:
-                outfile.write("      <td>" + fetch_fa_glyph("citation") + "citation: " + n.application + "</td>\n")
+                outfile.write(f'      <td>{fetch_fa_glyph("citation")}citation: {n.application}</td>\n')
                 if is_name and not do_print:  # only print on one pass
-                    report_error("Citation not in DB: " + n.cite_key + " cites " + n.application)
+                    report_error(f'Citation not in DB: {n.cite_key} cites {n.application}')
         elif n.context == "specimen":
             if n.application == "?":
-                outfile.write("      <td>" + fetch_fa_glyph("specimen") + "specimen: unknown locality</td>\n")
+                outfile.write(f'      <td>{fetch_fa_glyph("specimen")}specimen: unknown locality</td>\n')
             else:
                 outstr = create_location_sublink(n.application)
-                outfile.write("      <td>" + fetch_fa_glyph("specimen") + "specimen: " + outstr + "</td>\n")
+                outfile.write(f'      <td>{fetch_fa_glyph("specimen")}specimen: {outstr}</td>\n')
         elif n.context == "sequence":
             if n.application == "?":
-                outfile.write("      <td>" + fetch_fa_glyph("sequence") + "sequence: unknown locality</td>\n")
+                outfile.write(f'      <td>{fetch_fa_glyph("sequence")}sequence: unknown locality</td>\n')
             else:
                 outstr = create_location_sublink(n.application)
-                outfile.write("      <td>" + fetch_fa_glyph("sequence") + "sequence: " + outstr + "</td>\n")
+                outfile.write(f'      <td>{fetch_fa_glyph("sequence")}sequence: {outstr}</td>\n')
 
         elif n.context == "unpublished":
-            outfile.write("      <td>unpublished name <em class=\"species\">" +
-                          n.application + "</em></td>\n")
+            outfile.write(f'      <td>unpublished name <em class="species">{n.application}</em></td>\n')
         else:  # "n/a"
-            outfile.write("      <td>&nbsp;</td>\n")
+            outfile.write('      <td>&nbsp;</td>\n')
 
         # accepted species name
         if n.actual == "?":
-            outfile.write("      <td>?</td>\n")
+            outfile.write('      <td>?</td>\n')
         elif n.actual in {".", "="}:
-            outfile.write("      <td>TBD</td>\n")
+            outfile.write('      <td>TBD</td>\n')
         elif n.actual == "n/a":
-            outfile.write("      <td>&nbsp;</td>\n")                    
+            outfile.write('      <td>&nbsp;</td>\n')
         elif n.actual.startswith(">"):
-            outfile.write("      <td><em class=\"species\">" + n.actual[1:] + "</em></td>\n")
+            outfile.write(f'      <td><em class="species">{n.actual[1:]}</em></td>\n')
         elif n.actual.startswith("#"):
             t_rank, t_name = n.actual[1:].split("#")
-            outfile.write("      <td>" + create_taxon_link(t_rank, t_name, do_print, path="../") + "</td>\n")
+            outfile.write(f'      <td>{create_taxon_link(t_rank, t_name, do_print, path="../")}</td>\n')
         else:
             s = find_species_by_name(n.actual)
             if "<?>" in n.application:
                 glyphstr = " " + fetch_fa_glyph("questionable id")
             else:
                 glyphstr = ""
-            outfile.write("      <td><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + n.actual +
-                          ".html\"><em class=\"species\">" + s.binomial() + "</em></a>" + glyphstr + "</td>\n")
+            outfile.write(f'      <td><a href="{rel_link_prefix(do_print, "../")}u_{n.actual}.html">'
+                          f'<em class="species">{s.binomial()}</em></a>{glyphstr}</td>\n')
 
         # source of accepted species
         if n.source == ".":  # currently not listed
-            outfile.write("      <td>&nbsp;</td>\n")
+            outfile.write('      <td>&nbsp;</td>\n')
         elif n.source == "<":  # original name retained
-            outfile.write("      <td>" + fetch_fa_glyph("original") + "Original</td>\n")
+            outfile.write(f'      <td>{fetch_fa_glyph("original")}Original</td>\n')
         elif n.source == "=":  # automatically computer
-            outfile.write("      <td>" + fetch_fa_glyph("computed") + "Computed</td>\n")
+            outfile.write(f'      <td>{fetch_fa_glyph("computed")}Computed</td>\n')
         else:
             if ";" in n.source:
                 source_list = n.source.split(";")
@@ -1306,8 +1305,8 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
             for source in source_list:
                 if source in refdict:  # another reference
                     crossref = refdict[source]
-                    source_strs.append("<a href=\"" + rel_link_prefix(do_print, "../references/") +
-                                       crossref.cite_key + ".html\">" + crossref.citation + "</a>")
+                    source_strs.append(f'<a href="{rel_link_prefix(do_print, "../references/")}{crossref.cite_key}'
+                                       f'.html">{crossref.citation}</a>')
                 else:  # should start with a >
                     tmpsource = source[1:]
                     tmpsource = tmpsource.replace("MSR:", "")
@@ -1315,14 +1314,14 @@ def output_name_table(outfile: TextIO, do_print: bool, is_name: bool, itemlist: 
                     tmpsource = tmpsource.replace("geography", fetch_fa_glyph("geography") + "Geography")
                     tmpsource = tmpsource.replace("synonymy", fetch_fa_glyph("synonymy") + "Synonymy")
                     source_strs.append(tmpsource)
-            outfile.write("      <td>" + ", ".join(source_strs) + "</td>\n")
+            outfile.write(f'      <td>{", ".join(source_strs)}</td>\n')
 
         # notes
         if notecnt > 0:
             if n.name_note == ".":
                 outfile.write('      <td>&nbsp;</td>\n')
             else:
-                outfile.write("      <td>" + replace_species_in_string(n.name_note) + "</td>\n")
+                outfile.write(f'      <td>{replace_species_in_string(n.name_note)}</td>\n')
         outfile.write('    </tr>\n')
     outfile.write('    </table>\n')
 
@@ -1341,19 +1340,18 @@ def check_citation_cross_references(citelist: list, refdict: dict, name_table: d
                                 _ = name_table[c.application][nstr][1]
                                 _ = name_table[c.application][nstr][0]
                             except LookupError:
-                                report_error("Error in citation: " + c.cite_key + " cites" + nstr +
-                                             " in " + c.application)
+                                report_error(f'Error in citation: {c.cite_key} cites {nstr} in {c.application}')
                         else:
                             try:
                                 _ = name_table[c.application][int(nstr)]
                             except ValueError:
-                                report_error("Citation " + c.cite_key + " tried to cite " + c.application +
-                                             " #" + nstr + " (Value error)")
+                                report_error(f'Citation {c.cite_key} tried to cite {c.application} #{nstr} '
+                                             '(Value error)')
                             except KeyError:
-                                report_error("Citation " + c.cite_key + " tried to cite " + c.application +
-                                             " #" + nstr + " (Key error)")
+                                report_error(f'Citation {c.cite_key} tried to cite {c.application} #{nstr}'
+                                             ' (Key error)')
             else:
-                report_error("Citation not in DB: " + c.cite_key + " cites " + c.application)
+                report_error(f'Citation not in DB: {c.cite_key} cites {c.application}')
 
 
 def write_reference_page(outfile: TextIO, do_print: bool, ref: TMB_Classes.ReferenceClass, citelist: list,
