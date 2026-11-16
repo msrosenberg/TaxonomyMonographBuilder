@@ -46,23 +46,23 @@ AUTHOR_TAXON = 2        # Smith, 1970  <-- this one is needed for taxonomic name
 # this flag is to hide/display new materials still in progress from the general release
 SHOW_NEW = True
 # this flag can be used to suppress redrawing all of the maps, which is fairly time-consuming
-DRAW_MAPS = False
+DRAW_MAPS = True
 # this flag suppresses creation of output files, allowing some data integrity checking without the output time cost
 CHECK_DATA = False
 # this flag creates the location web pages only; it is for checking changes and not general use
 CHECK_LOCATIONS = False
 # this flag controls whether additional location data should be fetched from iNaturalist
-INCLUDE_INAT = False
+INCLUDE_INAT = True
 # Suppress some of the more time-consuming output; only meant for when testing others elements
-OUTPUT_REFS = False
-OUTPUT_LOCS = False
+OUTPUT_REFS = True
+OUTPUT_LOCS = True
 OUTPUT_GUIDES = True
-OUTPUT_SPECIES = False
-OUTPUT_NAMES = False
-OUTPUT_MEDIA = False
+OUTPUT_SPECIES = True
+OUTPUT_NAMES = True
+OUTPUT_MEDIA = True
 # these flags control creating print and web output, respectively
 OUTPUT_PRINT = True
-OUTPUT_WEB = False
+OUTPUT_WEB = True
 
 # randSeed = random.randint(0, 10000)
 
@@ -3830,27 +3830,30 @@ def write_species_list(outfile: TextIO, do_print: bool, specieslist: list) -> No
     else:
         common_html_header(outfile, "Fiddler Crab Species")
         link_str = "names/"
-    outfile.write("    <header id=\"" + init_data().species_url + "\">\n")
-    outfile.write("      <h1 class=\"bookmark1\">Species</h1>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
-    outfile.write("    <p>")
+    outfile.write(f'    <header id="{init_data().species_url}">\n')
+    outfile.write('      <h1 class="bookmark1">Species</h1>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
+    outfile.write('    <p>')
     nf = 0
     for s in specieslist:
         if s.status == "fossil":
             nf += 1
-    tstr = ("      The following lists all {} of the currently recognized species of fiddler crab, as well as "
-            "{} fossil species (marked with" + FOSSIL_IMAGE + ").\n")
-    outfile.write(tstr.format(len(specieslist) - nf, nf))
-    outfile.write("      See the <a href=\"" + link_str + "\">complete name index</a> for alternate species names "
-                  "and spellings.\n")
-    outfile.write("    </p>")
-    outfile.write("\n")
-    outfile.write("    <ul class=\"splist\">\n")
+
+    outfile.write(f'      The following lists all {len(specieslist) - nf} of the currently recognized species of '
+                  f'fiddler crab, as well as {nf} fossil species (marked with {FOSSIL_IMAGE}).\n')
+    # tstr = ("      The following lists all {} of the currently recognized species of fiddler crab, as well as "
+    #         "{} fossil species (marked with" + FOSSIL_IMAGE + ").\n")
+    # outfile.write(tstr.format(len(specieslist) - nf, nf))
+    outfile.write(f'      See the <a href="{link_str}">complete name index</a> for alternate species names '
+                  'and spellings.\n')
+    outfile.write('    </p>')
+    outfile.write('\n')
+    outfile.write('    <ul class="splist">\n')
     for species in specieslist:
-        outfile.write("      <li>" + create_species_link(species.genus, species.species, do_print,
-                                                         status=species.status) + "</li>\n")
-    outfile.write("    </ul>\n")
+        outfile.write(f'      <li>{create_species_link(species.genus, species.species, do_print, 
+                                                       status=species.status)}</li>\n')
+    outfile.write('    </ul>\n')
     if do_print:
         end_page_division(outfile)
     else:
@@ -3870,7 +3873,6 @@ def write_species_photo_page(outfile: TextIO, do_print: bool, fname: str, specie
             tmps = find_species_by_name(t)
             slist.append(tmps.binomial())
         ptitle = " & ".join(slist)
-        # ptitle = "Uca " + pspecies.replace(";", " & Uca ")
         is_multi = True
     else:
         spname = species_name
@@ -3883,36 +3885,35 @@ def write_species_photo_page(outfile: TextIO, do_print: bool, fname: str, specie
     else:
         common_html_header(outfile, ptitle + " Photo", indexpath="../")
         media_path = ""
-    outfile.write("    <header id=\"" + fname + "\">\n")
-    outfile.write("      <h1 class=\"nobookmark\"><em class=\"species\">" + ptitle + "</em> Photo</h1>\n")
+    outfile.write(f'    <header id="{fname}">\n')
+    outfile.write(f'      <h1 class="nobookmark"><em class="species">{ptitle}</em> Photo</h1>\n')
     if not is_multi:
         if common_name != "#":
-            outfile.write("      <h2 class=\"nobookmark\">" + common_name + "</h2>\n")
-    outfile.write("      <nav>\n")
-    outfile.write("        <ul>\n")
+            outfile.write(f'      <h2 class="nobookmark">{common_name}</h2>\n')
+    outfile.write('      <nav>\n')
+    outfile.write('        <ul>\n')
     if is_multi:
         splist = pspecies.split(";")
         for s in splist:
             sp = find_species_by_name(s)
-            outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + s +
-                          ".html\">" + fetch_fa_glyph("info") + "<em class=\"species\">" + sp.binomial() +
-                          "</em> page</a></li>\n")
+            outfile.write(f'          <li><a href="{rel_link_prefix(do_print, "../")}u_{s}.html">'
+                          f'{fetch_fa_glyph("info")}<em class="species">{sp.binomial()}</em> page</a></li>\n')
     else:
-        outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + species_name +
-                      ".html\">" + fetch_fa_glyph("info") + "Species page</a></li>\n")
+        outfile.write(f'          <li><a href="{rel_link_prefix(do_print, "../")}u_{species_name}.html">'
+                      f'{fetch_fa_glyph("info")}Species page</a></li>\n')
     if not do_print:
-        outfile.write("          <li><a href=\"../" + init_data().photo_url + "\">" + fetch_fa_glyph("photo") +
-                      "All species photos</a></li>\n")
-    outfile.write("        </ul>\n")
-    outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
-    outfile.write("    <figure class=\"fullpic\">\n")
-    outfile.write("      <img src=\"" + media_path + "U_" + spname + format(pn, "0>2") + ".jpg\" alt=\"" +
-                  ptitle + " photo\" title=\"" + ptitle + " photo\" />\n")
+        outfile.write(f'          <li><a href="../{init_data().photo_url}">{fetch_fa_glyph("photo")}'
+                      'All species photos</a></li>\n')
+    outfile.write('        </ul>\n')
+    outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
+    outfile.write('    <figure class="fullpic">\n')
+    outfile.write(f'      <img src="{media_path}U_{spname}{pn:0>2}.jpg" alt="{ptitle} photo" '
+                  f'title="{ptitle} photo" />\n')
     caption = replace_reference_in_string(caption, refdict, do_print, path="../")
-    outfile.write("      <figcaption>" + replace_species_in_string(caption) + "</figcaption>\n")
-    outfile.write("    </figure>\n")
+    outfile.write(f'      <figcaption>{replace_species_in_string(caption)}</figcaption>\n')
+    outfile.write('    </figure>\n')
     if do_print:
         end_page_division(outfile)
     else:
@@ -3932,7 +3933,6 @@ def write_species_video_page(fname: str, video: TMB_Classes.VideoClass, vn: int)
                 tmps = find_species_by_name(t)
                 slist.append(tmps.binomial())
             vtitle = " & ".join(slist)
-            # vtitle = "Uca " + video.species.replace(";", " & Uca ")
             is_multi = True
         else:
             spname = video.species
@@ -3940,47 +3940,45 @@ def write_species_video_page(fname: str, video: TMB_Classes.VideoClass, vn: int)
             vtitle = species.binomial()
             is_multi = False
         common_html_header(outfile, vtitle + " Video", indexpath="../")
-        outfile.write("    <header>\n")
-        outfile.write("      <h1 class=\"nobookmark\"><em class=\"species\">" + vtitle + "</em> Video</h1>\n")
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
+        outfile.write('    <header>\n')
+        outfile.write(f'      <h1 class="nobookmark"><em class="species">{vtitle}</em> Video</h1>\n')
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
         if is_multi:
             splist = video.species.split(";")
             for s in splist:
                 sp = find_species_by_name(s)
-                outfile.write("          <li><a href=\"../u_" + s +
-                              ".html\">" + fetch_fa_glyph("info") + "<em class=\"species\">" + sp.binomial() +
-                              "</em> page</a></li>\n")
+                outfile.write(f'          <li><a href="../u_{s}.html">{fetch_fa_glyph("info")}'
+                              f'<em class="species">{sp.binomial()}</em> page</a></li>\n')
         else:
-            outfile.write("          <li><a href=\"../u_" + video.species +
-                          ".html\">" + fetch_fa_glyph("info") + "Species page</a></li>\n")
-        outfile.write("          <li><a href=\"../" + init_data().video_url + "\">" + fetch_fa_glyph("video") +
-                      "All species videos</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-        outfile.write("    </header>\n")
-        outfile.write("\n")
-        outfile.write("    <h2>" + replace_species_in_string(video.caption) + "</h2>\n")
-        outfile.write("    <video width=\"{:d}\" height=\"{:d}\" controls>\n".format(video.width, video.height))
-        outfile.write("      <source src=\"U_" + spname + format(vn, "0>2") + "." + video.format.lower() +
-                      "\" type=\"video/mp4\">\n")
-        outfile.write("      Your browser does not support the video tag.\n")
-        outfile.write("    </video>\n")
-        outfile.write("    <p class=\"vidcaption\">\n")
-        outfile.write("      " + video.date_location + "<br />\n")
-        outfile.write("      " + video.author + "<br />\n")
-        outfile.write("    </p>\n")
-        outfile.write("    <dl class=\"viddetails\">\n")
-        outfile.write("      <dt>Length</dt>\n")
-        outfile.write("        <dd>" + video.length + "</dd>\n")
-        outfile.write("      <dt>Size</dt>\n")
-        outfile.write("        <dd>{:d} &times; {:d}</dd>\n".format(video.width, video.height))
-        outfile.write("      <dt>Format</dt>\n")
-        outfile.write("        <dd>" + video.format + "</dd>\n")
+            outfile.write(f'          <li><a href="../u_{video.species}.html">{fetch_fa_glyph("info")}'
+                          'Species page</a></li>\n')
+        outfile.write(f'          <li><a href="../{init_data().video_url}">{fetch_fa_glyph("video")}'
+                      'All species videos</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+        outfile.write('    </header>\n')
+        outfile.write('\n')
+        outfile.write(f'    <h2>{replace_species_in_string(video.caption)}</h2>\n')
+        outfile.write(f'    <video width="{video.width}" height="{video.height}" controls>\n')
+        outfile.write(f'      <source src="U_{spname}{vn:0>2}.{video.format.lower()}" type="video/mp4">\n')
+        outfile.write('      Your browser does not support the video tag.\n')
+        outfile.write('    </video>\n')
+        outfile.write('    <p class="vidcaption">\n')
+        outfile.write(f'      {video.date_location}<br />\n')
+        outfile.write(f'      {video.author}<br />\n')
+        outfile.write('    </p>\n')
+        outfile.write('    <dl class="viddetails">\n')
+        outfile.write('      <dt>Length</dt>\n')
+        outfile.write(f'        <dd>{video.length}</dd>\n')
+        outfile.write('      <dt>Size</dt>\n')
+        outfile.write(f'        <dd>{video.width} &times; {video.height}</dd>\n')
+        outfile.write('      <dt>Format</dt>\n')
+        outfile.write(f'        <dd>{video.format}</dd>\n')
         if video.notes != "#":
-            outfile.write("      <dt>Notes</dt>\n")
-            outfile.write("        <dd>" + video.notes + "</dd>\n")
-        outfile.write("    </dl>\n")
+            outfile.write('      <dt>Notes</dt>\n')
+            outfile.write(f'        <dd>{video.notes}</dd>\n')
+        outfile.write('    </dl>\n')
         common_html_footer(outfile, indexpath="../")
 
 
@@ -4009,20 +4007,19 @@ def write_annotated_reference_list(outfile: TextIO, do_print: bool, references: 
 
 
 def write_reference_list(outfile: TextIO, do_print: bool, references: list, citations: dict) -> None:
-    outfile.write("    <section class=\"spsection\">\n")
+    outfile.write('    <section class="spsection">\n')
     if do_print:
-        outfile.write("      <h2 class=\"nobookmark\">" + fetch_fa_glyph("references") + "References</h2>\n")
+        outfile.write(f'      <h2 class="nobookmark">{fetch_fa_glyph("references")}References</h2>\n')
     else:
-        outfile.write("      <h2 id=\"references\" class=\"nobookmark\">" + fetch_fa_glyph("references") +
-                      "References</h2>\n")
-    outfile.write("      <p>\n")
+        outfile.write(f'      <h2 id="references" class="nobookmark">{fetch_fa_glyph("references")}References</h2>\n')
+    outfile.write('      <p>\n')
     reflist = []
     for ref in references:
         if ref.cite_key in citations:
             reflist.append(format_reference_cite(ref, do_print, AUTHOR_PAREN))
-    outfile.write(", \n".join(reflist))
-    outfile.write("      </p>\n")
-    outfile.write("    </section>\n")
+    outfile.write(', \n'.join(reflist))
+    outfile.write('      </p>\n')
+    outfile.write('    </section>\n')
 
 
 def size_label(w: float) -> str:
@@ -4763,24 +4760,24 @@ def write_photo_index(outfile: TextIO, do_print: bool, specieslist: list, photos
     else:
         common_html_header(outfile, "Fiddler Crab Photos")
         media_path = ""
-    outfile.write("    <header id=\"" + init_data().photo_url + "\">\n")
-    outfile.write("      <h1 class=\"bookmark1\">Photo Index</h1>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
-    outfile.write("    <p>\n")
-    outfile.write("      Note: many photos of supposed fiddler crabs on the web are actually from other genera "
-                  "(ghost crabs are a common error). Lay-people often assume any crab with asymmetric claws is a "
-                  "fiddler crab.\n")
-    outfile.write("    </p>\n")
-    outfile.write("    <p>\n")
-    outfile.write("      Total photo count is " + str(len(photos)) + ".\n")
-    outfile.write("    </p>\n")
+    outfile.write(f'    <header id="{init_data().photo_url}">\n')
+    outfile.write('      <h1 class="bookmark1">Photo Index</h1>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
+    outfile.write('    <p>\n')
+    outfile.write('      Note: many photos of supposed fiddler crabs on the web are actually from other genera '
+                  '(ghost crabs are a common error). Lay-people often assume any crab with asymmetric claws is a '
+                  'fiddler crab.\n')
+    outfile.write('    </p>\n')
+    outfile.write('    <p>\n')
+    outfile.write(f'      Total photo count is {len(photos)}.\n')
+    outfile.write('    </p>\n')
     for sp in specieslist:
         species = sp.species
         status = sp.status
-        outfile.write("    <section class=\"photosection\">\n")
-        outfile.write("      <h2 class=\"nobookmark\">" +
-                      create_species_link(sp.genus, species, do_print, status=status) + "</h2>\n")
+        outfile.write('    <section class="photosection">\n')
+        outfile.write('      <h2 class="nobookmark">' +
+                      create_species_link(sp.genus, species, do_print, status=status) + '</h2>\n')
         photo_n = 0
         for photo in photos:
             splist = photo.species.split(";")
@@ -4790,19 +4787,19 @@ def write_photo_index(outfile: TextIO, do_print: bool, specieslist: list, photos
                     spname = photo.species.replace(";", "_")
                 else:
                     spname = photo.species
-                pfname = "photo_u_" + spname + format(pn, "0>2") + ".html"
-                outfile.write("      <figure class=\"sppic\">\n")
-                outfile.write("        <a href=\"" + rel_link_prefix(do_print, "photos/") + pfname +
-                              "\"><img class=\"thumbnail\" src=\"" + media_path + "photos/U_" + spname +
-                              format(pn, "0>2") + "tn.jpg\" alt=\"" + spname + " thumbnail\" title=\"" +
-                              spname + "\" /></a>\n")
-                outfile.write("      </figure>\n")
+                # pfname = "photo_u_" + spname + format(pn, "0>2") + ".html"
+                pfname = f"photo_u_{spname}{pn:0>2}.html"
+                outfile.write('      <figure class="sppic">\n')
+                outfile.write(f'        <a href="{rel_link_prefix(do_print, "photos/")}{pfname}">'
+                              f'<img class="thumbnail" src="{media_path}photos/U_{spname}{pn:0>2}tn.jpg" '
+                              f'alt="{spname} thumbnail" title="{spname}" /></a>\n')
+                outfile.write('      </figure>\n')
                 photo_n += 1
         if photo_n == 0:
-            outfile.write("      <p>\n")
-            outfile.write("        <em>No pictures available at this time.</em>\n")
-            outfile.write("      </p>\n")
-        outfile.write("    </section>\n")
+            outfile.write('      <p>\n')
+            outfile.write('        <em>No pictures available at this time.</em>\n')
+            outfile.write('      </p>\n')
+        outfile.write('    </section>\n')
     if do_print:
         end_page_division(outfile)
     else:
@@ -4851,40 +4848,40 @@ def write_video_index(outfile: TextIO, do_print: bool, videos: list) -> None:
         start_page_division(outfile, "index_page")
     else:
         common_html_header(outfile, "Fiddler Crab Videos")
-    outfile.write("    <header id=\"" + init_data().video_url + "\">\n")
-    outfile.write("      <h1 class=\"bookmark1\">Video Index</h1>\n")
+    outfile.write(f'    <header id="{init_data().video_url}">\n')
+    outfile.write('      <h1 class="bookmark1">Video Index</h1>\n')
     if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
         for i, x in enumerate(secshort):
-            outfile.write("          <li><a href=\"#" + secanchor[i] + "\">" + x + "</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
+            outfile.write(f'          <li><a href="#{secanchor[i]}">{x}</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
     if do_print:
-        outfile.write("    <p>\n")
-        outfile.write("      Videos are available on the web at <a href=\"" + init_data().site_url() +
-                      "/" + init_data().video_url + "\">" + init_data().site_url() +
-                      "/" + init_data().video_url + "</a> or by following the embedded links.")
-        outfile.write("    </p>\n")
-    outfile.write("    <p>\n")
+        outfile.write('    <p>\n')
+        outfile.write('      Videos are available on the web at '
+                      f'<a href="{init_data().site_url()}/{init_data().video_url}">'
+                      f'{init_data().site_url()}/{init_data().video_url}</a> or by following the embedded links.')
+        outfile.write('    </p>\n')
+    outfile.write('    <p>\n')
     if do_print:
         linktxt = "individual species' page"
     else:
-        linktxt = "<a href=\"" + rel_link_prefix(do_print) + init_data().species_url + "\">individual species' page</a>"
-    outfile.write("      Most of these videos predate digital video (let alone HD) and were recorded on Hi8 tape. "
-                  "Hopefully they will eventually be replaced by higher quality video. These are grouped by "
-                  "activity. Videos for specific species can be found on the " + linktxt + ".\n")
-    outfile.write("    </p>\n")
-    outfile.write("    <p>\n")
-    outfile.write("      Total video count is " + str(len(videos)) + "\n")
-    outfile.write("    </p>\n")
+        linktxt = f'<a href="{rel_link_prefix(do_print)}{init_data().species_url}">individual species\' page</a>'
+    outfile.write('      Most of these videos predate digital video (let alone HD) and were recorded on Hi8 tape. '
+                  'Hopefully they will eventually be replaced by higher quality video. These are grouped by '
+                  f'activity. Videos for specific species can be found on the {linktxt}.\n')
+    outfile.write('    </p>\n')
+    outfile.write('    <p>\n')
+    outfile.write(f'      Total video count is {len(videos)}\n')
+    outfile.write('    </p>\n')
     for i, x in enumerate(sectitle):
-        outfile.write("\n")
-        outfile.write("    <section class=\"spsection\">\n")
-        outfile.write("      <h2 id=\"" + secanchor[i] + "\" class=\"nobookmark\">" + x + "</h2>\n")
-        outfile.write("      <dl class=\"vidlist\">\n")
+        outfile.write('\n')
+        outfile.write('    <section class="spsection">\n')
+        outfile.write(f'      <h2 id="{secanchor[i]}" class="nobookmark">{x}</h2>\n')
+        outfile.write('      <dl class="vidlist">\n')
         for video in videos:
             if "video_" + video.activity == secanchor[i]:
                 vn = int(video.n)
@@ -4892,13 +4889,16 @@ def write_video_index(outfile: TextIO, do_print: bool, videos: list) -> None:
                     spname = video.species.replace(";", "_")
                 else:
                     spname = video.species
-                vfname = "video/video_u_" + spname + format(vn, "0>2") + ".html"
-                outfile.write("            <dt><a class=\"vidlink\" href=\"" + abs_link_prefix(do_print) + vfname +
-                              "\">" + replace_species_in_string(video.caption) + "</a></dt>\n")
-                outfile.write("              <dd>{}, {:d} &times; {:d}, {}</dd>\n".format(video.length, video.width,
-                                                                                          video.height, video.format))
-        outfile.write("      </dl>\n")
-        outfile.write("    </section>\n")
+                # vfname = "video/video_u_" + spname + format(vn, "0>2") + ".html"
+                vfname = f'video/video_u_{spname}{vn:0>2}.html'
+                outfile.write(f'            <dt><a class="vidlink" href="{abs_link_prefix(do_print)}{vfname}">'
+                              f'{replace_species_in_string(video.caption)}</a></dt>\n')
+                # outfile.write("              <dd>{}, {:d} &times; {:d}, {}</dd>\n".format(video.length, video.width,
+                #                                                                           video.height, video.format))
+                outfile.write(f'              <dd>{video.length}, {video.width:d} &times; {video.height:d}, '
+                              f'{video.format}</dd>\n')
+        outfile.write('      </dl>\n')
+        outfile.write('    </section>\n')
     # write individual video pages
     if do_print:
         end_page_division(outfile)
@@ -4930,7 +4930,8 @@ def write_specific_art_page(outfile: TextIO, do_print: bool, art: TMB_Classes.Ar
         ref = refdict[art.cite_key]
         author = ref.citation
     else:
-        author = art.author + " (" + art.year + ")"
+        # author = art.author + " (" + art.year + ")"
+        author = f"{art.author} ({art.year})"
     ptitle = art.title + ": " + author
 
     if do_print:
@@ -4939,31 +4940,29 @@ def write_specific_art_page(outfile: TextIO, do_print: bool, art: TMB_Classes.Ar
     else:
         common_html_header(outfile, ptitle, indexpath="../")
         media_path = ""
-    outfile.write("    <header id=\"" + art.image + ".html\">\n")
-    outfile.write("      <h1 class=\"nobookmark\"><em class=\"species\">" + art.title + "</em></h1>\n")
-    outfile.write("      <h2 class=\"nobookmark\">" + author + "</h2>\n")
+    outfile.write(f'    <header id="{art.image}.html">\n')
+    outfile.write(f'      <h1 class="nobookmark"><em class="species">{art.title}</em></h1>\n')
+    outfile.write(f'      <h2 class="nobookmark">{author}</h2>\n')
     if (art.species != "n/a") or (art.cite_key != "n/a") or (not do_print):
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
         if art.species != "n/a":
-            outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + "u_" + art.species +
-                          ".html\">Species page</a></li>\n")
+            outfile.write(f'          <li><a href="{rel_link_prefix(do_print, "../")}u_{art.species}.html">'
+                          f'Species page</a></li>\n')
         if art.cite_key != "n/a":
-            outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../references/") + art.cite_key +
-                          ".html\">Reference</a></li>\n")
+            outfile.write(f'          <li><a href="{rel_link_prefix(do_print, "../references/")}{art.cite_key}.html">'
+                          f'Reference</a></li>\n')
         if not do_print:
-            outfile.write("          <li><a href=\"" + rel_link_prefix(do_print, "../") + backurl + "\">" + backtext +
-                          "</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
-    outfile.write("    <figure class=\"fullpic\">\n")
-    outfile.write("      <img src=\"" + media_path + art.image + "." + art.ext + "\" alt=\"" + ptitle +
-                  " image\" title=\"" + ptitle + "\" />\n")
+            outfile.write(f'          <li><a href="{rel_link_prefix(do_print, "../")}{backurl}">{backtext}</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
+    outfile.write('    <figure class="fullpic">\n')
+    outfile.write(f'      <img src="{media_path}{art.image}.{art.ext}" alt="{ptitle} image" title="{ptitle}" />\n')
     outstr = replace_reference_in_string(art.notes, refdict, do_print, path="../")
-    outfile.write("      <figcaption>" + replace_species_in_string(outstr) + "</figcaption>\n")
-    outfile.write("    </figure>\n")
+    outfile.write(f'      <figcaption>{replace_species_in_string(outstr)}</figcaption>\n')
+    outfile.write('    </figure>\n')
     if do_print:
         end_page_division(outfile)
     else:
@@ -4980,10 +4979,10 @@ def write_art_science_pages(outfile: TextIO, do_print: bool, artlist: list, refd
     else:
         common_html_header(outfile, "Fiddler Crab Art - Scientific")
         media_path = ""
-    outfile.write("    <header id=\"" + init_data().art_sci_url + "\">\n")
-    outfile.write("      <h1 class=\"bookmark1\">Scientific Drawings</h1>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
+    outfile.write(f'    <header id="{init_data().art_sci_url}">\n')
+    outfile.write('      <h1 class="bookmark1">Scientific Drawings</h1>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
     artsource = []
     cnt = 0
     for art in artlist:
@@ -4998,29 +4997,29 @@ def write_art_science_pages(outfile: TextIO, do_print: bool, artlist: list, refd
                 artsource.index(artist)
             except ValueError:
                 artsource.append(artist)
-    outfile.write("      <p>\n")
-    outfile.write("        Formal scientific drawings are often works of art as well as scientific illustration. "
-                  "These are ordered chronologically.\n")
-    outfile.write("      </p>\n")
-    outfile.write("      <p>\n")
-    outfile.write("        Total scientific drawing count is " + str(cnt) + ".\n")
-    outfile.write("      </p>\n")
+    outfile.write('      <p>\n')
+    outfile.write('        Formal scientific drawings are often works of art as well as scientific illustration. '
+                  'These are ordered chronologically.\n')
+    outfile.write('      </p>\n')
+    outfile.write('      <p>\n')
+    outfile.write(f'        Total scientific drawing count is {cnt}.\n')
+    outfile.write('      </p>\n')
     for a in artsource:
-        outfile.write("      <h3 class=\"nobookmark\">" + a + "</h3>\n")
+        outfile.write(f'      <h3 class="nobookmark">{a}</h3>\n')
         for art in artlist:
             if art.art_type == "science":
                 if art.cite_key != "n/a":
                     ref = refdict[art.cite_key]
                     artist = ref.citation
                 else:
-                    artist = art.author + " (" + art.year + ")"
+                    # artist = art.author + " (" + art.year + ")"
+                    artist = f"{art.author} ({art.year})"
                 if artist == a:
-                    outfile.write("      <figure class=\"sppic\">\n")
-                    outfile.write("        <a href=\"" + rel_link_prefix(do_print, "art/") + art.image +
-                                  ".html\"><img class=\"thumbnail\" src=\"" + media_path + "art/" +
-                                  art.image + "_tn." + art.ext + "\" alt=\"" + art.title + " thumbnail\" title=\"" +
-                                  art.title + "\" /></a>\n")
-                    outfile.write("      </figure>\n")
+                    outfile.write('      <figure class="sppic">\n')
+                    outfile.write(f'        <a href="{rel_link_prefix(do_print, "art/")}{art.image}.html">'
+                                  f'<img class="thumbnail" src="{media_path}art/{art.image}_tn.{art.ext}" '
+                                  f'alt="{art.title} thumbnail" title="{art.title}" /></a>\n')
+                    outfile.write('      </figure>\n')
     if do_print:
         end_page_division(outfile)
     else:
@@ -5053,10 +5052,10 @@ def write_art_stamps_pages(outfile: TextIO, do_print: bool, artlist: list, refdi
     else:
         common_html_header(outfile, "Fiddler Crab Stamps")
         media_path = ""
-    outfile.write("    <header id=\"" + init_data().art_stamp_url + "\">\n")
-    outfile.write("      <h1 class=\"bookmark1\">Postage Stamps</h1>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
+    outfile.write(f'    <header id="{init_data().art_stamp_url}">\n')
+    outfile.write('      <h1 class="bookmark1">Postage Stamps</h1>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
     artsource = []
     cnt = 0
     for art in artlist:
@@ -5066,26 +5065,25 @@ def write_art_stamps_pages(outfile: TextIO, do_print: bool, artlist: list, refdi
                 artsource.index(art.author)
             except ValueError:
                 artsource.append(art.author)
-    outfile.write("      <p>\n")
-    outfile.write("        Fiddler crabs have been featured on postage stamps surprisingly often. Quality "
-                  "control leaves something to be desired, however, as misidentifications are common "
-                  "(<em>e.g.</em>, see The Gambia and the Solomon Islands). Omori &amp; Holthuis (2000, 2005) "
-                  "have actually written papers about crustacea on postage stamps.\n")
-    outfile.write("      </p>\n")
-    outfile.write("      <p>\n")
-    outfile.write("        Total fiddler crab stamps is " + str(cnt) + ".\n")
-    outfile.write("      </p>\n")
+    outfile.write('      <p>\n')
+    outfile.write('        Fiddler crabs have been featured on postage stamps surprisingly often. Quality '
+                  'control leaves something to be desired, however, as misidentifications are common '
+                  '(<em>e.g.</em>, see The Gambia and the Solomon Islands). Omori &amp; Holthuis (2000, 2005) '
+                  'have actually written papers about crustacea on postage stamps.\n')
+    outfile.write('      </p>\n')
+    outfile.write('      <p>\n')
+    outfile.write(f'        Total fiddler crab stamps is {cnt}.\n')
+    outfile.write('      </p>\n')
     for a in artsource:
-        outfile.write("      <h3 class=\"nobookmark\">" + a + "</h3>\n")
+        outfile.write(f'      <h3 class="nobookmark">{a}</h3>\n')
         for art in artlist:
             if art.art_type == "stamp":
                 if art.author == a:
-                    outfile.write("      <figure class=\"sppic\">\n")
-                    outfile.write("        <a href=\"" + rel_link_prefix(do_print, "art/") + art.image +
-                                  ".html\"><img class=\"thumbnail\" src=\"" + media_path + "art/" +
-                                  art.image + "_tn." + art.ext + "\" alt=\"" + art.title + " thumbnail\" title=\"" +
-                                  art.title + "\" /></a>\n")
-                    outfile.write("      </figure>\n")
+                    outfile.write('      <figure class="sppic">\n')
+                    outfile.write(f'        <a href="{rel_link_prefix(do_print, "art/")}{art.image}.html">'
+                                  f'<img class="thumbnail" src="{media_path}art/{art.image}_tn.{art.ext}" '
+                                  f'alt="{art.title} thumbnail" title="{art.title}" /></a>\n')
+                    outfile.write('      </figure>\n')
     if do_print:
         end_page_division(outfile)
     else:
@@ -5113,17 +5111,17 @@ def write_art_crafts_pages(outfile: TextIO, do_print: bool, artlist: list, refdi
     else:
         common_html_header(outfile, "Fiddler Crab Crafts")
         media_path = ""
-    outfile.write("    <header id=\"" + init_data().art_craft_url + "\">\n")
-    outfile.write("      <h1 class=\"bookmark1\">Arts &amp; Crafts</h1>\n")
+    outfile.write(f'    <header id="{init_data().art_craft_url}">\n')
+    outfile.write('      <h1 class="bookmark1">Arts &amp; Crafts</h1>\n')
     if not do_print:
-        outfile.write("      <nav>\n")
-        outfile.write("        <ul>\n")
-        outfile.write("          <li><a href=\"#origami\">Origami</a></li>\n")
-        outfile.write("        </ul>\n")
-        outfile.write("      </nav>\n")
-    outfile.write("    </header>\n")
-    outfile.write("\n")
-    outfile.write("      <h2 id=\"origami\" class=\"nobookmark\">Origami</h2>\n")
+        outfile.write('      <nav>\n')
+        outfile.write('        <ul>\n')
+        outfile.write('          <li><a href="#origami">Origami</a></li>\n')
+        outfile.write('        </ul>\n')
+        outfile.write('      </nav>\n')
+    outfile.write('    </header>\n')
+    outfile.write('\n')
+    outfile.write('      <h2 id="origami" class="nobookmark">Origami</h2>\n')
     artsource = []
     cnt = 0
     for art in artlist:
@@ -5133,24 +5131,23 @@ def write_art_crafts_pages(outfile: TextIO, do_print: bool, artlist: list, refdi
                 artsource.index(art.author)
             except ValueError:
                 artsource.append(art.author)
-    outfile.write("      <p>\n")
-    outfile.write("        Male fiddler crabs are a particular challenge for origami because of the asymmetry, "
-                  "but a number of origami experts have developed fiddler crab models.\n")
-    outfile.write("      </p>\n")
-    outfile.write("      <p>\n")
-    outfile.write("        Total fiddler crab origami models is " + str(cnt) + ".\n")
-    outfile.write("      </p>\n")
+    outfile.write('      <p>\n')
+    outfile.write('        Male fiddler crabs are a particular challenge for origami because of the asymmetry, '
+                  'but a number of origami experts have developed fiddler crab models.\n')
+    outfile.write('      </p>\n')
+    outfile.write('      <p>\n')
+    outfile.write(f'        Total fiddler crab origami models is {cnt}.\n')
+    outfile.write('      </p>\n')
     for a in artsource:
-        outfile.write("      <h3 class=\"nobookmark\">" + a + "</h3>\n")
+        outfile.write(f'      <h3 class="nobookmark">{a}</h3>\n')
         for art in artlist:
             if art.art_type == "origami":
                 if art.author == a:
-                    outfile.write("      <figure class=\"sppic\">\n")
-                    outfile.write("        <a href=\"" + rel_link_prefix(do_print, "art/") + art.image +
-                                  ".html\"><img class=\"thumbnail\" src=\"" + media_path + "art/" +
-                                  art.image + "_tn." + art.ext + "\" alt=\"" + art.title + " thumbnail\" title=\"" +
-                                  art.title + "\" /></a>\n")
-                    outfile.write("      </figure>\n")
+                    outfile.write('      <figure class="sppic">\n')
+                    outfile.write(f'        <a href="{rel_link_prefix(do_print, "art/")}{art.image}.html">'
+                                  f'<img class="thumbnail" src="{media_path}art/{art.image}_tn.{art.ext}" '
+                                  f'alt="{art.title} thumbnail" title="{art.title}" /></a>\n')
+                    outfile.write('      </figure>\n')
     if do_print:
         end_page_division(outfile)
     else:
